@@ -1,6 +1,7 @@
 
 import Foundation
 import Combine
+import UIKit
 
 public class Notifly {
     
@@ -25,6 +26,7 @@ public class Notifly {
     let useCustomClickHandler: Bool
     
     let auth: Auth
+    let notificationsManager: NotificationsManager
     let trackingManager: TrackingManager
     
     // MARK: Lifecycle
@@ -38,21 +40,7 @@ public class Notifly {
         self.useCustomClickHandler = useCustomClickHandler
         self.auth = Auth(username: username,
                          password: password)
+        self.notificationsManager = NotificationsManager()
         self.trackingManager = TrackingManager(projectID: projectID)
-    }
-    
-    // MARK: Public Static Methods
-
-    
-    // MARK: Instance Methods
-    
-    func track(eventName: String,
-               eventParams: [String: String],
-               segmentationEventParamKeys: [String],
-               userID: String?) -> AnyPublisher<String, Error> {
-        return trackingManager.track(eventName: eventName,
-                                     eventParams: eventParams,
-                                     segmentationEventParamKeys: segmentationEventParamKeys,
-                                     userID: userID)
     }
 }

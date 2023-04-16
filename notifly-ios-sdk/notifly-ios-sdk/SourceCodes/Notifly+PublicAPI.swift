@@ -1,11 +1,15 @@
 import Foundation
 import Combine
+import UIKit
 
 /**
  Contains all available Notifly SDK Public APIs.
  */
 public extension Notifly {
     
+    /**
+     Initializes the Notifly SDK. This method is to be called as soon as the app laucnhes. (AppDelegate.applicationDidFinishLaunching)
+     */
     static func initialize(projectID: String,
                            username: String,
                            password: String,
@@ -16,13 +20,25 @@ public extension Notifly {
                        useCustomClickHandler: useCustomClickHandler)
     }
     
+    static func application(_ application: UIApplication,
+                            didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        main.notificationsManager.application(application,
+                                              didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
+    }
+    
+    static func application(_ application: UIApplication,
+                            didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        main.notificationsManager.application(application,
+                                              didFailToRegisterForRemoteNotificationsWithError: error)
+    }
+    
     static func track(eventName: String,
                       eventParams: [String: String],
                       segmentationEventParamKeys: [String],
                       userID: String?) -> AnyPublisher<String, Error> {
-        return main.track(eventName: eventName,
-                          eventParams: eventParams,
-                          segmentationEventParamKeys: segmentationEventParamKeys,
-                          userID: userID)
+        return main.trackingManager.track(eventName: eventName,
+                                          eventParams: eventParams,
+                                          segmentationEventParamKeys: segmentationEventParamKeys,
+                                          userID: userID)
     }
 }
