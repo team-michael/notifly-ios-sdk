@@ -47,6 +47,8 @@ public class Notifly {
     }
     
     private func setup() {
-        UNUserNotificationCenter.current().delegate = notificationsManager
+        if !useCustomClickHandler {
+            UNUserNotificationCenter.current().delegate = notificationsManager
+        }
     }
 }

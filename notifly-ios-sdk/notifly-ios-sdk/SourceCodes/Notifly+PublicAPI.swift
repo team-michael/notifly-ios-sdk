@@ -7,6 +7,8 @@ import UIKit
  */
 public extension Notifly {
     
+    // MARK: - Required Setup API configurations
+    
     /**
      Initializes the Notifly SDK. This method is to be called as soon as the app laucnhes. (AppDelegate.applicationDidFinishLaunching)
      */
@@ -31,6 +33,27 @@ public extension Notifly {
         main.notificationsManager.application(application,
                                               didFailToRegisterForRemoteNotificationsWithError: error)
     }
+    
+    // MARK: Optional Setup API configurations.
+    // - Only use below APIs if your app implements custom push notification handler or passed `false` for `useCustomClickHandler` in the `initialize` method.
+    
+    static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
+                                       didReceive response: UNNotificationResponse,
+                                       withCompletionHandler completion: () -> Void) {
+        main.notificationsManager.userNotificationCenter(notificationCenter,
+                                                         didReceive: response,
+                                                         withCompletionHandler: completion)
+    }
+    
+    static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
+                                       willPresent notification: UNNotification,
+                                       withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void) {
+        main.notificationsManager.userNotificationCenter(notificationCenter,
+                                                         willPresent: notification,
+                                                         withCompletionHandler: completion)
+    }
+    
+    // MARK: - On-demand APIs
     
     static func track(eventName: String,
                       eventParams: [String: String]?,
