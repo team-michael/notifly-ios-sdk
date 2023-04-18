@@ -2,5 +2,5 @@ import Foundation
 
 enum NotiflyError: Error {
     case notImplemented
-    case missingData(_ descripiton: String)
+    case unexpectedNil(_ descripiton: String)
 }

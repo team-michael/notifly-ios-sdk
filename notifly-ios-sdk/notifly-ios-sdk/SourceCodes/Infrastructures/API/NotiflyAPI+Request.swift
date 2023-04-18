@@ -35,12 +35,19 @@ extension NotiflyAPI {
             return self
         }
         
-        func buildAndFire<T: Decodable>() -> AnyPublisher<T, Error> {
+        func buildAndFire<T: Codable>() -> AnyPublisher<T, Error> {
             do {
                 let request = try build()
                 return URLSession.shared.dataTaskPublisher(for: request)
                     .map(\.data)
-                    .decode(type: T.self, decoder: JSONDecoder())
+                    .decode(type: Response<T>.self, decoder: JSONDecoder())
+                    .tryCompactMap {
+                        if let data = $0.data {
+                            return data
+                        } else {
+                            throw NotiflyError.unexpectedNil("Response has empty payload")
+                        }
+                    }
                     .eraseToAnyPublisher()
             } catch {
                 return Fail(outputType: T.self, failure: error)
@@ -48,12 +55,31 @@ extension NotiflyAPI {
             }
         }
         
+        func buildAndFireWithRawJSONResponseType() -> AnyPublisher<String, Error> {
+            do {
+                let request = try build()
+                return URLSession.shared.dataTaskPublisher(for: request)
+                    .map(\.data)
+                    .tryMap {
+                        if let response = String(data: $0, encoding: .utf8) {
+                            return response
+                        } else {
+                            throw NotiflyError.unexpectedNil("Response is corrupted.")
+                        }
+                    }
+                    .eraseToAnyPublisher()
+            } catch {
+                return Fail(outputType: String.self, failure: error)
+                    .eraseToAnyPublisher()
+            }
+        }
+        
         private func build() throws -> URLRequest {
             guard let url = url else {
-                throw NotiflyError.missingData("NotiflyAPI.RequestBuilder.url")
+                throw NotiflyError.unexpectedNil("NotiflyAPI.RequestBuilder.url")
             }
             guard let method = method else {
-                throw NotiflyError.missingData("NotiflyAPI.RequestBuilder.method")
+                throw NotiflyError.unexpectedNil("NotiflyAPI.RequestBuilder.method")
             }
             
             var request = URLRequest(url: url)
@@ -64,9 +90,13 @@ extension NotiflyAPI {
             })
             
             if let body = body {
-                request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+                request.httpBody = try? JSONEncoder().encode(body)
             }
             return request
         }
+    }
+    
+    struct Response<T: Codable>: Codable {
+        let data: T?
     }
 }

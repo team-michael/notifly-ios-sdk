@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		672E7B7329ED34AA00B3E9F2 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7229ED34AA00B3E9F2 /* Logger.swift */; };
 		673F0E8529EBA7D200814217 /* notifly_ios_sdk.docc in Sources */ = {isa = PBXBuildFile; fileRef = 673F0E8429EBA7D200814217 /* notifly_ios_sdk.docc */; };
 		673F0E8B29EBA7D200814217 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */; };
 		673F0E9029EBA7D200814217 /* notifly_ios_sdkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F0E8F29EBA7D200814217 /* notifly_ios_sdkTests.swift */; };
@@ -34,6 +35,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		672E7B7229ED34AA00B3E9F2 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = notifly_ios_sdk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		673F0E8329EBA7D200814217 /* notifly_ios_sdk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = notifly_ios_sdk.h; sourceTree = "<group>"; };
 		673F0E8429EBA7D200814217 /* notifly_ios_sdk.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = notifly_ios_sdk.docc; sourceTree = "<group>"; };
@@ -70,6 +72,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		672E7B7129ED349E00B3E9F2 /* Util */ = {
+			isa = PBXGroup;
+			children = (
+				672E7B7229ED34AA00B3E9F2 /* Logger.swift */,
+			);
+			path = Util;
+			sourceTree = "<group>";
+		};
 		673F0E7629EBA7D200814217 = {
 			isa = PBXGroup;
 			children = (
@@ -119,6 +129,7 @@
 		673F0EA629EBC65000814217 /* Infrastructures */ = {
 			isa = PBXGroup;
 			children = (
+				672E7B7129ED349E00B3E9F2 /* Util */,
 				673F0EBF29EC72B500814217 /* Notifications */,
 				673F0EB729EC5C4D00814217 /* API */,
 				673F0EB429EC5BBA00814217 /* Auth */,
@@ -287,6 +298,7 @@
 				673F0EBB29EC610400814217 /* Notifly+PublicAPI.swift in Sources */,
 				673F0EB329EBCA3D00814217 /* NotiflyError.swift in Sources */,
 				673F0E8529EBA7D200814217 /* notifly_ios_sdk.docc in Sources */,
+				672E7B7329ED34AA00B3E9F2 /* Logger.swift in Sources */,
 				673F0EAD29EBC66400814217 /* Notifly.swift in Sources */,
 				673F0EAE29EBC67700814217 /* Auth.swift in Sources */,
 				673F0EAF29EBC67C00814217 /* TrackingEvent.swift in Sources */,

@@ -15,7 +15,7 @@ class NotiflyAPI {
     func trackEvent(_ event: TrackingEvent) -> AnyPublisher<String, Error> {
         request(to: "https://api.notifly.tech/track-event", method: .POST, authTokenRequired: true)
             .map { $0.set(body: event) }
-            .flatMap{ (builder: RequestBuilder) -> AnyPublisher<String, Error> in builder.buildAndFire() }
+            .flatMap{ $0.buildAndFireWithRawJSONResponseType() }
             .eraseToAnyPublisher()
     }
     
@@ -39,3 +39,4 @@ class NotiflyAPI {
         }
     }
 }
+

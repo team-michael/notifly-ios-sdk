@@ -33,8 +33,8 @@ public extension Notifly {
     }
     
     static func track(eventName: String,
-                      eventParams: [String: String],
-                      segmentationEventParamKeys: [String],
+                      eventParams: [String: String]?,
+                      segmentationEventParamKeys: [String]?,
                       userID: String?) -> AnyPublisher<String, Error> {
         return main.trackingManager.track(eventName: eventName,
                                           eventParams: eventParams,

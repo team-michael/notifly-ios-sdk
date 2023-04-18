@@ -10,13 +10,26 @@ class TrackingManager {
         self.projectID = projectID
     }
     
-    func track(eventName: String, eventParams: [String: String], segmentationEventParamKeys: [String], userID: String?) -> AnyPublisher<String, Error> {
-        let event = TrackingEvent(projectID: projectID,
-                                  eventName: eventName,
-                                  isGlobalEvent: userID == nil,
-                                  eventParams: eventParams,
-                                  segmentationEventParamKeys: segmentationEventParamKeys,
-                                  userID: userID)
+    func track(eventName: String,
+               eventParams: [String: String]?,
+               segmentationEventParamKeys: [String]?,
+               userID: String?) -> AnyPublisher<String, Error> {
+        let event = createTrackingEvent(eventName: eventName,
+                                        eventParams: eventParams,
+                                        segmentationEventParamKeys: segmentationEventParamKeys,
+                                        userID: userID)
         return NotiflyAPI().trackEvent(event)
+    }
+    
+    func createTrackingEvent(eventName: String,
+                             eventParams: [String: String]?,
+                             segmentationEventParamKeys: [String]?,
+                             userID: String?) -> TrackingEvent {
+        return TrackingEvent(projectID: projectID,
+                             eventName: eventName,
+                             isGlobalEvent: userID == nil,
+                             eventParams: eventParams,
+                             segmentationEventParamKeys: segmentationEventParamKeys,
+                             userID: userID)
     }
 }
