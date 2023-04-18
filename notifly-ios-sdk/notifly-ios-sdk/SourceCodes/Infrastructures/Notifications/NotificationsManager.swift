@@ -2,6 +2,7 @@ import Combine
 import Foundation
 import UIKit
 import UserNotifications
+import SafariServices
 
 class NotificationsManager: NSObject {
     
@@ -32,6 +33,41 @@ class NotificationsManager: NSObject {
         apnDeviceTokenPromise?(.failure(error))
     }
     
+    func schedulePushNotification(title: String?,
+                                  body: String?,
+                                  url: URL,
+                                  delay: TimeInterval) {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if let error = error {
+                Logger.error("Error requesting authorization for notifications: \(error.localizedDescription)")
+                return
+            }
+            
+            // Create a notification content object
+            let content = UNMutableNotificationContent()
+            content.title = title ?? (body == nil ? "Test Push Notification" : "")
+            content.body = body ?? ""
+            content.badge = 1 as NSNumber
+            content.sound = .default
+            content.userInfo["url"] = url.absoluteString
+            
+            // Create a trigger for the notification
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)
+            
+            // Create a request for the notification
+            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+            
+            // Schedule the notification
+            UNUserNotificationCenter.current().add(request) { error in
+                if let error = error {
+                    Logger.error("Error scheduling notification: \(error.localizedDescription)")
+                } else {
+                    Logger.info("Notification scheduled successfully.")
+                }
+            }
+        }
+    }
+    
     // MARK: Private Methods
     
     private func setup() {
@@ -44,17 +80,22 @@ class NotificationsManager: NSObject {
         if !UIApplication.shared.isRegisteredForRemoteNotifications {
             UIApplication.shared.registerForRemoteNotifications()
         }
-        
-        // Observe notifications.
-        UNUserNotificationCenter.current().delegate = self
     }
     
     private func handleNotifcation(_ notification: UNNotification, completion: () -> Void) {
-        let userInfo = notification.request.content.userInfo
-        if let payload = userInfo["data"] {
-            // TODO: Handle Notification
+        let content = notification.request.content
+        Logger.info("Received Push Notificatiob with content: \(content)")
+        if let urlString = content.userInfo["url"] as? String,
+            let url = URL(string: urlString) {
+            presentWebViewForURL(url: url)
         }
+        UIApplication.shared.applicationIconBadgeNumber = 0
         completion()
+    }
+    
+    private func presentWebViewForURL(url: URL) {
+        let browserVC = SFSafariViewController(url: url)
+        AppHelper.present(browserVC)
     }
 }
 

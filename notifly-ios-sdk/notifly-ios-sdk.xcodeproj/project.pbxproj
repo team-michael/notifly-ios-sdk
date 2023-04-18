@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		672E7B7329ED34AA00B3E9F2 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7229ED34AA00B3E9F2 /* Logger.swift */; };
+		672E7B8029EE4B0C00B3E9F2 /* AppHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7F29EE4B0C00B3E9F2 /* AppHelper.swift */; };
 		673F0E8529EBA7D200814217 /* notifly_ios_sdk.docc in Sources */ = {isa = PBXBuildFile; fileRef = 673F0E8429EBA7D200814217 /* notifly_ios_sdk.docc */; };
 		673F0E8B29EBA7D200814217 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */; };
 		673F0E9029EBA7D200814217 /* notifly_ios_sdkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F0E8F29EBA7D200814217 /* notifly_ios_sdkTests.swift */; };
@@ -36,6 +37,7 @@
 
 /* Begin PBXFileReference section */
 		672E7B7229ED34AA00B3E9F2 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		672E7B7F29EE4B0C00B3E9F2 /* AppHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppHelper.swift; sourceTree = "<group>"; };
 		673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = notifly_ios_sdk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		673F0E8329EBA7D200814217 /* notifly_ios_sdk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = notifly_ios_sdk.h; sourceTree = "<group>"; };
 		673F0E8429EBA7D200814217 /* notifly_ios_sdk.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = notifly_ios_sdk.docc; sourceTree = "<group>"; };
@@ -76,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				672E7B7229ED34AA00B3E9F2 /* Logger.swift */,
+				672E7B7F29EE4B0C00B3E9F2 /* AppHelper.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -303,6 +306,7 @@
 				673F0EAE29EBC67700814217 /* Auth.swift in Sources */,
 				673F0EAF29EBC67C00814217 /* TrackingEvent.swift in Sources */,
 				673F0EB029EBC67F00814217 /* TrackingManager.swift in Sources */,
+				672E7B8029EE4B0C00B3E9F2 /* AppHelper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

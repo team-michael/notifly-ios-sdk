@@ -41,4 +41,14 @@ public extension Notifly {
                                           segmentationEventParamKeys: segmentationEventParamKeys,
                                           userID: userID)
     }
+    
+    static func schedulePushNotification(title: String?,
+                                         body: String?,
+                                         url: URL,
+                                         delay: TimeInterval) {
+        main.notificationsManager.schedulePushNotification(title: title,
+                                                           body: body,
+                                                           url: url,
+                                                           delay: delay)
+    }
 }

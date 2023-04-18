@@ -17,6 +17,7 @@ class MainViewController: UIViewController {
     let pushTokenTextView = UITextView()
     
     let testTrackingButton = UIButton()
+    let testPushNotification = UIButton()
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -44,6 +45,10 @@ class MainViewController: UIViewController {
         navigationController?.pushViewController(TrackingTestViewController(), animated: true)
     }
     
+    func navigateToTestPushNotificationVC() {
+        navigationController?.pushViewController(PushNotificationTestViewController(), animated: true)
+    }
+    
     private func setup() {
         setupUI()
         authorizeWithCurrentIntputs() // Initialize Notifly with default values.
@@ -65,6 +70,7 @@ class MainViewController: UIViewController {
         // Hookup CTAs
         authorizeButton.addTarget(self, action: #selector(authorizeBtnTapped(sender:)), for: .touchUpInside)
         testTrackingButton.addTarget(self, action: #selector(testTrackingBtnTapped(sender:)), for: .touchUpInside)
+        testPushNotification.addTarget(self, action: #selector(testPushNotificationBtnTapped(sender:)), for: .touchUpInside)
     }
     
     private func setupStackView() {
@@ -93,6 +99,7 @@ class MainViewController: UIViewController {
         stackView.addInfoView(labelText: "Push Token", textView: pushTokenTextView)
         
         stackView.addCTAView(labelText: "Test Tracking Event", button: testTrackingButton, bgColor: .black)
+        stackView.addCTAView(labelText: "Test Push Notification", button: testPushNotification, bgColor: .black)
         
         stackView.addArrangedSubview(UIView())
     }
@@ -133,6 +140,11 @@ class MainViewController: UIViewController {
     @objc
     private func testTrackingBtnTapped(sender: UIButton) {
         navigateToTestTrackingVC()
+    }
+    
+    @objc
+    private func testPushNotificationBtnTapped(sender: UIButton) {
+        navigateToTestPushNotificationVC()
     }
 }
 

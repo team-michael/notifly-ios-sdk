@@ -13,6 +13,7 @@
 		672E7B7A29EDF22F00B3E9F2 /* UIStackView+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7929EDF22F00B3E9F2 /* UIStackView+.swift */; };
 		672E7B7C29EDF91800B3E9F2 /* UITextField+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7B29EDF91800B3E9F2 /* UITextField+.swift */; };
 		672E7B7E29EE05AF00B3E9F2 /* KeyValueDataInputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7D29EE05AF00B3E9F2 /* KeyValueDataInputViewController.swift */; };
+		672E7B8229EE524D00B3E9F2 /* PushNotificationTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B8129EE524D00B3E9F2 /* PushNotificationTestViewController.swift */; };
 		675EB43529ED18B0001347FB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 675EB43429ED18B0001347FB /* AppDelegate.swift */; };
 		675EB43729ED18B0001347FB /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 675EB43629ED18B0001347FB /* SceneDelegate.swift */; };
 		675EB43929ED18B0001347FB /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 675EB43829ED18B0001347FB /* MainViewController.swift */; };
@@ -45,6 +46,7 @@
 		672E7B7929EDF22F00B3E9F2 /* UIStackView+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIStackView+.swift"; sourceTree = "<group>"; };
 		672E7B7B29EDF91800B3E9F2 /* UITextField+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITextField+.swift"; sourceTree = "<group>"; };
 		672E7B7D29EE05AF00B3E9F2 /* KeyValueDataInputViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyValueDataInputViewController.swift; sourceTree = "<group>"; };
+		672E7B8129EE524D00B3E9F2 /* PushNotificationTestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationTestViewController.swift; sourceTree = "<group>"; };
 		675EB43129ED18B0001347FB /* NotiflyTestApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NotiflyTestApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		675EB43429ED18B0001347FB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		675EB43629ED18B0001347FB /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -98,6 +100,7 @@
 			children = (
 				675EB43829ED18B0001347FB /* MainViewController.swift */,
 				672E7B7429EDF1C400B3E9F2 /* TrackingTestViewController.swift */,
+				672E7B8129EE524D00B3E9F2 /* PushNotificationTestViewController.swift */,
 				672E7B7829EDF22600B3E9F2 /* Util */,
 				675EB43429ED18B0001347FB /* AppDelegate.swift */,
 				675EB43629ED18B0001347FB /* SceneDelegate.swift */,
@@ -244,6 +247,7 @@
 				675EB43729ED18B0001347FB /* SceneDelegate.swift in Sources */,
 				672E7B6D29ED1E4F00B3E9F2 /* TestConstants.swift in Sources */,
 				672E7B7529EDF1C400B3E9F2 /* TrackingTestViewController.swift in Sources */,
+				672E7B8229EE524D00B3E9F2 /* PushNotificationTestViewController.swift in Sources */,
 				672E7B7A29EDF22F00B3E9F2 /* UIStackView+.swift in Sources */,
 				672E7B7E29EE05AF00B3E9F2 /* KeyValueDataInputViewController.swift in Sources */,
 			);

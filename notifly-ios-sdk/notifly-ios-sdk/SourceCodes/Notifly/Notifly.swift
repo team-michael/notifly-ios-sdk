@@ -43,5 +43,10 @@ public class Notifly {
                          password: password)
         self.notificationsManager = NotificationsManager()
         self.trackingManager = TrackingManager(projectID: projectID)
+        setup()
+    }
+    
+    private func setup() {
+        UNUserNotificationCenter.current().delegate = notificationsManager
     }
 }
