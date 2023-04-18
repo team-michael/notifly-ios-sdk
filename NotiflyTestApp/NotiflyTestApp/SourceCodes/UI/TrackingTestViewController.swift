@@ -32,6 +32,7 @@ class TrackingTestViewController: UIViewController {
     
     private func setupUI() {
         view.backgroundColor = .white
+        title = "Test Tracking"
         setupStackView()
         
         eventNameTextField.placeholder = "Test Event Name"

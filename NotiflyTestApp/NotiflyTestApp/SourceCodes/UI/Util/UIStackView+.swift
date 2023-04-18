@@ -8,7 +8,7 @@ extension UIStackView {
         label.textColor = .darkGray
         
         textfield.layer.borderWidth = 1
-        textfield.layer.borderColor = UIColor.black.cgColor
+        textfield.setToDefaultUI()
         
         addArrangedSubview(label)
         addArrangedSubview(textfield)

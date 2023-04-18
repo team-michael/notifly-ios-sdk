@@ -20,10 +20,14 @@ class MainViewController: UIViewController {
     
     private var cancellables = Set<AnyCancellable>()
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
     }
+    
+    // MARK: = Methods
     
     func authorizeWithCurrentIntputs() {
         guard let projectID = projectIDTextField.checkAndRetrieveValueText(),
@@ -47,6 +51,7 @@ class MainViewController: UIViewController {
 
     private func setupUI() {
         view.backgroundColor = .white
+        title = "Test Notifly"
         setupStackView()
         
         // Populate initial test values

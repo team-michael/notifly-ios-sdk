@@ -148,8 +148,8 @@ private class SingleKeyValueInputView: UIStackView {
                 throw InputError.IncompletePair
             } else {
                 // Both text fields are empty which is fine.
-                keyTextField.layer.borderColor = UIColor.black.cgColor
-                valueTextField.layer.borderColor = UIColor.black.cgColor
+                keyTextField.setToDefaultUI()
+                valueTextField.setToDefaultUI()
                 return nil
             }
         }

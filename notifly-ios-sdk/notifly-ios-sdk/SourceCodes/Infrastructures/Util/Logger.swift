@@ -15,11 +15,11 @@ class Logger {
     }
     
     static func info(_ msg: String) {
-        print("Notifly Info: ", msg)
+        print("[Notifly Info] ", msg)
     }
     
     static func error(_ msg: String) {
-        print("🔥 Notifly Error: ", msg)
+        print("🔥 [Notifly Error] ", msg)
     }
     
     private init() { }

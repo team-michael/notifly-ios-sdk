@@ -22,11 +22,13 @@ class NotificationsManager: NSObject {
     
     func application(_ app: UIApplication,
                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Logger.info("Successfully received the push notification deviceToken: \(deviceToken)")
         apnDeviceTokenPromise?(.success(deviceToken))
     }
     
     func application(_ application: UIApplication,
                      didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        Logger.error("Failed to receive the push notification deviceToken with error: \(error)")
         apnDeviceTokenPromise?(.failure(error))
     }
     
