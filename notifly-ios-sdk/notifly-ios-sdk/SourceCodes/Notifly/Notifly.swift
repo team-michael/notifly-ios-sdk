@@ -30,6 +30,8 @@ public class Notifly {
     let notificationsManager: NotificationsManager
     let trackingManager: TrackingManager
     
+    var trackingCancellables = Set<AnyCancellable>()
+    
     // MARK: Lifecycle
     
     init(projectID: String,

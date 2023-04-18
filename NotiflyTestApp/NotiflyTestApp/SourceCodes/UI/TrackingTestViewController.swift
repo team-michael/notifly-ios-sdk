@@ -108,10 +108,10 @@ class TrackingTestViewController: UIViewController {
         }
         
         // Fire Tracking
-        let trackingPub = Notifly.track(eventName: eventName,
-                                        eventParams: customEventParams,
-                                        segmentationEventParamKeys: segmentationEventParamKeys,
-                                        userID: userID)
+        let trackingPub = Notifly.main.trackingManager.track(eventName: eventName,
+                                                             eventParams: customEventParams,
+                                                             segmentationEventParamKeys: segmentationEventParamKeys,
+                                                             userID: userID)
         let cancellable = trackingPub
             .catch { Just("Tracking Event Failed. Error: \($0)") }
             .receive(on: RunLoop.main)

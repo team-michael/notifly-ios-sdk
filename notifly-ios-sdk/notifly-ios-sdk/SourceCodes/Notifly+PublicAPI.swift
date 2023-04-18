@@ -58,11 +58,15 @@ public extension Notifly {
     static func track(eventName: String,
                       eventParams: [String: String]?,
                       segmentationEventParamKeys: [String]?,
-                      userID: String?) -> AnyPublisher<String, Error> {
-        return main.trackingManager.track(eventName: eventName,
-                                          eventParams: eventParams,
-                                          segmentationEventParamKeys: segmentationEventParamKeys,
-                                          userID: userID)
+                      userID: String?) {
+        let trackingPub =  main.trackingManager.track(eventName: eventName,
+                                                      eventParams: eventParams,
+                                                      segmentationEventParamKeys: segmentationEventParamKeys,
+                                                      userID: userID)
+        let cancellable = trackingPub
+            .replaceError(with: "Error Occured")
+            .sink { _ in }
+        main.trackingCancellables.insert(cancellable)
     }
     
     static func schedulePushNotification(title: String?,
