@@ -8,10 +8,14 @@ typealias KeyValue = (key: String, value: String)
 
 class KeyValueDataInputViewController: UIViewController {
     
+    // MARK: - Constants
+    private let rightLeftPadding: CGFloat = 12
+    
     // MARK: - Properties
     
     weak var delegate: KeyValueDataInputViewControllerDelegate?
     
+    private let scrollView = UIScrollView()
     private let keyPairStackView = UIStackView()
     private let ctaStackView = UIStackView()
     private let addKeyValueButton = UIButton()
@@ -45,6 +49,10 @@ class KeyValueDataInputViewController: UIViewController {
         keyPairStackView.addSeparator()
         keyPairStackView.addArrangedSubview(keyPairInputView)
         
+        var contentSize = scrollView.contentSize
+        contentSize.height = CGFloat((keyPairInputViews.count + 1) * 110)
+        scrollView.contentSize = contentSize
+        
         keyPairStackView.widthAnchor.constraint(equalTo: keyPairInputView.widthAnchor).isActive = true
     }
 
@@ -65,27 +73,47 @@ class KeyValueDataInputViewController: UIViewController {
     
     private func setupUI() {
         view.backgroundColor = .white
+        setupScrollView()
         setupStackView()
         
         addKeyValueButton.addTarget(self, action: #selector(addKeyValueBtnTapped(sender:)), for: .touchUpInside)
         saveButton.addTarget(self, action: #selector(saveBtnTapped(sender:)), for: .touchUpInside)
     }
     
+    private func setupScrollView() {
+        scrollView.contentSize = CGSize(width: 320, height: 500)
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.isDirectionalLockEnabled = true
+        scrollView.bounces = false
+        scrollView.addSubview(keyPairStackView)
+        scrollView.addSubview(ctaStackView)
+        
+        view.addSubview(scrollView)
+        
+        NSLayoutConstraint.activate([
+            view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            view.safeAreaLayoutGuide.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: -rightLeftPadding),
+            view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: rightLeftPadding),
+        ])
+    }
+    
     private func setupStackView() {
+        
         // Setup StackView UI
-        view.addSubview(keyPairStackView)
-        view.addSubview(ctaStackView)
         keyPairStackView.translatesAutoresizingMaskIntoConstraints = false
         ctaStackView.translatesAutoresizingMaskIntoConstraints = false
         
+        let defaultHeightConstraint = keyPairStackView.heightAnchor.constraint(equalToConstant: 20)
+        defaultHeightConstraint.priority = .defaultLow
+
         NSLayoutConstraint.activate([
-            view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: keyPairStackView.topAnchor),
-            view.safeAreaLayoutGuide.leftAnchor.constraint(equalTo: keyPairStackView.leftAnchor, constant: -12),
-            view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: keyPairStackView.rightAnchor, constant: 12),
-            keyPairStackView.bottomAnchor.constraint(equalTo: ctaStackView.topAnchor, constant: -12),
-            view.safeAreaLayoutGuide.leftAnchor.constraint(equalTo: ctaStackView.leftAnchor, constant: -12),
-            view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: ctaStackView.rightAnchor, constant: 12),
-            view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: ctaStackView.bottomAnchor),
+            
+            defaultHeightConstraint,
+            keyPairStackView.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -(rightLeftPadding * 2)),
+            ctaStackView.widthAnchor.constraint(equalTo: keyPairStackView.widthAnchor),
+            scrollView.contentLayoutGuide.topAnchor.constraint(equalTo: keyPairStackView.topAnchor),
+            keyPairStackView.bottomAnchor.constraint(equalTo: ctaStackView.topAnchor, constant: -12)
         ])
         
         // StackView Config
