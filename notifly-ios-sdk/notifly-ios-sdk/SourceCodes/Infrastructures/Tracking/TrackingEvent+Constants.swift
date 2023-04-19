@@ -2,11 +2,11 @@ import Foundation
 
 enum TrackingConstant {
     
-    enum Hash {
-        static let eventID = "830b5f7b-e392-43db-a17b-d835f0bcab2b"
-        static let registeredUserID = "ce7c62f9-e8ae-4009-8fd6-468e9581fa21"
-        static let unregisteredUserID = "a6446dcf-c057-4de7-a360-56af8659d52f"
-        static let deviceID = "830848b3-2444-467d-9cd8-3430d2738c57"
+    enum HashNamespace {
+        static let eventID = UUID(uuidString: "830b5f7b-e392-43db-a17b-d835f0bcab2b")!
+        static let registeredUserID = UUID(uuidString: "ce7c62f9-e8ae-4009-8fd6-468e9581fa21")!
+        static let unregisteredUserID = UUID(uuidString: "a6446dcf-c057-4de7-a360-56af8659d52f")!
+        static let deviceID = UUID(uuidString: "830848b3-2444-467d-9cd8-3430d2738c57")!
     }
     
     enum Internal {

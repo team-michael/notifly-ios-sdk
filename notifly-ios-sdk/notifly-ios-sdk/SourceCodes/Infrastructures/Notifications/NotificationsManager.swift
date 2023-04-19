@@ -9,7 +9,30 @@ class NotificationsManager: NSObject {
     
     // MARK: Properties
     
-    private(set) var apnDeviceTokenPub: Future<String, Error>?
+    /**
+        // TODO: Remove  this workaround ocne push token can be succesfully retrieved.
+     */
+    private var _apnDeviceTokenPub: AnyPublisher<String, Error>?
+    
+    private(set) var apnDeviceTokenPub: AnyPublisher<String, Error>? {
+        
+        // TODO: Remove this temp workaround once APNs token is available.
+        get {
+            if let pub = _apnDeviceTokenPub {
+                return pub
+                    .catch { error in
+                        Logger.info("Failed to get APNs Token with error: \(error)\n\nVisit \(#file) to replace this workaround once APNs can be successfully retrieved.")
+                        return Just("debug-apns-device-token").setFailureType(to: Error.self)
+                    }
+                    .eraseToAnyPublisher()
+            } else {
+                return nil
+            }
+        }
+        set {
+            _apnDeviceTokenPub = newValue
+        }
+    }
     
     private var apnDeviceTokenPromise: Future<String, Error>.Promise?
     
@@ -76,7 +99,7 @@ class NotificationsManager: NSObject {
         // Setup observer to listen for APN Device tokens.
         apnDeviceTokenPub = Future { [weak self] promise in
             self?.apnDeviceTokenPromise = promise
-        }
+        }.eraseToAnyPublisher()
         
         // Register Remote Notification.
         if !UIApplication.shared.isRegisteredForRemoteNotifications {
@@ -98,9 +121,9 @@ class NotificationsManager: NSObject {
     private func presentWebViewForURL(url: URL) {
         let browserVC = SFSafariViewController(url: url)
         AppHelper.present(browserVC) {
-            Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.pushNotificationMessageShown,
-                                                            params: nil,
-                                                            segmentationEventParamKeys: nil)
+            Notifly.trackInternalEvent(eventName: TrackingConstant.Internal.pushNotificationMessageShown,
+                                       params: nil,
+                                       segmentationEventParamKeys: nil)
         }
     }
     
@@ -115,9 +138,9 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
     public func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                        didReceive response: UNNotificationResponse,
                                        withCompletionHandler completion: () -> Void) {
-        Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.pushClickEventName,
-                                                        params: nil,
-                                                        segmentationEventParamKeys: nil)
+        Notifly.trackInternalEvent(eventName: TrackingConstant.Internal.pushClickEventName,
+                                   params: nil,
+                                   segmentationEventParamKeys: nil)
         handleNotifcation(response.notification,
                           completion: completion)
     }

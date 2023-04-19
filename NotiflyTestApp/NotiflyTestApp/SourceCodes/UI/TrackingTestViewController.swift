@@ -90,13 +90,12 @@ class TrackingTestViewController: UIViewController {
         let segmentationEventParamKeys = segmentationEventParamsTextField.text?
             .split(separator: ",")
             .map(String.init)
-        let userID = userIDTextField.checkAndRetrieveValueText(changeBorderColorOnError: false)
+        let _ = userIDTextField.checkAndRetrieveValueText(changeBorderColorOnError: false) // TODO: Remove
         
         // Inspect request payload
-        let event = Notifly.main.trackingManager.createTrackingEvent(eventName: eventName,
-                                                                     eventParams: customEventParams,
-                                                                     segmentationEventParamKeys: segmentationEventParamKeys,
-                                                                     userID: userID)
+        let event = Notifly.main.trackingManager.createExternalTrackingEvent(eventName: eventName,
+                                                                             eventParams: customEventParams,
+                                                                             segmentationEventParamKeys: segmentationEventParamKeys)
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         

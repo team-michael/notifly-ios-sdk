@@ -19,9 +19,9 @@ class UserManager {
             try setUserProperties([TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID])
         } else {
             externalUserID = nil
-            Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.removeUserPropertiesEventName,
-                                                            params: nil,
-                                                            segmentationEventParamKeys: nil)
+            Notifly.trackInternalEvent(eventName: TrackingConstant.Internal.removeUserPropertiesEventName,
+                                       params: nil,
+                                       segmentationEventParamKeys: nil)
         }
     }
     
@@ -34,9 +34,9 @@ class UserManager {
             externalUserID = newExternalUserID
             _notiflyUserIDCache = nil
         }
-        Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.setUserPropertiesEventName,
-                                                        params: params,
-                                                        segmentationEventParamKeys: nil)
+        Notifly.trackInternalEvent(eventName: TrackingConstant.Internal.setUserPropertiesEventName,
+                                   params: params,
+                                   segmentationEventParamKeys: nil)
     }
     
     func getNotiflyUserID() throws -> String {
@@ -47,24 +47,19 @@ class UserManager {
     
     private func generateUserID(externalUserID: String?) throws -> String {
         let projectID = Notifly.main.projectID
-        let uuidV5Namespace: UUID?
+        let uuidV5Namespace: UUID
         let uuidV5Name: String
 
         if let externalUserID = externalUserID {
-            uuidV5Namespace = UUID(uuidString: "\(projectID)\(externalUserID)")
-            uuidV5Name = TrackingConstant.Hash.registeredUserID
+            uuidV5Name = "\(projectID)\(externalUserID)"
+            uuidV5Namespace = TrackingConstant.HashNamespace.registeredUserID
         } else {
             let deviceToken = try AppHelper.getDeviceID()
-            uuidV5Namespace = UUID(uuidString: "\(projectID)\(deviceToken)")
-            uuidV5Name = TrackingConstant.Hash.unregisteredUserID
+            uuidV5Name = "\(projectID)\(deviceToken)"
+            uuidV5Namespace = TrackingConstant.HashNamespace.unregisteredUserID
         }
         
-        guard let namespaceUUID = uuidV5Namespace,
-              let uuidV5 = UUID(uuidString: "\(namespaceUUID.uuidString)\(uuidV5Name)")else {
-            Logger.error("Failed to generate UserID with projectID: \(projectID), externalUserID: \(externalUserID ?? "null")")
-            throw NotiflyError.unexpectedNil("Failed to generate UserID using UUID V5")
-        }
-        
+        let uuidV5 = UUID(name: uuidV5Name, namespace: uuidV5Namespace)
         return uuidV5.notiflyStyleString
     }
 }

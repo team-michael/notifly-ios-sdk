@@ -22,6 +22,10 @@ public extension Notifly {
                        username: username,
                        password: password,
                        useCustomClickHandler: useCustomClickHandler)
+        
+        Notifly.trackInternalEvent(eventName: TrackingConstant.Internal.sessionStartEventName,
+                                   params: nil,
+                                   segmentationEventParamKeys: nil)
     }
     
     static func application(_ application: UIApplication,
@@ -65,8 +69,14 @@ public extension Notifly {
                                                       eventParams: eventParams,
                                                       segmentationEventParamKeys: segmentationEventParamKeys)
         let cancellable = trackingPub
-            .replaceError(with: "Error Occured")
-            .sink { _ in }
+            .catch({ error in
+                let msg = "External Tracking Error: \(error)"
+                Logger.error(msg)
+                return Just(msg)
+            })
+            .sink { resultPayload in
+                Logger.info("Success response for External Tracking. Respone:\n\(resultPayload)")
+            }
         main.trackingCancellables.insert(cancellable)
     }
     
