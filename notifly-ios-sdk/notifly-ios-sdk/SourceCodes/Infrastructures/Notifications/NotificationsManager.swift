@@ -1,4 +1,5 @@
 import Combine
+import FirebaseMessaging
 import Foundation
 import UIKit
 import UserNotifications
@@ -8,9 +9,9 @@ class NotificationsManager: NSObject {
     
     // MARK: Properties
     
-    private(set) var apnDeviceToken: Future<Data, Error>?
+    private(set) var apnDeviceTokenPub: Future<String, Error>?
     
-    private var apnDeviceTokenPromise: Future<Data, Error>.Promise?
+    private var apnDeviceTokenPromise: Future<String, Error>.Promise?
     
     // MARK: Lifecycle
     
@@ -24,7 +25,8 @@ class NotificationsManager: NSObject {
     func application(_ app: UIApplication,
                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Logger.info("Successfully received the push notification deviceToken: \(deviceToken)")
-        apnDeviceTokenPromise?(.success(deviceToken))
+        Messaging.messaging().apnsToken = deviceToken
+        apnDeviceTokenPromise?(.success(stringFromPushToken(data: deviceToken)))
     }
     
     func application(_ application: UIApplication,
@@ -72,7 +74,7 @@ class NotificationsManager: NSObject {
     
     private func setup() {
         // Setup observer to listen for APN Device tokens.
-        apnDeviceToken = Future { [weak self] promise in
+        apnDeviceTokenPub = Future { [weak self] promise in
             self?.apnDeviceTokenPromise = promise
         }
         
@@ -95,7 +97,15 @@ class NotificationsManager: NSObject {
     
     private func presentWebViewForURL(url: URL) {
         let browserVC = SFSafariViewController(url: url)
-        AppHelper.present(browserVC)
+        AppHelper.present(browserVC) {
+            Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.pushNotificationMessageShown,
+                                                            params: nil,
+                                                            segmentationEventParamKeys: nil)
+        }
+    }
+    
+    private func stringFromPushToken(data: Data) -> String {
+        return data.map { String(format: "%.2hhx", $0) }.joined()
     }
 }
 
@@ -105,6 +115,9 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
     public func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                        didReceive response: UNNotificationResponse,
                                        withCompletionHandler completion: () -> Void) {
+        Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.pushClickEventName,
+                                                        params: nil,
+                                                        segmentationEventParamKeys: nil)
         handleNotifcation(response.notification,
                           completion: completion)
     }

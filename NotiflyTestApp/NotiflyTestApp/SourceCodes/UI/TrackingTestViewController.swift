@@ -65,7 +65,7 @@ class TrackingTestViewController: UIViewController {
         // StackView SubViews
         stackView.addInputView(labelText: "Event Name", textfield: eventNameTextField)
         stackView.addInputView(labelText: "Segmentation Events (Optional)", textfield: segmentationEventParamsTextField)
-        stackView.addInputView(labelText: "User ID (Optional)", textfield: userIDTextField)
+        stackView.addInputView(labelText: "User ID (Deprecated)", textfield: userIDTextField)
         
         stackView.addCTAView(labelText: "Custom Event Params", button: customEventParamsButton, bgColor: .darkText)
         stackView.addCTAView(labelText: "Submit Event", button: submitTrackingEventButton, bgColor: .blue)
@@ -110,8 +110,7 @@ class TrackingTestViewController: UIViewController {
         // Fire Tracking
         let trackingPub = Notifly.main.trackingManager.track(eventName: eventName,
                                                              eventParams: customEventParams,
-                                                             segmentationEventParamKeys: segmentationEventParamKeys,
-                                                             userID: userID)
+                                                             segmentationEventParamKeys: segmentationEventParamKeys)
         let cancellable = trackingPub
             .catch { Just("Tracking Event Failed. Error: \($0)") }
             .receive(on: RunLoop.main)

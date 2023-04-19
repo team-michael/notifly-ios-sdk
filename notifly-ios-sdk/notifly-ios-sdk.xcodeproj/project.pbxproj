@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		672E7B7329ED34AA00B3E9F2 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7229ED34AA00B3E9F2 /* Logger.swift */; };
 		672E7B8029EE4B0C00B3E9F2 /* AppHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7F29EE4B0C00B3E9F2 /* AppHelper.swift */; };
+		672E7DF029EF98B500B3E9F2 /* TrackingEvent+Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7DEF29EF98B500B3E9F2 /* TrackingEvent+Constants.swift */; };
+		672E7DF329EFA50400B3E9F2 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 672E7DF229EFA50400B3E9F2 /* FirebaseMessaging */; };
+		672E7DF629EFB6D700B3E9F2 /* UserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7DF529EFB6D700B3E9F2 /* UserManager.swift */; };
+		672E7DF929EFBA0200B3E9F2 /* UUID+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7DF829EFBA0200B3E9F2 /* UUID+.swift */; };
 		673F0E8529EBA7D200814217 /* notifly_ios_sdk.docc in Sources */ = {isa = PBXBuildFile; fileRef = 673F0E8429EBA7D200814217 /* notifly_ios_sdk.docc */; };
 		673F0E8B29EBA7D200814217 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */; };
 		673F0E9029EBA7D200814217 /* notifly_ios_sdkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F0E8F29EBA7D200814217 /* notifly_ios_sdkTests.swift */; };
@@ -38,6 +42,9 @@
 /* Begin PBXFileReference section */
 		672E7B7229ED34AA00B3E9F2 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		672E7B7F29EE4B0C00B3E9F2 /* AppHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppHelper.swift; sourceTree = "<group>"; };
+		672E7DEF29EF98B500B3E9F2 /* TrackingEvent+Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TrackingEvent+Constants.swift"; sourceTree = "<group>"; };
+		672E7DF529EFB6D700B3E9F2 /* UserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
+		672E7DF829EFBA0200B3E9F2 /* UUID+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UUID+.swift"; sourceTree = "<group>"; };
 		673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = notifly_ios_sdk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		673F0E8329EBA7D200814217 /* notifly_ios_sdk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = notifly_ios_sdk.h; sourceTree = "<group>"; };
 		673F0E8429EBA7D200814217 /* notifly_ios_sdk.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = notifly_ios_sdk.docc; sourceTree = "<group>"; };
@@ -60,6 +67,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				672E7DF329EFA50400B3E9F2 /* FirebaseMessaging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,8 +87,17 @@
 			children = (
 				672E7B7229ED34AA00B3E9F2 /* Logger.swift */,
 				672E7B7F29EE4B0C00B3E9F2 /* AppHelper.swift */,
+				672E7DF829EFBA0200B3E9F2 /* UUID+.swift */,
 			);
 			path = Util;
+			sourceTree = "<group>";
+		};
+		672E7DF429EFB6C400B3E9F2 /* User */ = {
+			isa = PBXGroup;
+			children = (
+				672E7DF529EFB6D700B3E9F2 /* UserManager.swift */,
+			);
+			path = User;
 			sourceTree = "<group>";
 		};
 		673F0E7629EBA7D200814217 = {
@@ -132,6 +149,7 @@
 		673F0EA629EBC65000814217 /* Infrastructures */ = {
 			isa = PBXGroup;
 			children = (
+				672E7DF429EFB6C400B3E9F2 /* User */,
 				672E7B7129ED349E00B3E9F2 /* Util */,
 				673F0EBF29EC72B500814217 /* Notifications */,
 				673F0EB729EC5C4D00814217 /* API */,
@@ -147,6 +165,7 @@
 			children = (
 				673F0EA929EBC65000814217 /* TrackingManager.swift */,
 				673F0EAA29EBC65000814217 /* TrackingEvent.swift */,
+				672E7DEF29EF98B500B3E9F2 /* TrackingEvent+Constants.swift */,
 			);
 			path = Tracking;
 			sourceTree = "<group>";
@@ -213,6 +232,9 @@
 			dependencies = (
 			);
 			name = "notifly-ios-sdk";
+			packageProductDependencies = (
+				672E7DF229EFA50400B3E9F2 /* FirebaseMessaging */,
+			);
 			productName = "notifly-ios-sdk";
 			productReference = 673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */;
 			productType = "com.apple.product-type.framework";
@@ -262,6 +284,9 @@
 				Base,
 			);
 			mainGroup = 673F0E7629EBA7D200814217;
+			packageReferences = (
+				672E7DF129EFA50400B3E9F2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			productRefGroup = 673F0E8129EBA7D200814217 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -297,16 +322,19 @@
 				673F0EB629EC5BDB00814217 /* Auth+Credentials.swift in Sources */,
 				673F0EB129EBC68200814217 /* NotiflyAPI.swift in Sources */,
 				673F0EC129EC72CC00814217 /* NotificationsManager.swift in Sources */,
+				672E7DF629EFB6D700B3E9F2 /* UserManager.swift in Sources */,
 				673F0EB929EC5C7E00814217 /* NotiflyAPI+Request.swift in Sources */,
 				673F0EBB29EC610400814217 /* Notifly+PublicAPI.swift in Sources */,
 				673F0EB329EBCA3D00814217 /* NotiflyError.swift in Sources */,
 				673F0E8529EBA7D200814217 /* notifly_ios_sdk.docc in Sources */,
+				672E7DF929EFBA0200B3E9F2 /* UUID+.swift in Sources */,
 				672E7B7329ED34AA00B3E9F2 /* Logger.swift in Sources */,
 				673F0EAD29EBC66400814217 /* Notifly.swift in Sources */,
 				673F0EAE29EBC67700814217 /* Auth.swift in Sources */,
 				673F0EAF29EBC67C00814217 /* TrackingEvent.swift in Sources */,
 				673F0EB029EBC67F00814217 /* TrackingManager.swift in Sources */,
 				672E7B8029EE4B0C00B3E9F2 /* AppHelper.swift in Sources */,
+				672E7DF029EF98B500B3E9F2 /* TrackingEvent+Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -583,6 +611,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		672E7DF129EFA50400B3E9F2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 9.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		672E7DF229EFA50400B3E9F2 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 672E7DF129EFA50400B3E9F2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 673F0E7729EBA7D200814217 /* Project object */;
 }

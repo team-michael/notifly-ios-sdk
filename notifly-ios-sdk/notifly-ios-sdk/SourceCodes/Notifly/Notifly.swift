@@ -1,4 +1,3 @@
-
 import Foundation
 import Combine
 import UIKit
@@ -21,7 +20,6 @@ public class Notifly {
     }
 
     static private var _main: Notifly?
-
     
     let projectID: String
     let useCustomClickHandler: Bool
@@ -29,6 +27,7 @@ public class Notifly {
     let auth: Auth
     let notificationsManager: NotificationsManager
     let trackingManager: TrackingManager
+    let userManager = UserManager()
     
     var trackingCancellables = Set<AnyCancellable>()
     
@@ -48,9 +47,15 @@ public class Notifly {
         setup()
     }
     
+    // MARK: - Private Methods
+    
     private func setup() {
         if !useCustomClickHandler {
             UNUserNotificationCenter.current().delegate = notificationsManager
         }
+        
+        trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.sessionStartEventName,
+                                           params: nil,
+                                           segmentationEventParamKeys: nil)
     }
 }

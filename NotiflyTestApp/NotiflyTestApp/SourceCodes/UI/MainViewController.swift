@@ -122,7 +122,7 @@ class MainViewController: UIViewController {
             }
         cancellables.insert(cancellable)
         
-        cancellable = Notifly.main.notificationsManager.apnDeviceToken!
+        cancellable = Notifly.main.notificationsManager.apnDeviceTokenPub!
             .map { "\($0)" }
             .catch { Just("Failed to get the push token. Error: \($0)") }
             .receive(on: RunLoop.main)

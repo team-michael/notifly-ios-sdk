@@ -1,3 +1,4 @@
+import FirebaseCore
 import Foundation
 import Combine
 import UIKit
@@ -16,6 +17,7 @@ public extension Notifly {
                            username: String,
                            password: String,
                            useCustomClickHandler: Bool) {
+//        FirebaseApp.configure() // TODO: Uncomment this once Firebase is configured properly for the project.
         main = Notifly(projectID: projectID,
                        username: username,
                        password: password,
@@ -61,12 +63,19 @@ public extension Notifly {
                       userID: String?) {
         let trackingPub =  main.trackingManager.track(eventName: eventName,
                                                       eventParams: eventParams,
-                                                      segmentationEventParamKeys: segmentationEventParamKeys,
-                                                      userID: userID)
+                                                      segmentationEventParamKeys: segmentationEventParamKeys)
         let cancellable = trackingPub
             .replaceError(with: "Error Occured")
             .sink { _ in }
         main.trackingCancellables.insert(cancellable)
+    }
+    
+    static func setUserID(_ userID: String?) throws {
+        try main.userManager.setExternalUserID(userID)
+    }
+    
+    static func setUserProperties(_ params: [String: String]) throws {
+        try main.userManager.setUserProperties(params)
     }
     
     static func schedulePushNotification(title: String?,
