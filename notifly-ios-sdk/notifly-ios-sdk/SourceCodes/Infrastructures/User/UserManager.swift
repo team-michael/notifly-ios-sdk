@@ -1,3 +1,4 @@
+import Combine
 import FirebaseMessaging
 import Foundation
 
@@ -13,19 +14,17 @@ class UserManager {
     
     private var _notiflyUserIDCache: String?
     
-    func setExternalUserID(_ newExternalUserID: String?) throws {
-        if let newExternalUserID = newExternalUserID {
+    func setExternalUserID(_ newExternalUserID: String?) throws -> AnyPublisher<String, Error> {
+        if let newExternalUserID = newExternalUserID, !newExternalUserID.isEmpty {
             // `self.externalUserID` property is set in `setUserProperties` function.
-            try setUserProperties([TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID])
+            return try setUserProperties([TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID])
         } else {
             externalUserID = nil
-            Notifly.trackInternalEvent(eventName: TrackingConstant.Internal.removeUserPropertiesEventName,
-                                       params: nil,
-                                       segmentationEventParamKeys: nil)
+            return Notifly.main.trackingManager.trackInternalEventPub(name: TrackingConstant.Internal.removeUserPropertiesEventName, params: nil)
         }
     }
     
-    func setUserProperties(_ params: [String: String]) throws {
+    func setUserProperties(_ params: [String: String]) throws -> AnyPublisher<String, Error> {
         var params = params
         if let newExternalUserID = params[TrackingConstant.Internal.notiflyExternalUserID] {
             params[TrackingConstant.Internal.previousExternalUserID] = externalUserID
@@ -34,9 +33,7 @@ class UserManager {
             externalUserID = newExternalUserID
             _notiflyUserIDCache = nil
         }
-        Notifly.trackInternalEvent(eventName: TrackingConstant.Internal.setUserPropertiesEventName,
-                                   params: params,
-                                   segmentationEventParamKeys: nil)
+        return Notifly.main.trackingManager.trackInternalEventPub(name: TrackingConstant.Internal.setUserPropertiesEventName, params: params)
     }
     
     func getNotiflyUserID() throws -> String {

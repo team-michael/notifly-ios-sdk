@@ -21,7 +21,7 @@ class NotificationsManager: NSObject {
             if let pub = _apnDeviceTokenPub {
                 return pub
                     .catch { error in
-                        Logger.info("Failed to get APNs Token with error: \(error)\n\nVisit \(#file) to replace this workaround once APNs can be successfully retrieved.")
+                        Logger.info("Failed to get APNs Token with error: \(error)\n\nVisit \(#filePath) to replace this workaround once APNs can be successfully retrieved.\nAs workaround, debug APN Token is used.")
                         return Just("debug-apns-device-token").setFailureType(to: Error.self)
                     }
                     .eraseToAnyPublisher()
@@ -121,9 +121,7 @@ class NotificationsManager: NSObject {
     private func presentWebViewForURL(url: URL) {
         let browserVC = SFSafariViewController(url: url)
         AppHelper.present(browserVC) {
-            Notifly.trackInternalEvent(eventName: TrackingConstant.Internal.pushNotificationMessageShown,
-                                       params: nil,
-                                       segmentationEventParamKeys: nil)
+            Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.pushNotificationMessageShown, params: nil)
         }
     }
     
@@ -138,9 +136,7 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
     public func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                        didReceive response: UNNotificationResponse,
                                        withCompletionHandler completion: () -> Void) {
-        Notifly.trackInternalEvent(eventName: TrackingConstant.Internal.pushClickEventName,
-                                   params: nil,
-                                   segmentationEventParamKeys: nil)
+        Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.pushClickEventName, params: nil)
         handleNotifcation(response.notification,
                           completion: completion)
     }

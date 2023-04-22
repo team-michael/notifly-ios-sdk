@@ -19,6 +19,20 @@ extension UIStackView {
         ])
     }
     
+    func addSwitchView(labelText: String, switchView: UISwitch) {
+        let label = UILabel()
+        label.text = labelText
+        label.textColor = .darkGray
+        
+        addArrangedSubview(label)
+        addArrangedSubview(switchView)
+        
+        NSLayoutConstraint.activate([
+            widthAnchor.constraint(equalTo: label.widthAnchor),
+            widthAnchor.constraint(equalTo: switchView.widthAnchor)
+        ])
+    }
+    
     func addCTAView(labelText: String, button: UIButton, bgColor: UIColor) {
         button.setTitle(labelText, for: .normal)
         button.backgroundColor = bgColor

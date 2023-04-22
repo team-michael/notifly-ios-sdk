@@ -13,7 +13,7 @@ class NotiflyAPI {
     }
     
     func trackEvent(_ event: TrackingEventProtocol) -> AnyPublisher<String, Error> {
-        request(to: "https://api.notifly.tech/track-event", method: .POST, authTokenRequired: true)
+        request(to: "https://12lnng07q2.execute-api.ap-northeast-2.amazonaws.com/prod/records", method: .POST, authTokenRequired: true)
             .map { $0.set(body: event) }
             .flatMap{ $0.buildAndFireWithRawJSONResponseType() }
             .eraseToAnyPublisher()

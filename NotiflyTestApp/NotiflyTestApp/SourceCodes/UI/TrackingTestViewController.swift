@@ -10,7 +10,7 @@ class TrackingTestViewController: UIViewController {
     
     let eventNameTextField = UITextField()
     let segmentationEventParamsTextField = UITextField()
-    let userIDTextField = UITextField()
+    let isInternalEventSwitch = UISwitch()
     
     let customEventParamsButton = UIButton()
     let submitTrackingEventButton = UIButton()
@@ -36,7 +36,6 @@ class TrackingTestViewController: UIViewController {
         setupStackView()
         
         eventNameTextField.placeholder = "Test Event Name"
-        userIDTextField.placeholder = "UserID"
         segmentationEventParamsTextField.placeholder = "Comma (',') Separated. e.g. 'value1, value2'"
         
         requestPayloadTextView.text = "N/A"
@@ -65,7 +64,7 @@ class TrackingTestViewController: UIViewController {
         // StackView SubViews
         stackView.addInputView(labelText: "Event Name", textfield: eventNameTextField)
         stackView.addInputView(labelText: "Segmentation Events (Optional)", textfield: segmentationEventParamsTextField)
-        stackView.addInputView(labelText: "User ID (Deprecated)", textfield: userIDTextField)
+        stackView.addSwitchView(labelText: "Is Internal Event", switchView: isInternalEventSwitch)
         
         stackView.addCTAView(labelText: "Custom Event Params", button: customEventParamsButton, bgColor: .darkText)
         stackView.addCTAView(labelText: "Submit Event", button: submitTrackingEventButton, bgColor: .blue)
@@ -90,27 +89,29 @@ class TrackingTestViewController: UIViewController {
         let segmentationEventParamKeys = segmentationEventParamsTextField.text?
             .split(separator: ",")
             .map(String.init)
-        let _ = userIDTextField.checkAndRetrieveValueText(changeBorderColorOnError: false) // TODO: Remove
         
         // Inspect request payload
-        let event = Notifly.main.trackingManager.createExternalTrackingEvent(eventName: eventName,
-                                                                             eventParams: customEventParams,
-                                                                             segmentationEventParamKeys: segmentationEventParamKeys)
+        let eventPub = Notifly.main.trackingManager.createTrackingEvent(name: eventName,
+                                                                        isInternal: isInternalEventSwitch.isOn,
+                                                                        eventParams: customEventParams,
+                                                                        segmentationEventParamKeys: segmentationEventParamKeys)
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         
-        if let jsonData = try? encoder.encode(event),
-           let jsonString = String(data: jsonData, encoding: .utf8) {
-            requestPayloadTextView.text = jsonString
-        } else {
-            requestPayloadTextView.text = "Failed to encode Event payload."
-        }
+        var cancellable = eventPub
+            .encode(encoder: encoder)
+            .map { String(data: $0, encoding: .utf8) ?? "Encoding Error" }
+            .catch { Just("Failed to encode Event payload with error: \($0)") }
+            .receive(on: RunLoop.main)
+            .assign(to: \.text, on: requestPayloadTextView)
+        cancellables.insert(cancellable)
         
         // Fire Tracking
         let trackingPub = Notifly.main.trackingManager.track(eventName: eventName,
-                                                             eventParams: customEventParams,
+                                                             isInternal: false,
+                                                             params: customEventParams,
                                                              segmentationEventParamKeys: segmentationEventParamKeys)
-        let cancellable = trackingPub
+        cancellable = trackingPub
             .catch { Just("Tracking Event Failed. Error: \($0)") }
             .receive(on: RunLoop.main)
             .sink { [weak self] resultingString in

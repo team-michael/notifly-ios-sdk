@@ -17,7 +17,8 @@ class MainViewController: UIViewController {
     let pushTokenTextView = UITextView()
     
     let testTrackingButton = UIButton()
-    let testPushNotification = UIButton()
+    let testPushNotificationButton = UIButton()
+    let testUserSettingsButton = UIButton()
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -49,6 +50,10 @@ class MainViewController: UIViewController {
         navigationController?.pushViewController(PushNotificationTestViewController(), animated: true)
     }
     
+    func navigateToTestUserSettingsVC() {
+        navigationController?.pushViewController(UserSettingsTestViewController(), animated: true)
+    }
+    
     private func setup() {
         setupUI()
         authorizeWithCurrentIntputs() // Initialize Notifly with default values.
@@ -70,7 +75,8 @@ class MainViewController: UIViewController {
         // Hookup CTAs
         authorizeButton.addTarget(self, action: #selector(authorizeBtnTapped(sender:)), for: .touchUpInside)
         testTrackingButton.addTarget(self, action: #selector(testTrackingBtnTapped(sender:)), for: .touchUpInside)
-        testPushNotification.addTarget(self, action: #selector(testPushNotificationBtnTapped(sender:)), for: .touchUpInside)
+        testPushNotificationButton.addTarget(self, action: #selector(testPushNotificationBtnTapped(sender:)), for: .touchUpInside)
+        testUserSettingsButton.addTarget(self, action: #selector(testUserSettingsBtnTapped(sender:)), for: .touchUpInside)
     }
     
     private func setupStackView() {
@@ -99,7 +105,8 @@ class MainViewController: UIViewController {
         stackView.addInfoView(labelText: "Push Token", textView: pushTokenTextView)
         
         stackView.addCTAView(labelText: "Test Tracking Event", button: testTrackingButton, bgColor: .black)
-        stackView.addCTAView(labelText: "Test Push Notification", button: testPushNotification, bgColor: .black)
+        stackView.addCTAView(labelText: "Test Push Notification", button: testPushNotificationButton, bgColor: .black)
+        stackView.addCTAView(labelText: "Test User Settings", button: testUserSettingsButton, bgColor: .black)
         
         stackView.addArrangedSubview(UIView())
     }
@@ -145,6 +152,11 @@ class MainViewController: UIViewController {
     @objc
     private func testPushNotificationBtnTapped(sender: UIButton) {
         navigateToTestPushNotificationVC()
+    }
+    
+    @objc
+    private func testUserSettingsBtnTapped(sender: UIButton) {
+        navigateToTestUserSettingsVC()
     }
 }
 

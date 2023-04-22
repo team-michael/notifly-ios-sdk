@@ -55,22 +55,3 @@ public class Notifly {
         }
     }
 }
-
-extension Notifly {
-    static func trackInternalEvent(eventName: String,
-                                   params: [String: String]?,
-                                   segmentationEventParamKeys: [String]?) {
-        let cancellable = main.trackingManager.trackInternalEvent(eventName: eventName,
-                                                                  params: params,
-                                                                  segmentationEventParamKeys: segmentationEventParamKeys)
-            .catch({ error in
-                let msg = "Internal Tracking Error: \(error)"
-                Logger.error(msg)
-                return Just(msg)
-            })
-            .sink { resultPayload in
-                Logger.info("Success response for Internal Tracking. Respone:\n\(resultPayload)")
-            }
-        main.trackingCancellables.insert(cancellable)
-    }
-}
