@@ -19,7 +19,7 @@ enum TrackingConstant {
 
         static let setUserPropertiesEventName = "set_user_properties"
         static let removeUserPropertiesEventName = "remove_external_user_id"
-        static let notiflyExternalUserID = "notiflyExternalUserId"
+        static let notiflyExternalUserID = "external_user_id"
         static let notiflyUserID = "notifly_user_id"
         static let previousNotiflyUserID = "previous_notifly_user_id"
         static let previousExternalUserID = "previous_external_user_id"

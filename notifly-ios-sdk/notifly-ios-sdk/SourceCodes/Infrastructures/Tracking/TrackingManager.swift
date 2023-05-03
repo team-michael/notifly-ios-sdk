@@ -61,7 +61,8 @@ class TrackingManager {
         
         if let pub = Notifly.main.notificationsManager.apnDeviceTokenPub {
             return pub.tryMap { pushToken in
-                TrackingEvent(id: UUID().uuidString,
+                let data = String(data: try! JSONEncoder().encode(
+                    TrackingEventData(id: UUID().uuidString,
                               name: name,
                               notifly_user_id: try Notifly.main.userManager.getNotiflyUserID(),
                               external_user_id: Notifly.main.userManager.externalUserID,
@@ -77,6 +78,12 @@ class TrackingManager {
                               app_version: try AppHelper.getAppVersion(),
                               sdk_version: try AppHelper.getSDKVersion(),
                               event_params: eventParams)
+                ), encoding: .utf8);
+                return TrackingEvent(
+                    records: [
+                        TrackingEventRecord(partitionKey: try Notifly.main.userManager.getNotiflyUserID(), data: data)
+                    ]
+                )
             }.eraseToAnyPublisher()
         } else {
             return Fail(outputType: TrackingEvent.self, failure: NotiflyError.unexpectedNil("APN Device Token is nil"))
