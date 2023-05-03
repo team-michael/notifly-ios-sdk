@@ -9,11 +9,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // TODO: remove this code after testing. this section is only for testing.
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
            if let error = error {
-                // 권한 요청 중 에러가 발생한 경우 처리
-                print("Failed to request authorization: \(error)")
+                Logger.info("Failed to request authorization: \(error)")
             } else {
-                // 권한 요청이 성공한 경우 처리
-                print("Authorization granted: \(granted)")
+                Logger.info("Authorization granted: \(granted)")
             }
         }
         return true
