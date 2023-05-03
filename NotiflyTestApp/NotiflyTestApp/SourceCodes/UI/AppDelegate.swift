@@ -9,9 +9,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // TODO: remove this code after testing. this section is only for testing.
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
            if let error = error {
-                Logger.info("Failed to request authorization: \(error)")
+                print("Failed to request authorization: \(error)")
             } else {
-                Logger.info("Authorization granted: \(granted)")
+                print("Authorization granted: \(granted)")
+                DispatchQueue.main.async {
+                        UIApplication.shared.registerForRemoteNotifications()
+                }
             }
         }
         return true
