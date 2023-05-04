@@ -17,7 +17,7 @@ public extension Notifly {
                            username: String,
                            password: String,
                            useCustomClickHandler: Bool) {
-//        FirebaseApp.configure() // TODO: Uncomment this once Firebase is configured properly for the project.
+        FirebaseApp.configure() // TODO: Uncomment this once Firebase is configured properly for the project.
         main = Notifly(projectID: projectID,
                        username: username,
                        password: password,

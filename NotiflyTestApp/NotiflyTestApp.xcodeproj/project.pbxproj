@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		672E7B6A29ED1D7600B3E9F2 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 672E7B6729ED1D3500B3E9F2 /* notifly_ios_sdk.framework */; };
 		672E7B6D29ED1E4F00B3E9F2 /* TestConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B6C29ED1E4F00B3E9F2 /* TestConstants.swift */; };
 		672E7B7529EDF1C400B3E9F2 /* TrackingTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7429EDF1C400B3E9F2 /* TrackingTestViewController.swift */; };
 		672E7B7A29EDF22F00B3E9F2 /* UIStackView+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7929EDF22F00B3E9F2 /* UIStackView+.swift */; };
@@ -21,6 +20,9 @@
 		675EB43E29ED18B1001347FB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 675EB43D29ED18B1001347FB /* Assets.xcassets */; };
 		675EB44129ED18B1001347FB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 675EB43F29ED18B1001347FB /* LaunchScreen.storyboard */; };
 		67A0706529F2270C0028DE1A /* UserSettingsTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67A0706429F2270C0028DE1A /* UserSettingsTestViewController.swift */; };
+		F21322EF2A0243D900C3EE43 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F21322EC2A0243D900C3EE43 /* GoogleService-Info.plist */; };
+		F21322F12A02448A00C3EE43 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 672E7B6729ED1D3500B3E9F2 /* notifly_ios_sdk.framework */; };
+		F21322F22A02448A00C3EE43 /* notifly_ios_sdk.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 672E7B6729ED1D3500B3E9F2 /* notifly_ios_sdk.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +42,20 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		F21322F32A02448A00C3EE43 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				F21322F22A02448A00C3EE43 /* notifly_ios_sdk.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		672E7B6129ED1D3500B3E9F2 /* notifly-ios-sdk.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "notifly-ios-sdk.xcodeproj"; path = "../notifly-ios-sdk/notifly-ios-sdk.xcodeproj"; sourceTree = "<group>"; };
 		672E7B6C29ED1E4F00B3E9F2 /* TestConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestConstants.swift; sourceTree = "<group>"; };
@@ -57,6 +73,8 @@
 		675EB44029ED18B1001347FB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		675EB44229ED18B1001347FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		67A0706429F2270C0028DE1A /* UserSettingsTestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsTestViewController.swift; sourceTree = "<group>"; };
+		F21322EC2A0243D900C3EE43 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		F21322F02A02445D00C3EE43 /* NotiflyTestApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotiflyTestApp.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,7 +82,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				672E7B6A29ED1D7600B3E9F2 /* notifly_ios_sdk.framework in Frameworks */,
+				F21322F12A02448A00C3EE43 /* notifly_ios_sdk.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,6 +159,8 @@
 		675EB43329ED18B0001347FB /* NotiflyTestApp */ = {
 			isa = PBXGroup;
 			children = (
+				F21322F02A02445D00C3EE43 /* NotiflyTestApp.entitlements */,
+				F21322EC2A0243D900C3EE43 /* GoogleService-Info.plist */,
 				672E7B6B29ED1E2000B3E9F2 /* SourceCodes */,
 				675EB43A29ED18B0001347FB /* Main.storyboard */,
 				675EB43D29ED18B1001347FB /* Assets.xcassets */,
@@ -160,6 +180,7 @@
 				675EB42D29ED18B0001347FB /* Sources */,
 				675EB42E29ED18B0001347FB /* Frameworks */,
 				675EB42F29ED18B0001347FB /* Resources */,
+				F21322F32A02448A00C3EE43 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -232,6 +253,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				675EB44129ED18B1001347FB /* LaunchScreen.storyboard in Resources */,
+				F21322EF2A0243D900C3EE43 /* GoogleService-Info.plist in Resources */,
 				675EB43E29ED18B1001347FB /* Assets.xcassets in Resources */,
 				675EB43C29ED18B0001347FB /* Main.storyboard in Resources */,
 			);
@@ -329,7 +351,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -383,7 +405,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -398,6 +420,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = NotiflyTestApp/NotiflyTestApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = MR367J8PMN;
@@ -408,13 +431,13 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.notifly.notifly-ios-sdk.NotiflyTestApp";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.notifly.notifly-ios-sdk.NotiflyIOSTestApp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -427,6 +450,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = NotiflyTestApp/NotiflyTestApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = MR367J8PMN;
@@ -437,13 +461,13 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.notifly.notifly-ios-sdk.NotiflyTestApp";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.notifly.notifly-ios-sdk.NotiflyIOSTestApp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
