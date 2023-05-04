@@ -90,7 +90,8 @@ class TrackingManager {
                                         app_version: try AppHelper.getAppVersion(),
                                         sdk_version: try AppHelper.getSDKVersion(),
                                         event_params: eventParams)
-                return TrackingRecord(partitionKey: userID, data: data)
+                let stringfiedData = String(data: try! JSONEncoder().encode(data), encoding: .utf8)!
+                return TrackingRecord(partitionKey: userID, data: stringfiedData)
             }.eraseToAnyPublisher()
         } else {
             return Fail(outputType: TrackingRecord.self, failure: NotiflyError.unexpectedNil("APN Device Token is nil"))
@@ -103,7 +104,7 @@ class TrackingManager {
     private func setup() {
         // Subscribe to log events lifecycles.
         eventPublisher
-            .sink { record in Logger.info("Queued Tracking Event Record \(record.data.name).") }
+            .sink { record in Logger.info("Queued Tracking Event Record \(record.data).") }
             .store(in: &cancellables)
             
         eventRequestPayloadPublisher
