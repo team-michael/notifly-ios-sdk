@@ -28,6 +28,26 @@ class TrackingTestViewController: UIViewController {
     
     private func setup() {
         setupUI()
+        
+        // Inspect request payload
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        
+        Notifly.main.trackingManager.eventRequestPayloadPublisher
+            .encode(encoder: encoder)
+            .map { String(data: $0, encoding: .utf8) ?? "Encoding Error" }
+            .catch { Just("Failed to encode Event payload with error: \($0)") }
+            .receive(on: RunLoop.main)
+            .assign(to: \.text, on: requestPayloadTextView)
+            .store(in: &cancellables)
+        
+        // Inspect Response Payload.
+        Notifly.main.trackingManager.eventRequestResponsePublisher
+            .receive(on: RunLoop.main)
+            .sink { [weak self] resultingString in
+                self?.responsePayloadTextView.text = resultingString
+            }
+            .store(in: &cancellables)
     }
     
     private func setupUI() {
@@ -67,7 +87,7 @@ class TrackingTestViewController: UIViewController {
         stackView.addSwitchView(labelText: "Is Internal Event", switchView: isInternalEventSwitch)
         
         stackView.addCTAView(labelText: "Custom Event Params", button: customEventParamsButton, bgColor: .darkText)
-        stackView.addCTAView(labelText: "Submit Event", button: submitTrackingEventButton, bgColor: .blue)
+        stackView.addCTAView(labelText: "Queue Tracking Event", button: submitTrackingEventButton, bgColor: .blue)
         
         stackView.addInfoView(labelText: "Request Payload", textView: requestPayloadTextView)
         stackView.addInfoView(labelText: "Response Payload", textView: responsePayloadTextView)
@@ -90,34 +110,14 @@ class TrackingTestViewController: UIViewController {
             .split(separator: ",")
             .map(String.init)
         
-        // Inspect request payload
-        let eventPub = Notifly.main.trackingManager.createTrackingEvent(name: eventName,
-                                                                        isInternal: isInternalEventSwitch.isOn,
-                                                                        eventParams: customEventParams,
-                                                                        segmentationEventParamKeys: segmentationEventParamKeys)
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
-        
-        var cancellable = eventPub
-            .encode(encoder: encoder)
-            .map { String(data: $0, encoding: .utf8) ?? "Encoding Error" }
-            .catch { Just("Failed to encode Event payload with error: \($0)") }
-            .receive(on: RunLoop.main)
-            .assign(to: \.text, on: requestPayloadTextView)
-        cancellables.insert(cancellable)
+        requestPayloadTextView.text = "Queued the tracking event. Queued tracking events are fired within \(Notifly.main.trackingManager.trackingFiringInterval) seconds of interval."
+        responsePayloadTextView.text = "N/A"
         
         // Fire Tracking
-        let trackingPub = Notifly.main.trackingManager.track(eventName: eventName,
-                                                             isInternal: false,
-                                                             params: customEventParams,
-                                                             segmentationEventParamKeys: segmentationEventParamKeys)
-        cancellable = trackingPub
-            .catch { Just("Tracking Event Failed. Error: \($0)") }
-            .receive(on: RunLoop.main)
-            .sink { [weak self] resultingString in
-                self?.responsePayloadTextView.text = resultingString
-            }
-        cancellables.insert(cancellable)
+        Notifly.main.trackingManager.track(eventName: eventName,
+                                           isInternal: false,
+                                           params: customEventParams,
+                                           segmentationEventParamKeys: segmentationEventParamKeys)
     }
     
     @objc

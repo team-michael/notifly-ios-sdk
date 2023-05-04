@@ -62,45 +62,18 @@ public extension Notifly {
     static func trackEvent(name: String,
                            params: [String: String]?,
                            segmentationEventParamKeys: [String]?) {
-        let cancellable = main.trackingManager.track(eventName: name,
-                                                     isInternal: false,
-                                                     params: params,
-                                                     segmentationEventParamKeys: segmentationEventParamKeys)
-            .catch({ error in
-                let msg = "Internal Tracking Error: \(error)"
-                Logger.error(msg)
-                return Just(msg)
-            })
-                .sink { resultPayload in
-                Logger.info("Success response for Internal Tracking. Respone:\n\(resultPayload)")
-            }
-        main.trackingCancellables.insert(cancellable)
+        main.trackingManager.track(eventName: name,
+                                   isInternal: false,
+                                   params: params,
+                                   segmentationEventParamKeys: segmentationEventParamKeys)
     }
     
     static func setUserID(_ userID: String?) throws {
-        let cancellable = try main.userManager.setExternalUserID(userID)
-            .catch({ error in
-                let msg = "Internal Tracking Error: \(error)"
-                Logger.error(msg)
-                return Just(msg)
-            })
-                .sink { resultPayload in
-                Logger.info("Success response for Internal Tracking. Respone:\n\(resultPayload)")
-            }
-        main.trackingCancellables.insert(cancellable)
+        try main.userManager.setExternalUserID(userID)
     }
     
     static func setUserProperties(_ params: [String: String]) throws {
-        let cancellable = try main.userManager.setUserProperties(params)
-            .catch({ error in
-                let msg = "Internal Tracking Error: \(error)"
-                Logger.error(msg)
-                return Just(msg)
-            })
-                .sink { resultPayload in
-                Logger.info("Success response for Internal Tracking. Respone:\n\(resultPayload)")
-            }
-        main.trackingCancellables.insert(cancellable)
+        try main.userManager.setUserProperties(params)
     }
     
     static func schedulePushNotification(title: String?,

@@ -4,15 +4,15 @@ import Foundation
 protocol TrackingEventProtocol: Codable {}
 
 struct TrackingEvent: TrackingEventProtocol {
-    let records: [TrackingEventRecord]?
+    let records: [TrackingRecord]
 }
 
-struct TrackingEventRecord: TrackingEventProtocol {
+struct TrackingRecord: Codable {
     let partitionKey: String
-    let data: String?
+    let data: TrackingData
 }
 
-struct TrackingEventData: TrackingEventProtocol {
+struct TrackingData: Codable {
     let id: String
     let name: String
     let notifly_user_id: String

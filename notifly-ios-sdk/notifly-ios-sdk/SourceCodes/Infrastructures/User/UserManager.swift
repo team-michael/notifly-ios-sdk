@@ -14,17 +14,17 @@ class UserManager {
     
     private var _notiflyUserIDCache: String?
     
-    func setExternalUserID(_ newExternalUserID: String?) throws -> AnyPublisher<String, Error> {
+    func setExternalUserID(_ newExternalUserID: String?) throws {
         if let newExternalUserID = newExternalUserID, !newExternalUserID.isEmpty {
             // `self.externalUserID` property is set in `setUserProperties` function.
-            return try setUserProperties([TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID])
+            try setUserProperties([TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID])
         } else {
             externalUserID = nil
-            return Notifly.main.trackingManager.trackInternalEventPub(name: TrackingConstant.Internal.removeUserPropertiesEventName, params: nil)
+            Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.removeUserPropertiesEventName, params: nil)
         }
     }
     
-    func setUserProperties(_ params: [String: String]) throws -> AnyPublisher<String, Error> {
+    func setUserProperties(_ params: [String: String]) throws {
         var params = params
         if let newExternalUserID = params[TrackingConstant.Internal.notiflyExternalUserID] {
             params[TrackingConstant.Internal.previousExternalUserID] = externalUserID
@@ -33,7 +33,7 @@ class UserManager {
             externalUserID = newExternalUserID
             _notiflyUserIDCache = nil
         }
-        return Notifly.main.trackingManager.trackInternalEventPub(name: TrackingConstant.Internal.setUserPropertiesEventName, params: params)
+        Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.setUserPropertiesEventName, params: params)
     }
     
     func getNotiflyUserID() throws -> String {

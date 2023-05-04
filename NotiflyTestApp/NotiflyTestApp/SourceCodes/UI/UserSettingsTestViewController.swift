@@ -8,7 +8,6 @@ class UserSettingsTestViewController: UIViewController {
     // MARK: Properties
     
     private var userProperties: [String: String]?
-    private var cancellables = Set<AnyCancellable>()
     
     // MARK: UI Components
 
@@ -34,11 +33,8 @@ class UserSettingsTestViewController: UIViewController {
     
     func submitUserIDTrackingEventWithCurrentInput() throws {
         let userID = userIDTextField.checkAndRetrieveValueText(changeBorderColorOnError: false)
-        let cancellable = try Notifly.main.userManager.setExternalUserID(userID)
-            .catch { Just("Failed with error: \($0)") }
-            .receive(on: RunLoop.main)
-            .assign(to: \.text, on: userIDTrackingResponseTextView)
-        cancellables.insert(cancellable)
+        try Notifly.main.userManager.setExternalUserID(userID)
+        userIDTrackingResponseTextView.text = "User ID successfully set to: \(userID ?? "<null>")"
     }
     
     func presentUserPropertiesVS() {
@@ -49,11 +45,8 @@ class UserSettingsTestViewController: UIViewController {
     
     func submitUserPropertiesTrackingEventWithCurrentInputs() throws {
         if let userProperties = userProperties {
-            let cancellable = try Notifly.main.userManager.setUserProperties(userProperties)
-                .catch { Just("Failed with error: \($0)") }
-                .receive(on: RunLoop.main)
-                .assign(to: \.text, on: userPropertiesResponseTextView)
-            cancellables.insert(cancellable)
+            try Notifly.main.userManager.setUserProperties(userProperties)
+            userPropertiesResponseTextView.text = "User Properties submitted with following: \n\n\(userProperties)"
         } else {
             userPropertiesResponseTextView.text = "Aborted. Nothing to submit."
         }
