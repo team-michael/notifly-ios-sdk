@@ -9,7 +9,7 @@ struct TrackingEvent: TrackingEventProtocol {
 
 struct TrackingRecord: Codable {
     let partitionKey: String
-    let data: TrackingData
+    let data: String?
 }
 
 struct TrackingData: Codable {
