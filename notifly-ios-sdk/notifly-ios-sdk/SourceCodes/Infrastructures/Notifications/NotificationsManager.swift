@@ -159,7 +159,7 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
                                        willPresent notification: UNNotification,
                                        withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void) {
         handleNotifcation(notification) {
-            completion(UNNotificationPresentationOptions())
+            completion([.banner, .badge, .sound])
         }
     }
 }
