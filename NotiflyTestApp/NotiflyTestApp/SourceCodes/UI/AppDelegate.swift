@@ -31,4 +31,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Notifly.application(application,
                             didFailToRegisterForRemoteNotificationsWithError: error)
     }
+    
+    func application(_ application: UIApplication,
+                    didReceiveRemoteNotification userInfo: [AnyHashable : Any],
+                    fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        Notifly.application(application,
+                            didReceiveRemoteNotification: userInfo,
+                            fetchCompletionHandler: completionHandler)
+    }
 }

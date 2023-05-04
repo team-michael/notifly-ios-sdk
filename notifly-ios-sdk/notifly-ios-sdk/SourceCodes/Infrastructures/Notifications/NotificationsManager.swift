@@ -70,6 +70,12 @@ class NotificationsManager: NSObject {
         Logger.error("Failed to receive the push notification deviceToken with error: \(error)")
         apnDeviceTokenPromise?(.failure(error))
     }
+
+    func application(_ application: UIApplication,
+                    didReceiveRemoteNotification userInfo: [AnyHashable : Any],
+                    fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+                
+    }
     
     func schedulePushNotification(title: String?,
                                   body: String?,

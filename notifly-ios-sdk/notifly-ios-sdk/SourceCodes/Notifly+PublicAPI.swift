@@ -38,6 +38,12 @@ public extension Notifly {
                                               didFailToRegisterForRemoteNotificationsWithError: error)
     }
     
+    static func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        main.notificationsManager.application(application,
+                                              didReceiveRemoteNotification: userInfo,
+                                              fetchCompletionHandler: completionHandler)
+    }
+    
     // MARK: Optional Setup API configurations.
     // - Only use below APIs if your app implements custom push notification handler or passed `false` for `useCustomClickHandler` in the `initialize` method.
     
