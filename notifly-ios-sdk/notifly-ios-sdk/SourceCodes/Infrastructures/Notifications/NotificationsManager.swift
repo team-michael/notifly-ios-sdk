@@ -149,7 +149,20 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
     public func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                        didReceive response: UNNotificationResponse,
                                        withCompletionHandler completion: () -> Void) {
-        Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.pushClickEventName, params: nil)
+        let pushData = response.notification.request.content.userInfo
+        if let campaignID = pushData["campaign_id"] as? String {
+            let messageID = pushData["notifly_message_id"] ?? "" as String
+            let clickStatus = UIApplication.shared.applicationState == .active ? "foreground" : "background" as String
+            if let pushClickEventParams = [
+                "type": "message_event",
+                "channel": "push-notification",
+                "campaign_id": campaignID,
+                "notifly_message_id": messageID,
+                "click_status": clickStatus,
+            ] as? [String: String] {
+                Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.pushClickEventName, params: pushClickEventParams)
+            }
+        }
         handleNotifcation(response.notification,
                           completion: completion)
     }
