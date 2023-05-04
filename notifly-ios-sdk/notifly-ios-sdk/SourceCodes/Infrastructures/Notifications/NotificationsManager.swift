@@ -125,7 +125,7 @@ class NotificationsManager: NSObject {
         Logger.info("Received Push Notificatiob with content: \(content)")
         if let urlString = content.userInfo["url"] as? String,
             let url = URL(string: urlString) {
-            presentWebViewForURL(url: url)
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
         UIApplication.shared.applicationIconBadgeNumber = 0
         completion()
