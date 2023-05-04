@@ -28,6 +28,7 @@ enum TrackingConstant {
         // MARK: Push Notification Handlling
         
         static let pushClickEventName = "push_click"
-        static let pushNotificationMessageShown = "in_app_message_show"
+        static let pushNotificationMessageShown = "push_delivered"
+        static let inAppMessageShown = "in_app_message_show"
     }
 }
