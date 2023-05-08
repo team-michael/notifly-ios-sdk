@@ -1,4 +1,5 @@
 import FirebaseCore
+import FirebaseMessaging
 import Foundation
 import Combine
 import UIKit
@@ -18,11 +19,28 @@ public extension Notifly {
                            password: String,
                            useCustomClickHandler: Bool) {
         FirebaseApp.configure() // TODO: Uncomment this once Firebase is configured properly for the project.
+        
         main = Notifly(projectID: projectID,
                        username: username,
                        password: password,
                        useCustomClickHandler: useCustomClickHandler)
         
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                Logger.info("Error fetching FCM registration token: \(error)")
+            } else if let token = token {
+                main.notificationsManager.apnDeviceTokenPromise?(.success(token))
+            }
+        }
+        
+        if let externalUserID = Globals.externalUserIdInUserDefaults {
+            do {
+                try main.userManager.setExternalUserID(externalUserID)
+            } catch {
+                Logger.error("Error setting external user ID: \(error)")
+            }
+        }
+
         Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.sessionStartEventName, params: nil)
     }
     

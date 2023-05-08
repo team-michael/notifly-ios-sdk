@@ -30,18 +30,11 @@ class NotificationsManager: NSObject {
             }
         }
         set {
-            Messaging.messaging().token { token, error in
-                if let error = error {
-                    self.apnDeviceTokenPromise?(.failure(error))
-                } else if let token = token {
-                    self.apnDeviceTokenPromise?(.success(token))
-                }
-            }
-            _apnDeviceTokenPub = newValue // Question: Should i remove this line? @JW From @DaeseongKim
+            _apnDeviceTokenPub = newValue 
         }
     }
     
-    private var apnDeviceTokenPromise: Future<String, Error>.Promise?
+    var apnDeviceTokenPromise: Future<String, Error>.Promise?
     
     // MARK: Lifecycle
     
@@ -62,7 +55,7 @@ class NotificationsManager: NSObject {
             } else if let token = token {
                 self.apnDeviceTokenPromise?(.success(token))
             }
-        } 
+        }
     }
     
     func application(_ application: UIApplication,
@@ -174,7 +167,21 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
     public func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                        didReceive response: UNNotificationResponse,
                                        withCompletionHandler completion: () -> Void) {
-        Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.pushClickEventName, params: nil) //TODO: Add params
+
+        let pushData = response.notification.request.content.userInfo
+        if let campaignID = pushData["campaign_id"] as? String {
+            let messageID = pushData["notifly_message_id"] ?? "" as String
+            let clickStatus = UIApplication.shared.applicationState == .active ? "foreground" : "background" as String
+            if let pushClickEventParams = [
+                "type": "message_event",
+                "channel": "push-notification",
+                "campaign_id": campaignID,
+                "notifly_message_id": messageID,
+                "click_status": clickStatus,
+            ] as? [String: String] {
+                Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.pushClickEventName, params: pushClickEventParams)
+            }
+        }
         handleNotifcation(response.notification,
                           completion: completion)
     }
@@ -184,7 +191,7 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
                                        willPresent notification: UNNotification,
                                        withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void) {
         handleNotifcation(notification) {
-            completion(UNNotificationPresentationOptions())
+            completion([.banner, .badge, .sound])
         }
     }
 }
