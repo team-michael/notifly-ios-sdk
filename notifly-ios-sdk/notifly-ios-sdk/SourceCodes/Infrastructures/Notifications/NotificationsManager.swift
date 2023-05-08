@@ -30,11 +30,18 @@ class NotificationsManager: NSObject {
             }
         }
         set {
-            _apnDeviceTokenPub = newValue 
+            Messaging.messaging().token { token, error in
+                if let error = error {
+                    self.apnDeviceTokenPromise?(.failure(error))
+                } else if let token = token {
+                    self.apnDeviceTokenPromise?(.success(token))
+                }
+            }
+            _apnDeviceTokenPub = newValue // Question: Should i remove this line? @JW From @DaeseongKim
         }
     }
     
-    var apnDeviceTokenPromise: Future<String, Error>.Promise?
+    private var apnDeviceTokenPromise: Future<String, Error>.Promise?
     
     // MARK: Lifecycle
     
@@ -55,7 +62,7 @@ class NotificationsManager: NSObject {
             } else if let token = token {
                 self.apnDeviceTokenPromise?(.success(token))
             }
-        }
+        } 
     }
     
     func application(_ application: UIApplication,
