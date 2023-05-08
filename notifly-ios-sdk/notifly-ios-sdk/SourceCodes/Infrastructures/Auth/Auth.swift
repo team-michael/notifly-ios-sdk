@@ -7,7 +7,7 @@ class Auth {
     
     var authorizationPub: AnyPublisher<String, Error>
     
-    let loginCred: Credentials
+    private let loginCred: Credentials
     private var authorizationRequestCancellable: AnyCancellable?
     
     // MARK: - Lifecycle
