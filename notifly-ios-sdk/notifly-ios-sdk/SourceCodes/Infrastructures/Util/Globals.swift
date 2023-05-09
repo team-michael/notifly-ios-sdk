@@ -11,7 +11,11 @@ final class Globals {
   private static var notiflyAuthTokenKey = "notifly_authToken"
   static var authTokenInUserDefaults: String? {
     set {
-      UserDefaults.standard.set(newValue, forKey: notiflyAuthTokenKey)
+      if let value = newValue {
+        UserDefaults.standard.set(value, forKey: notiflyAuthTokenKey)
+      } else {
+        UserDefaults.standard.removeObject(forKey: notiflyAuthTokenKey)
+      }
     }
 
     get {
@@ -22,7 +26,11 @@ final class Globals {
   private static var notiflyExternalUserIdKey = "notifly_external_user_id"
   static var externalUserIdInUserDefaults: String? {
     set {
-      UserDefaults.standard.set(newValue, forKey: notiflyExternalUserIdKey)
+      if let value = newValue {
+        UserDefaults.standard.set(value, forKey: notiflyExternalUserIdKey)
+      } else {
+        UserDefaults.standard.removeObject(forKey: notiflyExternalUserIdKey)
+      }
     }
 
     get {
@@ -33,7 +41,11 @@ final class Globals {
   private static var notiflyDeviceIdKey = "notifly_deviceId"
   static var deviceIdInUserDefaults: String? {
     set {
-      UserDefaults.standard.set(newValue, forKey: notiflyDeviceIdKey)
+      if let value = newValue {
+        UserDefaults.standard.set(value, forKey: notiflyDeviceIdKey)
+      } else {
+        UserDefaults.standard.removeObject(forKey: notiflyDeviceIdKey)
+      }
     }
 
     get {

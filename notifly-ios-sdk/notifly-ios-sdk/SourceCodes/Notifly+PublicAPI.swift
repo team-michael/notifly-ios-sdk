@@ -34,11 +34,7 @@ public extension Notifly {
         }
         
         if let externalUserID = Globals.externalUserIdInUserDefaults {
-            do {
-                try main.userManager.setExternalUserID(externalUserID)
-            } catch {
-                Logger.error("Error setting external user ID: \(error)")
-            }
+            main.userManager.externalUserID = externalUserID
         }
 
         Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.sessionStartEventName, params: nil)
