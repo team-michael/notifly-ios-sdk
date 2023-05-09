@@ -10,9 +10,8 @@ class NotiflyAPI {
             return Just(authToken)
                 .setFailureType(to: Error.self)
                 .eraseToAnyPublisher()
-        } else {
-            return 
-            request(to: "https://api.notifly.tech/authorize", method: .POST, authTokenRequired: false)
+        } else { 
+            return request(to: "https://api.notifly.tech/authorize", method: .POST, authTokenRequired: false)
                 .map { $0.set(body: credentials) }
                 .flatMap { (builder: RequestBuilder) -> AnyPublisher<String, Error> in builder.buildAndFire() }
                 .handleEvents(receiveOutput: { authToken in

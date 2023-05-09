@@ -28,6 +28,7 @@ public extension Notifly {
         Messaging.messaging().token { token, error in
             if let error = error {
                 Logger.info("Error fetching FCM registration token: \(error)")
+                main.notificationsManager.apnDeviceTokenPromise?(.failure(error))
             } else if let token = token {
                 main.notificationsManager.apnDeviceTokenPromise?(.success(token))
             }
