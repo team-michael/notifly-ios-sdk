@@ -25,9 +25,9 @@ class UserManager {
         }
     }
     
-    func setUserProperties(_ params: [String: String]) throws {
+    func setUserProperties(_ params: [String: Any]) throws {
         var params = params
-        if let newExternalUserID = params[TrackingConstant.Internal.notiflyExternalUserID] {
+        if let newExternalUserID = params[TrackingConstant.Internal.notiflyExternalUserID] as? String {
             params[TrackingConstant.Internal.previousExternalUserID] = externalUserID
             params[TrackingConstant.Internal.previousNotiflyUserID] = try getNotiflyUserID()
             

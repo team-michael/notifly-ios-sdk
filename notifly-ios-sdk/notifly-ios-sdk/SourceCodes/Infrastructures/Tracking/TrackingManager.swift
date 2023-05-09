@@ -38,7 +38,7 @@ class TrackingManager {
     
     // MARK: Methods
     
-    func trackInternalEvent(name: String, params: [String: String]?) {
+    func trackInternalEvent(name: String, params: [String: Any]?) {
         return track(eventName: name,
                      isInternal: true,
                      params: params,
@@ -47,7 +47,7 @@ class TrackingManager {
     
     func track(eventName: String,
                isInternal: Bool,
-               params: [String: String]?,
+               params: [String: Any]?,
                segmentationEventParamKeys: [String]?) {
         
         createTrackingRecord(name: eventName,
@@ -67,7 +67,7 @@ class TrackingManager {
     
     func createTrackingRecord(name: String,
                               isInternal: Bool,
-                              eventParams: [String: String]?,
+                              eventParams: [String: Any]?,
                               segmentationEventParamKeys: [String]?) -> AnyPublisher<TrackingRecord, Error> {
         
         if let pub = Notifly.main.notificationsManager.apnDeviceTokenPub {
@@ -89,7 +89,7 @@ class TrackingManager {
                                         os_version: AppHelper.getiOSVersion(),
                                         app_version: try AppHelper.getAppVersion(),
                                         sdk_version: try AppHelper.getSDKVersion(),
-                                        event_params: eventParams)
+                                        event_params: try self.convertFromStringToAnyArrayToTrackingDataEventParamArray(eventParams))
                 let stringfiedData = String(data: try! JSONEncoder().encode(data), encoding: .utf8)!
                 return TrackingRecord(partitionKey: userID, data: stringfiedData)
             }.eraseToAnyPublisher()
@@ -122,5 +122,12 @@ class TrackingManager {
                 self?.eventRequestResponsePublisher.send(result)
             }
             .store(in: &cancellables)
+    }
+
+    private func convertFromStringToAnyArrayToTrackingDataEventParamArray(_ eventParams: [String: Any]?) -> [TrackingDataEventParam]? {
+        guard let eventParams = eventParams else { return nil }
+        return eventParams.map { key, value in
+            TrackingDataEventParam(key: key, value: "\(value)")
+        }
     }
 }

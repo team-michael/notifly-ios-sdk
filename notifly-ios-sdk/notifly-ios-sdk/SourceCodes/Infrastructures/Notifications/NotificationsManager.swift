@@ -152,7 +152,7 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
                 "campaign_id": campaignID,
                 "notifly_message_id": messageID,
                 "click_status": clickStatus,
-            ] as? [String: String] {
+            ] as? [String: Any] {
                 Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.pushClickEventName, params: pushClickEventParams)
             }
         }
