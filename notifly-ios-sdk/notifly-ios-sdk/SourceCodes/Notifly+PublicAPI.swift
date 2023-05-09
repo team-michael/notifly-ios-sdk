@@ -26,10 +26,8 @@ public extension Notifly {
                        useCustomClickHandler: useCustomClickHandler)
         
         Messaging.messaging().token { token, error in
-            if let error = error {
-                Logger.info("Error fetching FCM registration token: \(error)")
-                main.notificationsManager.apnDeviceTokenPromise?(.failure(error))
-            } else if let token = token {
+            if let token = token,
+               error == nil {
                 main.notificationsManager.apnDeviceTokenPromise?(.success(token))
             }
         }
