@@ -14,7 +14,7 @@ import notifly_ios_sdk
 func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     '''
     // 여기서 프로젝트 아이디, 유저네임, 비밀번호를 본 앱의 정보로 바꿔주세요. 앱에서 따로 Push Notification 을 처리하는 경우 `useCustomClickHandler` 값을 `true` 로 바꿔주세요.
-    Notifly.initialize(launchOptions, projectID: "<project id>", username: "<username>", password: "<password>", useCustomClickHandler: false)
+    Notifly.initialize(projectID: "<project id>", username: "<username>", password: "<password>", useCustomClickHandler: false)
     '''
 }
 
