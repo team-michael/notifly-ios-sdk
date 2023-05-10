@@ -89,7 +89,7 @@ class TrackingManager {
                                         os_version: AppHelper.getiOSVersion(),
                                         app_version: try AppHelper.getAppVersion(),
                                         sdk_version: try AppHelper.getSDKVersion(),
-                                        event_params: try self.convertFromStringToAnyArrayToTrackingDataEventParamArray(eventParams))
+                                        event_params: try self.makeEventParamsCodable(eventParams))
                 let stringfiedData = String(data: try! JSONEncoder().encode(data), encoding: .utf8)!
                 return TrackingRecord(partitionKey: userID, data: stringfiedData)
             }.eraseToAnyPublisher()
@@ -124,10 +124,8 @@ class TrackingManager {
             .store(in: &cancellables)
     }
 
-    private func convertFromStringToAnyArrayToTrackingDataEventParamArray(_ eventParams: [String: Any]?) -> [TrackingDataEventParam]? {
+    private func makeEventParamsCodable(_ eventParams: [String: Any]?) -> [String: AnyCodable]? {
         guard let eventParams = eventParams else { return nil }
-        return eventParams.map { key, value in
-            TrackingDataEventParam(key: key, value: "\(value)")
-        }
+        return eventParams.mapValues { AnyCodable($0) }
     }
 }

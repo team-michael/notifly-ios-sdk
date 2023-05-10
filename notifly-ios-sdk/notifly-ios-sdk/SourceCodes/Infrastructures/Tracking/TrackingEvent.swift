@@ -28,58 +28,50 @@ struct TrackingData: Codable {
     let os_version: String
     let app_version: String
     let sdk_version: String
-    let event_params: [TrackingDataEventParam]?
+    let event_params: [String: AnyCodable]?
 }
 
+struct AnyCodable: Codable {
+    private let value: Any
 
-struct TrackingDataEventParam: Codable {
-    let key: String
-    var value: Any
-
-    enum CodingKeys: String, CodingKey {
-        case key
-        case value
-    }
-
-    init(key: String, value: Any) {
-        self.key = key
+    init(_ value: Any) {
         self.value = value
     }
 
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        key = try container.decode(String.self, forKey: .key)
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
 
-        // Decode the value based on its type
-        if let intValue = try? container.decode(Int.self, forKey: .value) {
-            value = intValue
-        } else if let boolValue = try? container.decode(Bool.self, forKey: .value) {
-            value = boolValue
-        } else if let stringValue = try? container.decode(String.self, forKey: .value) {
-            value = stringValue
+        if let encodable = value as? Encodable {
+            try encodable.encode(to: encoder)
         } else {
-            throw DecodingError.dataCorruptedError(forKey: .value, in: container, debugDescription: "Unsupported value type")
+            try container.encodeNil()
         }
     }
 
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(key, forKey: .key)
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
 
-        // Encode the value based on its type
-        switch value {
-        case let intValue as Int:
-            try container.encode(intValue, forKey: .value)
-        case let boolValue as Bool:
-            try container.encode(boolValue, forKey: .value)
-        case let stringValue as String:
-            try container.encode(stringValue, forKey: .value)
-        case let doubleValue as Double:
-            try container.encode(doubleValue, forKey: .value)
-        case let floatValue as Float:
-            try container.encode(floatValue, forKey: .value)
-        default:
-            throw EncodingError.invalidValue(value, EncodingError.Context(codingPath: [CodingKeys.value], debugDescription: "Unsupported value type"))
+        if let intValue = try? container.decode(Int.self) {
+            value = intValue
+        } else if let stringValue = try? container.decode(String.self) {
+            value = stringValue
+        } else if let boolValue = try? container.decode(Bool.self) {
+            value = boolValue
+        } else if let doubleValue = try? container.decode(Double.self) {
+            value = doubleValue
+        } else if let arrayValue = try? container.decode([AnyCodable].self) {
+            value = arrayValue
+        } else if let floatValue = try? container.decode(Float.self) {
+            value = floatValue
+        } else if let dictionaryValue = try? container.decode([String: AnyCodable].self) {
+            value = dictionaryValue
+        } else if container.decodeNil() {
+            value = ()
+        } else {
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Unsupported type"
+            )
         }
     }
 }
