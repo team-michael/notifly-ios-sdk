@@ -74,6 +74,8 @@ struct TrackingDataEventParam: Codable {
             try container.encode(boolValue, forKey: .value)
         case let stringValue as String:
             try container.encode(stringValue, forKey: .value)
+        case let doubleValue as Double:
+            try container.encode(doubleValue, forKey: .value)
         default:
             throw EncodingError.invalidValue(value, EncodingError.Context(codingPath: [CodingKeys.value], debugDescription: "Unsupported value type"))
         }
