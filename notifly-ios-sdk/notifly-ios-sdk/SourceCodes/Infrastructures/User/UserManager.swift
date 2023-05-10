@@ -13,6 +13,10 @@ class UserManager {
     }
     
     private var _notiflyUserIDCache: String?
+
+    init() {
+        externalUserID = Globals.externalUserIdInUserDefaults
+    }
     
     func setExternalUserID(_ newExternalUserID: String?) throws {
         if let newExternalUserID = newExternalUserID, !newExternalUserID.isEmpty {
