@@ -130,8 +130,6 @@ class NotificationsManager: NSObject {
                 Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.pushClickEventName, params: pushClickEventParams)
             }
         }
-        Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.pushClickEventName, params: nil)
-        print("DS, ", pushData) // TODO: Remove
 
         if let urlString = pushData["url"] as? String,
            let url = URL(string: urlString)
