@@ -15,8 +15,11 @@ class TrackingManager {
     // MARK: Properties
     
     let eventRequestPayloadPublisher: AnyPublisher<TrackingEvent, Never>
+    let internalEventRequestPayloadPublisher: AnyPublisher<TrackingEvent, Never>
     let eventRequestResponsePublisher = PassthroughSubject<String, Never>()
+    let internalEventRequestResponsePublisher = PassthroughSubject<String, Never>()
     private let eventPublisher = PassthroughSubject<TrackingRecord, Never>()
+    private let internalEventPublisher = PassthroughSubject<TrackingRecord, Never>()
     
     private let projectID: String
     private var cancellables = Set<AnyCancellable>()
@@ -31,6 +34,12 @@ class TrackingManager {
             .collect(.byTimeOrCount(RunLoop.current, .seconds(trackingFiringInterval), maxTrackingRecordsPerRequest))
             .map({ records in
                 TrackingEvent(records: records)
+            })
+            .eraseToAnyPublisher()
+
+        internalEventRequestPayloadPublisher = internalEventPublisher
+            .map({ record in
+                TrackingEvent(records: [record])
             })
             .eraseToAnyPublisher()
         setup()
@@ -60,7 +69,11 @@ class TrackingManager {
                 }
             },
                   receiveValue: { [weak self] record in
-                self?.eventPublisher.send(record)
+                if isInternal {
+                    self?.internalEventPublisher.send(record)
+                } else {
+                    self?.eventPublisher.send(record)
+                }
             })
             .store(in: &cancellables)
     }
@@ -106,9 +119,17 @@ class TrackingManager {
         eventPublisher
             .sink { record in Logger.info("Queued Tracking Event Record \(record.data).") }
             .store(in: &cancellables)
+
+        internalEventPublisher
+            .sink { record in Logger.info("Queued Tracking Internal Event Record \(record.data).") }
+            .store(in: &cancellables)
             
         eventRequestPayloadPublisher
             .sink { event in Logger.info("TrackingManager: Firing TrackingEvent request with \(event.records.count) records.") }
+            .store(in: &cancellables)
+
+        internalEventRequestPayloadPublisher
+            .sink { event in Logger.info("TrackingManager: Firing Internal TrackingEvent request with \(event.records.count) records.") }
             .store(in: &cancellables)
         
         // Submit the tracking event to API & log result.
@@ -120,6 +141,17 @@ class TrackingManager {
                 .sink { [weak self] result in
                 Logger.info("Tracking Event request finished. Result:\n\(result)")
                 self?.eventRequestResponsePublisher.send(result)
+            }
+            .store(in: &cancellables)
+
+        internalEventRequestPayloadPublisher
+            .flatMap(NotiflyAPI().trackEvent)
+            .catch({ error in
+                return Just("Tracking Event request failed with error: \(error)")
+            })
+                .sink { [weak self] result in
+                Logger.info("Tracking Event request finished. Result:\n\(result)")
+                self?.internalEventRequestResponsePublisher.send(result)
             }
             .store(in: &cancellables)
     }
