@@ -19,7 +19,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
 
-        Notifly.initialize(launchOptions, projectID: "b80c3f0e2fbd5eb986df4f1d32ea2871", username: "minyong", password: "000000", useCustomClickHandler: false)
         return true
     }
 
