@@ -27,7 +27,7 @@ public class Notifly {
     let auth: Auth
     let notificationsManager: NotificationsManager
     let trackingManager: TrackingManager
-    let userManager = UserManager()
+    let userManager: UserManager
     
     var trackingCancellables = Set<AnyCancellable>()
     
@@ -44,6 +44,8 @@ public class Notifly {
                          password: password)
         self.notificationsManager = NotificationsManager()
         self.trackingManager = TrackingManager(projectID: projectID)
+        self.userManager = UserManager()
+        
         setup()
     }
     
