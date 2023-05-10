@@ -6,6 +6,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
     {
+        Notifly.initialize(projectID: TestConstant.projectID, username: TestConstant.username, password: TestConstant.password, useCustomClickHandler: false)
         // TODO: remove this code after testing. this section is only for testing.
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
             if let error = error {
@@ -18,7 +19,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
 
-        Notifly.initialize(launchOptions, projectID: "b80c3f0e2fbd5eb986df4f1d32ea2871", username: "minyong", password: "000000", useCustomClickHandler: false)
         return true
     }
 

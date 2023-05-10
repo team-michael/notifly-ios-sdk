@@ -22,7 +22,6 @@ public class Notifly {
 
     let projectID: String
     let useCustomClickHandler: Bool
-    let launchOptions: [UIApplication.LaunchOptionsKey: Any]?
 
     let auth: Auth
     let notificationsManager: NotificationsManager
@@ -34,7 +33,6 @@ public class Notifly {
     // MARK: Lifecycle
 
     init(
-        launchOptions: [UIApplication.LaunchOptionsKey: Any]?,
         projectID: String,
         username: String,
         password: String,
@@ -42,7 +40,6 @@ public class Notifly {
     ) {
         self.projectID = projectID
         self.useCustomClickHandler = useCustomClickHandler
-        self.launchOptions = launchOptions
 
         auth = Auth(username: username,
                     password: password)
@@ -59,13 +56,5 @@ public class Notifly {
         if !useCustomClickHandler {
             UNUserNotificationCenter.current().delegate = notificationsManager
         }
-
-        // handle cold start from push notification if cold start using launchOptions
-        // if let launchOptions = launchOptions,
-        //    let notification = launchOptions[.remoteNotification] as? UNNotification
-        // {
-        //     notificationsManager.handleNotificationClick(notification, clickStatus: "quit", completion: {})
-        // }
-
     }
 }

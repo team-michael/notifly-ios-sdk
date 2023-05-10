@@ -14,7 +14,6 @@ public extension Notifly {
      Initializes the Notifly SDK. This method is to be called as soon as the app laucnhes. (AppDelegate.applicationDidFinishLaunching)
      */
     static func initialize(
-        _ launchOptions: [UIApplication.LaunchOptionsKey: Any]?,
         projectID: String,
         username: String,
         password: String,
@@ -23,7 +22,6 @@ public extension Notifly {
         FirebaseApp.configure() // TODO: Uncomment this once Firebase is configured properly for the project.
 
         main = Notifly(
-            launchOptions: launchOptions,
             projectID: projectID,
             username: username,
             password: password,
@@ -36,10 +34,6 @@ public extension Notifly {
             {
                 main.notificationsManager.apnDeviceTokenPromise?(.success(token))
             }
-        }
-
-        if let externalUserID = Globals.externalUserIdInUserDefaults {
-            main.userManager.externalUserID = externalUserID
         }
 
         Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.sessionStartEventName, params: nil)
