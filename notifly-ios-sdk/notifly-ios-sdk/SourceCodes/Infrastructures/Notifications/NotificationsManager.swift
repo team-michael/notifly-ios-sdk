@@ -114,10 +114,7 @@ class NotificationsManager: NSObject {
         }
     }
 
-    func handleNotificationClick(_ notification: UNNotification, clickStatus: String, completion: () -> Void) {
-        let pushData = notification.request.content.userInfo
-        Logger.info("Received Push Notificatiob with data: \(pushData)")
-
+    func logPushClickInternalEvent(pushData: [AnyHashable: Any], clickStatus: String) {
         if let campaignID = pushData["campaign_id"] as? String {
             let messageID = pushData["notifly_message_id"] ?? "" as String
             if let pushClickEventParams = [
@@ -130,22 +127,14 @@ class NotificationsManager: NSObject {
                 Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.pushClickEventName, params: pushClickEventParams)
             }
         }
-
-        if let urlString = pushData["url"] as? String,
-           let url = URL(string: urlString)
-        {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-        }
-        UIApplication.shared.applicationIconBadgeNumber = 0
-        completion()
     }
 
-    private func presentWebViewForURL(url: URL) {
-        let browserVC = SFSafariViewController(url: url)
-        AppHelper.present(browserVC) {
-            Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.pushNotificationMessageShown, params: nil)
-        }
-    }
+    // private func presentWebViewForURL(url: URL) {
+    //     let browserVC = SFSafariViewController(url: url)
+    //     AppHelper.present(browserVC) {
+    //         Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.pushNotificationMessageShown, params: nil)
+    //     }
+    // }
 
     private func stringFromPushToken(data: Data) -> String {
         return data.map { String(format: "%.2hhx", $0) }.joined()
@@ -158,10 +147,21 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
                                        didReceive response: UNNotificationResponse,
                                        withCompletionHandler completion: () -> Void)
     {
-        let clickStatus = UIApplication.shared.applicationState == .active ? "foreground" : "background"
-        handleNotificationClick(response.notification,
-                                clickStatus: clickStatus,
-                                completion: completion)
+        if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]?,
+           let clickStatus = UIApplication.shared.applicationState == .active ? "foreground" : "background"
+        {
+            if let urlString = pushData["url"] as? String,
+               let url = URL(string: urlString)
+            {
+                UIApplication.shared.open(url, options: [:]) { _ in
+                    self.logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
+                }
+            } else {
+                logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
+            }
+            UIApplication.shared.applicationIconBadgeNumber = 0
+        }
+        completion()
     }
 
     /// The method will be called on the delegate only if the application is in the foreground. If the method is not implemented or the handler is not called in a timely manner then the notification will not be presented. The application can choose to have the notification presented as a sound, badge, alert and/or in the notification list. This decision should be based on whether the information in the notification is otherwise visible to the user.
@@ -169,8 +169,6 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
                                        willPresent _: UNNotification,
                                        withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void)
     {
-        // handleNotificationClick(notification) {
         completion([.banner, .badge, .sound])
-        // }
     }
 }
