@@ -35,8 +35,7 @@ public extension Notifly {
                 main.notificationsManager.apnDeviceTokenPromise?(.success(token))
             }
         }
-
-        Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.sessionStartEventName, params: nil)
+        main.trackingManager.trackSessionStartInternalEvent()
     }
 
     static func application(_ application: UIApplication,
