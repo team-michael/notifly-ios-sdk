@@ -48,7 +48,7 @@ class TrackingManager {
     // MARK: Methods
     func trackSessionStartInternalEvent() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
-            let authStatus: Int = 0
+            var authStatus: Int = 0
             switch settings.authorizationStatus {
             case .authorized:
                 authStatus = 1
@@ -63,15 +63,15 @@ class TrackingManager {
             @unknown default:
                 authStatus = 0
             }
-            if let authStatus = authStatus {
-                return trackInternalEvent(
-                    name: TrackingConstant.Internal.sessionStartEventName,
-                    params: [
-                        "type": "session_start_type",
-                        "notif_auth_status": authStatus,
-                    ]
-                )
-            }
+            
+            return self.trackInternalEvent(
+                name: TrackingConstant.Internal.sessionStartEventName,
+                params: [
+                    "type": "session_start_type",
+                    "notif_auth_status": authStatus,
+                ]
+            )
+            
         }
     }
 

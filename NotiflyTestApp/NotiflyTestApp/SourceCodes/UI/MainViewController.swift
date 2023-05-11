@@ -1,5 +1,5 @@
 import Combine
-@testable import notifly_ios_sdk
+// @testable import notifly_ios_sdk
 import UIKit
 
 class MainViewController: UIViewController {
