@@ -36,7 +36,7 @@ public extension Notifly {
             }
         }
 
-        Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.sessionStartEventName, params: nil)
+        // Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.sessionStartEventName, params: nil)
     }
 
     static func application(_ application: UIApplication,
