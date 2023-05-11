@@ -49,6 +49,10 @@ class AppHelper {
     static func getiOSVersion() -> String {
         return UIDevice.current.systemVersion
     }
+
+    static func getSDKType() -> String {
+        return Globals.notiflySdkType.rawValue
+    }
 }
 
 private extension UIWindow {
