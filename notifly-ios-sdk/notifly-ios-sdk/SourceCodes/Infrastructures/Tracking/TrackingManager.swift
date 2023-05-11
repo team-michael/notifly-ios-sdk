@@ -15,8 +15,11 @@ class TrackingManager {
     // MARK: Properties
     
     let eventRequestPayloadPublisher: AnyPublisher<TrackingEvent, Never>
+    let internalEventRequestPayloadPublisher: AnyPublisher<TrackingEvent, Never>
     let eventRequestResponsePublisher = PassthroughSubject<String, Never>()
+    let internalEventRequestResponsePublisher = PassthroughSubject<String, Never>()
     private let eventPublisher = PassthroughSubject<TrackingRecord, Never>()
+    private let internalEventPublisher = PassthroughSubject<TrackingRecord, Never>()
     
     private let projectID: String
     private var cancellables = Set<AnyCancellable>()
@@ -33,12 +36,46 @@ class TrackingManager {
                 TrackingEvent(records: records)
             })
             .eraseToAnyPublisher()
+
+        internalEventRequestPayloadPublisher = internalEventPublisher
+            .map({ record in
+                TrackingEvent(records: [record])
+            })
+            .eraseToAnyPublisher()
         setup()
     }
     
     // MARK: Methods
-    
-    func trackInternalEvent(name: String, params: [String: String]?) {
+    func trackSessionStartInternalEvent() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            var authStatus: Int = 0
+            switch settings.authorizationStatus {
+            case .authorized:
+                authStatus = 1
+            case .denied:
+                authStatus = 0
+            case .notDetermined:
+                authStatus = -1
+            case .provisional:
+                authStatus = 2
+            case .ephemeral:
+                authStatus = 3
+            @unknown default:
+                authStatus = 0
+            }
+            
+            return self.trackInternalEvent(
+                name: TrackingConstant.Internal.sessionStartEventName,
+                params: [
+                    "type": "session_start_type",
+                    "notif_auth_status": authStatus,
+                ]
+            )
+            
+        }
+    }
+
+    func trackInternalEvent(name: String, params: [String: Any]?) {
         return track(eventName: name,
                      isInternal: true,
                      params: params,
@@ -47,7 +84,7 @@ class TrackingManager {
     
     func track(eventName: String,
                isInternal: Bool,
-               params: [String: String]?,
+               params: [String: Any]?,
                segmentationEventParamKeys: [String]?) {
         
         createTrackingRecord(name: eventName,
@@ -60,14 +97,18 @@ class TrackingManager {
                 }
             },
                   receiveValue: { [weak self] record in
-                self?.eventPublisher.send(record)
+                if isInternal {
+                    self?.internalEventPublisher.send(record)
+                } else {
+                    self?.eventPublisher.send(record)
+                }
             })
             .store(in: &cancellables)
     }
     
     func createTrackingRecord(name: String,
                               isInternal: Bool,
-                              eventParams: [String: String]?,
+                              eventParams: [String: Any]?,
                               segmentationEventParamKeys: [String]?) -> AnyPublisher<TrackingRecord, Error> {
         
         if let pub = Notifly.main.notificationsManager.apnDeviceTokenPub {
@@ -89,7 +130,7 @@ class TrackingManager {
                                         os_version: AppHelper.getiOSVersion(),
                                         app_version: try AppHelper.getAppVersion(),
                                         sdk_version: try AppHelper.getSDKVersion(),
-                                        event_params: eventParams)
+                                        event_params: try self.makeEventParamsCodable(eventParams))
                 let stringfiedData = String(data: try! JSONEncoder().encode(data), encoding: .utf8)!
                 return TrackingRecord(partitionKey: userID, data: stringfiedData)
             }.eraseToAnyPublisher()
@@ -106,9 +147,17 @@ class TrackingManager {
         eventPublisher
             .sink { record in Logger.info("Queued Tracking Event Record \(record.data).") }
             .store(in: &cancellables)
+
+        internalEventPublisher
+            .sink { record in Logger.info("Queued Tracking Internal Event Record \(record.data).") }
+            .store(in: &cancellables)
             
         eventRequestPayloadPublisher
             .sink { event in Logger.info("TrackingManager: Firing TrackingEvent request with \(event.records.count) records.") }
+            .store(in: &cancellables)
+
+        internalEventRequestPayloadPublisher
+            .sink { event in Logger.info("TrackingManager: Firing Internal TrackingEvent request with \(event.records.count) records.") }
             .store(in: &cancellables)
         
         // Submit the tracking event to API & log result.
@@ -122,5 +171,21 @@ class TrackingManager {
                 self?.eventRequestResponsePublisher.send(result)
             }
             .store(in: &cancellables)
+
+        internalEventRequestPayloadPublisher
+            .flatMap(NotiflyAPI().trackEvent)
+            .catch({ error in
+                return Just("Tracking Event request failed with error: \(error)")
+            })
+                .sink { [weak self] result in
+                Logger.info("Tracking Event request finished. Result:\n\(result)")
+                self?.internalEventRequestResponsePublisher.send(result)
+            }
+            .store(in: &cancellables)
+    }
+
+    private func makeEventParamsCodable(_ eventParams: [String: Any]?) -> [String: AnyCodable]? {
+        guard let eventParams = eventParams else { return nil }
+        return eventParams.mapValues { AnyCodable($0) }
     }
 }

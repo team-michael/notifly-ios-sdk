@@ -1,5 +1,5 @@
 import Combine
-@testable import notifly_ios_sdk
+// @testable import notifly_ios_sdk
 import UIKit
 
 class MainViewController: UIViewController {
@@ -37,9 +37,6 @@ class MainViewController: UIViewController {
               let password = passwordTextField.checkAndRetrieveValueText() else {
             return
         }
-        setupNotiflyWith(projectID: projectID,
-                         username: username,
-                         password: password)
     }
     
     func navigateToTestTrackingVC() {
@@ -109,34 +106,6 @@ class MainViewController: UIViewController {
         stackView.addCTAView(labelText: "Test User Settings", button: testUserSettingsButton, bgColor: .black)
         
         stackView.addArrangedSubview(UIView())
-    }
-    
-    private func setupNotiflyWith(projectID: String,
-                                  username: String,
-                                  password: String) {
-        // Initialize.
-        Notifly.initialize(projectID: projectID,
-                           username: username,
-                           password: password,
-                           useCustomClickHandler: false)
-        
-        // Hook up auth token view.
-        var cancellable = Notifly.main.auth.authorizationPub
-            .catch { Just("Auth failed. Please check your inputs. Error: \($0)") }
-            .receive(on: RunLoop.main)
-            .sink { [weak self] resultString in
-                self?.authTokenTextView.text = resultString
-            }
-        cancellables.insert(cancellable)
-        
-        cancellable = Notifly.main.notificationsManager.apnDeviceTokenPub!
-            .map { "\($0)" }
-            .catch { Just("Failed to get the push token. Error: \($0)") }
-            .receive(on: RunLoop.main)
-            .sink { [weak self] resultingString in
-                self?.pushTokenTextView.text = resultingString
-            }
-        cancellables.insert(cancellable)
     }
     
     @objc

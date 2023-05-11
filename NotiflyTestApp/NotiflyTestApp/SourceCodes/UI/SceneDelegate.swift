@@ -46,7 +46,57 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let url = URLContexts.first?.url else { return }
+        print("DeepLink: ", url)
+        guard url.scheme == "pushnotiflyios", url.host == "navigation" else { return }
+        let urlString = url.absoluteString
+        guard urlString.contains("name") else { return }
+        guard let components = URLComponents(string: url.absoluteString),
+            let name = components.queryItems?.first(where: { $0.name == "name" })?.value else {
+            return
+        }
 
+        print("page이름 = \(name)")
+
+        switch name {
+        case "notification":
+            let notificationVC = PushNotificationTestViewController()
+
+            if let navigationController = window?.rootViewController as? UINavigationController {
+                navigationController.pushViewController(notificationVC, animated: true)
+            } else {
+                let navigationController = UINavigationController(rootViewController: notificationVC)
+                window?.rootViewController = navigationController
+            }
+        case "event":
+            let trackingPageVC = TrackingTestViewController()
+
+            if let navigationController = window?.rootViewController as? UINavigationController {
+                navigationController.pushViewController(trackingPageVC, animated: true)
+            } else {
+                let navigationController = UINavigationController(rootViewController: trackingPageVC)
+                window?.rootViewController = navigationController
+            }
+        case "user":
+            let userPageVC = UserSettingsTestViewController()
+
+            if let navigationController = window?.rootViewController as? UINavigationController {
+                navigationController.pushViewController(userPageVC, animated: true)
+            } else {
+                let navigationController = UINavigationController(rootViewController: userPageVC)
+                window?.rootViewController = navigationController
+            }
+        default:
+            let mainVC = MainViewController()
+            if let navigationController = window?.rootViewController as? UINavigationController {
+                navigationController.pushViewController(mainVC, animated: true)
+            } else {
+                let navigationController = UINavigationController(rootViewController: mainVC)
+                window?.rootViewController = navigationController
+            }
+        }
+    }
 
 }
 

@@ -10,9 +10,8 @@ class NotiflyAPI {
             return Just(authToken)
                 .setFailureType(to: Error.self)
                 .eraseToAnyPublisher()
-        } else {
-            return 
-            request(to: "https://api.notifly.tech/authorize", method: .POST, authTokenRequired: false)
+        } else { 
+            return request(to: "https://api.notifly.tech/authorize", method: .POST, authTokenRequired: false)
                 .map { $0.set(body: credentials) }
                 .flatMap { (builder: RequestBuilder) -> AnyPublisher<String, Error> in builder.buildAndFire() }
                 .handleEvents(receiveOutput: { authToken in
@@ -34,6 +33,7 @@ class NotiflyAPI {
                 let json = try! JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
                 if let response = json["message"],
                    response as! String == "The incoming token has expired" {
+                    Globals.authTokenInUserDefaults = nil
                     return self.authorizeSession(credentials: Notifly.main.auth.loginCred)
                         .flatMap { _ in self.trackEvent(event) }
                         .eraseToAnyPublisher() 
