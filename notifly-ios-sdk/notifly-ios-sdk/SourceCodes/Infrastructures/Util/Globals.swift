@@ -7,7 +7,15 @@
 
 import Foundation
 
-final class Globals {
+public enum SdkType: String {
+  case native
+  case react_native
+  case flutter
+}
+
+enum Globals {
+  static var notiflySdkType: SdkType = .native
+
   private static var notiflyAuthTokenKey = "notifly_authToken"
   static var authTokenInUserDefaults: String? {
     set {

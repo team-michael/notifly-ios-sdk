@@ -28,6 +28,7 @@ struct TrackingData: Codable {
     let os_version: String
     let app_version: String
     let sdk_version: String
+    let sdk_type: String
     let event_params: [String: AnyCodable]?
 }
 
