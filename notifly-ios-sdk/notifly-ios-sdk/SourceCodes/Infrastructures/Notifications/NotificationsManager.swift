@@ -64,6 +64,24 @@ class NotificationsManager: NSObject {
         apnDeviceTokenPromise?(.failure(error))
     }
 
+    func application(_ application: UIApplication,
+                    didReceiveRemoteNotification userInfo: [AnyHashable : Any],
+                    fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        if let notiflyMessageType = userInfo["notifly_message_type"] as? String,
+            let notiflyInAppMessageData = userInfo["notifly_in_app_message_data"] as? String,
+            let data = Data(base64Encoded: notiflyInAppMessageData),
+            let decodedInAppMessageData = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+            notiflyMessageType == "in-app-message" {
+                if let urlString = decodedInAppMessageData["url"] as? String,
+                    let url = URL(string: urlString) {
+                    print("InAppMessage URL: ", url)
+                    showInAppMessage(url: url, completion: completionHandler)
+                }
+        } else {
+            completionHandler(.noData)
+        }
+    }
+    
     func schedulePushNotification(title: String?,
                                   body: String?,
                                   url: URL,
@@ -113,6 +131,14 @@ class NotificationsManager: NSObject {
             UIApplication.shared.registerForRemoteNotifications()
         }
     }
+    
+    private func showInAppMessage(url: URL, completion: (UIBackgroundFetchResult) -> Void) {
+        //TODO: Handle in-app message - open webview with appropriate size and interacting webview for logging button_click_event in webview
+        //TODO: Limit the number of in-app messages displayed to one.
+        Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.inAppMessageShown, params: nil) // TODO: Add params
+        completion(.noData)
+    }
+    
 
     func logPushClickInternalEvent(pushData: [AnyHashable: Any], clickStatus: String) {
         if let campaignID = pushData["campaign_id"] as? String {
