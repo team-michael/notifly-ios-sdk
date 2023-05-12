@@ -10,6 +10,11 @@ class AppHelper {
             topVC.present(vc, animated: animated, completion: completion)
         }
     }
+    
+    static func presentWebModal(url: URL?) throws {
+        let vc = try WebViewModalViewController(url: url)
+        present(vc, completion: nil)
+    }
 
     static func getDeviceID() throws -> String {
         if let deviceID = Globals.deviceIdInUserDefaults {

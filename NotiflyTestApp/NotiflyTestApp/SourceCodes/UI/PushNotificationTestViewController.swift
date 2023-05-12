@@ -92,10 +92,11 @@ class PushNotificationTestViewController: UIViewController {
         let title = titleTextField.checkAndRetrieveValueText(changeBorderColorOnError: false)
         let body = bodyTextField.checkAndRetrieveValueText(changeBorderColorOnError: false)
         
-        Notifly.schedulePushNotification(title: title,
-                                         body: body,
-                                         url: url,
-                                         delay: delay)
+//        Notifly.schedulePushNotification(title: title,
+//                                         body: body,
+//                                         url: url,
+//                                         delay: delay)
+        try? AppHelper.presentWebModal(url: url)
     }
     
     @objc

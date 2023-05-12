@@ -27,6 +27,7 @@
 		673F0EB929EC5C7E00814217 /* NotiflyAPI+Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F0EB829EC5C7E00814217 /* NotiflyAPI+Request.swift */; };
 		673F0EBB29EC610400814217 /* Notifly+PublicAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F0EBA29EC610400814217 /* Notifly+PublicAPI.swift */; };
 		673F0EC129EC72CC00814217 /* NotificationsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F0EC029EC72CC00814217 /* NotificationsManager.swift */; };
+		67901CD02A0DC54100D38A26 /* WebViewModalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67901CCF2A0DC54100D38A26 /* WebViewModalViewController.swift */; };
 		F2084FD72A08DCE600A4A7D6 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2084FD62A08DCE600A4A7D6 /* Globals.swift */; };
 /* End PBXBuildFile section */
 
@@ -61,6 +62,7 @@
 		673F0EB829EC5C7E00814217 /* NotiflyAPI+Request.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NotiflyAPI+Request.swift"; sourceTree = "<group>"; };
 		673F0EBA29EC610400814217 /* Notifly+PublicAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notifly+PublicAPI.swift"; sourceTree = "<group>"; };
 		673F0EC029EC72CC00814217 /* NotificationsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsManager.swift; sourceTree = "<group>"; };
+		67901CCF2A0DC54100D38A26 /* WebViewModalViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewModalViewController.swift; sourceTree = "<group>"; };
 		F2084FD62A08DCE600A4A7D6 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -203,6 +205,7 @@
 			isa = PBXGroup;
 			children = (
 				673F0EC029EC72CC00814217 /* NotificationsManager.swift */,
+				67901CCF2A0DC54100D38A26 /* WebViewModalViewController.swift */,
 			);
 			path = Notifications;
 			sourceTree = "<group>";
@@ -324,6 +327,7 @@
 			files = (
 				673F0EB629EC5BDB00814217 /* Auth+Credentials.swift in Sources */,
 				673F0EB129EBC68200814217 /* NotiflyAPI.swift in Sources */,
+				67901CD02A0DC54100D38A26 /* WebViewModalViewController.swift in Sources */,
 				673F0EC129EC72CC00814217 /* NotificationsManager.swift in Sources */,
 				672E7DF629EFB6D700B3E9F2 /* UserManager.swift in Sources */,
 				F2084FD72A08DCE600A4A7D6 /* Globals.swift in Sources */,
