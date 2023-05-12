@@ -83,8 +83,8 @@ public extension Notifly {
     // MARK: - On-demand APIs
 
     static func trackEvent(name: String,
-                           params: [String: Any]?,
-                           segmentationEventParamKeys: [String]?)
+                           params: [String: Any]? = nil,
+                           segmentationEventParamKeys: [String]? = nil)
     {
         main.trackingManager.track(eventName: name,
                                    isInternal: false,
@@ -92,12 +92,12 @@ public extension Notifly {
                                    segmentationEventParamKeys: segmentationEventParamKeys)
     }
 
-    static func setUserID(_ userID: String?) throws {
+    static func setUserID(_ userID: String? = nil) throws {
         try main.userManager.setExternalUserID(userID)
     }
 
-    static func setUserProperties(_ params: [String: Any]) throws {
-        try main.userManager.setUserProperties(params)
+    static func setUserProperties(_ properties: [String: Any]) throws {
+        try main.userManager.setUserProperties(properties)
     }
 
     static func schedulePushNotification(title: String?,
