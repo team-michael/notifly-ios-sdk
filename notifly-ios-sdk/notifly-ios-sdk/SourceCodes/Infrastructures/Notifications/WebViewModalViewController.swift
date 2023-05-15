@@ -45,22 +45,22 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     }
 
     func setupUI() -> Bool {
-        guard let modalSize = getModalSize() as? CGSize, let modalPositionConstraint = getModalPositionConstraint() as? NSLayoutConstraint else {
+        guard let modalSize = getModalSize() as? CGSize, let modalPositionConstraint = getModalPositionConstraint() as? NSLayoutConstraint, let webViewLayer = getWebViewLayer(modalSize: modalSize) as? CALayer? else {
             return false
         }
 
         webView.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .clear
+        webView.layer.mask = webViewLayer
         view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissCTATapped)))
         view.addSubview(webView)
+
         NSLayoutConstraint.activate([
             webView.widthAnchor.constraint(equalToConstant: modalSize.width),
             webView.heightAnchor.constraint(equalToConstant: modalSize.height),
             view.centerXAnchor.constraint(equalTo: webView.centerXAnchor),
             modalPositionConstraint,
         ])
-        
-       
 
         return true
     }
@@ -207,6 +207,33 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         }
 
         return view.centerYAnchor.constraint(equalTo: webView.centerYAnchor)
+    }
+
+    internal func getWebViewLayer(modalSize: CGSize) -> CALayer? {
+        guard let modalProps = modalProps,
+              let tlRadius = (modalProps["borderTopLeftRadius"] ?? 0.0) as? CGFloat,
+              let trRadius = (modalProps["borderTopRightRadius"] ?? 0.0) as? CGFloat,
+              let blRadius = (modalProps["borderBottomLeftRadius"] ?? 0.0) as? CGFloat,
+              let brRadius = (modalProps["borderBottomRightRadius"] ?? 0.0) as? CGFloat
+        else {
+            return nil
+        }
+
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: tlRadius, y: 0))
+        path.addLine(to: CGPoint(x: modalSize.width - trRadius, y: 0))
+        path.addArc(withCenter: CGPoint(x: modalSize.width - trRadius, y: trRadius), radius: trRadius, startAngle: -CGFloat.pi / 2, endAngle: 0, clockwise: true)
+        path.addLine(to: CGPoint(x: modalSize.width, y: modalSize.height - brRadius))
+        path.addArc(withCenter: CGPoint(x: modalSize.width - brRadius, y: modalSize.height - brRadius), radius: brRadius, startAngle: 0, endAngle: CGFloat.pi / 2, clockwise: true)
+        path.addLine(to: CGPoint(x: blRadius, y: modalSize.height))
+        path.addArc(withCenter: CGPoint(x: blRadius, y: modalSize.height - blRadius), radius: blRadius, startAngle: CGFloat.pi / 2, endAngle: CGFloat.pi, clockwise: true)
+        path.addLine(to: CGPoint(x: 0, y: tlRadius))
+        path.addArc(withCenter: CGPoint(x: tlRadius, y: tlRadius), radius: tlRadius, startAngle: CGFloat.pi, endAngle: -CGFloat.pi / 2, clockwise: true)
+        path.close()
+
+        let maskLayer = CAShapeLayer()
+        maskLayer.path = path.cgPath
+        return maskLayer
     }
 }
 
