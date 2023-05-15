@@ -64,24 +64,33 @@ class NotificationsManager: NSObject {
         apnDeviceTokenPromise?(.failure(error))
     }
 
-    func application(_ application: UIApplication,
-                    didReceiveRemoteNotification userInfo: [AnyHashable : Any],
-                    fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+    func application(_: UIApplication,
+                     didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void)
+    {
         if let notiflyMessageType = userInfo["notifly_message_type"] as? String,
-            let notiflyInAppMessageData = userInfo["notifly_in_app_message_data"] as? String,
-            let data = Data(base64Encoded: notiflyInAppMessageData),
-            let decodedInAppMessageData = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-            notiflyMessageType == "in-app-message" {
-                if let urlString = decodedInAppMessageData["url"] as? String,
-                    let url = URL(string: urlString) {
-                    print("InAppMessage URL: ", url)
-                    showInAppMessage(url: url, completion: completionHandler)
-                }
+           let notiflyInAppMessageData = userInfo["notifly_in_app_message_data"] as? String,
+           let data = Data(base64Encoded: notiflyInAppMessageData),
+           let decodedInAppMessageData = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+           notiflyMessageType == "in-app-message"
+        {
+            if WebViewModalViewController.openedInAppMessageCount == 0,
+               let urlString = decodedInAppMessageData["url"] as? String,
+               let notiflyInAppMessageData = [
+                   "urlString": urlString,
+                   "notiflyMessageID": decodedInAppMessageData["notifly_message_id"],
+                   "notiflyCampaignID": decodedInAppMessageData["campaign_id"],
+                   "modalProps": decodedInAppMessageData["modal_properties"],
+               ] as? [String: Any]
+            {
+                showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData, completion: completionHandler)
+            }
+
         } else {
             completionHandler(.noData)
         }
     }
-    
+
     func schedulePushNotification(title: String?,
                                   body: String?,
                                   url: URL,
@@ -131,14 +140,18 @@ class NotificationsManager: NSObject {
             UIApplication.shared.registerForRemoteNotifications()
         }
     }
-    
-    private func showInAppMessage(url: URL, completion: (UIBackgroundFetchResult) -> Void) {
-        //TODO: Handle in-app message - open webview with appropriate size and interacting webview for logging button_click_event in webview
-        //TODO: Limit the number of in-app messages displayed to one.
-        Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.inAppMessageShown, params: nil) // TODO: Add params
+
+    private func showInAppMessage(notiflyInAppMessageData: [String: Any], completion: (UIBackgroundFetchResult) -> Void) {
+        guard let urlString = notiflyInAppMessageData["urlString"] as? String,
+              let url = URL(string: urlString),
+              let modalProps = notiflyInAppMessageData["modalProps"] as? [String: Any]
+        else {
+            completion(.noData)
+            return
+        }
+        try? presentNotiflyInAppMessage(url: url, notiflyCampaignID: notiflyInAppMessageData["notiflyCampaignID"] as? String, notiflyMessageID: notiflyInAppMessageData["notiflyMessageID"] as? String, modalProps: modalProps)
         completion(.noData)
     }
-    
 
     func logPushClickInternalEvent(pushData: [AnyHashable: Any], clickStatus: String) {
         if let campaignID = pushData["campaign_id"] as? String {
@@ -155,12 +168,10 @@ class NotificationsManager: NSObject {
         }
     }
 
-    // private func presentWebViewForURL(url: URL) {
-    //     let browserVC = SFSafariViewController(url: url)
-    //     AppHelper.present(browserVC) {
-    //         Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.pushNotificationMessageShown, params: nil)
-    //     }
-    // }
+    internal func presentNotiflyInAppMessage(url: URL?, notiflyCampaignID: String?, notiflyMessageID: String?, modalProps: [String: Any]?) throws {
+        let vc = try WebViewModalViewController(url: url, notiflyCampaignID: notiflyCampaignID, notiflyMessageID: notiflyMessageID, modalProps: modalProps)
+        AppHelper.present(vc, completion: nil)
+    }
 
     private func stringFromPushToken(data: Data) -> String {
         return data.map { String(format: "%.2hhx", $0) }.joined()

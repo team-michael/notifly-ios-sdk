@@ -3,17 +3,12 @@ import Security
 import UIKit
 
 class AppHelper {
-    static func present(_ vc: UIViewController, animated: Bool = true, completion: (() -> Void)?) {
+    static func present(_ vc: UIViewController, animated: Bool = false, completion: (() -> Void)?) {
         if let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
            let topVC = window.topMostViewController
         {
             topVC.present(vc, animated: animated, completion: completion)
         }
-    }
-    
-    static func presentWebModal(url: URL?) throws {
-        let vc = try WebViewModalViewController(url: url)
-        present(vc, completion: nil)
     }
 
     static func getDeviceID() throws -> String {
@@ -57,6 +52,34 @@ class AppHelper {
 
     static func getSDKType() -> String {
         return Globals.notiflySdkType.rawValue
+    }
+
+    static func makeJsonCodable(_ jsonData: [String: Any]?) -> [String: AnyCodable]? {
+        guard let jsonData = jsonData else { return nil }
+        return jsonData.mapValues { value in
+            if let array = value as? [Any?] {
+                return AnyCodable(array.compactMap { element in AppHelper.toCodableValue(element) })
+            } else if let dictionary = value as? [String: Any] {
+                return AnyCodable(makeJsonCodable(dictionary))
+            }
+            return AppHelper.toCodableValue(value)
+        }
+    }
+
+    static func toCodableValue(_ value: Any?) -> AnyCodable {
+        if let str = value as? String {
+            return AnyCodable(str)
+        } else if let int = value as? Int {
+            return AnyCodable(int)
+        } else if let double = value as? Double {
+            return AnyCodable(double)
+        } else if let float = value as? Float {
+            return AnyCodable(float)
+        } else if let bool = value as? Bool {
+            return AnyCodable(bool)
+        } else {
+            return AnyCodable(value)
+        }
     }
 }
 

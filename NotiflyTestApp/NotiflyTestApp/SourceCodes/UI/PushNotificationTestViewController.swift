@@ -96,7 +96,7 @@ class PushNotificationTestViewController: UIViewController {
 //                                         body: body,
 //                                         url: url,
 //                                         delay: delay)
-        try? AppHelper.presentWebModal(url: url)
+//        try? AppHelper.presentWebModal(url: url)
     }
     
     @objc
