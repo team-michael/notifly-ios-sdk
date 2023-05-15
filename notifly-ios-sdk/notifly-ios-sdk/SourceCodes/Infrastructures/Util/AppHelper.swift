@@ -3,7 +3,7 @@ import Security
 import UIKit
 
 class AppHelper {
-    static func present(_ vc: UIViewController, animated: Bool = true, completion: (() -> Void)?) {
+    static func present(_ vc: UIViewController, animated: Bool = false, completion: (() -> Void)?) {
         if let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
            let topVC = window.topMostViewController
         {
@@ -53,6 +53,14 @@ class AppHelper {
     static func getSDKType() -> String {
         return Globals.notiflySdkType.rawValue
     }
+    
+//    static func getScreenSize() -> [String: Int] {
+//        if let rootView = UIApplication.shared.keyWindow?.rootViewController?.view {
+//            let screenSize = rootView.bounds.size
+//        } else {
+//            screenSize = UIScreen.main.bounds
+//        }
+//    }
 }
 
 private extension UIWindow {

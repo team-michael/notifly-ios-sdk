@@ -80,7 +80,8 @@ class NotificationsManager: NSObject {
                    "urlString": urlString,
                    "notiflyMessageID": decodedInAppMessageData["notifly_message_id"],
                    "notiflyCampaignID": decodedInAppMessageData["campaign_id"],
-               ] as? [String: String?]
+                   "modalProps": decodedInAppMessageData["modal_properties"]
+               ] as? [String: Any]
             {
                 showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData, completion: completionHandler)
             }
@@ -140,15 +141,15 @@ class NotificationsManager: NSObject {
         }
     }
 
-    private func showInAppMessage(notiflyInAppMessageData _: [String: String?], completion: (UIBackgroundFetchResult) -> Void) {
-        guard let urlString = notiflyInAppMessageData["urlString"],
-              let url = URL(string: urlString)
+    private func showInAppMessage(notiflyInAppMessageData: [String: Any], completion: (UIBackgroundFetchResult) -> Void) {
+        guard let urlString = notiflyInAppMessageData["urlString"] as? String,
+              let url = URL(string: urlString),
+              let modalProps = notiflyInAppMessageData["modalProps"] as? [String: Any]
         else {
             completion(.noData)
             return
         }
-        // TODO: Limit the number of in-app messages displayed to one.
-        try! presentNotiflyInAppMessage(url: url, notiflyCampaignID: notiflyInAppMessageData["notiflyCampaignID"], notiflyMessageID: notiflyInAppMessageData["notiflyMessageID"])
+        try? presentNotiflyInAppMessage(url: url, notiflyCampaignID: notiflyInAppMessageData["notiflyCampaignID"] as? String, notiflyMessageID: notiflyInAppMessageData["notiflyMessageID"] as? String, modalProps: modalProps)
         completion(.noData)
     }
 
@@ -167,8 +168,8 @@ class NotificationsManager: NSObject {
         }
     }
 
-    internal func presentNotiflyInAppMessage(url: URL?, notiflyCampaignID _: String?, notiflyMessageID _: String?) throws {
-        let vc = try WebViewModalViewController(url: url, notiflyCampaignID: notiflyCampaignID, notiflyMessageID: notiflyMessageID)
+    internal func presentNotiflyInAppMessage(url: URL?, notiflyCampaignID: String?, notiflyMessageID: String?, modalProps: [String: Any]?) throws {
+        let vc = try WebViewModalViewController(url: url, notiflyCampaignID: notiflyCampaignID, notiflyMessageID: notiflyMessageID, modalProps: modalProps)
         AppHelper.present(vc, completion: nil)
     }
 

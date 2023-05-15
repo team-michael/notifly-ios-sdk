@@ -57,7 +57,7 @@ class UserSettingsTestViewController: UIViewController {
     }
     
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = .black
         title = "Test User Settings"
         setupStackView()
         
