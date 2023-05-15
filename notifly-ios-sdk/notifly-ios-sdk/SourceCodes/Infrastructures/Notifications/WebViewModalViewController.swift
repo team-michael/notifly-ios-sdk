@@ -45,35 +45,22 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     }
 
     func setupUI() -> Bool {
-        let screenSize: CGSize
-        if let window = UIApplication.shared.keyWindow {
-            screenSize = window.bounds.size
-        } else {
-            screenSize = UIScreen.main.bounds.size
-        }
-
-        let screenWidth = screenSize.width
-        let screenHeight = screenSize.height
-        if screenWidth == 0 || screenHeight == 0 {
+        guard let modalSize = getModalSize() as? CGSize, let modalPositionConstraint = getModalPositionConstraint() as? NSLayoutConstraint else {
             return false
         }
 
-        guard let modalSize = CGSize(width: getViewWidth(modalProps: modalProps, screenWidth: screenWidth, screenHeight: screenHeight), height: getViewHeight(modalProps: modalProps, screenWidth: screenWidth, screenHeight: screenHeight)) as? CGSize else {
-            return false
-        }
-
-        view.backgroundColor = .clear
-        view.addSubview(webView)
         webView.translatesAutoresizingMaskIntoConstraints = false
-
+        view.backgroundColor = .clear
+        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissCTATapped)))
+        view.addSubview(webView)
         NSLayoutConstraint.activate([
             webView.widthAnchor.constraint(equalToConstant: modalSize.width),
             webView.heightAnchor.constraint(equalToConstant: modalSize.height),
             view.centerXAnchor.constraint(equalTo: webView.centerXAnchor),
-            view.centerYAnchor.constraint(equalTo: webView.centerYAnchor),
+            modalPositionConstraint,
         ])
-
-        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissCTATapped)))
+        
+       
 
         return true
     }
@@ -189,6 +176,37 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         }
 
         return viewHeight
+    }
+
+    internal func getModalSize() -> CGSize? {
+        let screenSize: CGSize
+        if let window = UIApplication.shared.keyWindow {
+            screenSize = window.bounds.size
+        } else {
+            screenSize = UIScreen.main.bounds.size
+        }
+
+        let screenWidth = screenSize.width
+        let screenHeight = screenSize.height
+        if screenWidth == 0 || screenHeight == 0 {
+            return nil
+        }
+        guard let modalSize = CGSize(width: getViewWidth(modalProps: modalProps, screenWidth: screenWidth, screenHeight: screenHeight), height: getViewHeight(modalProps: modalProps, screenWidth: screenWidth, screenHeight: screenHeight)) as? CGSize else {
+            return nil
+        }
+
+        return modalSize
+    }
+
+    internal func getModalPositionConstraint() -> NSLayoutConstraint? {
+        if let modalProps = modalProps,
+           let position = modalProps["position"] as? String,
+           position == "bottom"
+        {
+            return view.bottomAnchor.constraint(equalTo: webView.bottomAnchor)
+        }
+
+        return view.centerYAnchor.constraint(equalTo: webView.centerYAnchor)
     }
 }
 
