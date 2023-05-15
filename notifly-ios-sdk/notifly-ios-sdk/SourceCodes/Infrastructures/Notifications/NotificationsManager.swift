@@ -80,7 +80,7 @@ class NotificationsManager: NSObject {
                    "urlString": urlString,
                    "notiflyMessageID": decodedInAppMessageData["notifly_message_id"],
                    "notiflyCampaignID": decodedInAppMessageData["campaign_id"],
-                   "modalProps": decodedInAppMessageData["modal_properties"]
+                   "modalProps": decodedInAppMessageData["modal_properties"],
                ] as? [String: Any]
             {
                 showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData, completion: completionHandler)

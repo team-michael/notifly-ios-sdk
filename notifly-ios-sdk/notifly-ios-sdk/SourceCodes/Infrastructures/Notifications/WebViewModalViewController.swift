@@ -4,9 +4,10 @@ import WebKit
 
 class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate {
     static var openedInAppMessageCount: Int = 0
-    var webView = FullScreenWKWebView()
+    let webView = FullScreenWKWebView()
     var notiflyCampaignID: String?
     var notiflyMessageID: String?
+    var notiflyExtraData: [String: AnyCodable]?
     var modalProps: [String: Any]?
 
     convenience init(url: URL?, notiflyCampaignID: String?, notiflyMessageID: String?, modalProps: [String: Any]?) throws {
@@ -79,6 +80,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             type: event.notifly_button_click_type,
             button_name: event.notifly_button_name,
             link: event.notifly_button_click_link,
+            extra_data: event.notifly_extra_data,
         }));
             });
         """
@@ -92,25 +94,35 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
             guard let type = messageEventData["type"] as? String,
                   let buttonName = messageEventData["button_name"] as? String else { return }
+
+            if let extraData = messageEventData["extra_data"] as? [String: Any] {
+                var convertedExtraData: [String: AnyCodable] = [:]
+                AppHelper.makeJsonCodable(extraData)?.forEach { convertedExtraData[$0] = $1
+                }
+                notiflyExtraData = convertedExtraData
+            }
+
             let params = [
                 "type": "message_event",
                 "channel": "in-app-message",
-                "campaign_id": notiflyCampaignID ?? "",
-                "notifly_message_id": notiflyMessageID ?? "",
                 "button_name": buttonName,
-            ]
+                "campaign_id": notiflyCampaignID,
+                "notifly_message_id": notiflyMessageID,
+                "notifly_extra_data": notiflyExtraData,
+            ] as [String: Any]
 
             switch type {
             case "close":
                 Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.inAppMessageCloseButtonClicked, params: params)
                 dismissCTATapped()
-
             case "main-button":
-                Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.inAppMessageCloseButtonClicked, params: params)
+                Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.inAppMessageMainButtonClicked, params: params)
                 dismissCTATapped()
-
             case "hide_in_app_message":
                 Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked, params: params)
+                dismissCTATapped()
+            case "survey_submit_button":
+                Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.inAppMessageSurveySubmitButtonClicked, params: params)
                 dismissCTATapped()
             default:
                 return

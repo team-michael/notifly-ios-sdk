@@ -66,6 +66,8 @@ struct AnyCodable: Codable {
             value = floatValue
         } else if let dictionaryValue = try? container.decode([String: AnyCodable].self) {
             value = dictionaryValue
+        } else if let arrayValue = try? container.decode([AnyCodable?].self) {
+            value = arrayValue.compactMap { $0?.value }
         } else if container.decodeNil() {
             value = ()
         } else {

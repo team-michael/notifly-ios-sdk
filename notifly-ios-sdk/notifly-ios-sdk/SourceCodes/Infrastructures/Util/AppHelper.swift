@@ -53,14 +53,34 @@ class AppHelper {
     static func getSDKType() -> String {
         return Globals.notiflySdkType.rawValue
     }
-    
-//    static func getScreenSize() -> [String: Int] {
-//        if let rootView = UIApplication.shared.keyWindow?.rootViewController?.view {
-//            let screenSize = rootView.bounds.size
-//        } else {
-//            screenSize = UIScreen.main.bounds
-//        }
-//    }
+
+    static func makeJsonCodable(_ jsonData: [String: Any]?) -> [String: AnyCodable]? {
+        guard let jsonData = jsonData else { return nil }
+        return jsonData.mapValues { value in
+            if let array = value as? [Any?] {
+                return AnyCodable(array.compactMap { element in AppHelper.toCodableValue(element) })
+            } else if let dictionary = value as? [String: Any] {
+                return AnyCodable(makeJsonCodable(dictionary))
+            }
+            return AppHelper.toCodableValue(value)
+        }
+    }
+
+    static func toCodableValue(_ value: Any?) -> AnyCodable {
+        if let str = value as? String {
+            return AnyCodable(str)
+        } else if let int = value as? Int {
+            return AnyCodable(int)
+        } else if let double = value as? Double {
+            return AnyCodable(double)
+        } else if let float = value as? Float {
+            return AnyCodable(float)
+        } else if let bool = value as? Bool {
+            return AnyCodable(bool)
+        } else {
+            return AnyCodable(value)
+        }
+    }
 }
 
 private extension UIWindow {
