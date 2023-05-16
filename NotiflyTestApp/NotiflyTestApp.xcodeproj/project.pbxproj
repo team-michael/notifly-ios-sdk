@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		672E7B6D29ED1E4F00B3E9F2 /* TestConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B6C29ED1E4F00B3E9F2 /* TestConstants.swift */; };
 		672E7B7529EDF1C400B3E9F2 /* TrackingTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7429EDF1C400B3E9F2 /* TrackingTestViewController.swift */; };
 		672E7B7A29EDF22F00B3E9F2 /* UIStackView+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7929EDF22F00B3E9F2 /* UIStackView+.swift */; };
 		672E7B7C29EDF91800B3E9F2 /* UITextField+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7B29EDF91800B3E9F2 /* UITextField+.swift */; };
@@ -23,6 +22,7 @@
 		F21322EF2A0243D900C3EE43 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F21322EC2A0243D900C3EE43 /* GoogleService-Info.plist */; };
 		F21322F12A02448A00C3EE43 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 672E7B6729ED1D3500B3E9F2 /* notifly_ios_sdk.framework */; };
 		F21322F22A02448A00C3EE43 /* notifly_ios_sdk.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 672E7B6729ED1D3500B3E9F2 /* notifly_ios_sdk.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F2F3CE7D2A13A2DD009FEAF0 /* TestConstatns.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F3CE7A2A13A2DD009FEAF0 /* TestConstatns.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,7 +58,6 @@
 
 /* Begin PBXFileReference section */
 		672E7B6129ED1D3500B3E9F2 /* notifly-ios-sdk.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "notifly-ios-sdk.xcodeproj"; path = "../notifly-ios-sdk/notifly-ios-sdk.xcodeproj"; sourceTree = "<group>"; };
-		672E7B6C29ED1E4F00B3E9F2 /* TestConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestConstants.swift; sourceTree = "<group>"; };
 		672E7B7429EDF1C400B3E9F2 /* TrackingTestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingTestViewController.swift; sourceTree = "<group>"; };
 		672E7B7929EDF22F00B3E9F2 /* UIStackView+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIStackView+.swift"; sourceTree = "<group>"; };
 		672E7B7B29EDF91800B3E9F2 /* UITextField+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITextField+.swift"; sourceTree = "<group>"; };
@@ -75,6 +74,7 @@
 		67A0706429F2270C0028DE1A /* UserSettingsTestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsTestViewController.swift; sourceTree = "<group>"; };
 		F21322EC2A0243D900C3EE43 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F21322F02A02445D00C3EE43 /* NotiflyTestApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotiflyTestApp.entitlements; sourceTree = "<group>"; };
+		F2F3CE7A2A13A2DD009FEAF0 /* TestConstatns.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConstatns.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,8 +109,8 @@
 		672E7B6B29ED1E2000B3E9F2 /* SourceCodes */ = {
 			isa = PBXGroup;
 			children = (
+				F2F3CE7A2A13A2DD009FEAF0 /* TestConstatns.swift */,
 				672E7B6E29ED1EF100B3E9F2 /* UI */,
-				672E7B6C29ED1E4F00B3E9F2 /* TestConstants.swift */,
 			);
 			path = SourceCodes;
 			sourceTree = "<group>";
@@ -270,11 +270,11 @@
 				675EB43529ED18B0001347FB /* AppDelegate.swift in Sources */,
 				672E7B7C29EDF91800B3E9F2 /* UITextField+.swift in Sources */,
 				675EB43729ED18B0001347FB /* SceneDelegate.swift in Sources */,
-				672E7B6D29ED1E4F00B3E9F2 /* TestConstants.swift in Sources */,
 				672E7B7529EDF1C400B3E9F2 /* TrackingTestViewController.swift in Sources */,
 				672E7B8229EE524D00B3E9F2 /* PushNotificationTestViewController.swift in Sources */,
 				672E7B7A29EDF22F00B3E9F2 /* UIStackView+.swift in Sources */,
 				67A0706529F2270C0028DE1A /* UserSettingsTestViewController.swift in Sources */,
+				F2F3CE7D2A13A2DD009FEAF0 /* TestConstatns.swift in Sources */,
 				672E7B7E29EE05AF00B3E9F2 /* KeyValueDataInputViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

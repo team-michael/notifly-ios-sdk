@@ -17,6 +17,7 @@ Pod::Spec.new do |s|
   s.source_files = 'notifly-ios-sdk/notifly-ios-sdk/**/*'
   s.swift_versions = '5.0'
 
-  s.dependency 'FirebaseMessaging' 
+  s.dependency 'FirebaseMessaging'
+  s.dependency 'Firebase'
 
 end
