@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
   s.source_files = 'notifly-ios-sdk/notifly-ios-sdk/**/*'
   s.swift_versions = '5.0'
 
-  s.dependency 'Firebase', '~> 9.6.0'
+  s.dependency 'FirebaseMessaging', '~> 8.0'
 
   # s.resource_bundles = {
   #   'notifly_ios_sdk_dev' => ['notifly_ios_sdk_dev/Assets/*.png']
