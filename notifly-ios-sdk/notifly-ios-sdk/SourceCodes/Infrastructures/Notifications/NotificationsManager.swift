@@ -75,6 +75,7 @@ class NotificationsManager: NSObject {
            notiflyMessageType == "in-app-message"
         {
             if WebViewModalViewController.openedInAppMessageCount == 0,
+               UIApplication.shared.applicationState == .active,
                let urlString = decodedInAppMessageData["url"] as? String,
                let notiflyInAppMessageData = [
                    "urlString": urlString,
