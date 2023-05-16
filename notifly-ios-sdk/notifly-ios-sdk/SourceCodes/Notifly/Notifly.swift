@@ -12,6 +12,7 @@ public class Notifly {
             }
             return notifly
         }
+        
         set {
             _main = newValue
             Logger.info("Notifly initialized with projectID: \(newValue.projectID)")
