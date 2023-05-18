@@ -20,11 +20,8 @@ public extension Notifly {
         username: String,
         password: String
     ) {
-        // guard if FirebaseApp is initialized
-        // if not, log error and return
         guard FirebaseApp.app() != nil else {
-            Logger.error("FirebaseApp is not initialized. Please initialize FirebaseApp before calling Notifly.initialize.")
-            return
+            fatalError("🔥 FirebaseApp is not initialized. Please initialize FirebaseApp before calling Notifly.initialize.")
         }
         
         main = Notifly(
