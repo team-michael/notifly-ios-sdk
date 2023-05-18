@@ -115,11 +115,9 @@ private func saveUniqueIdToKeychain(deviceID: String) -> Bool {
 
         let status = SecItemAdd(query as CFDictionary, nil)
         if status == errSecSuccess {
-            print("Unique ID saved to Keychain")
             return true
-        } else {
-            print("Failed to save Unique ID to Keychain")
         }
+        
     }
     return false
 }

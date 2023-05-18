@@ -4,6 +4,7 @@ import FirebaseMessaging
 import Foundation
 import UIKit
 
+
 /**
  Contains all available Notifly SDK Public APIs.
  */
@@ -13,19 +14,23 @@ public extension Notifly {
     /**
      Initializes the Notifly SDK. This method is to be called as soon as the app laucnhes. (AppDelegate.applicationDidFinishLaunching)
      */
+
     static func initialize(
         projectID: String,
         username: String,
-        password: String,
-        useCustomClickHandler: Bool = false
+        password: String
     ) {
-        FirebaseApp.configure() // TODO: Uncomment this once Firebase is configured properly for the project.
-
+        // guard if FirebaseApp is initialized
+        // if not, log error and return
+        guard FirebaseApp.app() != nil else {
+            Logger.error("FirebaseApp is not initialized. Please initialize FirebaseApp before calling Notifly.initialize.")
+            return
+        }
+        
         main = Notifly(
             projectID: projectID,
             username: username,
-            password: password,
-            useCustomClickHandler: useCustomClickHandler
+            password: password
         )
 
         Messaging.messaging().token { token, error in
@@ -58,10 +63,6 @@ public extension Notifly {
                                               fetchCompletionHandler: completionHandler)
     }
     
-    // MARK: Optional Setup API configurations.
-
-    // - Only use below APIs if your app implements custom push notification handler or passed `false` for `useCustomClickHandler` in the `initialize` method.
-
     static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                        didReceive response: UNNotificationResponse,
                                        withCompletionHandler completion: () -> Void)

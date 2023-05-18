@@ -130,7 +130,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         }
     }
 
-    internal func convertStringToJson(_ jsonString: String) -> [String: Any]? {
+    private func convertStringToJson(_ jsonString: String) -> [String: Any]? {
         if let jsonData = jsonString.data(using: .utf8) {
             do {
                 let jsonObject = try JSONSerialization.jsonObject(with: jsonData, options: [])
@@ -138,13 +138,13 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                     return jsonDict
                 }
             } catch {
-                print("Error parsing JSON: \(error.localizedDescription)")
+                return nil
             }
         }
         return nil
     }
 
-    internal func getViewWidth(modalProps: [String: Any]?, screenWidth: CGFloat, screenHeight: CGFloat) -> CGFloat {
+    private func getViewWidth(modalProps: [String: Any]?, screenWidth: CGFloat, screenHeight: CGFloat) -> CGFloat {
         var viewWidth: CGFloat = 0.0
 
         if let width = modalProps?["width"] as? CGFloat {
@@ -167,7 +167,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         return viewWidth
     }
 
-    internal func getViewHeight(modalProps: [String: Any]?, screenWidth: CGFloat, screenHeight: CGFloat) -> CGFloat {
+    private func getViewHeight(modalProps: [String: Any]?, screenWidth: CGFloat, screenHeight: CGFloat) -> CGFloat {
         var viewHeight: CGFloat = 0.0
 
         if let height = modalProps?["height"] as? CGFloat {
@@ -190,7 +190,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         return viewHeight
     }
 
-    internal func getModalSize() -> CGSize? {
+    private func getModalSize() -> CGSize? {
         let screenSize: CGSize
         if let window = UIApplication.shared.keyWindow {
             screenSize = window.bounds.size
@@ -210,7 +210,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         return modalSize
     }
 
-    internal func getModalPositionConstraint() -> NSLayoutConstraint? {
+    private func getModalPositionConstraint() -> NSLayoutConstraint? {
         if let modalProps = modalProps,
            let position = modalProps["position"] as? String,
            position == "bottom"
@@ -221,7 +221,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         return view.centerYAnchor.constraint(equalTo: webView.centerYAnchor)
     }
 
-    internal func getWebViewLayer(modalSize: CGSize) -> CALayer? {
+    private func getWebViewLayer(modalSize: CGSize) -> CALayer? {
         guard let modalProps = modalProps,
               let tlRadius = (modalProps["borderTopLeftRadius"] ?? 0.0) as? CGFloat,
               let trRadius = (modalProps["borderTopRightRadius"] ?? 0.0) as? CGFloat,

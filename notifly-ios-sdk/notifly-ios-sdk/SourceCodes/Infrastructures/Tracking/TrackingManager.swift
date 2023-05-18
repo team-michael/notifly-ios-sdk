@@ -143,23 +143,6 @@ class TrackingManager {
     // MARK: - Private Methods
 
     private func setup() {
-        // Subscribe to log events lifecycles.
-        eventPublisher
-            .sink { record in Logger.info("Queued Tracking Event Record \(record.data).") }
-            .store(in: &cancellables)
-
-        internalEventPublisher
-            .sink { record in Logger.info("Queued Tracking Internal Event Record \(record.data).") }
-            .store(in: &cancellables)
-
-        eventRequestPayloadPublisher
-            .sink { event in Logger.info("TrackingManager: Firing TrackingEvent request with \(event.records.count) records.") }
-            .store(in: &cancellables)
-
-        internalEventRequestPayloadPublisher
-            .sink { event in Logger.info("TrackingManager: Firing Internal TrackingEvent request with \(event.records.count) records.") }
-            .store(in: &cancellables)
-
         // Submit the tracking event to API & log result.
         eventRequestPayloadPublisher
             .flatMap(NotiflyAPI().trackEvent)
@@ -167,7 +150,6 @@ class TrackingManager {
                 Just("Tracking Event request failed with error: \(error)")
             }
             .sink { [weak self] result in
-                Logger.info("Tracking Event request finished. Result:\n\(result)")
                 self?.eventRequestResponsePublisher.send(result)
             }
             .store(in: &cancellables)
@@ -178,7 +160,6 @@ class TrackingManager {
                 Just("Tracking Event request failed with error: \(error)")
             }
             .sink { [weak self] result in
-                Logger.info("Tracking Event request finished. Result:\n\(result)")
                 self?.internalEventRequestResponsePublisher.send(result)
             }
             .store(in: &cancellables)

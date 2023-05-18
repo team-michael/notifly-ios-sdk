@@ -25,9 +25,7 @@ class Auth {
                 if case .failure(let error) = completion {
                     Logger.error("Authorization error: \(error)")
                 }
-            },
-            receiveValue: { authToken in
-            Logger.info("Successfully authorized with token: \(authToken)")
+            }
         })
     }
 }

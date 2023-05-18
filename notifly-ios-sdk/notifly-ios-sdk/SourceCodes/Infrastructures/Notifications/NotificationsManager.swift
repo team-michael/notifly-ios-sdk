@@ -19,7 +19,7 @@ class NotificationsManager: NSObject {
             if let pub = _apnDeviceTokenPub {
                 return pub
                     .catch { error in
-                        Logger.info("Failed to get APNs Token with error: \(error)\n\nVisit \(#filePath) to replace this workaround once APNs can be successfully retrieved.\nAs workaround, debug APN Token is used.")
+                        Logger.error("Failed to get APNs Token with error: \(error)\n\nVisit \(#filePath) to replace this workaround once APNs can be successfully retrieved.\nAs workaround, debug APN Token is used.")
                         return Just("debug-apns-device-token").setFailureType(to: Error.self)
                     }
                     .eraseToAnyPublisher()
@@ -46,11 +46,10 @@ class NotificationsManager: NSObject {
     func application(_: UIApplication,
                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data)
     {
-        Logger.info("Successfully received the push notification deviceToken: \(deviceToken)")
         Messaging.messaging().apnsToken = deviceToken
         Messaging.messaging().token { token, error in
             if let error = error {
-                Logger.info("Error fetching FCM registration token: \(error)")
+                Logger.error("Error fetching FCM registration token: \(error)")
             } else if let token = token {
                 self.apnDeviceTokenPromise?(.success(token))
             }
@@ -154,7 +153,7 @@ class NotificationsManager: NSObject {
         completion(.noData)
     }
 
-    func logPushClickInternalEvent(pushData: [AnyHashable: Any], clickStatus: String) {
+    private func logPushClickInternalEvent(pushData: [AnyHashable: Any], clickStatus: String) {
         if let campaignID = pushData["campaign_id"] as? String {
             let messageID = pushData["notifly_message_id"] ?? "" as String
             if let pushClickEventParams = [
@@ -169,13 +168,9 @@ class NotificationsManager: NSObject {
         }
     }
 
-    internal func presentNotiflyInAppMessage(url: URL?, notiflyCampaignID: String?, notiflyMessageID: String?, modalProps: [String: Any]?) throws {
+    private func presentNotiflyInAppMessage(url: URL?, notiflyCampaignID: String?, notiflyMessageID: String?, modalProps: [String: Any]?) throws {
         let vc = try WebViewModalViewController(url: url, notiflyCampaignID: notiflyCampaignID, notiflyMessageID: notiflyMessageID, modalProps: modalProps)
         AppHelper.present(vc, completion: nil)
-    }
-
-    private func stringFromPushToken(data: Data) -> String {
-        return data.map { String(format: "%.2hhx", $0) }.joined()
     }
 }
 

@@ -22,7 +22,6 @@ public class Notifly {
     private static var _main: Notifly?
 
     let projectID: String
-    let useCustomClickHandler: Bool
 
     let auth: Auth
     let notificationsManager: NotificationsManager
@@ -36,11 +35,9 @@ public class Notifly {
     init(
         projectID: String,
         username: String,
-        password: String,
-        useCustomClickHandler: Bool
+        password: String
     ) {
         self.projectID = projectID
-        self.useCustomClickHandler = useCustomClickHandler
 
         auth = Auth(username: username,
                     password: password)
@@ -48,14 +45,6 @@ public class Notifly {
         trackingManager = TrackingManager(projectID: projectID)
         userManager = UserManager()
 
-        setup()
     }
 
-    // MARK: - Private Methods
-
-    private func setup() {
-        if !useCustomClickHandler {
-            UNUserNotificationCenter.current().delegate = notificationsManager
-        }
-    }
 }
