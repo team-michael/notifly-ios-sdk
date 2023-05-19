@@ -3,24 +3,23 @@ import Foundation
 import UIKit
 
 public class Notifly {
-    // MARK: - Properties
 
     static var main: Notifly {
         get {
             guard let notifly = _main else {
-                fatalError("You must call `Notifly.initialize`.")
+                fatalError("🔥 [Notifly Error] You must call `Notifly.initialize` before calling this method.")
             }
             return notifly
-        }
-        
+        } 
         set {
             _main = newValue
-            Logger.info("Notifly initialized with projectID: \(newValue.projectID)")
+            isInitialized = true
+            Logger.info("🚀 Notifly SDK initialized.")
         }
     }
 
     private static var _main: Notifly?
-
+    static var isInitialized: Bool = false
     let projectID: String
 
     let auth: Auth

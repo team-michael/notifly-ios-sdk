@@ -4,7 +4,6 @@ import FirebaseMessaging
 import Foundation
 import UIKit
 
-
 /**
  Contains all available Notifly SDK Public APIs.
  */
@@ -21,14 +20,20 @@ public extension Notifly {
         password: String
     ) {
         guard FirebaseApp.app() != nil else {
-            fatalError("🔥 FirebaseApp is not initialized. Please initialize FirebaseApp before calling Notifly.initialize.")
+            Logger.error("FirebaseApp is not initialized. Please initialize FirebaseApp before calling Notifly.initialize.")
+            return
         }
-        
+
         main = Notifly(
             projectID: projectID,
             username: username,
             password: password
         )
+        
+        if !isInitialized {
+            Logger.error("Fail to Initialize`.")
+            return
+        }
 
         Messaging.messaging().token { token, error in
             if let token = token,
@@ -37,12 +42,17 @@ public extension Notifly {
                 main.notificationsManager.apnDeviceTokenPromise?(.success(token))
             }
         }
+
         main.trackingManager.trackSessionStartInternalEvent()
     }
 
     static func application(_ application: UIApplication,
                             didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data)
     {
+        if !isInitialized {
+            Logger.error("You must call `Notifly.initialize` before calling this method.")
+            return
+        }
         main.notificationsManager.application(application,
                                               didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
     }
@@ -50,20 +60,32 @@ public extension Notifly {
     static func application(_ application: UIApplication,
                             didFailToRegisterForRemoteNotificationsWithError error: Error)
     {
+        if !isInitialized {
+            Logger.error("You must call `Notifly.initialize` before calling this method.")
+            return
+        }
         main.notificationsManager.application(application,
                                               didFailToRegisterForRemoteNotificationsWithError: error)
     }
-    
-    static func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+
+    static func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        if !isInitialized {
+            Logger.error("You must call `Notifly.initialize` before calling this method.")
+            return
+        }
         main.notificationsManager.application(application,
                                               didReceiveRemoteNotification: userInfo,
                                               fetchCompletionHandler: completionHandler)
     }
-    
+
     static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                        didReceive response: UNNotificationResponse,
                                        withCompletionHandler completion: () -> Void)
     {
+        if !isInitialized {
+            Logger.error("You must call `Notifly.initialize` before calling this method.")
+            return
+        }
         main.notificationsManager.userNotificationCenter(notificationCenter,
                                                          didReceive: response,
                                                          withCompletionHandler: completion)
@@ -73,6 +95,10 @@ public extension Notifly {
                                        willPresent notification: UNNotification,
                                        withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void)
     {
+        if !isInitialized {
+            Logger.error("You must call `Notifly.initialize` before calling this method.")
+            return
+        }
         main.notificationsManager.userNotificationCenter(notificationCenter,
                                                          willPresent: notification,
                                                          withCompletionHandler: completion)
@@ -80,22 +106,34 @@ public extension Notifly {
 
     // MARK: - On-demand APIs
 
-    static func trackEvent(name: String,
-                           params: [String: Any]? = nil,
+    static func trackEvent(eventName: String,
+                           eventParams: [String: Any]? = nil,
                            segmentationEventParamKeys: [String]? = nil)
     {
-        main.trackingManager.track(eventName: name,
+        if !isInitialized {
+            Logger.error("You must call `Notifly.initialize` before calling this method.")
+            return
+        }
+        main.trackingManager.track(eventName: eventName,
+                                   eventParams: eventParams,
                                    isInternal: false,
-                                   params: params,
                                    segmentationEventParamKeys: segmentationEventParamKeys)
     }
 
-    static func setUserID(_ userID: String? = nil) throws {
-        try main.userManager.setExternalUserID(userID)
+    static func setUserId(_ userId: String? = nil) {
+        if !isInitialized {
+            Logger.error("You must call `Notifly.initialize` before calling this method.")
+            return
+        }
+        main.userManager.setExternalUserId(userId)
     }
 
-    static func setUserProperties(_ properties: [String: Any]) throws {
-        try main.userManager.setUserProperties(properties)
+    static func setUserProperties(_ userProperties: [String: Any]) {
+        if !isInitialized {
+            Logger.error("You must call `Notifly.initialize` before calling this method.")
+            return
+        }
+        main.userManager.setUserProperties(userProperties)
     }
 
     static func schedulePushNotification(title: String?,
@@ -103,6 +141,10 @@ public extension Notifly {
                                          url: URL,
                                          delay: TimeInterval)
     {
+        if !isInitialized {
+            Logger.error("You must call `Notifly.initialize` before calling this method.")
+            return
+        }
         main.notificationsManager.schedulePushNotification(title: title,
                                                            body: body,
                                                            url: url,

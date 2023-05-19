@@ -41,7 +41,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             "campaign_id": notiflyCampaignID,
             "notifly_message_id": notiflyMessageID,
         ] as? [String: Any] {
-            Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.inAppMessageShown, params: params)
+            Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
         }
     }
 
@@ -113,16 +113,16 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
             switch type {
             case "close":
-                Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.inAppMessageCloseButtonClicked, params: params)
+                Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageCloseButtonClicked, eventParams: params)
                 dismissCTATapped()
             case "main-button":
-                Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.inAppMessageMainButtonClicked, params: params)
+                Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked, eventParams: params)
                 dismissCTATapped()
             case "hide_in_app_message":
-                Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked, params: params)
+                Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked, eventParams: params)
                 dismissCTATapped()
             case "survey_submit_button":
-                Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.inAppMessageSurveySubmitButtonClicked, params: params)
+                Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageSurveySubmitButtonClicked, eventParams: params)
                 dismissCTATapped()
             default:
                 return

@@ -33,7 +33,7 @@ class UserSettingsTestViewController: UIViewController {
     
     func submitUserIDTrackingEventWithCurrentInput() throws {
         let userID = userIDTextField.checkAndRetrieveValueText(changeBorderColorOnError: false)
-        try Notifly.main.userManager.setExternalUserID(userID)
+        Notifly.setUserId(userID)
         userIDTrackingResponseTextView.text = "User ID successfully set to: \(userID ?? "<null>")"
     }
     
@@ -45,7 +45,7 @@ class UserSettingsTestViewController: UIViewController {
     
     func submitUserPropertiesTrackingEventWithCurrentInputs() throws {
         if let userProperties = userProperties {
-            try Notifly.main.userManager.setUserProperties(userProperties)
+            Notifly.setUserProperties(userProperties)
             userPropertiesResponseTextView.text = "User Properties submitted with following: \n\n\(userProperties)"
         } else {
             userPropertiesResponseTextView.text = "Aborted. Nothing to submit."
@@ -62,7 +62,8 @@ class UserSettingsTestViewController: UIViewController {
         setupStackView()
         
         // Populate initial test values.
-        userIDTextField.text = Notifly.main.userManager.externalUserID
+
+        userIDTextField.text = ""
         userIDTextField.placeholder = "User ID Value."
         
         // Hook up CTAs.

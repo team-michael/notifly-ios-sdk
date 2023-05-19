@@ -65,8 +65,8 @@ class TrackingManager {
             }
 
             return self.trackInternalEvent(
-                name: TrackingConstant.Internal.sessionStartEventName,
-                params: [
+                eventName: TrackingConstant.Internal.sessionStartEventName,
+                eventParams: [
                     "type": "session_start_type",
                     "notif_auth_status": authStatus,
                 ]
@@ -74,21 +74,21 @@ class TrackingManager {
         }
     }
 
-    func trackInternalEvent(name: String, params: [String: Any]?) {
-        return track(eventName: name,
+    func trackInternalEvent(eventName: String, eventParams: [String: Any]?) {
+        return track(eventName: eventName,
+                     eventParams: eventParams,
                      isInternal: true,
-                     params: params,
                      segmentationEventParamKeys: nil)
     }
 
     func track(eventName: String,
+               eventParams: [String: Any]?,
                isInternal: Bool,
-               params: [String: Any]?,
                segmentationEventParamKeys: [String]?)
     {
-        createTrackingRecord(name: eventName,
+        createTrackingRecord(eventName: eventName,
+                             eventParams: eventParams,
                              isInternal: isInternal,
-                             eventParams: params,
                              segmentationEventParamKeys: segmentationEventParamKeys)
             .sink(receiveCompletion: { completion in
                       if case let .failure(error) = completion {
@@ -105,35 +105,49 @@ class TrackingManager {
             .store(in: &cancellables)
     }
 
-    func createTrackingRecord(name: String,
-                              isInternal: Bool,
+    func createTrackingRecord(eventName: String,
                               eventParams: [String: Any]?,
+                              isInternal: Bool,
                               segmentationEventParamKeys: [String]?) -> AnyPublisher<TrackingRecord, Error>
     {
         if let pub = Notifly.main.notificationsManager.apnDeviceTokenPub {
             return pub.tryMap { pushToken in
-                let userID = try Notifly.main.userManager.getNotiflyUserID()
-                let data = try TrackingData(id: UUID().uuidString,
-                                            name: name,
-                                            notifly_user_id: userID,
-                                            external_user_id: Notifly.main.userManager.externalUserID,
-                                            time: Int(Date().timeIntervalSince1970),
-                                            notifly_device_id: UUID(name: AppHelper.getDeviceID(),
-                                                                    namespace: TrackingConstant.HashNamespace.deviceID).notiflyStyleString,
-                                            external_device_id: AppHelper.getDeviceID(),
-                                            device_token: pushToken,
-                                            is_internal_event: isInternal,
-                                            segmentation_event_param_keys: segmentationEventParamKeys,
-                                            project_id: Notifly.main.projectID,
-                                            platform: AppHelper.getDevicePlatform(),
-                                            os_version: AppHelper.getiOSVersion(),
-                                            app_version: AppHelper.getAppVersion(),
-                                            sdk_version: AppHelper.getSDKVersion(),
-                                            sdk_type: AppHelper.getSDKType(),
-                                            event_params: AppHelper.makeJsonCodable(eventParams))
-                let stringfiedData = String(data: try! JSONEncoder().encode(data), encoding: .utf8)!
-                return TrackingRecord(partitionKey: userID, data: stringfiedData)
-            }.eraseToAnyPublisher()
+                let userID = Notifly.main.userManager.getNotiflyUserID()
+                if let deviceID = AppHelper.getDeviceID(),
+                   let appVersion = AppHelper.getAppVersion(),
+                   let sdkVersion = AppHelper.getSDKVersion(),
+                   let data = TrackingData(id: UUID().uuidString,
+                                           name: eventName,
+                                           notifly_user_id: userID,
+                                           external_user_id: Notifly.main.userManager.externalUserID,
+                                           time: Int(Date().timeIntervalSince1970),
+                                           notifly_device_id: UUID(name: deviceID,
+                                                                   namespace: TrackingConstant.HashNamespace.deviceID).notiflyStyleString,
+                                           external_device_id: deviceID,
+                                           device_token: pushToken,
+                                           is_internal_event: isInternal,
+                                           segmentation_event_param_keys: segmentationEventParamKeys,
+                                           project_id: Notifly.main.projectID,
+                                           platform: AppHelper.getDevicePlatform(),
+                                           os_version: AppHelper.getiOSVersion(),
+                                           app_version: appVersion,
+                                           sdk_version: sdkVersion,
+                                           sdk_type: AppHelper.getSDKType(),
+                                           event_params: AppHelper.makeJsonCodable(eventParams)) as? TrackingData,
+                   let stringfiedData = String(data: try! JSONEncoder().encode(data), encoding: .utf8) as? String
+
+                {
+                    return TrackingRecord(partitionKey: userID, data: stringfiedData)
+                } else {
+                    Logger.error("Failed to track event: " + eventName)
+                    throw NotiflyError.unexpectedNil("Failed to create tracking data")
+                }
+            }
+            .catch { _ in
+                Fail(outputType: TrackingRecord.self, failure: NotiflyError.unexpectedNil("TrackingRecord Data is invalid"))
+                    .eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
         } else {
             return Fail(outputType: TrackingRecord.self, failure: NotiflyError.unexpectedNil("APN Device Token is nil"))
                 .eraseToAnyPublisher()

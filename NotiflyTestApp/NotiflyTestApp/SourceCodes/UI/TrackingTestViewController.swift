@@ -115,8 +115,8 @@ class TrackingTestViewController: UIViewController {
         
         // Fire Tracking
         Notifly.main.trackingManager.track(eventName: eventName,
+                                           eventParams: customEventParams,
                                            isInternal: false,
-                                           params: customEventParams,
                                            segmentationEventParamKeys: segmentationEventParamKeys)
     }
     
