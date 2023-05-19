@@ -187,6 +187,9 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
         if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]?,
            let clickStatus = UIApplication.shared.applicationState == .active ? "foreground" : "background"
         {
+            guard let notiflyMessageType = pushData["notifly_message_type"] as? String else {
+                return
+            }
             if let urlString = pushData["url"] as? String,
                let url = URL(string: urlString)
             {
@@ -206,6 +209,10 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
                                        willPresent _: UNNotification,
                                        withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void)
     {
-        completion([.banner, .badge, .sound])
+        if #available(iOS 14.0, *) {
+            completion([.banner, .badge, .sound])
+        } else {
+            completion([.alert, .badge, .sound])
+        }
     }
 }

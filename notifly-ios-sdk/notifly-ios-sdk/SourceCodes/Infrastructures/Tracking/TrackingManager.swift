@@ -159,9 +159,11 @@ class TrackingManager {
     private func setup() {
         // Submit the tracking event to API & log result.
         eventRequestPayloadPublisher
-            .flatMap(NotiflyAPI().trackEvent)
-            .catch { error in
-                Just("Tracking Event request failed with error: \(error)")
+            .flatMap { payload in
+                NotiflyAPI().trackEvent(payload)
+                    .catch { error in
+                        Just("Tracking Event request failed with error: \(error)")
+                    }
             }
             .sink { [weak self] result in
                 self?.eventRequestResponsePublisher.send(result)
@@ -169,10 +171,13 @@ class TrackingManager {
             .store(in: &cancellables)
 
         internalEventRequestPayloadPublisher
-            .flatMap(NotiflyAPI().trackEvent)
-            .catch { error in
-                Just("Tracking Event request failed with error: \(error)")
+            .flatMap { payload in
+                NotiflyAPI().trackEvent(payload)
+                    .catch { error in
+                        Just("Tracking Event request failed with error: \(error)")
+                    }
             }
+
             .sink { [weak self] result in
                 self?.internalEventRequestResponsePublisher.send(result)
             }

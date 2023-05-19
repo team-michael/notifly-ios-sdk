@@ -70,6 +70,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     {
         Notifly.userNotificationCenter(notificationCenter,
                                        willPresent: notification,
-                                       withCompletionHandler: completion)
+                                       withCompletionHandler: completion)        
     }
 }
