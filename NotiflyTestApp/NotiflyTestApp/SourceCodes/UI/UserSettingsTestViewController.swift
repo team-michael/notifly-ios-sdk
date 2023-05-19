@@ -33,7 +33,7 @@ class UserSettingsTestViewController: UIViewController {
     
     func submitUserIDTrackingEventWithCurrentInput() throws {
         let userID = userIDTextField.checkAndRetrieveValueText(changeBorderColorOnError: false)
-        Notifly.setUserId(userID)
+        Notifly.setUserId(userId: userID)
         userIDTrackingResponseTextView.text = "User ID successfully set to: \(userID ?? "<null>")"
     }
     
@@ -45,7 +45,7 @@ class UserSettingsTestViewController: UIViewController {
     
     func submitUserPropertiesTrackingEventWithCurrentInputs() throws {
         if let userProperties = userProperties {
-            Notifly.setUserProperties(userProperties)
+            Notifly.setUserProperties(userProperties: userProperties)
             userPropertiesResponseTextView.text = "User Properties submitted with following: \n\n\(userProperties)"
         } else {
             userPropertiesResponseTextView.text = "Aborted. Nothing to submit."

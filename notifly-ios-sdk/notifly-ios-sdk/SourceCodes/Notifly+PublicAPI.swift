@@ -120,7 +120,7 @@ public extension Notifly {
                                    segmentationEventParamKeys: segmentationEventParamKeys)
     }
 
-    static func setUserId(_ userId: String? = nil) {
+    static func setUserId(userId: String? = nil) {
         if !isInitialized {
             Logger.error("You must call `Notifly.initialize` before calling this method.")
             return
@@ -128,7 +128,7 @@ public extension Notifly {
         main.userManager.setExternalUserId(userId)
     }
 
-    static func setUserProperties(_ userProperties: [String: Any]) {
+    static func setUserProperties(userProperties: [String: Any]) {
         if !isInitialized {
             Logger.error("You must call `Notifly.initialize` before calling this method.")
             return
