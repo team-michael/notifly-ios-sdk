@@ -11,7 +11,7 @@ class AppHelper {
         }
     }
 
-    static func getDeviceID() throws -> String {
+    static func getDeviceID() -> String? {
         if let deviceID = Globals.deviceIdInUserDefaults {
             return deviceID
         } else if let deviceID = retrieveUniqueIdFromKeychain() as? String {
@@ -19,7 +19,8 @@ class AppHelper {
             return deviceID
         } else {
             guard let deviceUUID = UIDevice.current.identifierForVendor else {
-                throw NotiflyError.unexpectedNil("Failed to get the Device Identifier.")
+                Logger.error("Failed to get the Device Identifier.")
+                return nil
             }
             if saveUniqueIdToKeychain(deviceID: deviceUUID.notiflyStyleString) as Bool {
                 Globals.deviceIdInUserDefaults = deviceUUID.notiflyStyleString
@@ -28,16 +29,18 @@ class AppHelper {
         }
     }
 
-    static func getAppVersion() throws -> String {
+    static func getAppVersion() -> String? {
         guard let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
-            throw NotiflyError.unexpectedNil("Failed to get the App version.")
+            Logger.error("Failed to get the App version.")
+            return nil
         }
         return version
     }
 
-    static func getSDKVersion() throws -> String {
+    static func getSDKVersion() -> String? {
         guard let version = Bundle(for: Notifly.self).infoDictionary?["CFBundleShortVersionString"] as? String else {
-            throw NotiflyError.unexpectedNil("Failed to get the SDK version.")
+            Logger.error("Failed to get the Notifly SDK version.")
+            return nil
         }
         return version
     }
@@ -117,7 +120,6 @@ private func saveUniqueIdToKeychain(deviceID: String) -> Bool {
         if status == errSecSuccess {
             return true
         }
-        
     }
     return false
 }

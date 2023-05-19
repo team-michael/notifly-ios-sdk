@@ -163,14 +163,18 @@ class NotificationsManager: NSObject {
                 "notifly_message_id": messageID,
                 "click_status": clickStatus,
             ] as? [String: Any] {
-                Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.pushClickEventName, params: pushClickEventParams)
+                Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.pushClickEventName, eventParams: pushClickEventParams)
             }
         }
     }
 
-    private func presentNotiflyInAppMessage(url: URL?, notiflyCampaignID: String?, notiflyMessageID: String?, modalProps: [String: Any]?) throws {
-        let vc = try WebViewModalViewController(url: url, notiflyCampaignID: notiflyCampaignID, notiflyMessageID: notiflyMessageID, modalProps: modalProps)
-        AppHelper.present(vc, completion: nil)
+    private func presentNotiflyInAppMessage(url: URL?, notiflyCampaignID: String?, notiflyMessageID: String?, modalProps: [String: Any]?) {
+        do {
+            let vc = try WebViewModalViewController(url: url, notiflyCampaignID: notiflyCampaignID, notiflyMessageID: notiflyMessageID, modalProps: modalProps)
+            AppHelper.present(vc, completion: nil)
+        } catch {
+            Logger.error("Error presenting in-app message: \(error.localizedDescription)")
+        }
     }
 }
 

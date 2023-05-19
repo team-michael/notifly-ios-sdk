@@ -18,37 +18,37 @@ class UserManager {
         externalUserID = Globals.externalUserIdInUserDefaults
     }
     
-    func setExternalUserID(_ newExternalUserID: String?) throws {
+    func setExternalUserId(_ newExternalUserID: String?) {
         if let newExternalUserID = newExternalUserID, !newExternalUserID.isEmpty {
             // `self.externalUserID` property is set in `setUserProperties` function.
-            try setUserProperties([TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID])
+            setUserProperties([TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID])
         } else {
             externalUserID = nil
             Globals.externalUserIdInUserDefaults = nil
-            Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.removeUserPropertiesEventName, params: nil)
+            Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.removeUserPropertiesEventName, eventParams: nil)
         }
     }
     
-    func setUserProperties(_ params: [String: Any]) throws {
-        var params = params
-        if let newExternalUserID = params[TrackingConstant.Internal.notiflyExternalUserID] as? String {
-            params[TrackingConstant.Internal.previousExternalUserID] = externalUserID
-            params[TrackingConstant.Internal.previousNotiflyUserID] = try getNotiflyUserID()
+    func setUserProperties(_ userProperties: [String: Any]) {
+        var userProperties = userProperties
+        if let newExternalUserID = userProperties[TrackingConstant.Internal.notiflyExternalUserID] as? String {
+            userProperties[TrackingConstant.Internal.previousExternalUserID] = externalUserID
+            userProperties[TrackingConstant.Internal.previousNotiflyUserID] = getNotiflyUserID()
             
             externalUserID = newExternalUserID
             Globals.externalUserIdInUserDefaults = newExternalUserID
             _notiflyUserIDCache = nil
         }
-        Notifly.main.trackingManager.trackInternalEvent(name: TrackingConstant.Internal.setUserPropertiesEventName, params: params)
+        Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.setUserPropertiesEventName, eventParams: userProperties)
     }
     
-    func getNotiflyUserID() throws -> String {
-        let userID = try _notiflyUserIDCache ?? generateUserID(externalUserID: externalUserID)
+    func getNotiflyUserID() -> String {
+        let userID = _notiflyUserIDCache ?? generateUserID(externalUserID: externalUserID)
         _notiflyUserIDCache = userID
         return userID
     }
     
-    private func generateUserID(externalUserID: String?) throws -> String {
+    private func generateUserID(externalUserID: String?) -> String {
         let projectID = Notifly.main.projectID
         let uuidV5Namespace: UUID
         let uuidV5Name: String
