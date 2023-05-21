@@ -8,31 +8,29 @@ import UserNotifications
 class NotificationsManager: NSObject {
     // MARK: Properties
 
-    /**
-        // TODO: Remove  this workaround ocne push token can be succesfully retrieved.
-     */
-    private var _apnDeviceTokenPub: AnyPublisher<String, Error>?
+    private var _deviceTokenPub: AnyPublisher<String, Error>?
 
-    private(set) var apnDeviceTokenPub: AnyPublisher<String, Error>? {
+    private(set) var deviceTokenPub: AnyPublisher<String, Error>? {
         // TODO: Remove this temp workaround once APNs token is available.
         get {
-            if let pub = _apnDeviceTokenPub {
+            if let pub = _deviceTokenPub {
                 return pub
                     .catch { error in
-                        Logger.error("Failed to get APNs Token with error: \(error)\n\nVisit \(#filePath) to replace this workaround once APNs can be successfully retrieved.\nAs workaround, debug APN Token is used.")
-                        return Just("debug-apns-device-token").setFailureType(to: Error.self)
+                        Logger.error("Failed to get APNs Token with error: \(error)\n")
+                        return Just("").setFailureType(to: Error.self)
                     }
                     .eraseToAnyPublisher()
             } else {
-                return nil
+                Logger.error("Failed to get APNs Token with error")
+                return Just("").setFailureType(to: Error.self).eraseToAnyPublisher()
             }
         }
         set {
-            _apnDeviceTokenPub = newValue
+            _deviceTokenPub = newValue
         }
     }
 
-    var apnDeviceTokenPromise: Future<String, Error>.Promise?
+    var deviceTokenPromise: Future<String, Error>.Promise?
 
     // MARK: Lifecycle
 
@@ -50,8 +48,9 @@ class NotificationsManager: NSObject {
         Messaging.messaging().token { token, error in
             if let error = error {
                 Logger.error("Error fetching FCM registration token: \(error)")
+                self.deviceTokenPromise?(.failure(error))
             } else if let token = token {
-                self.apnDeviceTokenPromise?(.success(token))
+                self.deviceTokenPromise?(.success(token))
             }
         }
     }
@@ -60,13 +59,18 @@ class NotificationsManager: NSObject {
                      didFailToRegisterForRemoteNotificationsWithError error: Error)
     {
         Logger.error("Failed to receive the push notification deviceToken with error: \(error)")
-        apnDeviceTokenPromise?(.failure(error))
+        deviceTokenPromise?(.failure(error))
     }
 
     func application(_: UIApplication,
                      didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void)
     {
+        guard (try? Notifly.main) != nil else {
+            Logger.error("Fail to receive Notifly In App Message: Notifly is not initialized yet.")
+            completionHandler(.noData)
+            return
+        }
         if let notiflyMessageType = userInfo["notifly_message_type"] as? String,
            let notiflyInAppMessageData = userInfo["notifly_in_app_message_data"] as? String,
            let data = Data(base64Encoded: notiflyInAppMessageData),
@@ -131,13 +135,14 @@ class NotificationsManager: NSObject {
 
     private func setup() {
         // Setup observer to listen for APN Device tokens.
-        apnDeviceTokenPub = Future { [weak self] promise in
-            self?.apnDeviceTokenPromise = promise
+        deviceTokenPub = Future { [weak self] promise in
+            self?.deviceTokenPromise = promise
         }.eraseToAnyPublisher()
 
         // Register Remote Notification.
-        if !UIApplication.shared.isRegisteredForRemoteNotifications {
+        if !(UIApplication.shared.isRegisteredForRemoteNotifications && Globals.isRegisteredAPNsInUserDefaults == true) {
             UIApplication.shared.registerForRemoteNotifications()
+            Globals.isRegisteredAPNsInUserDefaults = true
         }
     }
 
@@ -154,6 +159,9 @@ class NotificationsManager: NSObject {
     }
 
     private func logPushClickInternalEvent(pushData: [AnyHashable: Any], clickStatus: String) {
+        guard let notifly = try? Notifly.main else {
+            return
+        }
         if let campaignID = pushData["campaign_id"] as? String {
             let messageID = pushData["notifly_message_id"] ?? "" as String
             if let pushClickEventParams = [
@@ -163,7 +171,7 @@ class NotificationsManager: NSObject {
                 "notifly_message_id": messageID,
                 "click_status": clickStatus,
             ] as? [String: Any] {
-                Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.pushClickEventName, eventParams: pushClickEventParams)
+                notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.pushClickEventName, eventParams: pushClickEventParams)
             }
         }
     }
@@ -187,7 +195,13 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
         if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]?,
            let clickStatus = UIApplication.shared.applicationState == .active ? "foreground" : "background"
         {
-            guard let notiflyMessageType = pushData["notifly_message_type"] as? String else {
+            guard let notiflyMessageType = pushData["notifly_message_type"] as? String,
+                  notiflyMessageType == "push-notification"
+            else {
+                return
+            }
+            guard (try? Notifly.main) != nil else {
+                Logger.error("Fail to Log Notifly Push Message Click Event: Notifly is not initialized yet.")
                 return
             }
             if let urlString = pushData["url"] as? String,

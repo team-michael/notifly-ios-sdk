@@ -5,20 +5,15 @@ import UIKit
 public class Notifly {
 
     static var main: Notifly {
-        get {
+        get throws {
             guard let notifly = _main else {
-                fatalError("🔥 [Notifly Error] You must call `Notifly.initialize` before calling this method.")
+                throw NotiflyError.notInitialized
             }
             return notifly
         } 
-        set {
-            _main = newValue
-            isInitialized = true
-            Logger.info("🚀 Notifly SDK initialized.")
-        }
     }
 
-    private static var _main: Notifly?
+    static var _main: Notifly?
     static var isInitialized: Bool = false
     let projectID: String
 

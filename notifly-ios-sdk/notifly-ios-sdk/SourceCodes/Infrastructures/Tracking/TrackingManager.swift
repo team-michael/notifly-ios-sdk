@@ -110,16 +110,20 @@ class TrackingManager {
                               isInternal: Bool,
                               segmentationEventParamKeys: [String]?) -> AnyPublisher<TrackingRecord, Error>
     {
-        if let pub = Notifly.main.notificationsManager.apnDeviceTokenPub {
+        guard let notifly = try? Notifly.main else {
+            return Fail(outputType: TrackingRecord.self, failure: NotiflyError.notInitialized)
+                .eraseToAnyPublisher()
+        }
+        if let pub = notifly.notificationsManager.deviceTokenPub {
             return pub.tryMap { pushToken in
-                let userID = Notifly.main.userManager.getNotiflyUserID()
+                let userID = (try? notifly.userManager.getNotiflyUserID()) ?? ""
                 if let deviceID = AppHelper.getDeviceID(),
                    let appVersion = AppHelper.getAppVersion(),
                    let sdkVersion = AppHelper.getSDKVersion(),
                    let data = TrackingData(id: UUID().uuidString,
                                            name: eventName,
                                            notifly_user_id: userID,
-                                           external_user_id: Notifly.main.userManager.externalUserID,
+                                           external_user_id: notifly.userManager.externalUserID,
                                            time: Int(Date().timeIntervalSince1970),
                                            notifly_device_id: UUID(name: deviceID,
                                                                    namespace: TrackingConstant.HashNamespace.deviceID).notiflyStyleString,
@@ -127,14 +131,14 @@ class TrackingManager {
                                            device_token: pushToken,
                                            is_internal_event: isInternal,
                                            segmentation_event_param_keys: segmentationEventParamKeys,
-                                           project_id: Notifly.main.projectID,
+                                           project_id: notifly.projectID,
                                            platform: AppHelper.getDevicePlatform(),
                                            os_version: AppHelper.getiOSVersion(),
                                            app_version: appVersion,
                                            sdk_version: sdkVersion,
                                            sdk_type: AppHelper.getSDKType(),
                                            event_params: AppHelper.makeJsonCodable(eventParams)) as? TrackingData,
-                   let stringfiedData = String(data: try! JSONEncoder().encode(data), encoding: .utf8) as? String
+                   let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
 
                 {
                     return TrackingRecord(partitionKey: userID, data: stringfiedData)
