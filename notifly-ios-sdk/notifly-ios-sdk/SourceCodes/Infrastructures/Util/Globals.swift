@@ -60,4 +60,19 @@ enum Globals {
       UserDefaults.standard.string(forKey: notiflyDeviceIdKey)
     }
   }
+
+  private static var isRegisteredAPNsKey: String = "isRegisteredAPNs"
+  static var isRegisteredAPNsInUserDefaults: Bool? {
+    set {
+      if let value = newValue {
+        UserDefaults.standard.set(value, forKey: isRegisteredAPNsKey)
+      } else {
+        UserDefaults.standard.removeObject(forKey: isRegisteredAPNsKey)
+      }
+    }
+
+    get {
+      UserDefaults.standard.string(forKey: isRegisteredAPNsKey) != nil
+    }
+  }
 }

@@ -33,7 +33,7 @@ class TrackingTestViewController: UIViewController {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         
-        Notifly.main.trackingManager.eventRequestPayloadPublisher
+        try? Notifly.main.trackingManager.eventRequestPayloadPublisher
             .encode(encoder: encoder)
             .map { String(data: $0, encoding: .utf8) ?? "Encoding Error" }
             .catch { Just("Failed to encode Event payload with error: \($0)") }
@@ -42,7 +42,7 @@ class TrackingTestViewController: UIViewController {
             .store(in: &cancellables)
         
         // Inspect Response Payload.
-        Notifly.main.trackingManager.eventRequestResponsePublisher
+        try? Notifly.main.trackingManager.eventRequestResponsePublisher
             .receive(on: RunLoop.main)
             .sink { [weak self] resultingString in
                 self?.responsePayloadTextView.text = resultingString
@@ -110,13 +110,12 @@ class TrackingTestViewController: UIViewController {
             .split(separator: ",")
             .map(String.init)
         
-        requestPayloadTextView.text = "Queued the tracking event. Queued tracking events are fired within \(Notifly.main.trackingManager.trackingFiringInterval) seconds of interval."
+        requestPayloadTextView.text = "Queued the tracking event. Queued tracking events are fired within \(try? Notifly.main.trackingManager.trackingFiringInterval) seconds of interval."
         responsePayloadTextView.text = "N/A"
         
         // Fire Tracking
-        Notifly.main.trackingManager.track(eventName: eventName,
+        try? Notifly.trackEvent(eventName: eventName,
                                            eventParams: customEventParams,
-                                           isInternal: false,
                                            segmentationEventParamKeys: segmentationEventParamKeys)
     }
     

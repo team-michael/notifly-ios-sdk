@@ -8,23 +8,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication,
                      didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
     {
-
         FirebaseApp.configure()
-        
+
         Notifly.initialize(projectID: TestConstant.projectID, username: TestConstant.username, password: TestConstant.password)
-        
+
         UNUserNotificationCenter.current().delegate = self
-        
+
         // TODO: remove this code after testing. this section is only for testing.
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, error in
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
             if let error = error {
                 print("Failed to request authorization: \(error)")
             } else {
-                // print("Authorization granted: \(granted)")
-                DispatchQueue.main.async {
-                    UIApplication.shared.registerForRemoteNotifications()
-                }
+                print("Authorization granted: \(granted)")
+                // DispatchQueue.main.async {
+                    // UIApplication.shared.registerForRemoteNotifications()
+                // }
+
             }
+            Notifly.trackEvent(eventName: "HIHI")
         }
 
         return true
@@ -70,6 +71,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     {
         Notifly.userNotificationCenter(notificationCenter,
                                        willPresent: notification,
-                                       withCompletionHandler: completion)        
+                                       withCompletionHandler: completion)
     }
 }

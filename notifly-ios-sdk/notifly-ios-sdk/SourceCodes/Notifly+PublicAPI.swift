@@ -24,14 +24,14 @@ public extension Notifly {
             return
         }
 
-        main = Notifly(
+        _main = Notifly(
             projectID: projectID,
             username: username,
             password: password
         )
-        
-        if !isInitialized {
-            Logger.error("Fail to Initialize`.")
+
+        guard let main = _main else {
+            Logger.error("Failed to initialize Notifly.")
             return
         }
 
@@ -39,69 +39,89 @@ public extension Notifly {
             if let token = token,
                error == nil
             {
-                main.notificationsManager.apnDeviceTokenPromise?(.success(token))
+                try? main.notificationsManager.deviceTokenPromise?(.success(token))
             }
         }
 
-        main.trackingManager.trackSessionStartInternalEvent()
+        try? main.trackingManager.trackSessionStartInternalEvent()
     }
 
     static func application(_ application: UIApplication,
                             didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data)
     {
-        if !isInitialized {
-            Logger.error("You must call `Notifly.initialize` before calling this method.")
+        guard (try? main) != nil else {
+            Logger.error("Fail to Register apnsToken to Notifly: Notifly is not initialized yet.")
             return
         }
-        main.notificationsManager.application(application,
-                                              didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
+        try? main.notificationsManager.application(application,
+                                                   didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
     }
 
     static func application(_ application: UIApplication,
                             didFailToRegisterForRemoteNotificationsWithError error: Error)
     {
-        if !isInitialized {
-            Logger.error("You must call `Notifly.initialize` before calling this method.")
+        guard (try? main) != nil else {
+            Logger.error("Fail to Notify Notifly about the APNs token registration failure: Notifly is not initialized yet.")
             return
         }
-        main.notificationsManager.application(application,
-                                              didFailToRegisterForRemoteNotificationsWithError: error)
+        try? main.notificationsManager.application(application,
+                                                   didFailToRegisterForRemoteNotificationsWithError: error)
     }
 
     static func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        if !isInitialized {
-            Logger.error("You must call `Notifly.initialize` before calling this method.")
-            return
+        if let notiflyMessageType = userInfo["notifly_message_type"] as? String,
+           notiflyMessageType == "in-app-message"
+        {
+            guard (try? main) != nil else {
+                Logger.error("Fail to Received In-App Message: Notifly is not initialized yet.")
+                return
+            }
+            try? main.notificationsManager.application(application,
+                                                       didReceiveRemoteNotification: userInfo,
+                                                       fetchCompletionHandler: completionHandler)
         }
-        main.notificationsManager.application(application,
-                                              didReceiveRemoteNotification: userInfo,
-                                              fetchCompletionHandler: completionHandler)
     }
 
     static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                        didReceive response: UNNotificationResponse,
                                        withCompletionHandler completion: () -> Void)
     {
-        if !isInitialized {
-            Logger.error("You must call `Notifly.initialize` before calling this method.")
-            return
+        if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]?,
+           let clickStatus = UIApplication.shared.applicationState == .active ? "foreground" : "background"
+        {
+            guard let notiflyMessageType = pushData["notifly_message_type"] as? String,
+                  notiflyMessageType == "push-notification"
+            else {
+                return
+            }
+            guard (try? main) != nil else {
+                Logger.error("Fail to Log Notifly Push Message Click Event: Notifly is not initialized yet.")
+                return
+            }
+
+            try? main.notificationsManager.userNotificationCenter(notificationCenter,
+                                                                  didReceive: response,
+                                                                  withCompletionHandler: completion)
         }
-        main.notificationsManager.userNotificationCenter(notificationCenter,
-                                                         didReceive: response,
-                                                         withCompletionHandler: completion)
     }
 
     static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                        willPresent notification: UNNotification,
                                        withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void)
     {
-        if !isInitialized {
-            Logger.error("You must call `Notifly.initialize` before calling this method.")
-            return
+        if let pushData = notification.request.content.userInfo as [AnyHashable: Any]?,
+           let notiflyMessageType = pushData["notifly_message_type"] as? String,
+           notiflyMessageType == "push-notification"
+        {
+            guard (try? main) != nil else {
+                Logger.error("Fail to Show Notifly Foreground Message: Notifly is not initialized yet.")
+                return
+            }
+
+            try? main.notificationsManager.userNotificationCenter(notificationCenter,
+                                                                  willPresent: notification,
+                                                                  withCompletionHandler: completion)
         }
-        main.notificationsManager.userNotificationCenter(notificationCenter,
-                                                         willPresent: notification,
-                                                         withCompletionHandler: completion)
     }
 
     // MARK: - On-demand APIs
@@ -110,30 +130,34 @@ public extension Notifly {
                            eventParams: [String: Any]? = nil,
                            segmentationEventParamKeys: [String]? = nil)
     {
-        if !isInitialized {
-            Logger.error("You must call `Notifly.initialize` before calling this method.")
+        guard let main = try? main else {
+            Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.trackEvent.")
             return
         }
-        main.trackingManager.track(eventName: eventName,
-                                   eventParams: eventParams,
-                                   isInternal: false,
-                                   segmentationEventParamKeys: segmentationEventParamKeys)
+        try? main.trackingManager.track(eventName: eventName,
+                                        eventParams: eventParams,
+                                        isInternal: false,
+                                        segmentationEventParamKeys: segmentationEventParamKeys)
     }
 
     static func setUserId(userId: String? = nil) {
-        if !isInitialized {
-            Logger.error("You must call `Notifly.initialize` before calling this method.")
+        guard let main = try? main else {
+            if let userId = userId {
+                Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.setUserId.")
+            } else {
+                Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.setUserId to unregister user id.")
+            }
             return
         }
-        main.userManager.setExternalUserId(userId)
+        try? main.userManager.setExternalUserId(userId)
     }
 
     static func setUserProperties(userProperties: [String: Any]) {
-        if !isInitialized {
-            Logger.error("You must call `Notifly.initialize` before calling this method.")
+        guard let main = try? main else {
+            Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.setUserProperties.")
             return
         }
-        main.userManager.setUserProperties(userProperties)
+        try? main.userManager.setUserProperties(userProperties)
     }
 
     static func schedulePushNotification(title: String?,
@@ -141,13 +165,13 @@ public extension Notifly {
                                          url: URL,
                                          delay: TimeInterval)
     {
-        if !isInitialized {
-            Logger.error("You must call `Notifly.initialize` before calling this method.")
+        guard let main = try? main else {
+            Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.schedulePushNotification.")
             return
         }
-        main.notificationsManager.schedulePushNotification(title: title,
-                                                           body: body,
-                                                           url: url,
-                                                           delay: delay)
+        try? main.notificationsManager.schedulePushNotification(title: title,
+                                                                body: body,
+                                                                url: url,
+                                                                delay: delay)
     }
 }

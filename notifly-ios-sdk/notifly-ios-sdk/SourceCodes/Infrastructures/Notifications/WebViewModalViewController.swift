@@ -41,7 +41,11 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             "campaign_id": notiflyCampaignID,
             "notifly_message_id": notiflyMessageID,
         ] as? [String: Any] {
-            Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
+            guard let notifly = try? Notifly.main else {
+                Logger.error("Fail to Log In-App-Message Shown Event: Notifly is not initialized yet. ")
+                return
+            }
+            notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
         }
     }
 
@@ -89,6 +93,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
         if message.name == "notiflyInAppMessageEventHandler" {
+            guard let notifly = try? Notifly.main else {
+                Logger.error("Fail to Log In-App-Message Click Event: Notifly is not initialized yet. ")
+                return
+            }
             guard let body = message.body as? String,
                   let messageEventData = convertStringToJson(body) as [String: Any]? else { return }
 
@@ -113,16 +121,16 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
             switch type {
             case "close":
-                Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageCloseButtonClicked, eventParams: params)
+                notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageCloseButtonClicked, eventParams: params)
                 dismissCTATapped()
             case "main-button":
-                Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked, eventParams: params)
+                notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked, eventParams: params)
                 dismissCTATapped()
             case "hide_in_app_message":
-                Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked, eventParams: params)
+                notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked, eventParams: params)
                 dismissCTATapped()
             case "survey_submit_button":
-                Notifly.main.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageSurveySubmitButtonClicked, eventParams: params)
+                notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageSurveySubmitButtonClicked, eventParams: params)
                 dismissCTATapped()
             default:
                 return
