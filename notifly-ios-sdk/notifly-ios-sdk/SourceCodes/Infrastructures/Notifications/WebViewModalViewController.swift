@@ -50,9 +50,11 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     }
 
     func setupUI() -> Bool {
-        guard let modalSize = getModalSize() as? CGSize, let modalPositionConstraint = getModalPositionConstraint() as? NSLayoutConstraint, let webViewLayer = getWebViewLayer(modalSize: modalSize) as? CALayer? else {
+        guard let modalSize = getModalSize() as? CGSize, let webViewLayer = getWebViewLayer(modalSize: modalSize) as? CALayer? else {
             return false
         }
+        let modalPositionConstraint = getModalPositionConstraint() as NSLayoutConstraint
+        
 
         webView.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .clear
@@ -165,10 +167,23 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         }
         return nil
     }
+    
+    private func getModalSize() -> CGSize? {
+        let screenSize: CGSize
+        if let window = UIApplication.shared.keyWindow {
+            screenSize = window.bounds.size
+        } else {
+            screenSize = UIScreen.main.bounds.size
+        }
 
-    private func getViewWidth(modalProps: [String: Any]?, screenWidth: CGFloat, screenHeight: CGFloat) -> CGFloat {
+        let screenWidth = screenSize.width
+        let screenHeight = screenSize.height
+        if screenWidth == 0 || screenHeight == 0 {
+            return nil
+        }
+        
         var viewWidth: CGFloat = 0.0
-
+        var viewHeight: CGFloat = 0.0
         if let width = modalProps?["width"] as? CGFloat {
             viewWidth = width
         } else if let widthVW = modalProps?["width_vw"] as? CGFloat {
@@ -185,13 +200,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         if let maxWidth = modalProps?["max_width"] as? CGFloat, viewWidth > maxWidth {
             viewWidth = maxWidth
         }
-
-        return viewWidth
-    }
-
-    private func getViewHeight(modalProps: [String: Any]?, screenWidth: CGFloat, screenHeight: CGFloat) -> CGFloat {
-        var viewHeight: CGFloat = 0.0
-
+        
         if let height = modalProps?["height"] as? CGFloat {
             viewHeight = height
         } else if let heightVH = modalProps?["height_vh"] as? CGFloat {
@@ -208,31 +217,12 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         if let maxHeight = modalProps?["max_height"] as? CGFloat, viewHeight > maxHeight {
             viewHeight = maxHeight
         }
-
-        return viewHeight
-    }
-
-    private func getModalSize() -> CGSize? {
-        let screenSize: CGSize
-        if let window = UIApplication.shared.keyWindow {
-            screenSize = window.bounds.size
-        } else {
-            screenSize = UIScreen.main.bounds.size
-        }
-
-        let screenWidth = screenSize.width
-        let screenHeight = screenSize.height
-        if screenWidth == 0 || screenHeight == 0 {
-            return nil
-        }
-        guard let modalSize = CGSize(width: getViewWidth(modalProps: modalProps, screenWidth: screenWidth, screenHeight: screenHeight), height: getViewHeight(modalProps: modalProps, screenWidth: screenWidth, screenHeight: screenHeight)) as? CGSize else {
-            return nil
-        }
-
+        
+        let modalSize = CGSize(width: viewWidth, height: viewHeight)
         return modalSize
     }
 
-    private func getModalPositionConstraint() -> NSLayoutConstraint? {
+    private func getModalPositionConstraint() -> NSLayoutConstraint {
         if let modalProps = modalProps,
            let position = modalProps["position"] as? String,
            position == "bottom"

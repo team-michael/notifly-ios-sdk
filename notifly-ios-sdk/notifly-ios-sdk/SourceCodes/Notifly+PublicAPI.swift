@@ -68,7 +68,7 @@ public extension Notifly {
                                                    didFailToRegisterForRemoteNotificationsWithError: error)
     }
 
-    static func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+    static func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         if let notiflyMessageType = userInfo["notifly_message_type"] as? String,
            notiflyMessageType == "in-app-message"
         {
@@ -76,9 +76,20 @@ public extension Notifly {
                 Logger.error("Fail to Received In-App Message: Notifly is not initialized yet.")
                 return
             }
-            try? main.notificationsManager.application(application,
-                                                       didReceiveRemoteNotification: userInfo,
-                                                       fetchCompletionHandler: completionHandler)
+            try? main.notificationsManager.handleDataMessage(didReceiveRemoteNotification: userInfo)
+            completionHandler(.noData)
+        }
+    }
+
+    static func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
+        if let notiflyMessageType = userInfo["notifly_message_type"] as? String,
+           notiflyMessageType == "in-app-message"
+        {
+            guard (try? main) != nil else {
+                Logger.error("Fail to Received In-App Message: Notifly is not initialized yet.")
+                return
+            }
+            try? main.notificationsManager.handleDataMessage(didReceiveRemoteNotification: userInfo)
         }
     }
 

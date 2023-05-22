@@ -62,13 +62,9 @@ class NotificationsManager: NSObject {
         deviceTokenPromise?(.failure(error))
     }
 
-    func application(_: UIApplication,
-                     didReceiveRemoteNotification userInfo: [AnyHashable: Any],
-                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void)
-    {
+    func handleDataMessage(didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
         guard (try? Notifly.main) != nil else {
             Logger.error("Fail to receive Notifly In App Message: Notifly is not initialized yet.")
-            completionHandler(.noData)
             return
         }
         if let notiflyMessageType = userInfo["notifly_message_type"] as? String,
@@ -87,11 +83,8 @@ class NotificationsManager: NSObject {
                    "modalProps": decodedInAppMessageData["modal_properties"],
                ] as? [String: Any]
             {
-                showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData, completion: completionHandler)
+                showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
             }
-
-        } else {
-            completionHandler(.noData)
         }
     }
 
@@ -146,16 +139,20 @@ class NotificationsManager: NSObject {
         }
     }
 
-    private func showInAppMessage(notiflyInAppMessageData: [String: Any], completion: (UIBackgroundFetchResult) -> Void) {
+    private func showInAppMessage(notiflyInAppMessageData: [String: Any]) {
         guard let urlString = notiflyInAppMessageData["urlString"] as? String,
               let url = URL(string: urlString),
               let modalProps = notiflyInAppMessageData["modalProps"] as? [String: Any]
         else {
-            completion(.noData)
             return
         }
-        try? presentNotiflyInAppMessage(url: url, notiflyCampaignID: notiflyInAppMessageData["notiflyCampaignID"] as? String, notiflyMessageID: notiflyInAppMessageData["notiflyMessageID"] as? String, modalProps: modalProps)
-        completion(.noData)
+
+        do {
+            let vc = try WebViewModalViewController(url: url, notiflyCampaignID: notiflyInAppMessageData["notiflyCampaignID"] as? String, notiflyMessageID: notiflyInAppMessageData["notiflyMessageID"] as? String, modalProps: modalProps)
+            AppHelper.present(vc, completion: nil)
+        } catch {
+            Logger.error("Error presenting in-app message")
+        }
     }
 
     private func logPushClickInternalEvent(pushData: [AnyHashable: Any], clickStatus: String) {
@@ -173,15 +170,6 @@ class NotificationsManager: NSObject {
             ] as? [String: Any] {
                 notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.pushClickEventName, eventParams: pushClickEventParams)
             }
-        }
-    }
-
-    private func presentNotiflyInAppMessage(url: URL?, notiflyCampaignID: String?, notiflyMessageID: String?, modalProps: [String: Any]?) {
-        do {
-            let vc = try WebViewModalViewController(url: url, notiflyCampaignID: notiflyCampaignID, notiflyMessageID: notiflyMessageID, modalProps: modalProps)
-            AppHelper.present(vc, completion: nil)
-        } catch {
-            Logger.error("Error presenting in-app message: \(error.localizedDescription)")
         }
     }
 }
