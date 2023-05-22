@@ -123,8 +123,16 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             case "close":
                 notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageCloseButtonClicked, eventParams: params)
                 dismissCTATapped()
-            case "main-button":
-                notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked, eventParams: params)
+            case "main_button":
+                if let urlString = messageEventData["link"] as? String,
+                   let url = URL(string: urlString)
+                {
+                    UIApplication.shared.open(url, options: [:]) { _ in
+                        notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked, eventParams: params)
+                    }
+                } else {
+                    notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked, eventParams: params)
+                }
                 dismissCTATapped()
             case "hide_in_app_message":
                 notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked, eventParams: params)
