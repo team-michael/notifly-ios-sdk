@@ -137,6 +137,12 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             case "hide_in_app_message":
                 notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked, eventParams: params)
                 dismissCTATapped()
+                if let modalProps = modalProps as? [String: Any],
+                   let templateName = modalProps["template_name"] as? String,
+                   let newProperty = "hide_in_app_message_" + templateName as? String
+                {
+                    try? Notifly.main.userManager.setUserProperties([newProperty: true])
+                }
             case "survey_submit_button":
                 notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageSurveySubmitButtonClicked, eventParams: params)
                 dismissCTATapped()
