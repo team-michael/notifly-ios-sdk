@@ -137,6 +137,18 @@ class NotificationsManager: NSObject {
             UIApplication.shared.registerForRemoteNotifications()
             Globals.isRegisteredAPNsInUserDefaults = true
         }
+
+        if let apnsToken = Globals.notiflyAPNsTokenInUserDefaults {
+            Messaging.messaging().apnsToken = apnsToken
+            Messaging.messaging().token { token, error in
+                if let error = error {
+                    Logger.error("Error fetching FCM registration token: \(error)")
+                    self.deviceTokenPromise?(.failure(error))
+                } else if let token = token {
+                    self.deviceTokenPromise?(.success(token))
+                }
+            }
+        }
     }
 
     private func showInAppMessage(notiflyInAppMessageData: [String: Any]) {

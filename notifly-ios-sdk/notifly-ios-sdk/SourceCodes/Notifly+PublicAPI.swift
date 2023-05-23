@@ -53,7 +53,7 @@ public extension Notifly {
                             didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data)
     {
         guard (try? main) != nil else {
-            Logger.error("Fail to Register apnsToken to Notifly: Notifly is not initialized yet.")
+            Globals.notiflyAPNsTokenInUserDefaults = deviceToken
             return
         }
         try? main.notificationsManager.application(application,

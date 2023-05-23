@@ -61,18 +61,33 @@ enum Globals {
     }
   }
 
-  private static var isRegisteredAPNsKey: String = "isRegisteredAPNs"
-  static var isRegisteredAPNsInUserDefaults: Bool? {
+  private static var notiflyAPNsToken = "notifly_apnsToken"
+  static var notiflyAPNsTokenInUserDefaults: Data? {
     set {
       if let value = newValue {
-        UserDefaults.standard.set(value, forKey: isRegisteredAPNsKey)
+        UserDefaults.standard.set(value, forKey: notiflyAPNsToken)
       } else {
-        UserDefaults.standard.removeObject(forKey: isRegisteredAPNsKey)
+        UserDefaults.standard.removeObject(forKey: notiflyAPNsToken)
       }
     }
 
     get {
-      UserDefaults.standard.string(forKey: isRegisteredAPNsKey) != nil
+      UserDefaults.standard.data(forKey: notiflyDeviceIdKey)
+    }
+  }
+
+  private static var notiflyIsRegisteredAPNsKey: String = "notifly_isRegisteredAPNs"
+  static var isRegisteredAPNsInUserDefaults: Bool? {
+    set {
+      if let value = newValue {
+        UserDefaults.standard.set(value, forKey: notiflyIsRegisteredAPNsKey)
+      } else {
+        UserDefaults.standard.removeObject(forKey: notiflyIsRegisteredAPNsKey)
+      }
+    }
+
+    get {
+      UserDefaults.standard.string(forKey: notiflyIsRegisteredAPNsKey) != nil
     }
   }
 }
