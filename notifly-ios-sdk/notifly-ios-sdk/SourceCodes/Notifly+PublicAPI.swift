@@ -44,6 +44,7 @@ public extension Notifly {
         }
 
         try? main.trackingManager.trackSessionStartInternalEvent()
+        Logger.info("📡 Notifly SDK is successfully initialized.")
     }
 
     static func application(_ application: UIApplication,
