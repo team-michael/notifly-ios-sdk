@@ -40,6 +40,8 @@ public extension Notifly {
                error == nil
             {
                 try? main.notificationsManager.deviceTokenPromise?(.success(token))
+            } else {
+                try? main.notificationsManager.deviceTokenPromise?(.failure(error!))
             }
         }
 
