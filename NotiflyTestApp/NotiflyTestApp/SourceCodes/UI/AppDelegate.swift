@@ -9,9 +9,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                      didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
     {
         FirebaseApp.configure()
-
         Notifly.initialize(projectID: TestConstant.projectID, username: TestConstant.username, password: TestConstant.password)
-
         UNUserNotificationCenter.current().delegate = self
 
         // TODO: remove this code after testing. this section is only for testing.

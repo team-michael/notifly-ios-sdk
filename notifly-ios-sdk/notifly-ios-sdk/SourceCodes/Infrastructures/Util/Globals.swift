@@ -7,15 +7,7 @@
 
 import Foundation
 
-public enum SdkType: String {
-  case native
-  case react_native
-  case flutter
-}
-
 enum Globals {
-  static var notiflySdkType: SdkType = .native
-
   private static var notiflyAuthTokenKey = "notifly_authToken"
   static var authTokenInUserDefaults: String? {
     set {
@@ -58,21 +50,6 @@ enum Globals {
 
     get {
       UserDefaults.standard.string(forKey: notiflyDeviceIdKey)
-    }
-  }
-
-  private static var notiflyAPNsToken = "notifly_apnsToken"
-  static var notiflyAPNsTokenInUserDefaults: Data? {
-    set {
-      if let value = newValue {
-        UserDefaults.standard.set(value, forKey: notiflyAPNsToken)
-      } else {
-        UserDefaults.standard.removeObject(forKey: notiflyAPNsToken)
-      }
-    }
-
-    get {
-      UserDefaults.standard.data(forKey: notiflyDeviceIdKey)
     }
   }
 

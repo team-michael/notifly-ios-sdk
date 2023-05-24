@@ -17,7 +17,6 @@ class NotiflyAPI {
                     guard let notifly = try? Notifly.main else {
                         return
                     }
-                    Globals.authTokenInUserDefaults = authToken
                     notifly.auth.authorizationPub = Just(authToken)
                         .setFailureType(to: Error.self)
                         .eraseToAnyPublisher()
@@ -33,14 +32,35 @@ class NotiflyAPI {
             .flatMap {
                 if let data = $0.data(using: .utf8) as Data?,
                    let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let response = json["message"],
-                   let credentials = try? Notifly.main.auth.loginCred,
-                   response as! String == "The incoming token has expired"
+                   let response = json["message"]
                 {
-                    Globals.authTokenInUserDefaults = nil
-                    return self.authorizeSession(credentials: credentials)
-                        .flatMap { _ in self.trackEvent(event) }
-                        .eraseToAnyPublisher()
+                    if let credentials = try? Notifly.main.auth.loginCred,
+                       response as! String == "The incoming token has expired"
+                    {
+                        Globals.authTokenInUserDefaults = nil
+                        return self.authorizeSession(credentials: credentials)
+                            .flatMap { _ in self.retryTrackEvent(event) }
+                            .eraseToAnyPublisher()
+                    }
+                    Logger.error("Failed to track event with error: \(response)")
+                }
+                return Just($0)
+                    .setFailureType(to: Error.self)
+                    .eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
+    }
+
+    func retryTrackEvent(_ event: TrackingEventProtocol) -> AnyPublisher<String, Error> {
+        request(to: "https://12lnng07q2.execute-api.ap-northeast-2.amazonaws.com/prod/records", method: .POST, authTokenRequired: true)
+            .map { $0.set(body: event) }
+            .flatMap { $0.buildAndFireWithRawJSONResponseType() }
+            .flatMap {
+                if let data = $0.data(using: .utf8) as Data?,
+                   let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let response = json["message"]
+                {
+                    Logger.error("Failed to track event with error: \(response)")
                 }
                 return Just($0)
                     .setFailureType(to: Error.self)
