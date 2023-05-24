@@ -53,7 +53,7 @@ public extension Notifly {
                             didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data)
     {
         guard (try? main) != nil else {
-            Globals.notiflyAPNsTokenInUserDefaults = deviceToken
+            Messaging.messaging().apnsToken = deviceToken
             return
         }
         try? main.notificationsManager.application(application,
@@ -64,7 +64,7 @@ public extension Notifly {
                             didFailToRegisterForRemoteNotificationsWithError error: Error)
     {
         guard (try? main) != nil else {
-            Logger.error("Fail to Notify Notifly about the APNs token registration failure: Notifly is not initialized yet.")
+            Logger.error("Failed to Register for Remote Notifications: However, you can track events and set user properties without registering for remote notifications.")
             return
         }
         try? main.notificationsManager.application(application,
@@ -172,6 +172,19 @@ public extension Notifly {
             return
         }
         try? main.userManager.setUserProperties(userProperties)
+    }
+
+    static func setSdkType(type: String) {
+        if let sdkType = SdkType(rawValue: type) {
+            Notifly.sdkType = sdkType
+            Logger.info("Notifly SDK type is set to \(sdkType.rawValue).")
+        } else {
+            Logger.error("Notifly SDK type is invalid. Please set Notifly.sdkType to one of the following: react_native, flutter, native (default)")
+        }
+    }
+
+    static func setSdkVersion(version: String) {
+        Notifly.sdkVersion = version
     }
 
     static func schedulePushNotification(title: String?,

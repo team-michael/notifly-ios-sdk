@@ -12,9 +12,10 @@ public class Notifly {
             return notifly
         } 
     }
-
     static var _main: Notifly?
-    static var isInitialized: Bool = false
+    static var sdkVersion: String? = Bundle(for: Notifly.self).infoDictionary?["CFBundleShortVersionString"] as? String
+    static var sdkType: SdkType = .native
+
     let projectID: String
 
     let auth: Auth
@@ -38,7 +39,11 @@ public class Notifly {
         notificationsManager = NotificationsManager()
         trackingManager = TrackingManager(projectID: projectID)
         userManager = UserManager()
-
+    }
     }
 
+public enum SdkType: String {
+  case native = "native"
+  case react_native = "react_native"
+  case flutter = "flutter"
 }

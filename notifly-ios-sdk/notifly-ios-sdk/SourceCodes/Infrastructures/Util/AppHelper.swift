@@ -38,7 +38,7 @@ class AppHelper {
     }
 
     static func getSDKVersion() -> String? {
-        guard let version = Bundle(for: Notifly.self).infoDictionary?["CFBundleShortVersionString"] as? String else {
+        guard let version = Notifly.sdkVersion else {
             Logger.error("Failed to get the Notifly SDK version.")
             return nil
         }
@@ -54,7 +54,7 @@ class AppHelper {
     }
 
     static func getSDKType() -> String {
-        return Globals.notiflySdkType.rawValue
+        return Notifly.sdkType.rawValue
     }
 
     static func makeJsonCodable(_ jsonData: [String: Any]?) -> [String: AnyCodable]? {

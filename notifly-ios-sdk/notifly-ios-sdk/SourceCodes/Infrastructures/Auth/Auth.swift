@@ -18,15 +18,13 @@ class Auth {
     }
 
     private func setup() {
-        // Kick off the auth task and log the sucess state.
         authorizationRequestCancellable = authorizationPub.sink(
             receiveCompletion: { completion in
                 if case let .failure(error) = completion {
                     Logger.error("Authorization error: \(error)")
                 }
             },
-            receiveValue: { authToken in
-                Logger.info("Successfully authorized with username and password")
+            receiveValue: { _ in
             }
         )
     }
