@@ -8,6 +8,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication,
                      didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
     {
+
         FirebaseApp.configure()
         Notifly.initialize(projectID: TestConstant.projectID, username: TestConstant.username, password: TestConstant.password)
         UNUserNotificationCenter.current().delegate = self
@@ -18,10 +19,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 print("Failed to request authorization: \(error)")
             } else {
                 print("Authorization granted: \(granted)")
-                // DispatchQueue.main.async {
-                    // UIApplication.shared.registerForRemoteNotifications()
-                // }
-
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
             }
             Notifly.trackEvent(eventName: "HIHI")
         }

@@ -15,8 +15,8 @@ class NotificationsManager: NSObject {
         get {
             if let pub = _deviceTokenPub {
                 return pub
-                    .catch { error in
-                        Logger.error("Failed to get APNs Token with error: \(error)\n")
+                    .catch { _ in
+                        Logger.error("Failed to get APNs Token with error: You don't register APNs token to notifly yet.")
                         return Just("").setFailureType(to: Error.self)
                     }
                     .eraseToAnyPublisher()
@@ -31,6 +31,7 @@ class NotificationsManager: NSObject {
     }
 
     var deviceTokenPromise: Future<String, Error>.Promise?
+    private var deviceTokenPromiseTimeoutInterval: TimeInterval = 5.0
 
     // MARK: Lifecycle
 
@@ -46,11 +47,13 @@ class NotificationsManager: NSObject {
     {
         Messaging.messaging().apnsToken = deviceToken
         Messaging.messaging().token { token, error in
-            if let error = error {
-                Logger.error("Error fetching FCM registration token: \(error)")
-                self.deviceTokenPromise?(.failure(error))
-            } else if let token = token {
+            if let token = token, error == nil {
                 self.deviceTokenPromise?(.success(token))
+                self.deviceTokenPub = Just(token).setFailureType(to: Error.self).eraseToAnyPublisher()
+            } else {
+                Logger.error("Error fetching FCM registration token: \(error)")
+                self.deviceTokenPromise?(.failure(NotiflyError.deviceTokenError))
+                self.deviceTokenPub = Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
             }
         }
     }
@@ -130,6 +133,11 @@ class NotificationsManager: NSObject {
         // Setup observer to listen for APN Device tokens.
         deviceTokenPub = Future { [weak self] promise in
             self?.deviceTokenPromise = promise
+            DispatchQueue.main.asyncAfter(deadline: .now() + (self?.deviceTokenPromiseTimeoutInterval ?? 0.0)) {
+                if let promise = self?.deviceTokenPromise {
+                    promise(.failure(NotiflyError.promiseTimeout))
+                }
+            }
         }.eraseToAnyPublisher()
 
         // Register Remote Notification.
@@ -137,7 +145,6 @@ class NotificationsManager: NSObject {
             UIApplication.shared.registerForRemoteNotifications()
             Globals.isRegisteredAPNsInUserDefaults = true
         }
-
     }
 
     private func showInAppMessage(notiflyInAppMessageData: [String: Any]) {
