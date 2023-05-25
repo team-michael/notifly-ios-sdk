@@ -107,7 +107,7 @@ public extension Notifly {
                 return
             }
             guard (try? main) != nil else {
-                Logger.error("Fail to Log Notifly Push Message Click Event: Notifly is not initialized yet.")
+                Notifly.coldStartNotificationData = pushData
                 return
             }
 
