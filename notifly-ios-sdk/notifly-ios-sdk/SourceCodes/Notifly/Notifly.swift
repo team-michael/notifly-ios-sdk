@@ -3,18 +3,19 @@ import Foundation
 import UIKit
 
 public class Notifly {
-
     static var main: Notifly {
         get throws {
             guard let notifly = _main else {
                 throw NotiflyError.notInitialized
             }
             return notifly
-        } 
+        }
     }
+
     static var _main: Notifly?
     static var sdkVersion: String? = Bundle(for: Notifly.self).infoDictionary?["CFBundleShortVersionString"] as? String
     static var sdkType: SdkType = .native
+    static var launchOptions: [UIApplication.LaunchOptionsKey: Any]?
 
     let projectID: String
 
@@ -39,11 +40,25 @@ public class Notifly {
         notificationsManager = NotificationsManager()
         trackingManager = TrackingManager(projectID: projectID)
         userManager = UserManager()
-    }
+        processColdStartWithRemoteNotification()
     }
 
+    func processColdStartWithRemoteNotification() {
+        if let launchOptions = Notifly.launchOptions,
+           let pushData = launchOptions[.remoteNotification] as? [AnyHashable: Any]
+        {
+            guard let notiflyMessageType = pushData["notifly_message_type"] as? String,
+                  notiflyMessageType == "push-notification"
+            else {
+                return
+            }
+            notificationsManager.handleNotificationClickEvent(pushData: pushData, clickStatus: "quit")
+        }
+    }
+}
+
 public enum SdkType: String {
-  case native = "native"
-  case react_native = "react_native"
-  case flutter = "flutter"
+    case native
+    case react_native
+    case flutter
 }

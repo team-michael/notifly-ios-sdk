@@ -127,6 +127,22 @@ class NotificationsManager: NSObject {
         }
     }
 
+    func handleNotificationClickEvent(pushData: [AnyHashable: Any], clickStatus: String) {
+        guard (try? Notifly.main) != nil else {
+            Logger.error("Fail to Log Notifly Push Message Click Event: Notifly is not initialized yet.")
+            return
+        }
+        if let urlString = pushData["url"] as? String,
+           let url = URL(string: urlString)
+        {
+            UIApplication.shared.open(url, options: [:]) { _ in
+                self.logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
+            }
+        } else {
+            logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
+        }
+    }
+
     // MARK: Private Methods
 
     private func setup() {
@@ -196,20 +212,7 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
             else {
                 return
             }
-            guard (try? Notifly.main) != nil else {
-                Logger.error("Fail to Log Notifly Push Message Click Event: Notifly is not initialized yet.")
-                return
-            }
-            if let urlString = pushData["url"] as? String,
-               let url = URL(string: urlString)
-            {
-                UIApplication.shared.open(url, options: [:]) { _ in
-                    self.logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
-                }
-            } else {
-                logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
-            }
-            UIApplication.shared.applicationIconBadgeNumber = 0
+            handleNotificationClickEvent(pushData: pushData, clickStatus: clickStatus)
         }
         completion()
     }

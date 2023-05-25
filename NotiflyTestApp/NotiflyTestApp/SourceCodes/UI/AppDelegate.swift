@@ -6,10 +6,11 @@ import UserNotifications
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication,
-                     didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
     {
 
         FirebaseApp.configure()
+        Notifly.setLaunchOptions(launchOptions: launchOptions)
         Notifly.initialize(projectID: TestConstant.projectID, username: TestConstant.username, password: TestConstant.password)
         UNUserNotificationCenter.current().delegate = self
 
@@ -23,9 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     UIApplication.shared.registerForRemoteNotifications()
                 }
             }
-            Notifly.trackEvent(eventName: "HIHI")
         }
-
         return true
     }
 

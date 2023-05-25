@@ -185,6 +185,14 @@ public extension Notifly {
         Notifly.sdkVersion = version
     }
 
+    static func setLaunchOptions(launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
+        Notifly.launchOptions = launchOptions
+        guard let notifly = try? main else {
+            return
+        }
+        notifly.processColdStartWithRemoteNotification()
+    }
+
     static func schedulePushNotification(title: String?,
                                          body: String?,
                                          url: URL,
