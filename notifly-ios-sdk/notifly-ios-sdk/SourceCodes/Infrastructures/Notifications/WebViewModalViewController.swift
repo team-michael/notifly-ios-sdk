@@ -56,8 +56,6 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         let modalPositionConstraint = getModalPositionConstraint() as NSLayoutConstraint
 
         webView.translatesAutoresizingMaskIntoConstraints = false
-        // view.backgroundColor = .clear
-        // set view's background opacity to 0.2
         if let backgroundOpacity = modalProps?["backgroundOpacity"] as? CGFloat,
            backgroundOpacity >= 0 && backgroundOpacity <= 1
         {
