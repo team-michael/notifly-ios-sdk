@@ -145,6 +145,20 @@ class NotificationsManager: NSObject {
             UIApplication.shared.registerForRemoteNotifications()
             Globals.isRegisteredAPNsInUserDefaults = true
         }
+
+        if let pushData = Notifly.coldStartNotificationData {
+            let clickStatus = "background"
+            if let urlString = pushData["url"] as? String,
+               let url = URL(string: urlString)
+            {
+                UIApplication.shared.open(url, options: [:]) { _ in
+                    self.logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
+                }
+            } else {
+                logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
+            }
+            Notifly.coldStartNotificationData = nil
+        }
     }
 
     private func showInAppMessage(notiflyInAppMessageData: [String: Any]) {
@@ -197,6 +211,7 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
                 return
             }
             guard (try? Notifly.main) != nil else {
+                Notifly.coldStartNotificationData = pushData
                 Logger.error("Fail to Log Notifly Push Message Click Event: Notifly is not initialized yet.")
                 return
             }
@@ -209,7 +224,6 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
             } else {
                 logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
             }
-            UIApplication.shared.applicationIconBadgeNumber = 0
         }
         completion()
     }

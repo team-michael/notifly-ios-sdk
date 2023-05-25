@@ -15,6 +15,7 @@ public class Notifly {
     static var _main: Notifly?
     static var sdkVersion: String? = Bundle(for: Notifly.self).infoDictionary?["CFBundleShortVersionString"] as? String
     static var sdkType: SdkType = .native
+    static var coldStartNotificationData: [AnyHashable: Any]?
 
     let projectID: String
 
