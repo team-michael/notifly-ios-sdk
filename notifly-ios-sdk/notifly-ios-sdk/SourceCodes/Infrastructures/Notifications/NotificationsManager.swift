@@ -212,7 +212,6 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
             }
             guard (try? Notifly.main) != nil else {
                 Notifly.coldStartNotificationData = pushData
-                Logger.error("Fail to Log Notifly Push Message Click Event: Notifly is not initialized yet.")
                 return
             }
             if let urlString = pushData["url"] as? String,
