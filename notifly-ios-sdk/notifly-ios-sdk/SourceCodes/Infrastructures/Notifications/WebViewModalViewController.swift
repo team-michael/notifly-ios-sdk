@@ -54,10 +54,18 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             return false
         }
         let modalPositionConstraint = getModalPositionConstraint() as NSLayoutConstraint
-        
 
         webView.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .clear
+        // view.backgroundColor = .clear
+        // set view's background opacity to 0.2
+        if let backgroundOpacity = modalProps?["backgroundOpacity"] as? CGFloat,
+           backgroundOpacity >= 0 && backgroundOpacity <= 1
+        {
+            view.backgroundColor = UIColor.black.withAlphaComponent(CGFloat(backgroundOpacity))
+        } else {
+            view.backgroundColor = UIColor.black.withAlphaComponent(0.2)
+        }
+
         webView.layer.mask = webViewLayer
         view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissCTATapped)))
         view.addSubview(webView)
@@ -167,7 +175,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         }
         return nil
     }
-    
+
     private func getModalSize() -> CGSize? {
         let screenSize: CGSize
         if let window = UIApplication.shared.keyWindow {
@@ -181,7 +189,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         if screenWidth == 0 || screenHeight == 0 {
             return nil
         }
-        
+
         var viewWidth: CGFloat = 0.0
         var viewHeight: CGFloat = 0.0
         if let width = modalProps?["width"] as? CGFloat {
@@ -200,7 +208,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         if let maxWidth = modalProps?["max_width"] as? CGFloat, viewWidth > maxWidth {
             viewWidth = maxWidth
         }
-        
+
         if let height = modalProps?["height"] as? CGFloat {
             viewHeight = height
         } else if let heightVH = modalProps?["height_vh"] as? CGFloat {
@@ -217,7 +225,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         if let maxHeight = modalProps?["max_height"] as? CGFloat, viewHeight > maxHeight {
             viewHeight = maxHeight
         }
-        
+
         let modalSize = CGSize(width: viewWidth, height: viewHeight)
         return modalSize
     }
