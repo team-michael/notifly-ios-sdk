@@ -48,8 +48,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void)
     {
         Notifly.application(application,
-                            didReceiveRemoteNotification: userInfo,
-                            fetchCompletionHandler: completionHandler)
+                            didReceiveRemoteNotification: userInfo)
     }
 }
 
@@ -59,8 +58,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 withCompletionHandler completion: () -> Void)
     {
         Notifly.userNotificationCenter(notificationCenter,
-                                       didReceive: response,
-                                       withCompletionHandler: completion)
+                                       didReceive: response)
     }
 
     func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,

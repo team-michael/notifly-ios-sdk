@@ -69,19 +69,6 @@ public extension Notifly {
                                                    didFailToRegisterForRemoteNotificationsWithError: error)
     }
 
-    static func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        if let notiflyMessageType = userInfo["notifly_message_type"] as? String,
-           notiflyMessageType == "in-app-message"
-        {
-            guard (try? main) != nil else {
-                Logger.error("Fail to Received In-App Message: Notifly is not initialized yet.")
-                return
-            }
-            try? main.notificationsManager.handleDataMessage(didReceiveRemoteNotification: userInfo)
-            completionHandler(.noData)
-        }
-    }
-
     static func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
         if let notiflyMessageType = userInfo["notifly_message_type"] as? String,
            notiflyMessageType == "in-app-message"
@@ -95,8 +82,7 @@ public extension Notifly {
     }
 
     static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
-                                       didReceive response: UNNotificationResponse,
-                                       withCompletionHandler completion: () -> Void)
+                                       didReceive response: UNNotificationResponse)
     {
         if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]?,
            let clickStatus = UIApplication.shared.applicationState == .active ? "foreground" : "background"
@@ -112,8 +98,7 @@ public extension Notifly {
             }
 
             try? main.notificationsManager.userNotificationCenter(notificationCenter,
-                                                                  didReceive: response,
-                                                                  withCompletionHandler: completion)
+                                                                  didReceive: response)
         }
     }
 
