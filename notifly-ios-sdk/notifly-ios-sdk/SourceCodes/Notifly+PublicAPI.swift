@@ -14,7 +14,7 @@ public extension Notifly {
      Initializes the Notifly SDK. This method is to be called as soon as the app laucnhes. (AppDelegate.applicationDidFinishLaunching)
      */
 
-    static func initialize(
+    @objc static func initialize(
         projectID: String,
         username: String,
         password: String
@@ -47,7 +47,7 @@ public extension Notifly {
         Logger.info("📡 Notifly SDK is successfully initialized.")
     }
 
-    static func application(_ application: UIApplication,
+    @objc static func application(_ application: UIApplication,
                             didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data)
     {
         guard (try? main) != nil else {
@@ -58,7 +58,7 @@ public extension Notifly {
                                                    didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
     }
 
-    static func application(_ application: UIApplication,
+    @objc static func application(_ application: UIApplication,
                             didFailToRegisterForRemoteNotificationsWithError error: Error)
     {
         guard (try? main) != nil else {
@@ -69,7 +69,7 @@ public extension Notifly {
                                                    didFailToRegisterForRemoteNotificationsWithError: error)
     }
 
-    static func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
+    @objc static func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
         if let notiflyMessageType = userInfo["notifly_message_type"] as? String,
            notiflyMessageType == "in-app-message"
         {
@@ -81,7 +81,7 @@ public extension Notifly {
         }
     }
 
-    static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
+    @objc static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                        didReceive response: UNNotificationResponse)
     {
         if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]?,
@@ -102,7 +102,7 @@ public extension Notifly {
         }
     }
 
-    static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
+    @objc static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                        willPresent notification: UNNotification,
                                        withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void)
     {
@@ -123,7 +123,7 @@ public extension Notifly {
 
     // MARK: - On-demand APIs
 
-    static func trackEvent(eventName: String,
+    @objc static func trackEvent(eventName: String,
                            eventParams: [String: Any]? = nil,
                            segmentationEventParamKeys: [String]? = nil)
     {
@@ -137,7 +137,7 @@ public extension Notifly {
                                         segmentationEventParamKeys: segmentationEventParamKeys)
     }
 
-    static func setUserId(userId: String? = nil) {
+    @objc static func setUserId(userId: String? = nil) {
         guard let main = try? main else {
             if let userId = userId {
                 Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.setUserId.")
@@ -149,7 +149,7 @@ public extension Notifly {
         try? main.userManager.setExternalUserId(userId)
     }
 
-    static func setUserProperties(userProperties: [String: Any]) {
+    @objc static func setUserProperties(userProperties: [String: Any]) {
         guard let main = try? main else {
             Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.setUserProperties.")
             return
@@ -157,7 +157,7 @@ public extension Notifly {
         try? main.userManager.setUserProperties(userProperties)
     }
 
-    static func setSdkType(type: String) {
+    @objc static func setSdkType(type: String) {
         if let sdkType = SdkType(rawValue: type) {
             Notifly.sdkType = sdkType
             Logger.info("Notifly SDK type is set to \(sdkType.rawValue).")
@@ -166,11 +166,11 @@ public extension Notifly {
         }
     }
 
-    static func setSdkVersion(version: String) {
+    @objc static func setSdkVersion(version: String) {
         Notifly.sdkVersion = version
     }
 
-    static func schedulePushNotification(title: String?,
+    @objc static func schedulePushNotification(title: String?,
                                          body: String?,
                                          url: URL,
                                          delay: TimeInterval)

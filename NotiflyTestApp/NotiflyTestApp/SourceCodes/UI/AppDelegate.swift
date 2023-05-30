@@ -49,6 +49,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     {
         Notifly.application(application,
                             didReceiveRemoteNotification: userInfo)
+        completionHandler(.noData)
     }
 }
 
@@ -59,6 +60,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     {
         Notifly.userNotificationCenter(notificationCenter,
                                        didReceive: response)
+        completion()
     }
 
     func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
