@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import UIKit
 
-@objc public class Notifly {
+@objc public class Notifly: NSObject {
 
     static var main: Notifly {
         get throws {
