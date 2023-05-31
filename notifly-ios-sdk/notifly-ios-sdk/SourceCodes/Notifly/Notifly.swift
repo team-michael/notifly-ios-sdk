@@ -43,7 +43,7 @@ import UIKit
     }
     }
 
-public enum SdkType: String {
+@objc public enum SdkType: String {
   case native = "native"
   case react_native = "react_native"
   case flutter = "flutter"

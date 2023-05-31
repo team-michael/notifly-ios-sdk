@@ -7,7 +7,7 @@ import UIKit
 /**
  Contains all available Notifly SDK Public APIs.
  */
-public extension Notifly {
+@objc public extension Notifly {
     // MARK: - Required Setup API configurations
 
     /**
