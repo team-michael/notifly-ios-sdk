@@ -15,7 +15,7 @@ class UserManager {
     private var _notiflyUserIDCache: String?
 
     init() {
-        externalUserID = Globals.externalUserIdInUserDefaults
+        externalUserID = NotiflyCustomUserDefaults.externalUserIdInUserDefaults
     }
     
     func setExternalUserId(_ newExternalUserID: String?) {
@@ -28,7 +28,7 @@ class UserManager {
             setUserProperties([TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID])
         } else {
             externalUserID = nil
-            Globals.externalUserIdInUserDefaults = nil
+            NotiflyCustomUserDefaults.externalUserIdInUserDefaults = nil
             notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.removeUserPropertiesEventName, eventParams: nil)
         }
     }
@@ -44,7 +44,7 @@ class UserManager {
             userProperties[TrackingConstant.Internal.previousNotiflyUserID] = try? getNotiflyUserID()
             
             externalUserID = newExternalUserID
-            Globals.externalUserIdInUserDefaults = newExternalUserID
+            NotiflyCustomUserDefaults.externalUserIdInUserDefaults = newExternalUserID
             _notiflyUserIDCache = nil
         }
         notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.setUserPropertiesEventName, eventParams: userProperties)

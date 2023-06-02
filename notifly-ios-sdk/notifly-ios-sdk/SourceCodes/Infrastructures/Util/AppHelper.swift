@@ -12,10 +12,10 @@ class AppHelper {
     }
 
     static func getDeviceID() -> String? {
-        if let deviceID = Globals.deviceIdInUserDefaults {
+        if let deviceID = NotiflyCustomUserDefaults.deviceIdInUserDefaults {
             return deviceID
         } else if let deviceID = retrieveUniqueIdFromKeychain() as? String {
-            Globals.deviceIdInUserDefaults = deviceID
+            NotiflyCustomUserDefaults.deviceIdInUserDefaults = deviceID
             return deviceID
         } else {
             guard let deviceUUID = UIDevice.current.identifierForVendor else {
@@ -23,7 +23,7 @@ class AppHelper {
                 return nil
             }
             if saveUniqueIdToKeychain(deviceID: deviceUUID.notiflyStyleString) as Bool {
-                Globals.deviceIdInUserDefaults = deviceUUID.notiflyStyleString
+                NotiflyCustomUserDefaults.deviceIdInUserDefaults = deviceUUID.notiflyStyleString
             }
             return deviceUUID.notiflyStyleString
         }

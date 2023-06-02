@@ -5,7 +5,7 @@ class NotiflyAPI {
     // MARK: Public Methods
 
     func authorizeSession(credentials: Auth.Credentials) -> AnyPublisher<String, Error> {
-        if let authToken = Globals.authTokenInUserDefaults {
+        if let authToken = NotiflyCustomUserDefaults.authTokenInUserDefaults {
             return Just(authToken)
                 .setFailureType(to: Error.self)
                 .eraseToAnyPublisher()
@@ -37,7 +37,7 @@ class NotiflyAPI {
                     if let credentials = try? Notifly.main.auth.loginCred,
                        response as! String == "The incoming token has expired"
                     {
-                        Globals.authTokenInUserDefaults = nil
+                        NotiflyCustomUserDefaults.authTokenInUserDefaults = nil
                         return self.authorizeSession(credentials: credentials)
                             .flatMap { _ in self.retryTrackEvent(event) }
                             .eraseToAnyPublisher()

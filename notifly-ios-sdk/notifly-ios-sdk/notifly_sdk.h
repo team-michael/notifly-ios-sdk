@@ -6,7 +6,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <UserNotifications/UserNotifications.h>
 
 //! Project version number for notifly_ios_sdk.
 FOUNDATION_EXPORT double notifly_ios_sdkVersionNumber;

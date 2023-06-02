@@ -141,9 +141,9 @@ class NotificationsManager: NSObject {
         }.eraseToAnyPublisher()
 
         // Register Remote Notification.
-        if !(UIApplication.shared.isRegisteredForRemoteNotifications && Globals.isRegisteredAPNsInUserDefaults == true) {
+        if !(UIApplication.shared.isRegisteredForRemoteNotifications && NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults == true) {
             UIApplication.shared.registerForRemoteNotifications()
-            Globals.isRegisteredAPNsInUserDefaults = true
+            NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults = true
         }
 
         if let pushData = Notifly.coldStartNotificationData {
