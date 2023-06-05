@@ -4,4 +4,4 @@
 ![Generic badge](https://img.shields.io/badge/platform-ios-blue.svg)
 
 ## 앱에서 Notifly SDK 사용하기
-https://docs.notifly.tech/ko/developer-guide/client-sdk/ios-sdk를 참고해주세요.
+[Notifly 개발자 문서](https://docs.notifly.tech/ko/developer-guide/client-sdk/ios-sdk)를 참고해주세요.
