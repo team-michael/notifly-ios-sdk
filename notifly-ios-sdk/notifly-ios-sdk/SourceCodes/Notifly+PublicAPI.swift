@@ -35,6 +35,20 @@ import UIKit
             return
         }
 
+        if let pushData = Notifly.coldStartNotificationData {
+            let clickStatus = "background"
+            if let urlString = pushData["url"] as? String,
+               let url = URL(string: urlString)
+            {
+                UIApplication.shared.open(url, options: [:]) { _ in
+                    main.notificationsManager.logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
+                }
+            } else {
+                main.notificationsManager.logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
+            }
+            Notifly.coldStartNotificationData = nil
+        }
+
         Messaging.messaging().token { token, error in
             if let token = token,
                error == nil

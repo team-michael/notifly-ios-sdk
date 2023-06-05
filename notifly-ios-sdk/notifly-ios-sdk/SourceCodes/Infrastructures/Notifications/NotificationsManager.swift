@@ -145,20 +145,6 @@ class NotificationsManager: NSObject {
             UIApplication.shared.registerForRemoteNotifications()
             NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults = true
         }
-
-        if let pushData = Notifly.coldStartNotificationData {
-            let clickStatus = "background"
-            if let urlString = pushData["url"] as? String,
-               let url = URL(string: urlString)
-            {
-                UIApplication.shared.open(url, options: [:]) { _ in
-                    self.logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
-                }
-            } else {
-                logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
-            }
-            Notifly.coldStartNotificationData = nil
-        }
     }
 
     private func showInAppMessage(notiflyInAppMessageData: [String: Any]) {
@@ -177,7 +163,7 @@ class NotificationsManager: NSObject {
         }
     }
 
-    private func logPushClickInternalEvent(pushData: [AnyHashable: Any], clickStatus: String) {
+    func logPushClickInternalEvent(pushData: [AnyHashable: Any], clickStatus: String) {
         guard let notifly = try? Notifly.main else {
             return
         }
