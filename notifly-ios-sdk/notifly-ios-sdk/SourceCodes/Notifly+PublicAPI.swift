@@ -15,7 +15,7 @@ import UIKit
      */
 
     @objc static func initialize(
-        projectID: String,
+        projectId: String,
         username: String,
         password: String
     ) {
@@ -25,7 +25,7 @@ import UIKit
         }
 
         _main = Notifly(
-            projectID: projectID,
+            projectID: projectId,
             username: username,
             password: password
         )

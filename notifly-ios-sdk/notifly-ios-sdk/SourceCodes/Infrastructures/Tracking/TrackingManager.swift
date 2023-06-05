@@ -30,7 +30,7 @@ class TrackingManager {
 
         // Collect the events from the `eventPublisher` queue at specified interval and fire the event.
         eventRequestPayloadPublisher = eventPublisher
-            .collect(.byTimeOrCount(RunLoop.current, .seconds(trackingFiringInterval), maxTrackingRecordsPerRequest))
+            .collect(.byTimeOrCount(DispatchQueue.global(), .seconds(trackingFiringInterval), maxTrackingRecordsPerRequest))
             .map { records in
                 TrackingEvent(records: records)
             }
