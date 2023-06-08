@@ -74,6 +74,13 @@ class TrackingManager {
         }
     }
 
+    func trackSetDevicePropertiesInternalEvent(properties: [String: Any]) {
+        return self.trackInternalEvent(
+            eventName: TrackingConstant.Internal.setDevicePropertiesEventName,
+            eventParams: properties
+        )
+    }
+
     func trackInternalEvent(eventName: String, eventParams: [String: Any]?) {
         return track(eventName: eventName,
                      eventParams: eventParams,

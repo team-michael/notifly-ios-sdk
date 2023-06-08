@@ -10,7 +10,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     {
 
         FirebaseApp.configure()
-        Notifly.initialize(projectID: TestConstant.projectID, username: TestConstant.username, password: TestConstant.password)
+        Notifly.initialize(projectId: TestConstant.projectID, username: TestConstant.username, password: TestConstant.password)
         UNUserNotificationCenter.current().delegate = self
 
         // TODO: remove this code after testing. this section is only for testing.
@@ -33,7 +33,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data)
     {
         Notifly.application(application,
-                            didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
+                    didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
     }
 
     func application(_ application: UIApplication,

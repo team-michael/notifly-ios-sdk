@@ -12,6 +12,7 @@ enum TrackingConstant {
         // MARK: Session
 
         static let sessionStartEventName = "session_start"
+        static let setDevicePropertiesEventName = "set_device_properties"
 
         // MARK: User Properties
 
