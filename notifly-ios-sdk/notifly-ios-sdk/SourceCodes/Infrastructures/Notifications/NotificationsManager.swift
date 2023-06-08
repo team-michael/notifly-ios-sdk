@@ -62,7 +62,11 @@ class NotificationsManager: NSObject {
             }
         }
     }
-
+    
+    func setDeviceTokenPub(token: String) {
+        self.deviceTokenPub = Just(token).setFailureType(to: Error.self).eraseToAnyPublisher()
+    }
+    
     func application(_: UIApplication,
                      didFailToRegisterForRemoteNotificationsWithError error: Error)
     {

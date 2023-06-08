@@ -54,10 +54,10 @@ import UIKit
                error == nil
             {
                 try? main.notificationsManager.deviceTokenPromise?(.success(token))
+                main.notificationsManager.setDeviceTokenPub(token: token)
             }
+            try? main.trackingManager.trackSessionStartInternalEvent()
         }
-
-        try? main.trackingManager.trackSessionStartInternalEvent()
         Logger.info("📡 Notifly SDK is successfully initialized.")
     }
 
