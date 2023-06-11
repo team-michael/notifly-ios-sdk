@@ -13,19 +13,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Notifly.initialize(projectId: TestConstant.projectID, username: TestConstant.username, password: TestConstant.password)
         UNUserNotificationCenter.current().delegate = self
 
-        // TODO: remove this code after testing. this section is only for testing.
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
-            if let error = error {
-                print("Failed to request authorization: \(error)")
-            } else {
-                print("Authorization granted: \(granted)")
-                DispatchQueue.main.async {
-                    UIApplication.shared.registerForRemoteNotifications()
-                }
-            }
-            Notifly.trackEvent(eventName: "HIHI")
-        }
-
         return true
     }
 
