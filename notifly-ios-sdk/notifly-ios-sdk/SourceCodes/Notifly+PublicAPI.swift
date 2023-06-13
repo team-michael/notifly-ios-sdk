@@ -58,6 +58,7 @@ import UIKit
             }
             try? main.trackingManager.trackSessionStartInternalEvent()
         }
+        main.inAppMessageManager.syncState()
         Logger.info("📡 Notifly SDK is successfully initialized.")
     }
 
