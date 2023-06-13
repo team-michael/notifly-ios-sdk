@@ -40,11 +40,10 @@ struct ModalProperties {
     let borderTopLeftRadius: Float?
     let borderTopRightRadius: Float?
     
-    init(properties: [String: Any]) throws {
+    init?(properties: [String: Any]) {
         guard let name = properties["template_name"] as? String else {
-            throw NotiflyError.unexpectedNil("template_name is not exist.")
+            return nil
         }
-              
         templateName = name
         position = properties["position"] as? String
         width = properties["width"] as? Float

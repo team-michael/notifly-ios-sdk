@@ -92,6 +92,7 @@ class InAppMessageManager {
     }
     
     private func constructCampaign(campaignData: [[String:Any]]) -> [Campaign] {
+        
         return campaignData.compactMap { campaignDict -> Campaign? in
             guard let id = campaignDict["id"] as? String,
                 let testing = campaignDict["testing"] as? Bool,
@@ -101,8 +102,7 @@ class InAppMessageManager {
                 let messageDict = campaignDict["message"] as? [String: Any],
                   let htmlURL = messageDict["html_url"] as? String,
                   let modalPropertiesDict = messageDict["modal_properties"] as? [String: Any],
-                  let modalProperties = try? ModalProperties(properties: modalPropertiesDict),
-                  let message = try? Message(htmlURL: htmlURL, modalProperties: modalProperties),
+                  let modalProperties = ModalProperties(properties: modalPropertiesDict),
                 let segmentInfoDict = campaignDict["segment_info"] as? [String: Any],
                 let channel = campaignDict["channel"] as? String,
                 let segmentType = campaignDict["segment_type"] as? String,
@@ -111,6 +111,9 @@ class InAppMessageManager {
             else {
                 return nil
             }
+            
+            let message = Message(htmlURL: htmlURL, modalProperties: modalProperties)
+            
             var whitelist: [String]?
             if testing == true {
                 guard let whiteList = campaignDict["whitelist"] as? [String] else {
