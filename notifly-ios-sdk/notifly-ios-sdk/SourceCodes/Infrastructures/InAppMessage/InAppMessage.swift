@@ -16,13 +16,14 @@ struct CampaignData {
 }
 
 struct EventData {
-    var eventCounts: [EventIntermediateCount]
+    var eventCounts: [String: EventIntermediateCount]
 }
 
 struct EventIntermediateCount {
     let name: String
     let dt: String
-    let count: Int
+    var count: Int
+    let eventParams: [String: Any]
 }
 
 

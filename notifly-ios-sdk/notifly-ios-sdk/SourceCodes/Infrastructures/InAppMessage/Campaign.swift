@@ -117,8 +117,7 @@ struct EventBasedCondition {
     let value: Int
     
     init(condition: [String: Any]) throws {
-        guard
-              let event = condition["event"] as? String,
+        guard let event = condition["event"] as? String,
               let eventConditionType = condition["event_condition_type"] as? String,
               let secondaryValue = condition["secondary_value"] as? Float,
               let `operator` = condition["operator"] as? String,
