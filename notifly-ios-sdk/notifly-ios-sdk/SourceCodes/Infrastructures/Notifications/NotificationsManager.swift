@@ -15,9 +15,9 @@ class NotificationsManager: NSObject {
         get {
             if let pub = _deviceTokenPub {
                 return pub
-                    .catch { _ in
+                    .catch { _ -> AnyPublisher<String, Error> in
                         Logger.error("Failed to get APNs Token with error: You don't register APNs token to notifly yet.")
-                        return Just("").setFailureType(to: Error.self)
+                        return Just("").setFailureType(to: Error.self).eraseToAnyPublisher()
                     }
                     .eraseToAnyPublisher()
             } else {

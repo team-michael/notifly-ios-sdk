@@ -3,7 +3,7 @@ import Foundation
 
 class NotiflyAPI {
     // MARK: Public Methods
-
+    
     func authorizeSession(credentials: Auth.Credentials) -> AnyPublisher<String, Error> {
         if let authToken = NotiflyCustomUserDefaults.authTokenInUserDefaults {
             return Just(authToken)
@@ -11,7 +11,7 @@ class NotiflyAPI {
                 .eraseToAnyPublisher()
         } else {
             return request(to: "https://api.notifly.tech/authorize", method: .POST, authTokenRequired: false)
-                .map { $0.set(body: credentials) }
+                .map { $0.set(body: ApiRequestBody(payload: .AuthCredentials(credentials))) }
                 .flatMap { (builder: RequestBuilder) -> AnyPublisher<String, Error> in builder.buildAndFire() }
                 .handleEvents(receiveOutput: { authToken in
                     guard let notifly = try? Notifly.main else {
@@ -25,12 +25,12 @@ class NotiflyAPI {
         }
     }
 
-    func trackEvent(_ event: TrackingEventProtocol) -> AnyPublisher<String, Error> {
+    func trackEvent(_ event: TrackingEvent) -> AnyPublisher<String, Error> {
         request(to: "https://12lnng07q2.execute-api.ap-northeast-2.amazonaws.com/prod/records", method: .POST, authTokenRequired: true)
-            .map { $0.set(body: event) }
+            .map { $0.set(body: ApiRequestBody(payload: .TrackingEvent(event))) }
             .flatMap { $0.buildAndFireWithRawJSONResponseType() }
-            .flatMap {
-                if let data = $0.data(using: .utf8) as Data?,
+            .flatMap { response -> AnyPublisher<String, Error> in
+                if let data = response.data(using: .utf8) as Data?,
                    let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                    let response = json["message"]
                 {
@@ -44,25 +44,25 @@ class NotiflyAPI {
                     }
                     Logger.error("Failed to track event with error: \(response)")
                 }
-                return Just($0)
+                return Just(response)
                     .setFailureType(to: Error.self)
                     .eraseToAnyPublisher()
             }
             .eraseToAnyPublisher()
     }
 
-    func retryTrackEvent(_ event: TrackingEventProtocol) -> AnyPublisher<String, Error> {
+    func retryTrackEvent(_ event: TrackingEvent) -> AnyPublisher<String, Error> {
         request(to: "https://12lnng07q2.execute-api.ap-northeast-2.amazonaws.com/prod/records", method: .POST, authTokenRequired: true)
-            .map { $0.set(body: event) }
+            .map { $0.set(body: ApiRequestBody(payload: .TrackingEvent(event))) }
             .flatMap { $0.buildAndFireWithRawJSONResponseType() }
-            .flatMap {
-                if let data = $0.data(using: .utf8) as Data?,
+            .flatMap { response -> AnyPublisher<String, Error> in
+                if let data = response.data(using: .utf8) as Data?,
                    let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                    let response = json["message"]
                 {
                     Logger.error("Failed to track event with error: \(response)")
                 }
-                return Just($0)
+                return Just(response)
                     .setFailureType(to: Error.self)
                     .eraseToAnyPublisher()
             }
