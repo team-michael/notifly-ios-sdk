@@ -13,7 +13,7 @@ extension NotiflyAPI {
         var url: URL?
         var method: RequestMethod?
         var headers: [String: String] = ["Content-Type": "application/json"]
-        var body: Codable?
+        var body: ApiRequestBody?
         
         func set(url: URL?) -> RequestBuilder {
             self.url = url
@@ -30,7 +30,7 @@ extension NotiflyAPI {
             return self
         }
         
-        func set(body: Codable?) -> RequestBuilder {
+        func set(body: ApiRequestBody?) -> RequestBuilder {
             self.body = body
             return self
         }
@@ -88,7 +88,7 @@ extension NotiflyAPI {
             headers.forEach({ (key, value) in
                 request.setValue(value, forHTTPHeaderField: key)
             })
-            
+
             if let body = body {
                 request.httpBody = try? JSONEncoder().encode(body)
             }

@@ -27,7 +27,6 @@ class TrackingManager {
 
     init(projectID: String) {
         self.projectID = projectID
-
         // Collect the events from the `eventPublisher` queue at specified interval and fire the event.
         eventRequestPayloadPublisher = eventPublisher
             .collect(.byTimeOrCount(DispatchQueue.global(), .seconds(trackingFiringInterval), maxTrackingRecordsPerRequest))
@@ -45,7 +44,6 @@ class TrackingManager {
     }
 
     // MARK: Methods
-
     func trackSessionStartInternalEvent() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             var authStatus: Int = 0
