@@ -14,33 +14,29 @@ class InAppMessageManager {
     private var campaginData: CampaignData = CampaignData(inAppMessageCampaigns: [])
     private var eventData: EventData = EventData(eventCounts: [:])
     
-    private var _syncStateFinishedPub: AnyPublisher<Bool, Error>?
-    private(set) var syncStateFinishedPub: AnyPublisher<Bool, Error>? {
-        // TODO: Remove this temp workaround once APNs token is available.
+    private var _syncStateFinishedPub: AnyPublisher<Void, Error>?
+    private(set) var syncStateFinishedPub: AnyPublisher<Void, Error>? {
         get {
             if let pub = _syncStateFinishedPub {
                 return pub
                     .catch { _ in
-                        Logger.error("FAIL TRACK EVENT!!")
-                        return Just(false).setFailureType(to: Error.self)
+                        return Just(()).setFailureType(to: Error.self)
                     }
                     .eraseToAnyPublisher()
             } else {
-                Logger.error("FAIL TRACK EVENT")
-                return Just(false).setFailureType(to: Error.self).eraseToAnyPublisher()
+                return Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
             }
         }
         set {
             _syncStateFinishedPub = newValue
         }
     }
-    private var syncStateFinishedPromise: Future<Bool, Error>.Promise?
+    private var syncStateFinishedPromise: Future<Void, Error>.Promise?
     init() {
         syncStateFinishedPub = Future { [weak self] promise in
             self?.syncStateFinishedPromise = promise
             DispatchQueue.main.asyncAfter(deadline: .now() + (5.0)) {
                 if let promise = self?.syncStateFinishedPromise {
-                    Logger.error("FAIL nn")
                     promise(.failure(NotiflyError.promiseTimeout))
                 }
             }
@@ -88,8 +84,7 @@ class InAppMessageManager {
             case .failure(let error):
                 Logger.error(error.localizedDescription)
             }
-            
-           
+            // self.syncStateFinishedPromise?(.success(()))
         }
     }
     
@@ -157,8 +152,6 @@ class InAppMessageManager {
         } else {
             self.eventData.eventCounts[eicID] = EventIntermediateCount(name: eventName, dt: dt, count: 1, eventParams: (eventParams ?? [:]))
         }
-        Logger.error("UPDATE")
-        print(self.eventData.eventCounts)
     }
     
     private func constructCampaignData(campaignData: [[String:Any]]) -> Void {

@@ -73,7 +73,7 @@ class TrackingManager {
     }
 
     func trackSetDevicePropertiesInternalEvent(properties: [String: Any]) {
-        return self.trackInternalEvent(
+        return trackInternalEvent(
             eventName: TrackingConstant.Internal.setDevicePropertiesEventName,
             eventParams: properties
         )
@@ -98,34 +98,31 @@ class TrackingManager {
             trackingEventName = eventName
         }
         try? Notifly.main.inAppMessageManager.updateEventData(eventName: trackingEventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
-        
+
         guard let syncStateFinishedPub = try? Notifly.main.inAppMessageManager.syncStateFinishedPub else {
-            Logger.error("SYNC NIL")
+            Logger.error("Fail to track Event. \(trackingEventName)")
             return
         }
-        syncStateFinishedPub.tryMap { _ in
+
+        syncStateFinishedPub.flatMap { _ in
             self.createTrackingRecord(eventName: eventName,
-                             eventParams: eventParams,
-                             isInternal: isInternal,
-                             segmentationEventParamKeys: segmentationEventParamKeys)
-            .sink(receiveCompletion: { completion in
-                      if case let .failure(error) = completion {
-                          Logger.error("Failed to Track Event \(eventName). Error: \(error)")
-                      }
-                  },
-                  receiveValue: { [weak self] record in
-                      if isInternal {
-                          self?.internalEventPublisher.send(record)
-                      } else {
-                          self?.eventPublisher.send(record)
-                      }
-                  })
-            .store(in: &self.cancellables)
-        }.mapError { error -> Error in
-            Logger.error("HIHI")
-            return NotiflyError.unexpectedNil("TrackingRecord Data is invalid")
+                                      eventParams: eventParams,
+                                      isInternal: isInternal,
+                                      segmentationEventParamKeys: segmentationEventParamKeys)
         }
-        
+        .sink(receiveCompletion: { completion in
+                  if case let .failure(error) = completion {
+                      Logger.error("Failed to Track Event \(trackingEventName). Error: \(error)")
+                  }
+              },
+              receiveValue: { [weak self] record in
+                  if isInternal {
+                      self?.internalEventPublisher.send(record)
+                  } else {
+                      self?.eventPublisher.send(record)
+                  }
+              })
+        .store(in: &cancellables)
     }
 
     func createTrackingRecord(eventName: String,
@@ -141,8 +138,6 @@ class TrackingManager {
             return Fail(outputType: TrackingRecord.self, failure: NotiflyError.unexpectedNil("APN Device Token is nil"))
                 .eraseToAnyPublisher()
         }
-        Logger.error("TRACKEVENT")
-        
         return deviceTokenPub.tryMap { pushToken in
             let userID = (try? notifly.userManager.getNotiflyUserID()) ?? ""
             if let deviceID = AppHelper.getDeviceID(),
@@ -167,7 +162,7 @@ class TrackingManager {
                                        sdk_type: AppHelper.getSDKType(),
                                        event_params: AppHelper.makeJsonCodable(eventParams)) as? TrackingData,
                let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
-                
+
             {
                 return TrackingRecord(partitionKey: userID, data: stringfiedData)
             } else {
@@ -181,8 +176,8 @@ class TrackingManager {
         }
         .eraseToAnyPublisher()
     }
-    // MARK: - Private Methods
 
+    // MARK: - Private Methods
     private func setup() {
         // Submit the tracking event to API & log result.
         eventRequestPayloadPublisher
