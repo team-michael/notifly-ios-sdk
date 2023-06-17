@@ -5,22 +5,21 @@
 //  Created by 김대성 on 2023/06/12.
 //
 
-import Foundation
 import Combine
-
+import Foundation
 
 class InAppMessageManager {
-    private var userData: UserData = UserData(userProperties: [:])
-    private var campaginData: CampaignData = CampaignData(inAppMessageCampaigns: [])
-    private var eventData: EventData = EventData(eventCounts: [:])
-    
+    private var userData: UserData = .init(userProperties: [:])
+    private var campaginData: CampaignData = .init(inAppMessageCampaigns: [])
+    private var eventData: EventData = .init(eventCounts: [:])
+
     private var _syncStateFinishedPub: AnyPublisher<Void, Error>?
     private(set) var syncStateFinishedPub: AnyPublisher<Void, Error>? {
         get {
             if let pub = _syncStateFinishedPub {
                 return pub
                     .catch { _ in
-                        return Just(()).setFailureType(to: Error.self)
+                        Just(()).setFailureType(to: Error.self)
                     }
                     .eraseToAnyPublisher()
             } else {
@@ -31,11 +30,12 @@ class InAppMessageManager {
             _syncStateFinishedPub = newValue
         }
     }
+
     private var syncStateFinishedPromise: Future<Void, Error>.Promise?
     init() {
         syncStateFinishedPub = Future { [weak self] promise in
             self?.syncStateFinishedPromise = promise
-            DispatchQueue.main.asyncAfter(deadline: .now() + (5.0)) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
                 if let promise = self?.syncStateFinishedPromise {
                     promise(.failure(NotiflyError.promiseTimeout))
                 }
@@ -48,60 +48,62 @@ class InAppMessageManager {
             return
         }
         guard let projectID = notifly.projectID as String?,
-              let notiflyUserID = (try? notifly.userManager.getNotiflyUserID()) else {
+              let notiflyUserID = (try? notifly.userManager.getNotiflyUserID())
+        else {
             Logger.error("Fail to sync user state because Notifly is not initalized yet.")
             return
         }
-        
+
         requestSync(projectID: projectID, notiflyUserID: notiflyUserID) { result in
             switch result {
-            case .success(let data):
-                do{
+            case let .success(data):
+                do {
                     if let decodedData = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                         if let userData = decodedData["userData"] as? [String: Any],
-                           let userProperties = userData["user_properties"] as? [String: Any] {
+                           let userProperties = userData["user_properties"] as? [String: Any]
+                        {
                             self.userData.userProperties = userProperties
                         }
-                        
+
                         if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
                             self.constructCampaignData(campaignData: campaignData)
                         }
-                        
+
                         if let eicData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
                             self.constructEventIntermediateCountsData(eicData: eicData)
                             print(self.eventData)
                         }
-                        
+
                         try? Notifly.trackEvent(eventName: "HI1")
-                        try? Notifly.trackEvent(eventName: "HI2", eventParams: ["kings": "kk", "KING": 2], segmentationEventParamKeys: ["KING"] )
+                        try? Notifly.trackEvent(eventName: "HI2", eventParams: ["kings": "kk", "KING": 2], segmentationEventParamKeys: ["KING"])
                     } else {
                         Logger.error("Fail to sync user state")
                     }
-                    
+
                 } catch {
                     Logger.error(error.localizedDescription)
                 }
-            case .failure(let error):
+            case let .failure(error):
                 Logger.error(error.localizedDescription)
             }
-            // self.syncStateFinishedPromise?(.success(()))
+            self.syncStateFinishedPromise?(.success(()))
         }
     }
-    
+
     func requestSync(projectID: String, notiflyUserID: String, completion: @escaping (Result<Data, Error>) -> Void) {
         var urlComponents = URLComponents(string: InAppMessageConstant.syncStateURL)
         urlComponents?.queryItems = [
             URLQueryItem(name: "projectID", value: projectID),
-            URLQueryItem(name: "notiflyUserID", value: notiflyUserID)
+            URLQueryItem(name: "notiflyUserID", value: notiflyUserID),
         ]
-        
+
         if let url = urlComponents?.url {
-            let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+            let task = URLSession.shared.dataTask(with: url) { data, response, error in
                 if let error = error {
                     completion(.failure(error))
                     return
                 }
-                
+
                 if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                     if let data = data {
                         completion(.success(data))
@@ -114,22 +116,22 @@ class InAppMessageManager {
                     completion(.failure(apiRequestError))
                 }
             }
-            
+
             task.resume()
         } else {
             let invalidURLError = NSError(domain: "Invalid URL", code: 0, userInfo: nil)
             completion(.failure(invalidURLError))
         }
     }
-    
-    private func updateUserProperties(properties: [String: Any]) -> Void {
-        self.userData.userProperties.merge(properties) { (_, new) in new }
+
+    private func updateUserProperties(properties: [String: Any]) {
+        userData.userProperties.merge(properties) { _, new in new }
     }
-    
+
     func updateEventData(eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) {
-        let dt = self.getCurrentDate()
+        let dt = getCurrentDate()
         var eicID = eventName + InAppMessageConstant.idSeparator + dt + InAppMessageConstant.idSeparator
-        
+
         if let segmentationEventParamKeys = segmentationEventParamKeys,
            let eventParams = eventParams,
            segmentationEventParamKeys.count > 0,
@@ -139,43 +141,56 @@ class InAppMessageManager {
            let valueStr = String(describing: value) as? String
         {
             eicID += keyField + InAppMessageConstant.idSeparator + valueStr
-            self.updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [keyField: eventParams[keyField]])
+            updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [keyField: eventParams[keyField]])
         } else {
             eicID += InAppMessageConstant.idSeparator
-            self.updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
+            updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
         }
     }
-    
-    private func updateEventCountsInEventData(eicID: String, eventName: String, dt: String, eventParams: [String:Any]?) -> Void {
-        if var eicToUpdate = self.eventData.eventCounts[eicID] as? EventIntermediateCount {
+
+    private func updateEventCountsInEventData(eicID: String, eventName: String, dt: String, eventParams: [String: Any]?) {
+        if var eicToUpdate = eventData.eventCounts[eicID] as? EventIntermediateCount {
             eicToUpdate.count += 1
         } else {
-            self.eventData.eventCounts[eicID] = EventIntermediateCount(name: eventName, dt: dt, count: 1, eventParams: (eventParams ?? [:]))
+            eventData.eventCounts[eicID] = EventIntermediateCount(name: eventName, dt: dt, count: 1, eventParams: eventParams ?? [:])
         }
     }
-    
-    private func constructCampaignData(campaignData: [[String:Any]]) -> Void {
-        self.campaginData.inAppMessageCampaigns = campaignData.compactMap { campaignDict -> Campaign? in
+
+    private func inspectCampaignToTriggerAndGetCampaignData(eventName: String) -> Campaign {
+        guard let campaigns = campaginData.inAppMessageCampaigns else {
+            return nil
+        }
+        let campaignsToTrigger = campaigns.filter { $0.id == eventName }
+        if campaignsToTrigger.count == 0 {
+            return nil
+        }
+
+        // TODO: support multiple campaigns, now only support one campaign
+        return campaignsToTrigger[0]
+    }
+
+    private func constructCampaignData(campaignData: [[String: Any]]) {
+        campaginData.inAppMessageCampaigns = campaignData.compactMap { campaignDict -> Campaign? in
             guard let id = campaignDict["id"] as? String,
-                let testing = campaignDict["testing"] as? Bool,
-                let triggeringEvent = campaignDict["triggering_event"] as? String,
-                let statusRawValue = campaignDict["status"] as? Int,
+                  let testing = campaignDict["testing"] as? Bool,
+                  let triggeringEvent = campaignDict["triggering_event"] as? String,
+                  let statusRawValue = campaignDict["status"] as? Int,
                   let campaignStatus = CampaignStatus(rawValue: statusRawValue),
-                let messageDict = campaignDict["message"] as? [String: Any],
+                  let messageDict = campaignDict["message"] as? [String: Any],
                   let htmlURL = messageDict["html_url"] as? String,
                   let modalPropertiesDict = messageDict["modal_properties"] as? [String: Any],
                   let modalProperties = ModalProperties(properties: modalPropertiesDict),
-                let segmentInfoDict = campaignDict["segment_info"] as? [String: Any],
-                let channel = campaignDict["channel"] as? String,
-                let segmentType = campaignDict["segment_type"] as? String,
+                  let segmentInfoDict = campaignDict["segment_info"] as? [String: Any],
+                  let channel = campaignDict["channel"] as? String,
+                  let segmentType = campaignDict["segment_type"] as? String,
                   channel == "in-app-message",
                   segmentType == "condition"
             else {
                 return nil
             }
-            
+
             let message = Message(htmlURL: htmlURL, modalProperties: modalProperties)
-            
+
             var whitelist: [String]?
             if testing == true {
                 guard let whiteList = campaignDict["whitelist"] as? [String] else {
@@ -185,7 +200,7 @@ class InAppMessageManager {
             } else {
                 whitelist = nil
             }
-            
+
             var campaignStart: Int
             if let starts = campaignDict["starts"] as? [Int] {
                 campaignStart = starts[0]
@@ -194,21 +209,20 @@ class InAppMessageManager {
             }
             let delay = campaignDict["delay"] as? Int
             let campaignEnd = campaignDict["end"] as? Int
-            
+
             let segmentInfo = self.constructSegmnentInfo(segmentInfoDict: segmentInfoDict)
 
             return Campaign(id: id, channel: channel, segmentType: segmentType, message: message, segmentInfo: segmentInfo, triggeringEvent: triggeringEvent, campaignStart: campaignStart, campaignEnd: campaignEnd, delay: delay, status: campaignStatus, testing: testing, whitelist: whitelist)
-            
         }
     }
-    
+
     private func constructSegmnentInfo(segmentInfoDict: [String: Any]) -> SegmentInfo? {
         guard let rawGroups = segmentInfoDict["groups"] as? [[String: Any]], rawGroups.count > 0 else {
             return SegmentInfo(groups: nil, groupOperator: nil)
         }
         let groups = rawGroups.compactMap { groupDict -> Group? in
             guard let conditionDictionaries = groupDict["conditions"] as? [[String: Any]] else {
-                    return nil
+                return nil
             }
             guard let conditions = conditionDictionaries.compactMap({ conditionDict -> Condition? in
                 guard let unit = conditionDict["unit"] as? String else {
@@ -230,17 +244,17 @@ class InAppMessageManager {
                 return nil
             }
             let conditionOperator = (groupDict["condition_operator"] as? String) ?? InAppMessageConstant.segmentInfoDefaultConditionOperator
-            return Group(conditions: conditions.compactMap{ $0 }, conditionOperator: conditionOperator)
+            return Group(conditions: conditions.compactMap { $0 }, conditionOperator: conditionOperator)
         }
         let groupOperator = segmentInfoDict["group_operator"] as? String ?? InAppMessageConstant.segmentInfoDefaultGroupOperator
-        return SegmentInfo(groups: groups.compactMap{ $0 }, groupOperator: groupOperator)
+        return SegmentInfo(groups: groups.compactMap { $0 }, groupOperator: groupOperator)
     }
-    
-    private func constructEventIntermediateCountsData(eicData: [[String:Any]]) -> Void {
+
+    private func constructEventIntermediateCountsData(eicData: [[String: Any]]) {
         guard eicData.count > 0 else {
             return
         }
-        self.eventData.eventCounts = eicData.compactMap { eic -> (String, EventIntermediateCount)? in
+        eventData.eventCounts = eicData.compactMap { eic -> (String, EventIntermediateCount)? in
             guard let name = eic["name"] as? String,
                   let dt = eic["dt"] as? String,
                   let countStr = eic["count"] as? String,
@@ -251,18 +265,19 @@ class InAppMessageManager {
             }
             var eicID = name + InAppMessageConstant.idSeparator + dt + InAppMessageConstant.idSeparator
             if eventParams.count > 0,
-                let key = eventParams.keys.first,
-                let value = eventParams.values.first,
-                let valueStr = String(describing: value) as? String{
+               let key = eventParams.keys.first,
+               let value = eventParams.values.first,
+               let valueStr = String(describing: value) as? String
+            {
                 eicID += key + InAppMessageConstant.idSeparator + valueStr
             } else {
                 eicID += InAppMessageConstant.idSeparator
             }
-            
+
             return (eicID, EventIntermediateCount(name: name, dt: dt, count: count, eventParams: eventParams))
-        }.compactMap{ $0 }.reduce(into: [:]) { $0[$1.0] = $1.1 }
+        }.compactMap { $0 }.reduce(into: [:]) { $0[$1.0] = $1.1 }
     }
-    
+
     private func getCurrentDate() -> String {
         let currentDate = Date()
         let dateFormatter = DateFormatter()
