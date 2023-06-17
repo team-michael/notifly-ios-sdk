@@ -39,6 +39,7 @@ struct ModalProperties {
     let borderBottomRightRadius: Float?
     let borderTopLeftRadius: Float?
     let borderTopRightRadius: Float?
+    let backgroundOpacity: Float?
     
     init?(properties: [String: Any]) {
         guard let name = properties["template_name"] as? String else {
@@ -60,6 +61,7 @@ struct ModalProperties {
         borderBottomRightRadius = properties["borderBottomRightRadius"] as? Float
         borderTopLeftRadius = properties["borderTopLeftRadius"] as? Float
         borderTopRightRadius = properties["borderTopRightRadius"] as? Float
+        backgroundOpacity = (properties["backgroudOpacity"] ?? 0.2) as? Float
     }
 }
 

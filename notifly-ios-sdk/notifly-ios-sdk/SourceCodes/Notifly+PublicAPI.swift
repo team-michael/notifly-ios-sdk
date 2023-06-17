@@ -84,15 +84,8 @@ import UIKit
     }
 
     @objc static func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
-        if let notiflyMessageType = userInfo["notifly_message_type"] as? String,
-           notiflyMessageType == "in-app-message"
-        {
-            guard (try? main) != nil else {
-                Logger.error("Fail to Received In-App Message: Notifly is not initialized yet.")
-                return
-            }
-            try? main.notificationsManager.handleDataMessage(didReceiveRemoteNotification: userInfo)
-        }
+        Logger.error("Deprecated Method.")
+        return
     }
 
     @objc static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,

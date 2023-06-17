@@ -26,4 +26,9 @@ struct EventIntermediateCount {
     let eventParams: [String: Any]
 }
 
-
+struct InAppMessageData {
+    let notiflyMessageId: String
+    let notiflyCampaignId: String
+    let modalProps: ModalProperties
+    let url: URL
+}

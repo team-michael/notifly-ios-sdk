@@ -7,6 +7,7 @@
 
 import Combine
 import Foundation
+import UIKit
 
 class InAppMessageManager {
     private var userData: UserData = .init(userProperties: [:])
@@ -67,6 +68,8 @@ class InAppMessageManager {
 
                         if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
                             self.constructCampaignData(campaignData: campaignData)
+                            Logger.error("DD")
+                            print(self.campaginData.inAppMessageCampaigns)
                         }
 
                         if let eicData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
@@ -146,6 +149,18 @@ class InAppMessageManager {
             eicID += InAppMessageConstant.idSeparator
             updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
         }
+        if WebViewModalViewController.openedInAppMessageCount == 0,
+           UIApplication.shared.applicationState == .active,
+           let campaignsToTrigger = inspectCampaignToTriggerAndGetCampaignData(eventName: eventName)
+        {
+            // TODO: support multiple campaigns, now only support one campaign
+            if let campaignToTrigger = campaignsToTrigger[0] as? Campaign,
+               let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger)
+            {
+                // TODO: consider campaign delay
+                showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
+            }
+        }
     }
 
     private func updateEventCountsInEventData(eicID: String, eventName: String, dt: String, eventParams: [String: Any]?) {
@@ -156,19 +171,43 @@ class InAppMessageManager {
         }
     }
 
-    private func inspectCampaignToTriggerAndGetCampaignData(eventName: String) -> Campaign {
-        guard let campaigns = campaginData.inAppMessageCampaigns else {
+    /* method for showing in-app message */
+    private func inspectCampaignToTriggerAndGetCampaignData(eventName: String) -> [Campaign]? {
+        guard let campaigns = campaginData.inAppMessageCampaigns as? [Campaign] else {
             return nil
         }
-        let campaignsToTrigger = campaigns.filter { $0.id == eventName }
+
+        let campaignsToTrigger = campaigns.filter { $0.triggeringEvent == eventName }
         if campaignsToTrigger.count == 0 {
             return nil
         }
 
-        // TODO: support multiple campaigns, now only support one campaign
-        return campaignsToTrigger[0]
+        // TODO: check segment condition
+        return campaignsToTrigger
     }
 
+    private func prepareInAppMessageData(campaign: Campaign) -> InAppMessageData? {
+        let messageId = UUID().uuidString.replacingOccurrences(of: "-", with: "")
+        let campaignId = campaign.id
+        let urlString = campaign.message.htmlURL
+        let modalProperties = campaign.message.modalProperties
+        if let url = URL(string: urlString) {
+            return InAppMessageData(notiflyMessageId: messageId, notiflyCampaignId: campaignId, modalProps: modalProperties, url: url)
+        }
+        return nil
+    }
+
+    private func showInAppMessage(notiflyInAppMessageData: InAppMessageData) {
+         DispatchQueue.main.async {
+            guard let vc = try? WebViewModalViewController(notiflyInAppMessageData: notiflyInAppMessageData) else {
+                Logger.error("Error presenting in-app message")
+                return
+            }
+            AppHelper.present(vc, completion: nil)
+         }
+    }
+
+    /* method for showing in-app message */
     private func constructCampaignData(campaignData: [[String: Any]]) {
         campaginData.inAppMessageCampaigns = campaignData.compactMap { campaignDict -> Campaign? in
             guard let id = campaignDict["id"] as? String,

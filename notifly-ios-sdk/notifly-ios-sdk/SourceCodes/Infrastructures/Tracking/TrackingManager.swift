@@ -97,15 +97,15 @@ class TrackingManager {
         } else {
             trackingEventName = eventName
         }
-        try? Notifly.main.inAppMessageManager.updateEventData(eventName: trackingEventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
-
+        
         guard let syncStateFinishedPub = try? Notifly.main.inAppMessageManager.syncStateFinishedPub else {
             Logger.error("Fail to track Event. \(trackingEventName)")
             return
         }
 
         syncStateFinishedPub.flatMap { _ in
-            self.createTrackingRecord(eventName: eventName,
+            try? Notifly.main.inAppMessageManager.updateEventData(eventName: trackingEventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
+            return self.createTrackingRecord(eventName: eventName,
                                       eventParams: eventParams,
                                       isInternal: isInternal,
                                       segmentationEventParamKeys: segmentationEventParamKeys)

@@ -74,32 +74,6 @@ class NotificationsManager: NSObject {
         deviceTokenPromise?(.failure(error))
     }
 
-    func handleDataMessage(didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
-        guard (try? Notifly.main) != nil else {
-            Logger.error("Fail to receive Notifly In App Message: Notifly is not initialized yet.")
-            return
-        }
-        if let notiflyMessageType = userInfo["notifly_message_type"] as? String,
-           let notiflyInAppMessageData = userInfo["notifly_in_app_message_data"] as? String,
-           let data = Data(base64Encoded: notiflyInAppMessageData),
-           let decodedInAppMessageData = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-           notiflyMessageType == "in-app-message"
-        {
-            if WebViewModalViewController.openedInAppMessageCount == 0,
-               UIApplication.shared.applicationState == .active,
-               let urlString = decodedInAppMessageData["url"] as? String,
-               let notiflyInAppMessageData = [
-                   "urlString": urlString,
-                   "notiflyMessageID": decodedInAppMessageData["notifly_message_id"],
-                   "notiflyCampaignID": decodedInAppMessageData["campaign_id"],
-                   "modalProps": decodedInAppMessageData["modal_properties"],
-               ] as? [String: Any]
-            {
-                showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
-            }
-        }
-    }
-
     func schedulePushNotification(title: String?,
                                   body: String?,
                                   url: URL,
@@ -153,22 +127,6 @@ class NotificationsManager: NSObject {
         if !(UIApplication.shared.isRegisteredForRemoteNotifications && NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults == true) {
             UIApplication.shared.registerForRemoteNotifications()
             NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults = true
-        }
-    }
-
-    private func showInAppMessage(notiflyInAppMessageData: [String: Any]) {
-        guard let urlString = notiflyInAppMessageData["urlString"] as? String,
-              let url = URL(string: urlString),
-              let modalProps = notiflyInAppMessageData["modalProps"] as? [String: Any]
-        else {
-            return
-        }
-
-        do {
-            let vc = try WebViewModalViewController(url: url, notiflyCampaignID: notiflyInAppMessageData["notiflyCampaignID"] as? String, notiflyMessageID: notiflyInAppMessageData["notiflyMessageID"] as? String, modalProps: modalProps)
-            AppHelper.present(vc, completion: nil)
-        } catch {
-            Logger.error("Error presenting in-app message")
         }
     }
 
