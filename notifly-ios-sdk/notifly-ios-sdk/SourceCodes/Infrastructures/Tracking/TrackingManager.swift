@@ -91,7 +91,20 @@ class TrackingManager {
                isInternal: Bool,
                segmentationEventParamKeys: [String]?)
     {
-        createTrackingRecord(eventName: eventName,
+        var trackingEventName: String
+        if isInternal {
+            trackingEventName = "notifly__" + eventName
+        } else {
+            trackingEventName = eventName
+        }
+        try? Notifly.main.inAppMessageManager.updateEventData(eventName: trackingEventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
+        
+        guard let syncStateFinishedPub = try? Notifly.main.inAppMessageManager.syncStateFinishedPub else {
+            Logger.error("SYNC NIL")
+            return
+        }
+        syncStateFinishedPub.tryMap { _ in
+            self.createTrackingRecord(eventName: eventName,
                              eventParams: eventParams,
                              isInternal: isInternal,
                              segmentationEventParamKeys: segmentationEventParamKeys)
@@ -107,7 +120,12 @@ class TrackingManager {
                           self?.eventPublisher.send(record)
                       }
                   })
-            .store(in: &cancellables)
+            .store(in: &self.cancellables)
+        }.mapError { error -> Error in
+            Logger.error("HIHI")
+            return NotiflyError.unexpectedNil("TrackingRecord Data is invalid")
+        }
+        
     }
 
     func createTrackingRecord(eventName: String,
@@ -119,50 +137,50 @@ class TrackingManager {
             return Fail(outputType: TrackingRecord.self, failure: NotiflyError.notInitialized)
                 .eraseToAnyPublisher()
         }
-        if let pub = notifly.notificationsManager.deviceTokenPub {
-            return pub.tryMap { pushToken in
-                let userID = (try? notifly.userManager.getNotiflyUserID()) ?? ""
-                if let deviceID = AppHelper.getDeviceID(),
-                   let appVersion = AppHelper.getAppVersion(),
-                   let sdkVersion = AppHelper.getSDKVersion(),
-                   let data = TrackingData(id: UUID().uuidString,
-                                           name: eventName,
-                                           notifly_user_id: userID,
-                                           external_user_id: notifly.userManager.externalUserID,
-                                           time: Int(Date().timeIntervalSince1970),
-                                           notifly_device_id: UUID(name: deviceID,
-                                                                   namespace: TrackingConstant.HashNamespace.deviceID).notiflyStyleString,
-                                           external_device_id: deviceID,
-                                           device_token: pushToken,
-                                           is_internal_event: isInternal,
-                                           segmentation_event_param_keys: segmentationEventParamKeys,
-                                           project_id: notifly.projectID,
-                                           platform: AppHelper.getDevicePlatform(),
-                                           os_version: AppHelper.getiOSVersion(),
-                                           app_version: appVersion,
-                                           sdk_version: sdkVersion,
-                                           sdk_type: AppHelper.getSDKType(),
-                                           event_params: AppHelper.makeJsonCodable(eventParams)) as? TrackingData,
-                   let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
-
-                {
-                    return TrackingRecord(partitionKey: userID, data: stringfiedData)
-                } else {
-                    Logger.error("Failed to track event: " + eventName)
-                    throw NotiflyError.unexpectedNil("Failed to create tracking data")
-                }
-            }
-            .catch { _ in
-                Fail(outputType: TrackingRecord.self, failure: NotiflyError.unexpectedNil("TrackingRecord Data is invalid"))
-                    .eraseToAnyPublisher()
-            }
-            .eraseToAnyPublisher()
-        } else {
+        guard let deviceTokenPub = notifly.notificationsManager.deviceTokenPub else {
             return Fail(outputType: TrackingRecord.self, failure: NotiflyError.unexpectedNil("APN Device Token is nil"))
                 .eraseToAnyPublisher()
         }
+        Logger.error("TRACKEVENT")
+        
+        return deviceTokenPub.tryMap { pushToken in
+            let userID = (try? notifly.userManager.getNotiflyUserID()) ?? ""
+            if let deviceID = AppHelper.getDeviceID(),
+               let appVersion = AppHelper.getAppVersion(),
+               let sdkVersion = AppHelper.getSDKVersion(),
+               let data = TrackingData(id: UUID().uuidString,
+                                       name: eventName,
+                                       notifly_user_id: userID,
+                                       external_user_id: notifly.userManager.externalUserID,
+                                       time: Int(Date().timeIntervalSince1970),
+                                       notifly_device_id: UUID(name: deviceID,
+                                                               namespace: TrackingConstant.HashNamespace.deviceID).notiflyStyleString,
+                                       external_device_id: deviceID,
+                                       device_token: pushToken,
+                                       is_internal_event: isInternal,
+                                       segmentation_event_param_keys: segmentationEventParamKeys,
+                                       project_id: notifly.projectID,
+                                       platform: AppHelper.getDevicePlatform(),
+                                       os_version: AppHelper.getiOSVersion(),
+                                       app_version: appVersion,
+                                       sdk_version: sdkVersion,
+                                       sdk_type: AppHelper.getSDKType(),
+                                       event_params: AppHelper.makeJsonCodable(eventParams)) as? TrackingData,
+               let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
+                
+            {
+                return TrackingRecord(partitionKey: userID, data: stringfiedData)
+            } else {
+                Logger.error("Failed to track event: " + eventName)
+                throw NotiflyError.unexpectedNil("Failed to create tracking data")
+            }
+        }
+        .catch { _ in
+            Fail(outputType: TrackingRecord.self, failure: NotiflyError.unexpectedNil("TrackingRecord Data is invalid"))
+                .eraseToAnyPublisher()
+        }
+        .eraseToAnyPublisher()
     }
-
     // MARK: - Private Methods
 
     private func setup() {
