@@ -104,6 +104,8 @@ class TrackingManager {
         }
 
         syncStateFinishedPub.flatMap { _ in
+            Logger.error("SYCNSTATE PUB")
+            print(trackingEventName)
             try? Notifly.main.inAppMessageManager.updateEventData(eventName: trackingEventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
             return self.createTrackingRecord(eventName: eventName,
                                       eventParams: eventParams,

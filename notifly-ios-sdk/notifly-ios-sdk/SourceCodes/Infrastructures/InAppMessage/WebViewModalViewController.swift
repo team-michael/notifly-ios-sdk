@@ -63,7 +63,6 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         webView.layer.mask = webViewLayer
         view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissCTATapped)))
         view.addSubview(webView)
-
         NSLayoutConstraint.activate([
             webView.widthAnchor.constraint(equalToConstant: modalSize.width),
             webView.heightAnchor.constraint(equalToConstant: modalSize.height),
@@ -183,43 +182,44 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         if screenWidth == 0 || screenHeight == 0 {
             return nil
         }
-
+        
         var viewWidth: CGFloat = 0.0
         var viewHeight: CGFloat = 0.0
-        if let width = modalProps?.width as? CGFloat {
+        
+        if let width = modalProps?.width {
             viewWidth = width
-        } else if let widthVW = modalProps?.width_vw as? CGFloat {
+        } else if let widthVW = modalProps?.width_vw {
             viewWidth = screenWidth * (widthVW / 100)
-        } else if let widthVH = modalProps?.width_vh as? CGFloat, screenHeight != 0.0 {
+        } else if let widthVH = modalProps?.width_vh, screenHeight != 0.0 {
             viewWidth = screenHeight * (widthVH / 100)
         } else {
             viewWidth = screenWidth
         }
 
-        if let minWidth = modalProps?.min_width as? CGFloat, viewWidth < minWidth {
+        if let minWidth = modalProps?.min_width, viewWidth < minWidth {
             viewWidth = minWidth
         }
-        if let maxWidth = modalProps?.max_width as? CGFloat, viewWidth > maxWidth {
+        if let maxWidth = modalProps?.max_width, viewWidth > maxWidth {
             viewWidth = maxWidth
         }
 
-        if let height = modalProps?.height as? CGFloat {
+        if let height = modalProps?.height {
             viewHeight = height
-        } else if let heightVH = modalProps?.height_vh as? CGFloat {
+        } else if let heightVH = modalProps?.height_vh {
             viewHeight = screenHeight * (heightVH / 100)
-        } else if let heightVW = modalProps?.height_vw as? CGFloat, screenWidth != 0.0 {
+        } else if let heightVW = modalProps?.height_vw, screenWidth != 0.0 {
             viewHeight = screenWidth * (heightVW / 100)
         } else {
             viewHeight = screenHeight
         }
 
-        if let minHeight = modalProps?.min_height as? CGFloat, viewHeight < minHeight {
+        if let minHeight = modalProps?.min_height, viewHeight < minHeight {
             viewHeight = minHeight
         }
-        if let maxHeight = modalProps?.max_height as? CGFloat, viewHeight > maxHeight {
+        if let maxHeight = modalProps?.max_height, viewHeight > maxHeight {
             viewHeight = maxHeight
         }
-
+        
         let modalSize = CGSize(width: viewWidth, height: viewHeight)
         return modalSize
     }
@@ -237,10 +237,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     private func getWebViewLayer(modalSize: CGSize) -> CALayer? {
         guard let modalProps = modalProps,
-              let tlRadius = (modalProps.borderTopLeftRadius ?? 0.0) as? CGFloat,
-              let trRadius = (modalProps.borderTopRightRadius ?? 0.0) as? CGFloat,
-              let blRadius = (modalProps.borderBottomLeftRadius ?? 0.0) as? CGFloat,
-              let brRadius = (modalProps.borderBottomRightRadius ?? 0.0) as? CGFloat
+              let tlRadius = modalProps.borderTopLeftRadius,
+              let trRadius = modalProps.borderTopRightRadius,
+              let blRadius = modalProps.borderBottomLeftRadius,
+              let brRadius = modalProps.borderBottomRightRadius
         else {
             return nil
         }

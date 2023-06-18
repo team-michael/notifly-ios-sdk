@@ -25,21 +25,21 @@ struct Campaign {
 struct ModalProperties {
     let templateName: String
     let position: String?
-    let width: Float?
-    let min_width: Float?
-    let max_width: Float?
-    let width_vw: Float?
-    let width_vh: Float?
-    let height: Float?
-    let min_height: Float?
-    let max_height: Float?
-    let height_vw: Float?
-    let height_vh: Float?
-    let borderBottomLeftRadius: Float?
-    let borderBottomRightRadius: Float?
-    let borderTopLeftRadius: Float?
-    let borderTopRightRadius: Float?
-    let backgroundOpacity: Float?
+    let width: CGFloat?
+    let min_width: CGFloat?
+    let max_width: CGFloat?
+    let width_vw: CGFloat?
+    let width_vh: CGFloat?
+    let height: CGFloat?
+    let min_height: CGFloat?
+    let max_height: CGFloat?
+    let height_vw: CGFloat?
+    let height_vh: CGFloat?
+    let borderBottomLeftRadius: CGFloat?
+    let borderBottomRightRadius: CGFloat?
+    let borderTopLeftRadius: CGFloat?
+    let borderTopRightRadius: CGFloat?
+    let backgroundOpacity: CGFloat?
     
     init?(properties: [String: Any]) {
         guard let name = properties["template_name"] as? String else {
@@ -47,21 +47,21 @@ struct ModalProperties {
         }
         templateName = name
         position = properties["position"] as? String
-        width = properties["width"] as? Float
-        min_width = properties["min_width"] as? Float
-        max_width = properties["max_width"] as? Float
-        width_vw = properties["width_vw"] as? Float
-        width_vh = properties["width_vh"] as? Float
-        height = properties["height"] as? Float
-        min_height = properties["min_height"] as? Float
-        max_height = properties["max_height"] as? Float
-        height_vw = properties["height_vw"] as? Float
-        height_vh = properties["height_vh"] as? Float
-        borderBottomLeftRadius = properties["borderBottomLeftRadius"] as? Float
-        borderBottomRightRadius = properties["borderBottomRightRadius"] as? Float
-        borderTopLeftRadius = properties["borderTopLeftRadius"] as? Float
-        borderTopRightRadius = properties["borderTopRightRadius"] as? Float
-        backgroundOpacity = (properties["backgroudOpacity"] ?? 0.2) as? Float
+        width = properties["width"] as? CGFloat
+        min_width = properties["min_width"] as? CGFloat
+        max_width = properties["max_width"] as? CGFloat
+        width_vw = properties["width_vw"] as? CGFloat
+        width_vh = properties["width_vh"] as? CGFloat
+        height = properties["height"] as? CGFloat
+        min_height = properties["min_height"] as? CGFloat
+        max_height = properties["max_height"] as? CGFloat
+        height_vw = properties["height_vw"] as? CGFloat
+        height_vh = properties["height_vh"] as? CGFloat
+        borderBottomLeftRadius = properties["borderBottomLeftRadius"] as? CGFloat
+        borderBottomRightRadius = properties["borderBottomRightRadius"] as? CGFloat
+        borderTopLeftRadius = properties["borderTopLeftRadius"] as? CGFloat
+        borderTopRightRadius = properties["borderTopRightRadius"] as? CGFloat
+        backgroundOpacity = (properties["backgroudOpacity"] ?? 0.2) as? CGFloat
     }
 }
 

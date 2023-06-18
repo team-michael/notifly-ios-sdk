@@ -77,8 +77,8 @@ class InAppMessageManager {
                             print(self.eventData)
                         }
 
-                        try? Notifly.trackEvent(eventName: "HI1")
-                        try? Notifly.trackEvent(eventName: "HI2", eventParams: ["kings": "kk", "KING": 2], segmentationEventParamKeys: ["KING"])
+//                        try? Notifly.trackEvent(eventName: "HI1")
+//                        try? Notifly.trackEvent(eventName: "HI2", eventParams: ["kings": "kk", "KING": 2], segmentationEventParamKeys: ["KING"])
                     } else {
                         Logger.error("Fail to sync user state")
                     }
@@ -89,6 +89,7 @@ class InAppMessageManager {
             case let .failure(error):
                 Logger.error(error.localizedDescription)
             }
+            Logger.error("SYNC END")
             self.syncStateFinishedPromise?(.success(()))
         }
     }
@@ -150,7 +151,6 @@ class InAppMessageManager {
             updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
         }
         if WebViewModalViewController.openedInAppMessageCount == 0,
-           UIApplication.shared.applicationState == .active,
            let campaignsToTrigger = inspectCampaignToTriggerAndGetCampaignData(eventName: eventName)
         {
             // TODO: support multiple campaigns, now only support one campaign
@@ -158,7 +158,12 @@ class InAppMessageManager {
                let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger)
             {
                 // TODO: consider campaign delay
-                showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
+                DispatchQueue.main.async {
+                    if UIApplication.shared.applicationState == .active
+                    {
+                        self.showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
+                    }
+                }
             }
         }
     }
@@ -197,14 +202,14 @@ class InAppMessageManager {
         return nil
     }
 
-    private func showInAppMessage(notiflyInAppMessageData: InAppMessageData) {
-         DispatchQueue.main.async {
+    func showInAppMessage(notiflyInAppMessageData: InAppMessageData) {
+        DispatchQueue.main.async {
             guard let vc = try? WebViewModalViewController(notiflyInAppMessageData: notiflyInAppMessageData) else {
                 Logger.error("Error presenting in-app message")
                 return
             }
             AppHelper.present(vc, completion: nil)
-         }
+        }
     }
 
     /* method for showing in-app message */
@@ -214,6 +219,7 @@ class InAppMessageManager {
                   let testing = campaignDict["testing"] as? Bool,
                   let triggeringEvent = campaignDict["triggering_event"] as? String,
                   let statusRawValue = campaignDict["status"] as? Int,
+                  statusRawValue == 1,
                   let campaignStatus = CampaignStatus(rawValue: statusRawValue),
                   let messageDict = campaignDict["message"] as? [String: Any],
                   let htmlURL = messageDict["html_url"] as? String,
