@@ -9,6 +9,7 @@ import Combine
 import Foundation
 import UIKit
 
+// TODO: segment, delay, test
 class InAppMessageManager {
     private var userData: UserData = .init(userProperties: [:])
     private var campaginData: CampaignData = .init(inAppMessageCampaigns: [])
