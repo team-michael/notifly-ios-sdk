@@ -11,7 +11,7 @@ import UIKit
 
 // TODO: segment, delay, test - 06/18, 2023
 class InAppMessageManager {
-    private var userData: UserData = .init(userProperties: [:])
+    private var userData: UserData = .init(data: [:])
     private var campaginData: CampaignData = .init(inAppMessageCampaigns: [])
     private var eventData: EventData = .init(eventCounts: [:])
 
@@ -46,26 +46,24 @@ class InAppMessageManager {
     }
 
     func syncState() {
-        try? Notifly.trackEvent(eventName: "ABCBDE", eventParams:["ABC": false], segmentationEventParamKeys: ["ABC"])
         guard let notifly = (try? Notifly.main) else {
             return
         }
         guard let projectID = notifly.projectID as String?,
-              let notiflyUserID = (try? notifly.userManager.getNotiflyUserID())
+              let notiflyUserID = (try? notifly.userManager.getNotiflyUserID()),
+              let notiflyDeviceID = AppHelper.getDeviceID()
         else {
             Logger.error("Fail to sync user state because Notifly is not initalized yet.")
             return
         }
 
-        requestSync(projectID: projectID, notiflyUserID: notiflyUserID) { result in
+        requestSync(projectID: projectID, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID) { result in
             switch result {
             case let .success(data):
                 do {
                     if let decodedData = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                        if let userData = decodedData["userData"] as? [String: Any],
-                           let userProperties = userData["user_properties"] as? [String: Any]
-                        {
-                            self.userData.userProperties = userProperties
+                        if let userData = decodedData["userData"] as? [String: Any] {
+                            self.userData = UserData(data: userData)
                         }
 
                         if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
@@ -85,16 +83,18 @@ class InAppMessageManager {
             case let .failure(error):
                 Logger.error(error.localizedDescription)
             }
-            Logger.error("SYNC END") //TODO: REMOVE
+            Logger.error("SYNC END") // TODO: REMOVE
             self.syncStateFinishedPromise?(.success(()))
         }
     }
 
-    func requestSync(projectID: String, notiflyUserID: String, completion: @escaping (Result<Data, Error>) -> Void) {
+    func requestSync(projectID: String, notiflyUserID: String, notiflyDeviceID: String, completion: @escaping (Result<Data, Error>) -> Void) {
         var urlComponents = URLComponents(string: InAppMessageConstant.syncStateURL)
         urlComponents?.queryItems = [
             URLQueryItem(name: "projectID", value: projectID),
             URLQueryItem(name: "notiflyUserID", value: notiflyUserID),
+            URLQueryItem(name: "notiflyDeivceID", value: notiflyDeviceID),
+            URLQueryItem(name: "channel", value: "in-app-message"),
         ]
 
         if let url = urlComponents?.url {
@@ -145,20 +145,14 @@ class InAppMessageManager {
             eicID += InAppMessageConstant.idSeparator
             updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
         }
-        
-
-        print(self.eventData.eventCounts)
 
         if WebViewModalViewController.openedInAppMessageCount == 0,
-           let campaignsToTrigger = inspectCampaignToTriggerAndGetCampaignData(eventName: eventName)
+           let campaignsToTrigger = inspectCampaignToTriggerAndGetCampaignData(eventName: eventName, eventParams: eventParams)
         {
             let campaignToTrigger: Campaign = campaignsToTrigger[0]
             // TODO: support multiple campaigns, now only support one campaign
-            if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger)
-            {
-                Logger.error("INAPP")
-                print(campaignToTrigger)
-                self.showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
+            if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger) {
+                showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
             }
         }
     }
@@ -172,13 +166,14 @@ class InAppMessageManager {
     }
 
     /* method for showing in-app message */
-    private func inspectCampaignToTriggerAndGetCampaignData(eventName: String) -> [Campaign]? {
-        let campaignsToTrigger = campaginData.inAppMessageCampaigns.filter { $0.triggeringEvent == eventName }
+    private func inspectCampaignToTriggerAndGetCampaignData(eventName: String, eventParams: [String: Any]?) -> [Campaign]? {
+        let campaignsToTrigger = campaginData.inAppMessageCampaigns
+            .filter { $0.triggeringEvent == eventName }
+            .filter { self.isEntityOfSegment(campaign: $0, eventParams: eventParams) }
         if campaignsToTrigger.count == 0 {
             return nil
         }
 
-        // TODO: check segment condition
         return campaignsToTrigger
     }
 
@@ -309,10 +304,9 @@ class InAppMessageManager {
             var eicID = name + InAppMessageConstant.idSeparator + dt + InAppMessageConstant.idSeparator
             if eventParams.count > 0,
                let key = eventParams.keys.first,
-               let value = eventParams.values.first,
-               let valueStr = String(describing: value) as? String
+               let value = eventParams.values.first
             {
-                eicID += key + InAppMessageConstant.idSeparator + valueStr
+                eicID += key + InAppMessageConstant.idSeparator + String(describing: value)
             } else {
                 eicID += InAppMessageConstant.idSeparator
             }
@@ -327,11 +321,272 @@ class InAppMessageManager {
         dateFormatter.dateFormat = "yyyy-MM-dd"
         return dateFormatter.string(from: currentDate)
     }
-    
-    private func isEntityOfSegment(campaign: Campaign) {
+
+    private func isEntityOfSegment(campaign: Campaign, eventParams: [String: Any]?) -> Bool {
         // now only support for the condition-based-segment type
-        
-        
+        guard campaign.segmentType == "condition",
+              let segmentInfo = campaign.segmentInfo
+        else {
+            return false
+        }
+        if campaign.testing {
+            guard let whitelist = campaign.whitelist,
+                  let externalUserId = try? Notifly.main.userManager.externalUserID,
+                  whitelist.contains(externalUserId)
+            else {
+                return false
+            }
+        }
+        Logger.error("SEMGENT!")
+        print(segmentInfo)
+
+        guard let groups = segmentInfo.groups else {
+            return true // send to all
+        }
+
+        guard let groupOp = segmentInfo.groupOperator,
+              groupOp == "OR"
+        else {
+            // now only supported for OR operator as group operator
+            return false
+        }
+        return groups.contains { group in
+            self.isEntityOfGroup(group: group, eventParams: eventParams)
+        }
+    }
+
+    private func isEntityOfGroup(group: Group, eventParams: [String: Any]?) -> Bool {
+        guard let conditions = group.conditions,
+              conditions.count > 0
+        else {
+            return false
+        }
+        guard let conditionOp = group.conditionOperator,
+              conditionOp == "AND"
+        else {
+            // now only supported for AND operator as conditon operator
+            return false
+        }
+
+        return conditions.allSatisfy { condition in
+            return self.matchCondition(condition: condition, eventParams: eventParams)
+        }
+    }
+
+    private func matchCondition(condition: Condition, eventParams: [String: Any]?) -> Bool {
+        switch condition {
+        case let .UserBasedCondition(userCondition):
+            return matchUserBasedCondition(condition: userCondition, eventParams: eventParams)
+        case let .EventBasedCondition(eventCondition):
+            print("HIHI EVENT", eventCondition)
+            // TODO
+        }
+        return true
+    }
+
+    private func matchUserBasedCondition(condition: UserBasedCondition, eventParams: [String: Any]?) -> Bool {
+        guard let values = self.extractValuesOfConditionToCompare(condition: condition, eventParams: eventParams) else {
+            return false
+        }
+        let valueType = condition.valueType
+        if let userValue = convertAnyToSpecifiedType(value: values.0, type: condition.operator == "@>" ? "ARRAY" : valueType),
+           let comparisonTargetValue = convertAnyToSpecifiedType(value: values.1, type: valueType)
+        {
+            switch condition.operator {
+            case "=":
+                print(userValue, comparisonTargetValue)
+                return CompareValueHelper.isEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
+            case "!=":
+                return CompareValueHelper.isNotEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
+            case "@>":
+                return CompareValueHelper.isContains(value1: userValue, value2: comparisonTargetValue, type: valueType)
+            case ">":
+                return CompareValueHelper.isGreaterThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
+            case ">=":
+                return CompareValueHelper.isGreaterOrEqualThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
+            case "<":
+                return CompareValueHelper.isLessThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
+            case "<=":
+                return CompareValueHelper.isLessOrEqualThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
+            default:
+                return false
+            }
+        }
+
+        return false
     }
     
+    private func extractValuesOfConditionToCompare(condition: UserBasedCondition, eventParams: [String: Any]?) -> (Any, Any)? {
+        var userRawValue: Any?
+        if condition.unit == "user" {
+            userRawValue = userData.userProperties[condition.attribute]
+        } else {
+            userRawValue = userData.get(key: condition.attribute)
+        }
+
+        var comparisonTargetRawValue: Any?
+        let useEventParamsAsCondition = condition.useEventParamsAsCondition
+        if useEventParamsAsCondition {
+            guard let eventParams = eventParams,
+                  let key = condition.comparisonParameter as? String,
+                  let value = eventParams[key]
+            else {
+                return nil
+            }
+            comparisonTargetRawValue = value
+        } else {
+            comparisonTargetRawValue = condition.value
+        }
+        
+        guard let userRawValue = userRawValue, let comparisonTargetRawValue = comparisonTargetRawValue else {
+            return nil
+        }
+        return (userRawValue, comparisonTargetRawValue)
+    }
+
+    private func matchEventBasedCondition(condition _: EventBasedCondition) {}
+    private func convertAnyToSpecifiedType(value: Any, type: String) -> Any? {
+        switch (value, type) {
+        case let (value as String, "TEXT"):
+            return value
+        case let (value as Int, "INT"):
+            return value
+        case let (value as String, "INT"):
+            return Int(value)
+        case let (value as Bool, "BOOL"):
+            return value
+        case let (value as String, "BOOL"):
+            return Bool(value)
+        case let (value as [Any], "ARRAY"):
+            return value
+        case (_, _):
+            return nil
+        }
+    }
+}
+
+enum CompareValueHelper {
+    static func isEqual(value1: Any, value2: Any, type: String) -> Bool {
+        switch type {
+        case "TEXT":
+            if let value1 = value1 as? String, let value2 = value2 as? String {
+                return value1 == value2
+            }
+            return false
+        case "INT":
+            if let value1 = value1 as? Int, let value2 = value2 as? Int {
+                return value1 == value2
+            }
+            return false
+        case "BOOL":
+            if let value1 = value1 as? Bool, let value2 = value2 as? Bool {
+                return value1 == value2
+            }
+            return false
+        default:
+            return false
+        }
+    }
+
+    static func isNotEqual(value1: Any, value2: Any, type: String) -> Bool {
+        switch type {
+        case "TEXT":
+            if let value1 = value1 as? String, let value2 = value2 as? String {
+                return value1 != value2
+            }
+            return false
+        case "INT":
+            if let value1 = value1 as? Int, let value2 = value2 as? Int {
+                return value1 != value2
+            }
+            return false
+        case "BOOL":
+            if let value1 = value1 as? Bool, let value2 = value2 as? Bool {
+                return value1 != value2
+            }
+            return false
+        default:
+            return false
+        }
+    }
+
+    static func isContains(value1: Any, value2: Any, type: String) -> Bool {
+        guard let array = value1 as? [Any] else {
+            return false
+        }
+        for element in array {
+            if CompareValueHelper.isEqual(value1: element, value2: value2, type: type) {
+                return true
+            }
+        }
+        return false
+    }
+
+    static func isLessOrEqualThan(value1: Any, value2: Any, type: String) -> Bool {
+        switch type {
+        case "TEXT":
+            if let value1 = value1 as? String, let value2 = value2 as? String {
+                return value1 <= value2
+            }
+            return false
+        case "INT":
+            if let value1 = value1 as? Int, let value2 = value2 as? Int {
+                return value1 <= value2
+            }
+            return false
+        default:
+            return false
+        }
+    }
+
+    static func isLessThan(value1: Any, value2: Any, type: String) -> Bool {
+        switch type {
+        case "TEXT":
+            if let value1 = value1 as? String, let value2 = value2 as? String {
+                return value1 < value2
+            }
+            return false
+        case "INT":
+            if let value1 = value1 as? Int, let value2 = value2 as? Int {
+                return value1 < value2
+            }
+            return false
+        default:
+            return false
+        }
+    }
+
+    static func isGreaterOrEqualThan(value1: Any, value2: Any, type: String) -> Bool {
+        switch type {
+        case "TEXT":
+            if let value1 = value1 as? String, let value2 = value2 as? String {
+                return value1 >= value2
+            }
+            return false
+        case "INT":
+            if let value1 = value1 as? Int, let value2 = value2 as? Int {
+                return value1 >= value2
+            }
+            return false
+        default:
+            return false
+        }
+    }
+
+    static func isGreaterThan(value1: Any, value2: Any, type: String) -> Bool {
+        switch type {
+        case "TEXT":
+            if let value1 = value1 as? String, let value2 = value2 as? String {
+                return value1 > value2
+            }
+            return false
+        case "INT":
+            if let value1 = value1 as? Int, let value2 = value2 as? Int {
+                return value1 > value2
+            }
+            return false
+        default:
+            return false
+        }
+    }
 }
