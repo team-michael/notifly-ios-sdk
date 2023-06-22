@@ -9,7 +9,7 @@ import Combine
 import Foundation
 import UIKit
 
-// TODO: segment, delay, test
+// TODO: segment, delay, test - 06/18, 2023
 class InAppMessageManager {
     private var userData: UserData = .init(userProperties: [:])
     private var campaginData: CampaignData = .init(inAppMessageCampaigns: [])
@@ -46,6 +46,7 @@ class InAppMessageManager {
     }
 
     func syncState() {
+        try? Notifly.trackEvent(eventName: "ABCBDE", eventParams:["ABC": false], segmentationEventParamKeys: ["ABC"])
         guard let notifly = (try? Notifly.main) else {
             return
         }
@@ -69,17 +70,11 @@ class InAppMessageManager {
 
                         if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
                             self.constructCampaignData(campaignData: campaignData)
-                            Logger.error("DD")
-                            print(self.campaginData.inAppMessageCampaigns)
                         }
 
                         if let eicData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
                             self.constructEventIntermediateCountsData(eicData: eicData)
-                            print(self.eventData)
                         }
-
-//                        try? Notifly.trackEvent(eventName: "HI1")
-//                        try? Notifly.trackEvent(eventName: "HI2", eventParams: ["kings": "kk", "KING": 2], segmentationEventParamKeys: ["KING"])
                     } else {
                         Logger.error("Fail to sync user state")
                     }
@@ -90,7 +85,7 @@ class InAppMessageManager {
             case let .failure(error):
                 Logger.error(error.localizedDescription)
             }
-            Logger.error("SYNC END")
+            Logger.error("SYNC END") //TODO: REMOVE
             self.syncStateFinishedPromise?(.success(()))
         }
     }
@@ -142,29 +137,28 @@ class InAppMessageManager {
            segmentationEventParamKeys.count > 0,
            eventParams.count > 0,
            let keyField = segmentationEventParamKeys[0] as? String, // TODO: support multiple segmentationEventParamKey
-           let value = eventParams[keyField] as? String,
-           let valueStr = String(describing: value) as? String
+           let value = eventParams[keyField] as? String
         {
-            eicID += keyField + InAppMessageConstant.idSeparator + valueStr
-            updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [keyField: eventParams[keyField]])
+            eicID += keyField + InAppMessageConstant.idSeparator + String(describing: value)
+            updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
         } else {
             eicID += InAppMessageConstant.idSeparator
             updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
         }
+        
+
+        print(self.eventData.eventCounts)
+
         if WebViewModalViewController.openedInAppMessageCount == 0,
            let campaignsToTrigger = inspectCampaignToTriggerAndGetCampaignData(eventName: eventName)
         {
+            let campaignToTrigger: Campaign = campaignsToTrigger[0]
             // TODO: support multiple campaigns, now only support one campaign
-            if let campaignToTrigger = campaignsToTrigger[0] as? Campaign,
-               let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger)
+            if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger)
             {
-                // TODO: consider campaign delay
-                DispatchQueue.main.async {
-                    if UIApplication.shared.applicationState == .active
-                    {
-                        self.showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
-                    }
-                }
+                Logger.error("INAPP")
+                print(campaignToTrigger)
+                self.showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
             }
         }
     }
@@ -179,11 +173,7 @@ class InAppMessageManager {
 
     /* method for showing in-app message */
     private func inspectCampaignToTriggerAndGetCampaignData(eventName: String) -> [Campaign]? {
-        guard let campaigns = campaginData.inAppMessageCampaigns as? [Campaign] else {
-            return nil
-        }
-
-        let campaignsToTrigger = campaigns.filter { $0.triggeringEvent == eventName }
+        let campaignsToTrigger = campaginData.inAppMessageCampaigns.filter { $0.triggeringEvent == eventName }
         if campaignsToTrigger.count == 0 {
             return nil
         }
@@ -192,19 +182,26 @@ class InAppMessageManager {
         return campaignsToTrigger
     }
 
-    private func prepareInAppMessageData(campaign: Campaign) -> InAppMessageData? {
+    func prepareInAppMessageData(campaign: Campaign) -> InAppMessageData? {
         let messageId = UUID().uuidString.replacingOccurrences(of: "-", with: "")
         let campaignId = campaign.id
         let urlString = campaign.message.htmlURL
         let modalProperties = campaign.message.modalProperties
+        let delay = DispatchTimeInterval.seconds(campaign.delay ?? 0)
+        let deadline = DispatchTime.now() + delay
+
         if let url = URL(string: urlString) {
-            return InAppMessageData(notiflyMessageId: messageId, notiflyCampaignId: campaignId, modalProps: modalProperties, url: url)
+            return InAppMessageData(notiflyMessageId: messageId, notiflyCampaignId: campaignId, modalProps: modalProperties, url: url, deadline: deadline)
         }
         return nil
     }
 
-    func showInAppMessage(notiflyInAppMessageData: InAppMessageData) {
-        DispatchQueue.main.async {
+    private func showInAppMessage(notiflyInAppMessageData: InAppMessageData) {
+        DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline) {
+            guard UIApplication.shared.applicationState == .active else {
+                Logger.error("Due to being in a background state, in-app messages are being ignored.")
+                return
+            }
             guard let vc = try? WebViewModalViewController(notiflyInAppMessageData: notiflyInAppMessageData) else {
                 Logger.error("Error presenting in-app message")
                 return
@@ -330,4 +327,11 @@ class InAppMessageManager {
         dateFormatter.dateFormat = "yyyy-MM-dd"
         return dateFormatter.string(from: currentDate)
     }
+    
+    private func isEntityOfSegment(campaign: Campaign) {
+        // now only support for the condition-based-segment type
+        
+        
+    }
+    
 }

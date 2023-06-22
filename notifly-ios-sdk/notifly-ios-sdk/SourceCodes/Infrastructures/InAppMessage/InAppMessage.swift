@@ -31,4 +31,5 @@ struct InAppMessageData {
     let notiflyCampaignId: String
     let modalProps: ModalProperties
     let url: URL
+    let deadline: DispatchTime
 }

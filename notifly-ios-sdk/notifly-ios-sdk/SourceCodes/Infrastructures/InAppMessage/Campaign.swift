@@ -57,10 +57,10 @@ struct ModalProperties {
         max_height = properties["max_height"] as? CGFloat
         height_vw = properties["height_vw"] as? CGFloat
         height_vh = properties["height_vh"] as? CGFloat
-        borderBottomLeftRadius = properties["borderBottomLeftRadius"] as? CGFloat
-        borderBottomRightRadius = properties["borderBottomRightRadius"] as? CGFloat
-        borderTopLeftRadius = properties["borderTopLeftRadius"] as? CGFloat
-        borderTopRightRadius = properties["borderTopRightRadius"] as? CGFloat
+        borderBottomLeftRadius = (properties["borderBottomLeftRadius"] ?? 0.0) as? CGFloat
+        borderBottomRightRadius = (properties["borderBottomRightRadius"] ?? 0.0) as? CGFloat
+        borderTopLeftRadius = (properties["borderTopLeftRadius"] ?? 0.0) as? CGFloat
+        borderTopRightRadius = (properties["borderTopRightRadius"] ?? 0.0) as? CGFloat
         backgroundOpacity = (properties["backgroudOpacity"] ?? 0.2) as? CGFloat
     }
 }
