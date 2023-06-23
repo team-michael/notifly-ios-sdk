@@ -113,15 +113,16 @@ struct UserBasedCondition {
 
 struct EventBasedCondition {
     let event: String
-    let eventConditionType: String
-    let secondaryValue: Float
+    let eventConditionType: eventBasedConditionType
+    let secondaryValue: Int
     let `operator`: String
     let value: Int
     
     init(condition: [String: Any]) throws {
         guard let event = condition["event"] as? String,
-              let eventConditionType = condition["event_condition_type"] as? String,
-              let secondaryValue = condition["secondary_value"] as? Float,
+              let eventConditionTypeStr = condition["event_condition_type"] as? String,
+              let eventConditionType = eventBasedConditionType(rawValue: eventConditionTypeStr),
+              let secondaryValue = condition["secondary_value"] as? Int,
               let `operator` = condition["operator"] as? String,
               let value = condition["value"] as? Int
         else {
@@ -135,6 +136,10 @@ struct EventBasedCondition {
     }
 }
 
+enum eventBasedConditionType: String {
+    case allTime = "count X"
+    case lastNDays = "count X in Y days"
+}
 struct Group {
     let conditions: [Condition]?
     let conditionOperator: String?

@@ -369,23 +369,87 @@ class InAppMessageManager {
         }
 
         return conditions.allSatisfy { condition in
-            return self.matchCondition(condition: condition, eventParams: eventParams)
+            self.matchCondition(condition: condition, eventParams: eventParams)
         }
     }
 
     private func matchCondition(condition: Condition, eventParams: [String: Any]?) -> Bool {
         switch condition {
-        case let .UserBasedCondition(userCondition):
-            return matchUserBasedCondition(condition: userCondition, eventParams: eventParams)
         case let .EventBasedCondition(eventCondition):
-            print("HIHI EVENT", eventCondition)
-            // TODO
+            Logger.error("HIHI EVENT CONDITION")
+            print(eventCondition)
+            return matchEventBasedCondition(condition: eventCondition)
+        case let .UserBasedCondition(userCondition):
+            Logger.error("HIHI User CONDITION")
+            print(userCondition)
+            return matchUserBasedCondition(condition: userCondition, eventParams: eventParams)
         }
-        return true
+    }
+    
+    private func matchEventBasedCondition(condition: EventBasedCondition) -> Bool {
+        guard condition.value >= 0 else {
+            return false
+        }
+        var startDate: String?
+        if condition.eventConditionType == .lastNDays {
+            startDate = getDateStringBeforeNDays(n: condition.secondaryValue)
+            guard startDate != nil else {
+                return false
+            }
+        }
+        
+        let userCounts = caculateEventCounts(eventName: condition.event, startDate: startDate)
+        guard userCounts >= 0 else {
+            return false
+        }
+        
+        switch condition.`operator` {
+        case "=":
+            return userCounts == condition.value
+        case ">=":
+            return userCounts >= condition.value
+        case "<=":
+            return userCounts <= condition.value
+        case ">":
+            return userCounts > condition.value
+        case "<":
+            return userCounts < condition.value
+        default:
+            return false
+        }
+    }
+    
+    private func caculateEventCounts(eventName: String, startDate: String?) -> Int {
+        guard let eventCounts = Array(self.eventData.eventCounts.values) as? [EventIntermediateCount] else {
+            return -1
+        }
+        
+        var targetEventCounts = eventCounts.filter { $0.name == eventName }
+        if let startDate = startDate {
+            targetEventCounts = targetEventCounts.filter { $0.dt >= startDate }
+        }
+        guard !targetEventCounts.isEmpty else {
+            return 0
+        }
+        return targetEventCounts.reduce(0) { $0 + $1.count }
+    }
+
+    private func getDateStringBeforeNDays(n: Int) -> String? {
+        guard n >= 0 else {
+            return nil
+        }
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let currentDate = Date()
+        let calendar = Calendar.current
+        if let modifiedDate = calendar.date(byAdding: .day, value: -n, to: currentDate) {
+            return dateFormatter.string(from: modifiedDate)
+        }
+        return nil
     }
 
     private func matchUserBasedCondition(condition: UserBasedCondition, eventParams: [String: Any]?) -> Bool {
-        guard let values = self.extractValuesOfConditionToCompare(condition: condition, eventParams: eventParams) else {
+        guard let values = extractValuesOfUserBasedConditionToCompare(condition: condition, eventParams: eventParams) else {
             return false
         }
         let valueType = condition.valueType
@@ -415,8 +479,8 @@ class InAppMessageManager {
 
         return false
     }
-    
-    private func extractValuesOfConditionToCompare(condition: UserBasedCondition, eventParams: [String: Any]?) -> (Any, Any)? {
+
+    private func extractValuesOfUserBasedConditionToCompare(condition: UserBasedCondition, eventParams: [String: Any]?) -> (Any, Any)? {
         var userRawValue: Any?
         if condition.unit == "user" {
             userRawValue = userData.userProperties[condition.attribute]
@@ -437,14 +501,13 @@ class InAppMessageManager {
         } else {
             comparisonTargetRawValue = condition.value
         }
-        
+
         guard let userRawValue = userRawValue, let comparisonTargetRawValue = comparisonTargetRawValue else {
             return nil
         }
         return (userRawValue, comparisonTargetRawValue)
     }
-
-    private func matchEventBasedCondition(condition _: EventBasedCondition) {}
+    
     private func convertAnyToSpecifiedType(value: Any, type: String) -> Any? {
         switch (value, type) {
         case let (value as String, "TEXT"):
