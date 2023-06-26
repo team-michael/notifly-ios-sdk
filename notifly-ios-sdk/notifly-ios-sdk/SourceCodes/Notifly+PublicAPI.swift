@@ -191,4 +191,8 @@ import UIKit
                                                                 url: url,
                                                                 delay: delay)
     }
+    
+    @objc static func disableInAppMessage() {
+        Notifly.inAppMessageDisabled = true
+    }
 }

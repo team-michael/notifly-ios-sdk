@@ -458,7 +458,6 @@ class InAppMessageManager {
         {
             switch condition.operator {
             case "=":
-                print(userValue, comparisonTargetValue)
                 return CompareValueHelper.isEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
             case "!=":
                 return CompareValueHelper.isNotEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
