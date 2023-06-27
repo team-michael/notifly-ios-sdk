@@ -88,40 +88,40 @@ class InAppMessageManager {
         }
     }
 
-    func requestSync(projectID: String, notiflyUserID: String, notiflyDeviceID: String, completion: @escaping (Result<Data, Error>) -> Void) {
-        var urlComponents = URLComponents(string: InAppMessageConstant.syncStateURL)
-        urlComponents?.queryItems = [
-            URLQueryItem(name: "projectID", value: projectID),
-            URLQueryItem(name: "notiflyUserID", value: notiflyUserID),
-            URLQueryItem(name: "notiflyDeivceID", value: notiflyDeviceID),
-            URLQueryItem(name: "channel", value: "in-app-message"),
-        ]
-
-        if let url = urlComponents?.url {
-            let task = URLSession.shared.dataTask(with: url) { data, response, error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-
-                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                    if let data = data {
-                        completion(.success(data))
-                    } else {
-                        let noDataError = NSError(domain: "No data received", code: 0, userInfo: nil)
-                        completion(.failure(noDataError))
-                    }
-                } else {
-                    let apiRequestError = NSError(domain: "API request failed", code: 0, userInfo: nil)
-                    completion(.failure(apiRequestError))
-                }
-            }
-
-            task.resume()
-        } else {
-            let invalidURLError = NSError(domain: "Invalid URL", code: 0, userInfo: nil)
-            completion(.failure(invalidURLError))
-        }
+    func requestSync(projectID _: String, notiflyUserID _: String, notiflyDeviceID _: String, completion _: @escaping (Result<Data, Error>) -> Void) {
+//        var urlComponents = URLComponents(string: InAppMessageConstant.syncStateURL)
+//        urlComponents?.queryItems = [
+//            URLQueryItem(name: "projectID", value: projectID),
+//            URLQueryItem(name: "notiflyUserID", value: notiflyUserID),
+//            URLQueryItem(name: "notiflyDeivceID", value: notiflyDeviceID),
+//            URLQueryItem(name: "channel", value: "in-app-message"),
+//        ]
+//
+//        if let url = urlComponents?.url {
+//            let task = URLSession.shared.dataTask(with: url) { data, response, error in
+//                if let error = error {
+//                    completion(.failure(error))
+//                    return
+//                }
+//
+//                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+//                    if let data = data {
+//                        completion(.success(data))
+//                    } else {
+//                        let noDataError = NSError(domain: "No data received", code: 0, userInfo: nil)
+//                        completion(.failure(noDataError))
+//                    }
+//                } else {
+//                    let apiRequestError = NSError(domain: "API request failed", code: 0, userInfo: nil)
+//                    completion(.failure(apiRequestError))
+//                }
+//            }
+//
+//            task.resume()
+//        } else {
+//            let invalidURLError = NSError(domain: "Invalid URL", code: 0, userInfo: nil)
+//            completion(.failure(invalidURLError))
+//        }
     }
 
     private func updateUserProperties(properties: [String: Any]) {
@@ -385,7 +385,7 @@ class InAppMessageManager {
             return matchUserBasedCondition(condition: userCondition, eventParams: eventParams)
         }
     }
-    
+
     private func matchEventBasedCondition(condition: EventBasedCondition) -> Bool {
         guard condition.value >= 0 else {
             return false
@@ -397,13 +397,13 @@ class InAppMessageManager {
                 return false
             }
         }
-        
+
         let userCounts = caculateEventCounts(eventName: condition.event, startDate: startDate)
         guard userCounts >= 0 else {
             return false
         }
-        
-        switch condition.`operator` {
+
+        switch condition.operator {
         case "=":
             return userCounts == condition.value
         case ">=":
@@ -418,12 +418,12 @@ class InAppMessageManager {
             return false
         }
     }
-    
+
     private func caculateEventCounts(eventName: String, startDate: String?) -> Int {
-        guard let eventCounts = Array(self.eventData.eventCounts.values) as? [EventIntermediateCount] else {
+        guard let eventCounts = Array(eventData.eventCounts.values) as? [EventIntermediateCount] else {
             return -1
         }
-        
+
         var targetEventCounts = eventCounts.filter { $0.name == eventName }
         if let startDate = startDate {
             targetEventCounts = targetEventCounts.filter { $0.dt >= startDate }
@@ -506,7 +506,7 @@ class InAppMessageManager {
         }
         return (userRawValue, comparisonTargetRawValue)
     }
-    
+
     private func convertAnyToSpecifiedType(value: Any, type: String) -> Any? {
         switch (value, type) {
         case let (value as String, "TEXT"):

@@ -3,26 +3,12 @@ import Foundation
 
 class NotiflyAPI {
     // MARK: Public Methods
-    
+
     func authorizeSession(credentials: Auth.Credentials) -> AnyPublisher<String, Error> {
-        if let authToken = NotiflyCustomUserDefaults.authTokenInUserDefaults {
-            return Just(authToken)
-                .setFailureType(to: Error.self)
-                .eraseToAnyPublisher()
-        } else {
-            return request(to: "https://api.notifly.tech/authorize", method: .POST, authTokenRequired: false)
-                .map { $0.set(body: ApiRequestBody(payload: .AuthCredentials(credentials))) }
-                .flatMap { (builder: RequestBuilder) -> AnyPublisher<String, Error> in builder.buildAndFire() }
-                .handleEvents(receiveOutput: { authToken in
-                    guard let notifly = try? Notifly.main else {
-                        return
-                    }
-                    notifly.auth.authorizationPub = Just(authToken)
-                        .setFailureType(to: Error.self)
-                        .eraseToAnyPublisher()
-                })
-                .eraseToAnyPublisher()
-        }
+        return request(to: "https://api.notifly.tech/authorize", method: .POST, authTokenRequired: false)
+            .map { $0.set(body: ApiRequestBody(payload: .AuthCredentials(credentials))) }
+            .flatMap { (builder: RequestBuilder) -> AnyPublisher<String, Error> in builder.buildAndFire() }
+            .eraseToAnyPublisher()
     }
 
     func trackEvent(_ event: TrackingEvent) -> AnyPublisher<String, Error> {
@@ -34,16 +20,18 @@ class NotiflyAPI {
                    let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                    let response = json["message"]
                 {
-                    if let credentials = try? Notifly.main.auth.loginCred,
+                    if let auth = try? Notifly.main.auth,
                        response as! String == "The incoming token has expired"
                     {
-                        NotiflyCustomUserDefaults.authTokenInUserDefaults = nil
-                        return self.authorizeSession(credentials: credentials)
-                            .flatMap { _ in self.retryTrackEvent(event) }
+                        return auth.refreshAuth()
+                            .flatMap { _ in
+                                self.retryTrackEvent(event)
+                            }
                             .eraseToAnyPublisher()
                     }
                     Logger.error("Failed to track event with error: \(response)")
                 }
+
                 return Just(response)
                     .setFailureType(to: Error.self)
                     .eraseToAnyPublisher()
@@ -83,7 +71,10 @@ class NotiflyAPI {
            authTokenRequired
         {
             return notifly.auth.authorizationPub
-                .map { request.set(authorizationToken: $0) }
+                .tryMap {
+                    print($0)
+                    return request.set(authorizationToken: $0)
+                }
                 .eraseToAnyPublisher()
         } else {
             return Just(request)

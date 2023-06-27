@@ -1,42 +1,41 @@
-import Foundation
 import Combine
+import Foundation
 
 extension NotiflyAPI {
-    
     enum RequestMethod: String {
         case GET
         case POST
     }
-    
+
     class RequestBuilder {
-        
         var url: URL?
         var method: RequestMethod?
         var headers: [String: String] = ["Content-Type": "application/json"]
         var body: ApiRequestBody?
-        
+
         func set(url: URL?) -> RequestBuilder {
             self.url = url
             return self
         }
-        
+
         func set(method: RequestMethod) -> RequestBuilder {
             self.method = method
             return self
         }
-        
+
         func set(authorizationToken: String) -> RequestBuilder {
-            self.headers["Authorization"] = authorizationToken
+            headers["Authorization"] = authorizationToken
             return self
         }
-        
+
         func set(body: ApiRequestBody?) -> RequestBuilder {
             self.body = body
             return self
         }
-        
+
         func buildAndFire<T: Codable>() -> AnyPublisher<T, Error> {
             do {
+                Logger.error("AUTH REQUEST")
                 let request = try build()
                 return URLSession.shared.dataTaskPublisher(for: request)
                     .map(\.data)
@@ -54,7 +53,7 @@ extension NotiflyAPI {
                     .eraseToAnyPublisher()
             }
         }
-        
+
         func buildAndFireWithRawJSONResponseType() -> AnyPublisher<String, Error> {
             do {
                 let request = try build()
@@ -73,7 +72,7 @@ extension NotiflyAPI {
                     .eraseToAnyPublisher()
             }
         }
-        
+
         private func build() throws -> URLRequest {
             guard let url = url else {
                 throw NotiflyError.unexpectedNil("NotiflyAPI.RequestBuilder.url")
@@ -81,13 +80,13 @@ extension NotiflyAPI {
             guard let method = method else {
                 throw NotiflyError.unexpectedNil("NotiflyAPI.RequestBuilder.method")
             }
-            
+
             var request = URLRequest(url: url)
             request.httpMethod = method.rawValue
-            
-            headers.forEach({ (key, value) in
+
+            headers.forEach { key, value in
                 request.setValue(value, forHTTPHeaderField: key)
-            })
+            }
 
             if let body = body {
                 request.httpBody = try? JSONEncoder().encode(body)
@@ -95,7 +94,7 @@ extension NotiflyAPI {
             return request
         }
     }
-    
+
     struct Response<T: Codable>: Codable {
         let data: T?
     }

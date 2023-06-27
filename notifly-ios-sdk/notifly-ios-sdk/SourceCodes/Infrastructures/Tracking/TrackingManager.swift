@@ -119,6 +119,7 @@ class TrackingManager {
               },
               receiveValue: { [weak self] record in
                   if isInternal {
+                      
                       self?.internalEventPublisher.send(record)
                   } else {
                       self?.eventPublisher.send(record)
@@ -164,7 +165,7 @@ class TrackingManager {
                                        sdk_type: AppHelper.getSDKType(),
                                        event_params: AppHelper.makeJsonCodable(eventParams)) as? TrackingData,
                let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
-
+                
             {
                 return TrackingRecord(partitionKey: userID, data: stringfiedData)
             } else {

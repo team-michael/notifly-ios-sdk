@@ -8,7 +8,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication,
                      didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
     {
-
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+            if let error = error {
+                print("Failed to request authorization: \(error)")
+                return
+            } else {
+                guard granted else {
+                    print("Notification permission denied")
+                    return
+                }
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            }
+        }
         FirebaseApp.configure()
         Notifly.initialize(projectId: TestConstant.projectID, username: TestConstant.username, password: TestConstant.password)
         UNUserNotificationCenter.current().delegate = self
