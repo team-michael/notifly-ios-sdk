@@ -28,6 +28,16 @@ extension NotiflyAPI {
             return self
         }
 
+        func set(bearer: Bool) -> RequestBuilder {
+            guard let authorizationToken = headers["Authorization"] as? String,
+                  bearer
+            else {
+                return self
+            }
+            headers["Authorization"] = "Bearer " + authorizationToken
+            return self
+        }
+
         func set(body: ApiRequestBody?) -> RequestBuilder {
             self.body = body
             return self
@@ -35,7 +45,6 @@ extension NotiflyAPI {
 
         func buildAndFire<T: Codable>() -> AnyPublisher<T, Error> {
             do {
-                Logger.error("AUTH REQUEST")
                 let request = try build()
                 return URLSession.shared.dataTaskPublisher(for: request)
                     .map(\.data)

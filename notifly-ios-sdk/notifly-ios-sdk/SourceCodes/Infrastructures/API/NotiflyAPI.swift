@@ -57,8 +57,15 @@ class NotiflyAPI {
             .eraseToAnyPublisher()
     }
 
+    func requestSyncState(projectID: String, notiflyUserID: String, notiflyDeviceID: String) -> AnyPublisher<String, Error> {
+        let endpoint = "https://api.notifly.tech/user-state/" + projectID + "/" + notiflyUserID + "?deviceId=" + notiflyDeviceID + "&channel=in-app-message"
+        return request(to: endpoint, method: .GET, authTokenRequired: true)
+            .map { $0.set(bearer: true) }
+            .flatMap { $0.buildAndFireWithRawJSONResponseType() }
+            .eraseToAnyPublisher()
+    }
+    
     // MARK: Private Methods
-
     private func request(to uri: String,
                          method: RequestMethod,
                          authTokenRequired: Bool) -> AnyPublisher<RequestBuilder, Error>
@@ -70,12 +77,10 @@ class NotiflyAPI {
         if let notifly = try? Notifly.main,
            authTokenRequired
         {
-            return notifly.auth.authorizationPub
-                .tryMap {
-                    print($0)
-                    return request.set(authorizationToken: $0)
-                }
-                .eraseToAnyPublisher()
+            return notifly.auth.authorizationPub.tryMap {
+                return request.set(authorizationToken: $0)
+            }
+            .eraseToAnyPublisher()
         } else {
             return Just(request)
                 .setFailureType(to: Error.self)

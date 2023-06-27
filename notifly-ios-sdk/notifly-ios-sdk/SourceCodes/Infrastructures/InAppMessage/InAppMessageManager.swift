@@ -14,7 +14,7 @@ class InAppMessageManager {
     private var userData: UserData = .init(data: [:])
     private var campaginData: CampaignData = .init(inAppMessageCampaigns: [])
     private var eventData: EventData = .init(eventCounts: [:])
-
+    private var requestSyncStateCancellables = Set<AnyCancellable>()
     private var _syncStateFinishedPub: AnyPublisher<Void, Error>?
     private(set) var syncStateFinishedPub: AnyPublisher<Void, Error>? {
         get {
@@ -57,71 +57,32 @@ class InAppMessageManager {
             return
         }
 
-        requestSync(projectID: projectID, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID) { result in
-            switch result {
-            case let .success(data):
-                do {
-                    if let decodedData = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                        if let userData = decodedData["userData"] as? [String: Any] {
-                            self.userData = UserData(data: userData)
-                        }
-
-                        if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
-                            self.constructCampaignData(campaignData: campaignData)
-                        }
-
-                        if let eicData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
-                            self.constructEventIntermediateCountsData(eicData: eicData)
-                        }
-                    } else {
-                        Logger.error("Fail to sync user state")
+        NotiflyAPI().requestSyncState(projectID: projectID, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID)
+            .sink(receiveCompletion: { completion in
+                if case let .failure(error) = completion {
+                    Logger.error("Fail to sync user state: " + error.localizedDescription)
+                    self.syncStateFinishedPromise?(.success(()))
+                }
+            }, receiveValue: { [weak self] jsonString in
+                if let jsonData = jsonString.data(using: .utf8),
+                   let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
+                {
+                    if let userData = decodedData["userData"] as? [String: Any] {
+                        self?.userData = UserData(data: userData)
                     }
 
-                } catch {
-                    Logger.error(error.localizedDescription)
-                }
-            case let .failure(error):
-                Logger.error(error.localizedDescription)
-            }
-            Logger.error("SYNC END") // TODO: REMOVE
-            self.syncStateFinishedPromise?(.success(()))
-        }
-    }
+                    if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
+                        self?.constructCampaignData(campaignData: campaignData)
+                    }
 
-    func requestSync(projectID _: String, notiflyUserID _: String, notiflyDeviceID _: String, completion _: @escaping (Result<Data, Error>) -> Void) {
-//        var urlComponents = URLComponents(string: InAppMessageConstant.syncStateURL)
-//        urlComponents?.queryItems = [
-//            URLQueryItem(name: "projectID", value: projectID),
-//            URLQueryItem(name: "notiflyUserID", value: notiflyUserID),
-//            URLQueryItem(name: "notiflyDeivceID", value: notiflyDeviceID),
-//            URLQueryItem(name: "channel", value: "in-app-message"),
-//        ]
-//
-//        if let url = urlComponents?.url {
-//            let task = URLSession.shared.dataTask(with: url) { data, response, error in
-//                if let error = error {
-//                    completion(.failure(error))
-//                    return
-//                }
-//
-//                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-//                    if let data = data {
-//                        completion(.success(data))
-//                    } else {
-//                        let noDataError = NSError(domain: "No data received", code: 0, userInfo: nil)
-//                        completion(.failure(noDataError))
-//                    }
-//                } else {
-//                    let apiRequestError = NSError(domain: "API request failed", code: 0, userInfo: nil)
-//                    completion(.failure(apiRequestError))
-//                }
-//            }
-//
-//            task.resume()
-//        } else {
-//            let invalidURLError = NSError(domain: "Invalid URL", code: 0, userInfo: nil)
-//            completion(.failure(invalidURLError))
-//        }
+                    if let eicData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
+                        self?.constructEventIntermediateCountsData(eicData: eicData)
+                    }
+                }
+                Logger.error("SYNC END") // TODO: REMOVE
+                self?.syncStateFinishedPromise?(.success(()))
+            })
+            .store(in: &requestSyncStateCancellables)
     }
 
     private func updateUserProperties(properties: [String: Any]) {
