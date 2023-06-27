@@ -77,6 +77,7 @@ class Auth {
             self?.authorizationPub = Just(authToken)
                 .setFailureType(to: Error.self)
                 .eraseToAnyPublisher()
+            NotiflyCustomUserDefaults.authTokenInUserDefaults = authToken
         })
         .eraseToAnyPublisher()
     }
