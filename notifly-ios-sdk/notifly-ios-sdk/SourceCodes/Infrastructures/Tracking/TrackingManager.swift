@@ -141,7 +141,8 @@ class TrackingManager {
         }
         return deviceTokenPub.tryMap { pushToken in
             let userID = (try? notifly.userManager.getNotiflyUserID()) ?? ""
-            if let deviceID = AppHelper.getDeviceID(),
+            if let notiflyDeviceID = AppHelper.getNotiflyDeviceID(),
+               let deviceID = AppHelper.getDeviceID(),
                let appVersion = AppHelper.getAppVersion(),
                let sdkVersion = AppHelper.getSDKVersion(),
                let data = TrackingData(id: UUID().uuidString,
@@ -149,8 +150,7 @@ class TrackingManager {
                                        notifly_user_id: userID,
                                        external_user_id: notifly.userManager.externalUserID,
                                        time: Int(Date().timeIntervalSince1970),
-                                       notifly_device_id: UUID(name: deviceID,
-                                                               namespace: TrackingConstant.HashNamespace.deviceID).notiflyStyleString,
+                                       notifly_device_id: notiflyDeviceID,
                                        external_device_id: deviceID,
                                        device_token: pushToken,
                                        is_internal_event: isInternal,

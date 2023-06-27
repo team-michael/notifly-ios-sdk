@@ -12,7 +12,7 @@ import UIKit
 // TODO: segment, delay, test - 06/18, 2023
 class InAppMessageManager {
     private var userData: UserData = .init(data: [:])
-    private var campaginData: CampaignData = .init(inAppMessageCampaigns: [])
+    private var campaignData: CampaignData = .init(inAppMessageCampaigns: [])
     private var eventData: EventData = .init(eventCounts: [:])
     private var requestSyncStateCancellables = Set<AnyCancellable>()
     private var _syncStateFinishedPub: AnyPublisher<Void, Error>?
@@ -51,7 +51,7 @@ class InAppMessageManager {
         }
         guard let projectID = notifly.projectID as String?,
               let notiflyUserID = (try? notifly.userManager.getNotiflyUserID()),
-              let notiflyDeviceID = AppHelper.getDeviceID()
+              let notiflyDeviceID = AppHelper.getNotiflyDeviceID()
         else {
             Logger.error("Fail to sync user state because Notifly is not initalized yet.")
             return
@@ -68,7 +68,12 @@ class InAppMessageManager {
                    let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
                 {
                     if let userData = decodedData["userData"] as? [String: Any] {
-                        self?.userData = UserData(data: userData)
+                        if let previousUserProperties = self?.userData.userProperties as? [String:Any] {
+                            self?.userData = UserData(data: userData)
+                            self?.updateUserProperties(properties: previousUserProperties)
+                        } else {
+                            self?.userData = UserData(data: userData)
+                        }
                     }
 
                     if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
@@ -84,7 +89,7 @@ class InAppMessageManager {
             .store(in: &requestSyncStateCancellables)
     }
 
-    private func updateUserProperties(properties: [String: Any]) {
+    func updateUserProperties(properties: [String: Any]) {
         userData.userProperties.merge(properties) { _, new in new }
     }
 
@@ -127,8 +132,12 @@ class InAppMessageManager {
 
     /* method for showing in-app message */
     private func inspectCampaignToTriggerAndGetCampaignData(eventName: String, eventParams: [String: Any]?) -> [Campaign]? {
-        let campaignsToTrigger = campaginData.inAppMessageCampaigns
+        let now = { () -> Int in
+            return Int(Date().timeIntervalSince1970)
+        }
+        let campaignsToTrigger = campaignData.inAppMessageCampaigns
             .filter { $0.triggeringEvent == eventName }
+            .filter { isCampaignActive(campaign: $0) }
             .filter { self.isEntityOfSegment(campaign: $0, eventParams: eventParams) }
         if campaignsToTrigger.count == 0 {
             return nil
@@ -136,7 +145,19 @@ class InAppMessageManager {
 
         return campaignsToTrigger
     }
-
+    
+    private func isCampaignActive(campaign: Campaign) -> Bool {
+        let now = Int(Date().timeIntervalSince1970)
+        if let startTimestamp = campaign.campaignStart as? Int {
+            if let endTimestamp = campaign.campaignEnd as? Int {
+                return now >= startTimestamp && now <= endTimestamp
+            } else {
+                return now >= startTimestamp
+            }
+        }
+        return false
+    }
+    
     func prepareInAppMessageData(campaign: Campaign) -> InAppMessageData? {
         let messageId = UUID().uuidString.replacingOccurrences(of: "-", with: "")
         let campaignId = campaign.id
@@ -167,7 +188,7 @@ class InAppMessageManager {
 
     /* method for showing in-app message */
     private func constructCampaignData(campaignData: [[String: Any]]) {
-        campaginData.inAppMessageCampaigns = campaignData.compactMap { campaignDict -> Campaign? in
+        self.campaignData.inAppMessageCampaigns = campaignData.compactMap { campaignDict -> Campaign? in
             guard let id = campaignDict["id"] as? String,
                   let testing = campaignDict["testing"] as? Bool,
                   let triggeringEvent = campaignDict["triggering_event"] as? String,
@@ -254,8 +275,7 @@ class InAppMessageManager {
         eventData.eventCounts = eicData.compactMap { eic -> (String, EventIntermediateCount)? in
             guard let name = eic["name"] as? String,
                   let dt = eic["dt"] as? String,
-                  let countStr = eic["count"] as? String,
-                  let count = Int(countStr),
+                  let count = eic["count"] as? Int,
                   let eventParams = eic["event_params"] as? [String: Any]
             else {
                 return nil
@@ -411,7 +431,7 @@ class InAppMessageManager {
             switch condition.operator {
             case "=":
                 return CompareValueHelper.isEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
-            case "!=":
+            case "<>":
                 return CompareValueHelper.isNotEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
             case "@>":
                 return CompareValueHelper.isContains(value1: userValue, value2: comparisonTargetValue, type: valueType)

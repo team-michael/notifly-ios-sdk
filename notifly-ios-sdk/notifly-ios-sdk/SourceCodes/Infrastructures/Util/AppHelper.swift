@@ -10,7 +10,13 @@ class AppHelper {
             topVC.present(vc, animated: animated, completion: completion)
         }
     }
-
+    static func getNotiflyDeviceID() -> String? {
+        guard let deviceID = AppHelper.getDeviceID() else {
+            return nil
+        }
+        return UUID(name: deviceID,
+                            namespace: TrackingConstant.HashNamespace.deviceID).notiflyStyleString
+    }
     static func getDeviceID() -> String? {
         if let deviceID = NotiflyCustomUserDefaults.deviceIdInUserDefaults {
             return deviceID
@@ -38,11 +44,7 @@ class AppHelper {
     }
 
     static func getSDKVersion() -> String? {
-        guard let version = Notifly.sdkVersion else {
-            Logger.error("Failed to get the Notifly SDK version.")
-            return nil
-        }
-        return version
+        return Notifly.sdkVersion
     }
 
     static func getDevicePlatform() -> String {

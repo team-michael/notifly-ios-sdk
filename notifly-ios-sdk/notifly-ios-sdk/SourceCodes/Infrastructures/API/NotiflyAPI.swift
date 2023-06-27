@@ -58,6 +58,7 @@ class NotiflyAPI {
     }
 
     func requestSyncState(projectID: String, notiflyUserID: String, notiflyDeviceID: String) -> AnyPublisher<String, Error> {
+        
         let endpoint = "https://api.notifly.tech/user-state/" + projectID + "/" + notiflyUserID + "?deviceId=" + notiflyDeviceID + "&channel=in-app-message"
         return request(to: endpoint, method: .GET, authTokenRequired: true)
             .map { $0.set(bearer: true) }

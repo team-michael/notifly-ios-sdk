@@ -36,21 +36,15 @@ class Auth {
 
     init(username: String, password: String) {
         loginCred = Credentials(userName: username, password: password)
-        if let authToken = NotiflyCustomUserDefaults.authTokenInUserDefaults {
-            authorizationPub = Just(authToken)
-                .setFailureType(to: Error.self)
-                .eraseToAnyPublisher()
-        } else {
-            authorizationPub = Future { [weak self] promise in
-                self?.authorizationPromise = promise
-                DispatchQueue.main.asyncAfter(deadline: .now() + (self?.authorizationPromiseTimeoutInterval ?? 0.0)) {
-                    if let promise = self?.authorizationPromise {
-                        promise(.failure(NotiflyError.promiseTimeout))
-                    }
+        authorizationPub = Future { [weak self] promise in
+            self?.authorizationPromise = promise
+            DispatchQueue.main.asyncAfter(deadline: .now() + (self?.authorizationPromiseTimeoutInterval ?? 0.0)) {
+                if let promise = self?.authorizationPromise {
+                    promise(.failure(NotiflyError.promiseTimeout))
                 }
-            }.eraseToAnyPublisher()
-            setup()
-        }
+            }
+        }.eraseToAnyPublisher()
+        setup()
     }
 
     private func setup() {
