@@ -79,7 +79,6 @@ class InAppMessageManager {
                         self?.constructEventIntermediateCountsData(eicData: eicData)
                     }
                 }
-                Logger.error("SYNC END") // TODO: REMOVE
                 self?.syncStateFinishedPromise?(.success(()))
             })
             .store(in: &requestSyncStateCancellables)
@@ -234,7 +233,6 @@ class InAppMessageManager {
                     return .EventBasedCondition(condition)
                 } else {
                     guard let condition = try? UserBasedCondition(condition: conditionDict) else {
-                        print(conditionDict)
                         return nil
                     }
                     return .UserBasedCondition(condition)
@@ -298,9 +296,6 @@ class InAppMessageManager {
                 return false
             }
         }
-        Logger.error("SEMGENT!")
-        print(segmentInfo)
-
         guard let groups = segmentInfo.groups else {
             return true // send to all
         }
@@ -337,12 +332,8 @@ class InAppMessageManager {
     private func matchCondition(condition: Condition, eventParams: [String: Any]?) -> Bool {
         switch condition {
         case let .EventBasedCondition(eventCondition):
-            Logger.error("HIHI EVENT CONDITION")
-            print(eventCondition)
             return matchEventBasedCondition(condition: eventCondition)
         case let .UserBasedCondition(userCondition):
-            Logger.error("HIHI User CONDITION")
-            print(userCondition)
             return matchUserBasedCondition(condition: userCondition, eventParams: eventParams)
         }
     }
