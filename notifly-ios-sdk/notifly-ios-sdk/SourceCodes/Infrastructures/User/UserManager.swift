@@ -31,6 +31,9 @@ class UserManager {
             NotiflyCustomUserDefaults.externalUserIdInUserDefaults = nil
             notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.removeUserPropertiesEventName, eventParams: nil)
         }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+            notifly.inAppMessageManager.syncState()
+        }
     }
     
     func setUserProperties(_ userProperties: [String: Any]) {
@@ -47,13 +50,14 @@ class UserManager {
             NotiflyCustomUserDefaults.externalUserIdInUserDefaults = newExternalUserID
             _notiflyUserIDCache = nil
         }
+        notifly.inAppMessageManager.updateUserProperties(properties: userProperties)
         notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.setUserPropertiesEventName, eventParams: userProperties)
     }
     
     func getNotiflyUserID() throws -> String {
         let userID = try (_notiflyUserIDCache ?? generateUserID(externalUserID: externalUserID))
         _notiflyUserIDCache = userID
-        return userID
+        return userID.lowercased()
     }
     
     private func generateUserID(externalUserID: String?) throws -> String {
