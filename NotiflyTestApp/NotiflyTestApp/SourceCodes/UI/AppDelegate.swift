@@ -25,12 +25,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FirebaseApp.configure()
         Notifly.initialize(projectId: TestConstant.projectID, username: TestConstant.username, password: TestConstant.password)
         UNUserNotificationCenter.current().delegate = self
-        Notifly.setUserProperties(userProperties: [
-            "Bool1": true,
-            "Bool2": false,
-            "age": 27,
-            "name": "DS"
-        ])
         return true
     }
 
