@@ -68,7 +68,7 @@ class InAppMessageManager {
                    let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
                 {
                     if let userData = decodedData["userData"] as? [String: Any] {
-                        if let previousUserProperties = self?.userData.userProperties as? [String:Any] {
+                        if let previousUserProperties = self?.userData.userProperties as? [String: Any] {
                             self?.userData = UserData(data: userData)
                             self?.updateUserProperties(properties: previousUserProperties)
                         } else {
@@ -133,7 +133,7 @@ class InAppMessageManager {
     /* method for showing in-app message */
     private func inspectCampaignToTriggerAndGetCampaignData(eventName: String, eventParams: [String: Any]?) -> [Campaign]? {
         let now = { () -> Int in
-            return Int(Date().timeIntervalSince1970)
+            Int(Date().timeIntervalSince1970)
         }
         let campaignsToTrigger = campaignData.inAppMessageCampaigns
             .filter { $0.triggeringEvent == eventName }
@@ -145,7 +145,7 @@ class InAppMessageManager {
 
         return campaignsToTrigger
     }
-    
+
     private func isCampaignActive(campaign: Campaign) -> Bool {
         let now = Int(Date().timeIntervalSince1970)
         if let startTimestamp = campaign.campaignStart as? Int {
@@ -157,7 +157,7 @@ class InAppMessageManager {
         }
         return false
     }
-    
+
     func prepareInAppMessageData(campaign: Campaign) -> InAppMessageData? {
         let messageId = UUID().uuidString.replacingOccurrences(of: "-", with: "")
         let campaignId = campaign.id
