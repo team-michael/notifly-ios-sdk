@@ -138,6 +138,7 @@ class InAppMessageManager {
         let campaignsToTrigger = campaignData.inAppMessageCampaigns
             .filter { $0.triggeringEvent == eventName }
             .filter { isCampaignActive(campaign: $0) }
+            .filter { !isBlacklistTemplate(templateName: $0.message.modalProperties.templateName) }
             .filter { self.isEntityOfSegment(campaign: $0, eventParams: eventParams) }
         if campaignsToTrigger.count == 0 {
             return nil
@@ -156,6 +157,14 @@ class InAppMessageManager {
             }
         }
         return false
+    }
+
+    private func isBlacklistTemplate(templateName: String) -> Bool {
+        let propertyKeyForBlacklist = "hide_in_app_message_" + templateName
+        guard let isBlacklist = self.userData.userProperties[propertyKeyForBlacklist] as? Bool else {
+            return false
+        }
+        return isBlacklist
     }
 
     func prepareInAppMessageData(campaign: Campaign) -> InAppMessageData? {
