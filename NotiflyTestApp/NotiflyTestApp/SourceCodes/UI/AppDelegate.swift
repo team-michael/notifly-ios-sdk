@@ -14,7 +14,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 return
             } else {
                 guard granted else {
-                    print("Notification permission denied")
+                    print("Notification permission denied.")
                     return
                 }
                 DispatchQueue.main.async {
@@ -40,15 +40,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     {
         Notifly.application(application,
                             didFailToRegisterForRemoteNotificationsWithError: error)
-    }
-
-    func application(_ application: UIApplication,
-                     didReceiveRemoteNotification userInfo: [AnyHashable: Any],
-                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void)
-    {
-        Notifly.application(application,
-                            didReceiveRemoteNotification: userInfo)
-        completionHandler(.noData)
     }
 }
 
