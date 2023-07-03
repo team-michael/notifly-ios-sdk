@@ -9,7 +9,6 @@ import Combine
 import Foundation
 import UIKit
 
-// TODO: segment, delay, test - 06/18, 2023
 class InAppMessageManager {
     private var userData: UserData = .init(data: [:])
     private var campaignData: CampaignData = .init(inAppMessageCampaigns: [])
@@ -110,14 +109,14 @@ class InAppMessageManager {
             eicID += InAppMessageConstant.idSeparator
             updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
         }
-
-        if WebViewModalViewController.openedInAppMessageCount == 0,
-           let campaignsToTrigger = inspectCampaignToTriggerAndGetCampaignData(eventName: eventName, eventParams: eventParams)
+        
+        if var campaignsToTrigger = inspectCampaignToTriggerAndGetCampaignData(eventName: eventName, eventParams: eventParams)
         {
-            let campaignToTrigger: Campaign = campaignsToTrigger[0]
-            // TODO: support multiple campaigns, now only support one campaign
-            if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger) {
-                showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
+            campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
+            for campaignToTrigger in campaignsToTrigger {
+                if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger) {
+                    showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
+                }
             }
         }
     }
@@ -181,8 +180,13 @@ class InAppMessageManager {
         return nil
     }
 
+    
     private func showInAppMessage(notiflyInAppMessageData: InAppMessageData) {
         DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline) {
+            guard WebViewModalViewController.openedInAppMessageCount == 0 else {
+                Logger.error("Already In App Message Opened. New In App Message Ignored.")
+                return
+            }
             guard UIApplication.shared.applicationState == .active else {
                 Logger.error("Due to being in a background state, in-app messages are being ignored.")
                 return
@@ -239,8 +243,11 @@ class InAppMessageManager {
             let campaignEnd = campaignDict["end"] as? Int
 
             let segmentInfo = self.constructSegmnentInfo(segmentInfoDict: segmentInfoDict)
-
-            return Campaign(id: id, channel: channel, segmentType: segmentType, message: message, segmentInfo: segmentInfo, triggeringEvent: triggeringEvent, campaignStart: campaignStart, campaignEnd: campaignEnd, delay: delay, status: campaignStatus, testing: testing, whitelist: whitelist)
+            let lastUpdatedTimestamp = (campaignDict["last_updated_timestamp"] as? Int) ?? 0
+            
+            return Campaign(id: id, channel: channel, segmentType: segmentType, message: message, segmentInfo: segmentInfo, triggeringEvent: triggeringEvent, campaignStart: campaignStart, campaignEnd: campaignEnd, delay: delay, status: campaignStatus, testing: testing, whitelist: whitelist,
+                            lastUpdatedTimestamp: lastUpdatedTimestamp
+            )
         }
     }
 
@@ -415,7 +422,10 @@ class InAppMessageManager {
         return targetEventCounts.reduce(0) { $0 + $1.count }
     }
 
-    private func getDateStringBeforeNDays(n: Int) -> String? {
+    private func getDateStringBeforeNDays(n: Int?) -> String? {
+        guard let n = n else {
+            return nil
+        }
         guard n >= 0 else {
             return nil
         }

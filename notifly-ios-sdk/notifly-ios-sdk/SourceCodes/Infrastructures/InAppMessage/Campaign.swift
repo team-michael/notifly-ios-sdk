@@ -20,6 +20,7 @@ struct Campaign {
     let status: CampaignStatus
     let testing: Bool
     let whitelist: [String]?
+    let lastUpdatedTimestamp: Int
 }
 
 struct ModalProperties {
@@ -114,7 +115,7 @@ struct UserBasedCondition {
 struct EventBasedCondition {
     let event: String
     let eventConditionType: eventBasedConditionType
-    let secondaryValue: Int
+    let secondaryValue: Int?
     let `operator`: String
     let value: Int
     
@@ -122,7 +123,6 @@ struct EventBasedCondition {
         guard let event = condition["event"] as? String,
               let eventConditionTypeStr = condition["event_condition_type"] as? String,
               let eventConditionType = eventBasedConditionType(rawValue: eventConditionTypeStr),
-              let secondaryValue = condition["secondary_value"] as? Int,
               let `operator` = condition["operator"] as? String,
               let value = condition["value"] as? Int
         else {
@@ -130,7 +130,7 @@ struct EventBasedCondition {
         }
         self.event = event
         self.eventConditionType = eventConditionType
-        self.secondaryValue = secondaryValue
+        self.secondaryValue = condition["secondary_value"] as? Int
         self.value = value
         self.`operator` = `operator`
     }
