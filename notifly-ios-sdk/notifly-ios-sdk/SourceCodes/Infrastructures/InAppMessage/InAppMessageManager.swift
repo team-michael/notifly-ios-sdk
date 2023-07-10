@@ -134,15 +134,16 @@ class InAppMessageManager {
         let now = { () -> Int in
             Int(Date().timeIntervalSince1970)
         }
+        
         let campaignsToTrigger = campaignData.inAppMessageCampaigns
             .filter { $0.triggeringEvent == eventName }
             .filter { isCampaignActive(campaign: $0) }
             .filter { !isBlacklistTemplate(templateName: $0.message.modalProperties.templateName) }
             .filter { self.isEntityOfSegment(campaign: $0, eventParams: eventParams) }
+        
         if campaignsToTrigger.count == 0 {
             return nil
         }
-
         return campaignsToTrigger
     }
 
@@ -195,7 +196,6 @@ class InAppMessageManager {
                 Logger.error("Error presenting in-app message")
                 return
             }
-            AppHelper.present(vc, completion: nil)
         }
     }
 

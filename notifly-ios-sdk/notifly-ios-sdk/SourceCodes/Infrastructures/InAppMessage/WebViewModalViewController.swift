@@ -4,7 +4,7 @@ import WebKit
 
 class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate {
     static var openedInAppMessageCount: Int = 0
-    let webView = FullScreenWKWebView()
+    var webView = FullScreenWKWebView()
     var notiflyCampaignID: String?
     var notiflyMessageID: String?
     var notiflyExtraData: [String: AnyCodable]?
@@ -12,39 +12,22 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     convenience init(notiflyInAppMessageData: InAppMessageData) throws {
         self.init(nibName: nil, bundle: nil)
+        self.view.isHidden = false
         modalPresentationStyle = .overFullScreen
-
-        self.notiflyCampaignID = notiflyInAppMessageData.notiflyCampaignId
-        self.notiflyMessageID = notiflyInAppMessageData.notiflyMessageId
-        self.modalProps = notiflyInAppMessageData.modalProps
-        webView.load(URLRequest(url: notiflyInAppMessageData.url))
+        notiflyCampaignID = notiflyInAppMessageData.notiflyCampaignId
+        notiflyMessageID = notiflyInAppMessageData.notiflyMessageId
+        modalProps = notiflyInAppMessageData.modalProps
+        DispatchQueue.main.async { [weak self] in
+            self?.webView.load(URLRequest(url: notiflyInAppMessageData.url))
+        }
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         webView.navigationDelegate = self
         webView.configuration.userContentController.add(self, name: "notiflyInAppMessageEventHandler")
-        WebViewModalViewController.openedInAppMessageCount += 1
-
-        if !setupUI() as Bool {
-            dismissCTATapped()
-            return
-        }
-
-        if let params = [
-            "type": "message_event",
-            "channel": "in-app-message",
-            "campaign_id": notiflyCampaignID,
-            "notifly_message_id": notiflyMessageID,
-        ] as? [String: Any] {
-            guard let notifly = try? Notifly.main else {
-                Logger.error("Fail to Log In-App-Message Shown Event: Notifly is not initialized yet. ")
-                return
-            }
-            notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
-        }
     }
-
+    
     func setupUI() -> Bool {
         guard let modalSize = getModalSize() as? CGSize, let webViewLayer = getWebViewLayer(modalSize: modalSize) as? CALayer? else {
             return false
@@ -59,9 +42,13 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         } else {
             view.backgroundColor = UIColor.black.withAlphaComponent(0.2)
         }
-
+        
         webView.layer.mask = webViewLayer
-        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissCTATapped)))
+        if let shouldDismissCTATapped=modalProps?.dismissCTATapped,
+           shouldDismissCTATapped {
+            view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissCTATapped)))
+        }
+        
         view.addSubview(webView)
         NSLayoutConstraint.activate([
             webView.widthAnchor.constraint(equalToConstant: modalSize.width),
@@ -69,10 +56,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             view.centerXAnchor.constraint(equalTo: webView.centerXAnchor),
             modalPositionConstraint,
         ])
-
+        AppHelper.present(self, completion: nil)
         return true
     }
-
+    
     @objc
     private func dismissCTATapped() {
         dismiss(animated: false)
@@ -80,20 +67,30 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     }
 
     func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {
-        let injectedJavaScript = """
-        const button_trigger = document.getElementById('notifly-button-trigger'); button_trigger.addEventListener('click', function(event){
-        if (!event.notifly_button_click_type) return;
-        window.webkit.messageHandlers.notiflyInAppMessageEventHandler.postMessage(JSON.stringify({
-            type: event.notifly_button_click_type,
-            button_name: event.notifly_button_name,
-            link: event.notifly_button_click_link,
-            extra_data: event.notifly_extra_data,
-        }));
-            });
-        """
-        webView.evaluateJavaScript(injectedJavaScript, completionHandler: nil)
+        WebViewModalViewController.openedInAppMessageCount += 1
+        webView.evaluateJavaScript(InAppMessageConstant.injectedJavaScript, completionHandler: nil)
+        self.view.isHidden = true
+        if !self.setupUI() as Bool {
+            self.dismissCTATapped()
+            return
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.view.isHidden=false
+        }
+        if let params = [
+            "type": "message_event",
+            "channel": "in-app-message",
+            "campaign_id": notiflyCampaignID,
+            "notifly_message_id": notiflyMessageID,
+        ] as? [String: Any] {
+            guard let notifly = try? Notifly.main else {
+                Logger.error("Fail to Log In-App-Message Shown Event: Notifly is not initialized yet. ")
+                return
+            }
+            notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
+        }
     }
-
+    
     func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
         if message.name == "notiflyInAppMessageEventHandler" {
             guard let notifly = try? Notifly.main else {
@@ -140,8 +137,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             case "hide_in_app_message":
                 notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked, eventParams: params)
                 dismissCTATapped()
-                if let templateName = modalProps?.templateName
-                {
+                if let templateName = modalProps?.templateName {
                     let newProperty = "hide_in_app_message_" + templateName
                     try? Notifly.main.userManager.setUserProperties([newProperty: true])
                 }
@@ -181,10 +177,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         if screenWidth == 0 || screenHeight == 0 {
             return nil
         }
-        
+
         var viewWidth: CGFloat = 0.0
         var viewHeight: CGFloat = 0.0
-        
+
         if let width = modalProps?.width {
             viewWidth = width
         } else if let widthVW = modalProps?.width_vw {
@@ -218,7 +214,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         if let maxHeight = modalProps?.max_height, viewHeight > maxHeight {
             viewHeight = maxHeight
         }
-        
+
         let modalSize = CGSize(width: viewWidth, height: viewHeight)
         return modalSize
     }
@@ -267,3 +263,4 @@ class FullScreenWKWebView: WKWebView {
         return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     }
 }
+

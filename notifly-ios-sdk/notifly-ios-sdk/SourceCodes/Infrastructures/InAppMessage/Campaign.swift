@@ -41,6 +41,7 @@ struct ModalProperties {
     let borderTopLeftRadius: CGFloat?
     let borderTopRightRadius: CGFloat?
     let backgroundOpacity: CGFloat?
+    let dismissCTATapped: Bool?
     
     init?(properties: [String: Any]) {
         guard let name = properties["template_name"] as? String else {
@@ -62,7 +63,8 @@ struct ModalProperties {
         borderBottomRightRadius = (properties["borderBottomRightRadius"] ?? 0.0) as? CGFloat
         borderTopLeftRadius = (properties["borderTopLeftRadius"] ?? 0.0) as? CGFloat
         borderTopRightRadius = (properties["borderTopRightRadius"] ?? 0.0) as? CGFloat
-        backgroundOpacity = (properties["backgroudOpacity"] ?? 0.2) as? CGFloat
+        backgroundOpacity = (properties["backgroundOpacity"] ?? 0.2) as? CGFloat
+        dismissCTATapped = (properties["dismissCTATapped"] ?? false) as? Bool
     }
 }
 
