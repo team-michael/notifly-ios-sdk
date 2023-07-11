@@ -77,6 +77,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.view.isHidden=false
         }
+
         if let params = [
             "type": "message_event",
             "channel": "in-app-message",
@@ -129,11 +130,12 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 {
                     UIApplication.shared.open(url, options: [:]) { _ in
                         notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked, eventParams: params)
+                        self.dismissCTATapped()   
                     }
                 } else {
                     notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked, eventParams: params)
+                    dismissCTATapped()
                 }
-                dismissCTATapped()
             case "hide_in_app_message":
                 notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked, eventParams: params)
                 dismissCTATapped()
