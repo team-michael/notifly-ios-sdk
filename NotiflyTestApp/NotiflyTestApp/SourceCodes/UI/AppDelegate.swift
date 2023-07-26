@@ -23,7 +23,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         FirebaseApp.configure()
-        Notifly.disableInAppMessage()
         Notifly.initialize(projectId: TestConstant.projectID, username: TestConstant.username, password: TestConstant.password)
         UNUserNotificationCenter.current().delegate = self
         return true
