@@ -177,6 +177,11 @@ import UIKit
         Notifly.sdkVersion = version
     }
 
+    @objc static func disableInAppMessage() {
+        Notifly.inAppMessageDisabled = true
+        Logger.info("In App Message Channel is disabled.");
+    }
+
     @objc static func schedulePushNotification(title: String?,
                                          body: String?,
                                          url: URL,
@@ -192,7 +197,4 @@ import UIKit
                                                                 delay: delay)
     }
     
-    @objc static func disableInAppMessage() {
-        Notifly.inAppMessageDisabled = true
-    }
 }

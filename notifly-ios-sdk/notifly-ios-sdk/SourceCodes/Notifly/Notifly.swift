@@ -17,7 +17,7 @@ import UIKit
     static var sdkVersion: String = NotiflyConstant.sdkVersion
     static var sdkType: SdkType = .native
     static var coldStartNotificationData: [AnyHashable: Any]?
-    static var inAppMessageDisabled: Bool = true
+    static var inAppMessageDisabled: Bool = false
     
     let projectID: String
     

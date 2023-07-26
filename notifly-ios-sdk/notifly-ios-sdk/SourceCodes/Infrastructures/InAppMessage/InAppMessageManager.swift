@@ -48,6 +48,12 @@ class InAppMessageManager {
         guard let notifly = (try? Notifly.main) else {
             return
         }
+        
+        guard !Notifly.inAppMessageDisabled else {
+            self.syncStateFinishedPromise?(.success(()))
+            return
+        }
+
         guard let projectID = notifly.projectID as String?,
               let notiflyUserID = (try? notifly.userManager.getNotiflyUserID()),
               let notiflyDeviceID = AppHelper.getNotiflyDeviceID()
@@ -89,10 +95,16 @@ class InAppMessageManager {
     }
 
     func updateUserProperties(properties: [String: Any]) {
+        guard !Notifly.inAppMessageDisabled else {
+            return
+        }
         userData.userProperties.merge(properties) { _, new in new }
     }
 
     func updateEventData(eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) {
+        guard !Notifly.inAppMessageDisabled else {
+            return
+        }
         let dt = getCurrentDate()
         var eicID = eventName + InAppMessageConstant.idSeparator + dt + InAppMessageConstant.idSeparator
 
