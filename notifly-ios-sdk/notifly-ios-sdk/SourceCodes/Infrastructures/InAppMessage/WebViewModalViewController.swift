@@ -63,11 +63,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     @objc
     private func dismissCTATapped() {
         dismiss(animated: false)
-        WebViewModalViewController.openedInAppMessageCount -= 1
+        WebViewModalViewController.openedInAppMessageCount = 0
     }
 
     func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {
-        WebViewModalViewController.openedInAppMessageCount += 1
         webView.evaluateJavaScript(InAppMessageConstant.injectedJavaScript, completionHandler: nil)
         self.view.isHidden = true
         if !self.setupUI() as Bool {

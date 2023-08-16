@@ -29,9 +29,9 @@ class TrackingManager {
         self.projectID = projectID
         // Collect the events from the `eventPublisher` queue at specified interval and fire the event.
         eventRequestPayloadPublisher = eventPublisher
-            .collect(.byTimeOrCount(DispatchQueue.global(), .seconds(trackingFiringInterval), maxTrackingRecordsPerRequest))
-            .map { records in
-                TrackingEvent(records: records)
+            // .collect(.byTimeOrCount(DispatchQueue.global(), .seconds(trackingFiringInterval), maxTrackingRecordsPerRequest))
+            .map { record in
+                TrackingEvent(records: [record])
             }
             .eraseToAnyPublisher()
 

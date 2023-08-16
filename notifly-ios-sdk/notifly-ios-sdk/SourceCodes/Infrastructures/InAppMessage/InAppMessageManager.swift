@@ -48,9 +48,9 @@ class InAppMessageManager {
         guard let notifly = (try? Notifly.main) else {
             return
         }
-        
+
         guard !Notifly.inAppMessageDisabled else {
-            self.syncStateFinishedPromise?(.success(()))
+            syncStateFinishedPromise?(.success(()))
             return
         }
 
@@ -121,7 +121,7 @@ class InAppMessageManager {
             eicID += InAppMessageConstant.idSeparator
             updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
         }
-        
+
         if var campaignsToTrigger = inspectCampaignToTriggerAndGetCampaignData(eventName: eventName, eventParams: eventParams)
         {
             campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
@@ -146,13 +146,13 @@ class InAppMessageManager {
         let now = { () -> Int in
             Int(Date().timeIntervalSince1970)
         }
-        
+
         let campaignsToTrigger = campaignData.inAppMessageCampaigns
             .filter { $0.triggeringEvent == eventName }
             .filter { isCampaignActive(campaign: $0) }
             .filter { !isBlacklistTemplate(templateName: $0.message.modalProperties.templateName) }
             .filter { self.isEntityOfSegment(campaign: $0, eventParams: eventParams) }
-        
+
         if campaignsToTrigger.count == 0 {
             return nil
         }
@@ -173,7 +173,7 @@ class InAppMessageManager {
 
     private func isBlacklistTemplate(templateName: String) -> Bool {
         let propertyKeyForBlacklist = "hide_in_app_message_" + templateName
-        guard let isBlacklist = self.userData.userProperties[propertyKeyForBlacklist] as? Bool else {
+        guard let isBlacklist = userData.userProperties[propertyKeyForBlacklist] as? Bool else {
             return false
         }
         return isBlacklist
@@ -193,19 +193,21 @@ class InAppMessageManager {
         return nil
     }
 
-    
     private func showInAppMessage(notiflyInAppMessageData: InAppMessageData) {
         DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline) {
             guard WebViewModalViewController.openedInAppMessageCount == 0 else {
                 Logger.error("Already In App Message Opened. New In App Message Ignored.")
                 return
             }
+            WebViewModalViewController.openedInAppMessageCount = 1
             guard UIApplication.shared.applicationState == .active else {
                 Logger.error("Due to being in a background state, in-app messages are being ignored.")
+                WebViewModalViewController.openedInAppMessageCount = 0
                 return
             }
             guard let vc = try? WebViewModalViewController(notiflyInAppMessageData: notiflyInAppMessageData) else {
                 Logger.error("Error presenting in-app message")
+                WebViewModalViewController.openedInAppMessageCount = 0
                 return
             }
         }
@@ -256,10 +258,9 @@ class InAppMessageManager {
 
             let segmentInfo = self.constructSegmnentInfo(segmentInfoDict: segmentInfoDict)
             let lastUpdatedTimestamp = (campaignDict["last_updated_timestamp"] as? Int) ?? 0
-            
+
             return Campaign(id: id, channel: channel, segmentType: segmentType, message: message, segmentInfo: segmentInfo, triggeringEvent: triggeringEvent, campaignStart: campaignStart, campaignEnd: campaignEnd, delay: delay, status: campaignStatus, testing: testing, whitelist: whitelist,
-                            lastUpdatedTimestamp: lastUpdatedTimestamp
-            )
+                            lastUpdatedTimestamp: lastUpdatedTimestamp)
         }
     }
 
