@@ -1,32 +1,30 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.2
 import PackageDescription
 
 let package = Package(
-    name: "NotiflySDK",
+    name: "Notifly",
     platforms: [
-        .iOS(.v13)
+        .iOS(.v13),
     ],
     products: [
         .library(
-            name: "NotiflySDK",
-            targets: ["NotiflySDK"]
+            name: "Notifly",
+            targets: ["Notifly"]
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "8.0.0"),
+        .package(name: "Firebase",
+                 url: "https://github.com/firebase/firebase-ios-sdk.git",
+                 from: "8.0.0"),
     ],
     targets: [
         .target(
-            name: "NotiflySDK",
+            name: "Notifly",
             dependencies: [
-                "Firebase",
-                "FirebaseMessaging",
+                .product(name: "FirebaseMessaging", package: "Firebase"),
             ],
             path: "Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk",
-            sources: ["**/*"],
-            swiftSettings: [
-                .define("SWIFT_PACKAGE")
-            ]
+            sources: ["SourceCodes"]
         ),
     ]
 )
