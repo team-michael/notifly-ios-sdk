@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '13.0'
 
-  s.source_files = 'Notifly/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/**/*'
+  s.source_files = 'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/**/*'
   s.swift_versions = '5.0'
 
   s.dependency 'Firebase/Core'
