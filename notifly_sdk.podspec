@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
   s.name             = 'notifly_sdk'
-  s.version          = '1.0.9'
+  s.version          = '1.1.0'
   s.summary          = 'Notifly iOS SDK.'
 
   s.description      = <<-DESC
-  NOTIFLY iOS SDK : 1.0.9
+  NOTIFLY iOS SDK : 1.1.0
   DESC
 
   s.homepage         = 'https://github.com/team-michael/notifly-ios-sdk'
@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '13.0'
 
-  s.source_files = 'notifly-ios-sdk/notifly-ios-sdk/**/*'
+  s.source_files = 'Notifly/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/**/*'
   s.swift_versions = '5.0'
 
   s.dependency 'Firebase/Core'
