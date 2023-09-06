@@ -9,7 +9,7 @@ let package = Package(
     products: [
         .library(
             name: "notifly_sdk",
-            targets: ["Notifly"]
+            targets: ["notifly_sdk"]
         ),
     ],
     dependencies: [
@@ -19,7 +19,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "Notifly",
+            name: "notifly_sdk",
             dependencies: [
                 .product(name: "FirebaseMessaging", package: "Firebase"),
             ],
