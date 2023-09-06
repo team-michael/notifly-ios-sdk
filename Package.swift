@@ -2,13 +2,13 @@
 import PackageDescription
 
 let package = Package(
-    name: "Notifly",
+    name: "notifly_sdk",
     platforms: [
         .iOS(.v13),
     ],
     products: [
         .library(
-            name: "Notifly",
+            name: "notifly_sdk",
             targets: ["Notifly"]
         ),
     ],
