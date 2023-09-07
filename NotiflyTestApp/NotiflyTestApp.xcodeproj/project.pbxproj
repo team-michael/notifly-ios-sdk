@@ -20,8 +20,9 @@
 		675EB44129ED18B1001347FB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 675EB43F29ED18B1001347FB /* LaunchScreen.storyboard */; };
 		67A0706529F2270C0028DE1A /* UserSettingsTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67A0706429F2270C0028DE1A /* UserSettingsTestViewController.swift */; };
 		F21322EF2A0243D900C3EE43 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F21322EC2A0243D900C3EE43 /* GoogleService-Info.plist */; };
-		F21322F12A02448A00C3EE43 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 672E7B6729ED1D3500B3E9F2 /* notifly_ios_sdk.framework */; };
-		F21322F22A02448A00C3EE43 /* notifly_ios_sdk.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 672E7B6729ED1D3500B3E9F2 /* notifly_ios_sdk.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F22B77BA2AA98B5D00F7C432 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F22B77B72AA989A400F7C432 /* notifly_ios_sdk.framework */; };
+		F22B77BB2AA98B5D00F7C432 /* notifly_ios_sdk.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F22B77B72AA989A400F7C432 /* notifly_ios_sdk.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F22B77BC2AA98B6800F7C432 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F22B77B72AA989A400F7C432 /* notifly_ios_sdk.framework */; };
 		F2F3CE7D2A13A2DD009FEAF0 /* TestConstatns.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F3CE7A2A13A2DD009FEAF0 /* TestConstatns.swift */; };
 /* End PBXBuildFile section */
 
@@ -40,6 +41,20 @@
 			remoteGlobalIDString = 673F0E8A29EBA7D200814217;
 			remoteInfo = "notifly-ios-sdkTests";
 		};
+		F22B77B62AA989A400F7C432 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F22B77B12AA989A400F7C432 /* notifly-ios-sdk.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 673F0E8029EBA7D200814217;
+			remoteInfo = "notifly-ios-sdk";
+		};
+		F22B77B82AA989A400F7C432 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F22B77B12AA989A400F7C432 /* notifly-ios-sdk.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 673F0E8A29EBA7D200814217;
+			remoteInfo = "notifly-ios-sdkTests";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -49,7 +64,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				F21322F22A02448A00C3EE43 /* notifly_ios_sdk.framework in Embed Frameworks */,
+				F22B77BB2AA98B5D00F7C432 /* notifly_ios_sdk.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -74,6 +89,7 @@
 		67A0706429F2270C0028DE1A /* UserSettingsTestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsTestViewController.swift; sourceTree = "<group>"; };
 		F21322EC2A0243D900C3EE43 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F21322F02A02445D00C3EE43 /* NotiflyTestApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotiflyTestApp.entitlements; sourceTree = "<group>"; };
+		F22B77B12AA989A400F7C432 /* notifly-ios-sdk.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "notifly-ios-sdk.xcodeproj"; path = "../Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk.xcodeproj"; sourceTree = "<group>"; };
 		F2F3CE7A2A13A2DD009FEAF0 /* TestConstatns.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConstatns.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -82,7 +98,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F21322F12A02448A00C3EE43 /* notifly_ios_sdk.framework in Frameworks */,
+				F22B77BC2AA98B6800F7C432 /* notifly_ios_sdk.framework in Frameworks */,
+				F22B77BA2AA98B5D00F7C432 /* notifly_ios_sdk.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,6 +109,7 @@
 		672E7B6029ED1D3500B3E9F2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F22B77B12AA989A400F7C432 /* notifly-ios-sdk.xcodeproj */,
 				672E7B6129ED1D3500B3E9F2 /* notifly-ios-sdk.xcodeproj */,
 			);
 			name = Frameworks;
@@ -170,6 +188,15 @@
 			path = NotiflyTestApp;
 			sourceTree = "<group>";
 		};
+		F22B77B22AA989A400F7C432 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F22B77B72AA989A400F7C432 /* notifly_ios_sdk.framework */,
+				F22B77B92AA989A400F7C432 /* notifly-ios-sdkTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -222,6 +249,10 @@
 					ProductGroup = 672E7B6229ED1D3500B3E9F2 /* Products */;
 					ProjectRef = 672E7B6129ED1D3500B3E9F2 /* notifly-ios-sdk.xcodeproj */;
 				},
+				{
+					ProductGroup = F22B77B22AA989A400F7C432 /* Products */;
+					ProjectRef = F22B77B12AA989A400F7C432 /* notifly-ios-sdk.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -243,6 +274,20 @@
 			fileType = wrapper.cfbundle;
 			path = "notifly-ios-sdkTests.xctest";
 			remoteRef = 672E7B6829ED1D3500B3E9F2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F22B77B72AA989A400F7C432 /* notifly_ios_sdk.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = notifly_ios_sdk.framework;
+			remoteRef = F22B77B62AA989A400F7C432 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F22B77B92AA989A400F7C432 /* notifly-ios-sdkTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "notifly-ios-sdkTests.xctest";
+			remoteRef = F22B77B82AA989A400F7C432 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */

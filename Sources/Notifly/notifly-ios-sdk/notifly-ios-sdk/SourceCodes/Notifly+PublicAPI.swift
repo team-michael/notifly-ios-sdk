@@ -129,7 +129,6 @@ import UIKit
     }
 
     // MARK: - On-demand APIs
-
     @objc static func trackEvent(eventName: String,
                            eventParams: [String: Any]? = nil,
                            segmentationEventParamKeys: [String]? = nil)
@@ -195,6 +194,19 @@ import UIKit
                                                                 body: body,
                                                                 url: url,
                                                                 delay: delay)
+    }
+    
+    @objc static func registerFCMToken(token: String?) {
+        guard let main = try? main else {
+            Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.registerFCMToken.")
+            return
+        }
+        guard let token = token else {
+            Logger.error("Token must not be empty.")
+            return;
+        }
+        try? main.notificationsManager.registerFCMToken(token: token)
+        Logger.info("FCM token is successfully registered.")
     }
     
 }

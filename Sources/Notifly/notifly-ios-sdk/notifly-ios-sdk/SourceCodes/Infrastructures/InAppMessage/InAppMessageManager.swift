@@ -105,9 +105,19 @@ class InAppMessageManager {
         guard !Notifly.inAppMessageDisabled else {
             return
         }
+        
+        if var campaignsToTrigger = inspectCampaignToTriggerAndGetCampaignData(eventName: eventName, eventParams: eventParams)
+        {
+            campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
+            for campaignToTrigger in campaignsToTrigger {
+                if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger) {
+                    showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
+                }
+            }
+        }
+        
         let dt = getCurrentDate()
         var eicID = eventName + InAppMessageConstant.idSeparator + dt + InAppMessageConstant.idSeparator
-
         if let segmentationEventParamKeys = segmentationEventParamKeys,
            let eventParams = eventParams,
            segmentationEventParamKeys.count > 0,
@@ -122,15 +132,7 @@ class InAppMessageManager {
             updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
         }
 
-        if var campaignsToTrigger = inspectCampaignToTriggerAndGetCampaignData(eventName: eventName, eventParams: eventParams)
-        {
-            campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
-            for campaignToTrigger in campaignsToTrigger {
-                if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger) {
-                    showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
-                }
-            }
-        }
+
     }
 
     private func updateEventCountsInEventData(eicID: String, eventName: String, dt: String, eventParams: [String: Any]?) {

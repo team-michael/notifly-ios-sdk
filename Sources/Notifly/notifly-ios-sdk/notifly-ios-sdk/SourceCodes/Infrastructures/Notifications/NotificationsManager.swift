@@ -48,18 +48,22 @@ class NotificationsManager: NSObject {
         Messaging.messaging().apnsToken = deviceToken
         Messaging.messaging().token { token, error in
             if let token = token, error == nil {
-                self.deviceTokenPromise?(.success(token))
-                self.deviceTokenPub = Just(token).setFailureType(to: Error.self).eraseToAnyPublisher()
-                if let notifly = try? Notifly.main {
-                    notifly.trackingManager.trackSetDevicePropertiesInternalEvent(properties: [
-                        "device_token": token,
-                    ])
-                }
+                self.registerFCMToken(token: token)
             } else {
                 Logger.error("Error fetching FCM registration token: \(error)")
                 self.deviceTokenPromise?(.failure(NotiflyError.deviceTokenError))
                 self.deviceTokenPub = Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
             }
+        }
+    }
+    
+    func registerFCMToken(token: String) {
+        self.deviceTokenPromise?(.success(token))
+        self.deviceTokenPub = Just(token).setFailureType(to: Error.self).eraseToAnyPublisher()
+        if let notifly = try? Notifly.main {
+            notifly.trackingManager.trackSetDevicePropertiesInternalEvent(properties: [
+                "device_token": token,
+            ])
         }
     }
 
