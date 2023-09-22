@@ -72,8 +72,8 @@ class UserManager {
             uuidV5Name = "\(projectID)\(externalUserID)"
             uuidV5Namespace = TrackingConstant.HashNamespace.registeredUserID
         } else {
-            let deviceToken = try AppHelper.getDeviceID()
-            uuidV5Name = "\(projectID)\(deviceToken)"
+            let deviceID = try AppHelper.getDeviceID()
+            uuidV5Name = "\(projectID)\(deviceID)"
             uuidV5Namespace = TrackingConstant.HashNamespace.unregisteredUserID
         }
         

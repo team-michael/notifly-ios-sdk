@@ -32,8 +32,8 @@ class InAppMessageManager {
         }
     }
 
-    private var syncStateFinishedPromise: Future<Void, Error>.Promise?
-    init() {
+    var syncStateFinishedPromise: Future<Void, Error>.Promise?
+    init(disabled: Bool) {
         syncStateFinishedPub = Future { [weak self] promise in
             self?.syncStateFinishedPromise = promise
             DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
@@ -42,6 +42,9 @@ class InAppMessageManager {
                 }
             }
         }.eraseToAnyPublisher()
+        if disabled {
+            syncStateFinishedPromise?(.success(()))
+        }
     }
 
     func syncState() {

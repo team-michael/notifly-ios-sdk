@@ -24,14 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         FirebaseApp.configure()
         Notifly.initialize(projectId: TestConstant.projectID, username: TestConstant.username, password: TestConstant.password)
-        Messaging.messaging().token { token, error in
-            if let token = token,
-               error == nil
-            {
-                Notifly.registerFCMToken(token: token)
-            }
-            
-        }
+        
         UNUserNotificationCenter.current().delegate = self
         return true
     }

@@ -28,22 +28,31 @@ import UIKit
     let inAppMessageManager: InAppMessageManager
     
     var trackingCancellables = Set<AnyCancellable>()
-    
     // MARK: Lifecycle
     
     init(
         projectID: String,
         username: String,
-        password: String
+        password: String,
+        isMainApp: Bool
     ) {
         self.projectID = projectID
-        
+        NotiflyCustomUserDefaults.projectIdInUserDefaults = projectID
+        NotiflyCustomUserDefaults.usernameInUserDefaults = username
+        NotiflyCustomUserDefaults.passwordInUserDefaults = password
         auth = Auth(username: username,
                     password: password)
-        notificationsManager = NotificationsManager()
         trackingManager = TrackingManager(projectID: projectID)
         userManager = UserManager()
-        inAppMessageManager = InAppMessageManager()
+        
+        notificationsManager = NotificationsManager()
+        if !isMainApp {
+            Notifly.inAppMessageDisabled = true
+            notificationsManager.deviceTokenPromise?(.success(""))
+        }
+        inAppMessageManager = InAppMessageManager(disabled: Notifly.inAppMessageDisabled)
+        super.init()
+        Notifly._main = self
     }
 }
 

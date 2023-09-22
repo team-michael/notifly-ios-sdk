@@ -59,6 +59,10 @@ class AppHelper {
         return Notifly.sdkType.rawValue
     }
 
+    static func getBundleIdentifier() -> String? {
+        return Bundle.main.bundleIdentifier
+    }
+
     static func makeJsonCodable(_ jsonData: [String: Any]?) -> [String: AnyCodable]? {
         guard let jsonData = jsonData else { return nil }
         return jsonData.mapValues { value in
