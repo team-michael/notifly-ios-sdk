@@ -24,17 +24,18 @@ import UIKit
             return
         }
 
-        _main = Notifly(
+        Notifly(
             projectID: projectId,
             username: username,
-            password: password
+            password: password,
+            isMainApp: true
         )
 
-        guard let main = _main else {
+        guard let main = try? Notifly.main else {
             Logger.error("Failed to initialize Notifly.")
             return
         }
-
+        
         if let pushData = Notifly.coldStartNotificationData {
             let clickStatus = "background"
             if let urlString = pushData["url"] as? String,
@@ -113,6 +114,7 @@ import UIKit
                                        willPresent notification: UNNotification,
                                        withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void)
     {
+        
         if let pushData = notification.request.content.userInfo as [AnyHashable: Any]?,
            let notiflyMessageType = pushData["notifly_message_type"] as? String,
            notiflyMessageType == "push-notification"

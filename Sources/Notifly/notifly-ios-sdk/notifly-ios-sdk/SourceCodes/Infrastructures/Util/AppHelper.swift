@@ -48,7 +48,7 @@ class AppHelper {
     }
 
     static func getDevicePlatform() -> String {
-        return UIDevice.current.systemName.lowercased()
+        return "ios"
     }
 
     static func getiOSVersion() -> String {
@@ -57,6 +57,10 @@ class AppHelper {
 
     static func getSDKType() -> String {
         return Notifly.sdkType.rawValue
+    }
+
+    static func getBundleIdentifier() -> String? {
+        return Bundle.main.bundleIdentifier
     }
 
     static func makeJsonCodable(_ jsonData: [String: Any]?) -> [String: AnyCodable]? {
