@@ -48,7 +48,7 @@ class AppHelper {
     }
 
     static func getDevicePlatform() -> String {
-        return UIDevice.current.systemName.lowercased()
+        return "ios"
     }
 
     static func getiOSVersion() -> String {

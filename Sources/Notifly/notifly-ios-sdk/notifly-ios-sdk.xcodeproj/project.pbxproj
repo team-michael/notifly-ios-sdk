@@ -35,6 +35,7 @@
 		F2BB65CE2A3D9759001B3AFF /* WebViewModalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BB65CD2A3D9759001B3AFF /* WebViewModalViewController.swift */; };
 		F2DF20D02AB1EB1200CB9703 /* NotificationServiceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DF20CF2AB1EB1200CB9703 /* NotificationServiceExtension.swift */; };
 		F2F732E22A26E3A5008BA9B1 /* notifly_sdk.h in Headers */ = {isa = PBXBuildFile; fileRef = F2F732E12A26E3A5008BA9B1 /* notifly_sdk.h */; };
+		F2FDA1B22AC14AD400FB452D /* MessageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2FDA1B12AC14AD400FB452D /* MessageData.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,6 +77,7 @@
 		F2BB65CD2A3D9759001B3AFF /* WebViewModalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebViewModalViewController.swift; sourceTree = "<group>"; };
 		F2DF20CF2AB1EB1200CB9703 /* NotificationServiceExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationServiceExtension.swift; sourceTree = "<group>"; };
 		F2F732E12A26E3A5008BA9B1 /* notifly_sdk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = notifly_sdk.h; sourceTree = "<group>"; };
+		F2FDA1B12AC14AD400FB452D /* MessageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageData.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -220,6 +222,7 @@
 			children = (
 				673F0EC029EC72CC00814217 /* NotificationsManager.swift */,
 				F2DF20CF2AB1EB1200CB9703 /* NotificationServiceExtension.swift */,
+				F2FDA1B12AC14AD400FB452D /* MessageData.swift */,
 			);
 			path = Notifications;
 			sourceTree = "<group>";
@@ -371,6 +374,7 @@
 				673F0EAF29EBC67C00814217 /* TrackingEvent.swift in Sources */,
 				673F0EB029EBC67F00814217 /* TrackingManager.swift in Sources */,
 				F213F5112A36E49B00350AAC /* InAppMessage.swift in Sources */,
+				F2FDA1B22AC14AD400FB452D /* MessageData.swift in Sources */,
 				F213F5132A36E5BD00350AAC /* Campaign.swift in Sources */,
 				F223CF9F2A4ACCF5001E01DD /* Notifly+Constant.swift in Sources */,
 				672E7B8029EE4B0C00B3E9F2 /* AppHelper.swift in Sources */,
