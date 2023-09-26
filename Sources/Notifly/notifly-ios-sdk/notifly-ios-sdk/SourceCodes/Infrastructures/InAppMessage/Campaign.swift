@@ -21,6 +21,7 @@ struct Campaign {
     let testing: Bool
     let whitelist: [String]?
     let lastUpdatedTimestamp: Int
+    let reEligibleCondition: ReEligibleCondition?
 }
 
 struct ModalProperties {
@@ -65,6 +66,20 @@ struct ModalProperties {
         borderTopRightRadius = (properties["borderTopRightRadius"] ?? 0.0) as? CGFloat
         backgroundOpacity = (properties["backgroundOpacity"] ?? 0.2) as? CGFloat
         dismissCTATapped = (properties["dismissCTATapped"] ?? false) as? Bool
+    }
+}
+
+struct ReEligibleCondition {
+    let value: Int
+    let unit: String
+    
+    init?(data: [String: Any]) {
+        guard let unit = data["unit"] as? String,
+              let value = data["value"] as? Int else {
+            return nil
+        }
+        self.value = value
+        self.unit = unit
     }
 }
 

@@ -8,6 +8,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     var notiflyCampaignID: String?
     var notiflyMessageID: String?
     var notiflyExtraData: [String: AnyCodable]?
+    var notiflyReEligibleCondition: ReEligibleCondition?
     var modalProps: ModalProperties?
 
     convenience init(notiflyInAppMessageData: InAppMessageData) throws {
@@ -16,6 +17,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         modalPresentationStyle = .overFullScreen
         notiflyCampaignID = notiflyInAppMessageData.notiflyCampaignId
         notiflyMessageID = notiflyInAppMessageData.notiflyMessageId
+        notiflyReEligibleCondition = notiflyInAppMessageData.notiflyReEligibleCondition
         modalProps = notiflyInAppMessageData.modalProps
         DispatchQueue.main.async { [weak self] in
             self?.webView.load(URLRequest(url: notiflyInAppMessageData.url))
@@ -76,19 +78,32 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.view.isHidden=false
         }
-
-        if let params = [
+        var hideUntilData: [String:Int]?
+        if let campaignID = notiflyCampaignID,
+           let reEligibleCondition = notiflyReEligibleCondition,
+           let hideUntil = calculateHideUntil(reEligibleCondition: reEligibleCondition) {
+            hideUntilData=[campaignID:hideUntil]
+            if let manager = InAppMessageManager.shared {
+                InAppMessageManager.shared?.updateHideCampaignUntilData(hideUntilData: [
+                    campaignID:hideUntil
+                ])
+            } else {
+                Logger.error("InAppMessage shared manager is not exist.")
+            }
+        }
+        
+        guard let notifly = try? Notifly.main else {
+            Logger.error("Fail to Log In-App-Message Shown Event: Notifly is not initialized yet. ")
+            return
+        }
+        let params = [
             "type": "message_event",
             "channel": "in-app-message",
             "campaign_id": notiflyCampaignID,
             "notifly_message_id": notiflyMessageID,
-        ] as? [String: Any] {
-            guard let notifly = try? Notifly.main else {
-                Logger.error("Fail to Log In-App-Message Shown Event: Notifly is not initialized yet. ")
-                return
-            }
-            notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
-        }
+            "hide_until_data": hideUntilData ?? nil
+        ] as [String: Any]
+        notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
     }
     
     func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -105,11 +120,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
             if let extraData = messageEventData["extra_data"] as? [String: Any] {
                 var convertedExtraData: [String: AnyCodable] = [:]
-                AppHelper.makeJsonCodable(extraData)?.forEach { convertedExtraData[$0] = $1
-                }
+                AppHelper.makeJsonCodable(extraData)?.forEach { convertedExtraData[$0] = $1 }
                 notiflyExtraData = convertedExtraData
             }
-
+            
             let params = [
                 "type": "message_event",
                 "channel": "in-app-message",
@@ -139,8 +153,17 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked, eventParams: params)
                 dismissCTATapped()
                 if let templateName = modalProps?.templateName {
-                    let newProperty = "hide_in_app_message_" + templateName
-                    try? Notifly.main.userManager.setUserProperties([newProperty: true])
+                    let now = Int(Date().timeIntervalSince1970)
+                    var hideUntil: Int
+                    if let hideUntilInDaysData = notiflyExtraData?["hide_until_in_days"] as? AnyCodable,
+                       let hideUntilInDays = hideUntilInDaysData.getValue() as? Int,
+                        hideUntilInDays > 0 {
+                        hideUntil = now + 24 * 3600 * hideUntilInDays
+                    } else {
+                        hideUntil = -1
+                    }
+                    let newProperty = "hide_in_app_message_until_" + templateName
+                    try? Notifly.main.userManager.setUserProperties([newProperty: hideUntil])
                 }
             case "survey_submit_button":
                 notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageSurveySubmitButtonClicked, eventParams: params)
