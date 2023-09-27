@@ -83,12 +83,12 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
            let reEligibleCondition = notiflyReEligibleCondition,
            let hideUntil = calculateHideUntil(reEligibleCondition: reEligibleCondition) {
             hideUntilData=[campaignID:hideUntil]
-            if let manager = InAppMessageManager.shared {
-                InAppMessageManager.shared?.updateHideCampaignUntilData(hideUntilData: [
+            if let main = try? Notifly.main, let manager = main.inAppMessageManager as? InAppMessageManager {
+                manager.updateHideCampaignUntilData(hideUntilData: [
                     campaignID:hideUntil
                 ])
             } else {
-                Logger.error("InAppMessage shared manager is not exist.")
+                Logger.error("InAppMessage manager is not exist.")
             }
         }
         
