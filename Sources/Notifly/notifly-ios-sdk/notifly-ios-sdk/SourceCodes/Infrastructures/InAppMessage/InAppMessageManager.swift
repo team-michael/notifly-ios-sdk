@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 
 class InAppMessageManager {
+    static var shared: InAppMessageManager?
     private var userData: UserData = .init(data: [:])
     private var campaignData: CampaignData = .init(inAppMessageCampaigns: [])
     private var eventData: EventData = .init(eventCounts: [:])
@@ -45,6 +46,7 @@ class InAppMessageManager {
         if disabled {
             syncStateFinishedPromise?(.success(()))
         }
+        InAppMessageManager.shared = self
     }
 
     func syncState() {
@@ -148,10 +150,6 @@ class InAppMessageManager {
 
     /* method for showing in-app message */
     private func inspectCampaignToTriggerAndGetCampaignData(eventName: String, eventParams: [String: Any]?) -> [Campaign]? {
-        let now = { () -> Int in
-            Int(Date().timeIntervalSince1970)
-        }
-
         let campaignsToTrigger = campaignData.inAppMessageCampaigns
             .filter { $0.triggeringEvent == eventName }
             .filter { isCampaignActive(campaign: $0) }
@@ -166,22 +164,49 @@ class InAppMessageManager {
 
     private func isCampaignActive(campaign: Campaign) -> Bool {
         let now = Int(Date().timeIntervalSince1970)
-        if let startTimestamp = campaign.campaignStart as? Int {
-            if let endTimestamp = campaign.campaignEnd as? Int {
-                return now >= startTimestamp && now <= endTimestamp
-            } else {
-                return now >= startTimestamp
-            }
+        let startTimestamp = campaign.campaignStart
+        if let endTimestamp = campaign.campaignEnd {
+            return now >= startTimestamp && now <= endTimestamp
         }
-        return false
+        return now >= startTimestamp
     }
 
     private func isBlacklistTemplate(templateName: String) -> Bool {
-        let propertyKeyForBlacklist = "hide_in_app_message_" + templateName
-        guard let isBlacklist = userData.userProperties[propertyKeyForBlacklist] as? Bool else {
+        let outdatedPropertyKeyForBlacklist = "hide_in_app_message_" + templateName
+        let propertyKeyForBlacklist = "hide_in_app_message_until_" + templateName
+        if let hide = userData.userProperties[outdatedPropertyKeyForBlacklist] as? Bool {
+            return hide
+        }
+        let hideUntil = userData.userProperties[propertyKeyForBlacklist]
+        if hideUntil == nil {
             return false
         }
-        return isBlacklist
+        if let intHideUntil = hideUntil as? Int {
+            if intHideUntil == -1 {
+                return true
+            }
+            let now = Int(Date().timeIntervalSince1970)
+            if now <= intHideUntil {
+                return true
+            } else {
+                return false
+            }
+        }
+        Logger.error("Invalid user hide_in_app_message property.")
+        return true
+    }
+    
+    private func isHiddenCampaign(campaignID: String, reEligibleCondition: ReEligibleCondition) -> Bool {
+        let now = Int(Date().timeIntervalSince1970)
+        if let hideUntil = self.userData.campaignHiddenUntil[campaignID] {
+            if hideUntil == -1 {
+                return true
+            }
+            if (hideUntil >= now) {
+                return true
+            }
+        }
+        return false
     }
 
     func prepareInAppMessageData(campaign: Campaign) -> InAppMessageData? {
@@ -191,15 +216,20 @@ class InAppMessageManager {
         let modalProperties = campaign.message.modalProperties
         let delay = DispatchTimeInterval.seconds(campaign.delay ?? 0)
         let deadline = DispatchTime.now() + delay
-
+        
         if let url = URL(string: urlString) {
-            return InAppMessageData(notiflyMessageId: messageId, notiflyCampaignId: campaignId, modalProps: modalProperties, url: url, deadline: deadline)
+            return InAppMessageData(notiflyMessageId: messageId, notiflyCampaignId: campaignId, modalProps: modalProperties, url: url, deadline: deadline, notiflyReEligibleCondition: campaign.reEligibleCondition)
         }
         return nil
     }
 
     private func showInAppMessage(notiflyInAppMessageData: InAppMessageData) {
         DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline) {
+            if let reEligibleCondition = notiflyInAppMessageData.notiflyReEligibleCondition {
+                guard !self.isHiddenCampaign(campaignID: notiflyInAppMessageData.notiflyCampaignId, reEligibleCondition: reEligibleCondition) else {
+                    return
+                }
+            }
             guard WebViewModalViewController.openedInAppMessageCount == 0 else {
                 Logger.error("Already In App Message Opened. New In App Message Ignored.")
                 return
@@ -216,6 +246,10 @@ class InAppMessageManager {
                 return
             }
         }
+    }
+    
+    func updateHideCampaignUntilData(hideUntilData: [String:Int]) {
+        self.userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }
     }
 
     /* method for showing in-app message */
@@ -241,7 +275,12 @@ class InAppMessageManager {
             }
 
             let message = Message(htmlURL: htmlURL, modalProperties: modalProperties)
-
+            var reEligibleCondition: ReEligibleCondition? = nil
+            if let rawReEligibleCondition = campaignDict["re_eligible_condition"] as? [String: Any],
+               let reEligibleConditionData = ReEligibleCondition(data: rawReEligibleCondition) {
+                    reEligibleCondition = reEligibleConditionData
+            }
+            
             var whitelist: [String]?
             if testing == true {
                 guard let whiteList = campaignDict["whitelist"] as? [String] else {
@@ -263,9 +302,9 @@ class InAppMessageManager {
 
             let segmentInfo = self.constructSegmnentInfo(segmentInfoDict: segmentInfoDict)
             let lastUpdatedTimestamp = (campaignDict["last_updated_timestamp"] as? Int) ?? 0
-
+            
             return Campaign(id: id, channel: channel, segmentType: segmentType, message: message, segmentInfo: segmentInfo, triggeringEvent: triggeringEvent, campaignStart: campaignStart, campaignEnd: campaignEnd, delay: delay, status: campaignStatus, testing: testing, whitelist: whitelist,
-                            lastUpdatedTimestamp: lastUpdatedTimestamp)
+                            lastUpdatedTimestamp: lastUpdatedTimestamp, reEligibleCondition: reEligibleCondition)
         }
     }
 
@@ -659,5 +698,24 @@ enum CompareValueHelper {
         default:
             return false
         }
+    }
+}
+
+func calculateHideUntil(reEligibleCondition: ReEligibleCondition) -> Int? {
+    let now = Int(Date().timeIntervalSince1970)
+    let oneDayTimeInterval = 24 * 60 * 60
+    switch reEligibleCondition.unit {
+    case "infinite":
+        return -1
+    case "h":
+        return now + reEligibleCondition.value * 3600
+    case "d":
+        return now + reEligibleCondition.value * oneDayTimeInterval
+    case "w":
+        return now + reEligibleCondition.value * 7 * oneDayTimeInterval
+    case "m":
+        return now + reEligibleCondition.value * 30 * oneDayTimeInterval
+    default:
+        return nil
     }
 }

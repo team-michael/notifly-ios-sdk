@@ -9,6 +9,7 @@ import Foundation
 
 struct UserData {
     var userProperties: [String: Any]
+    var campaignHiddenUntil: [String: Int]
     var platform: String?
     var osVersion: String?
     var appVersion: String?
@@ -18,6 +19,7 @@ struct UserData {
 
     init(data: [String: Any]) {
         let userProperties: [String: Any] = (data["user_properties"] as? [String: Any]) ?? [:]
+        let campaignHiddenUntilData: [String: Int] = (data["campaign_hidden_until"] as? [String: Int]) ?? [:]
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
 
@@ -30,10 +32,12 @@ struct UserData {
               let updatedAtDate = dateFormatter.date(from: updatedAtStr)
         else {
             self.userProperties = [:]
+            self.campaignHiddenUntil = [:]
             return
         }
-
+        
         self.userProperties = userProperties
+        self.campaignHiddenUntil = campaignHiddenUntilData
         self.platform = platform
         self.osVersion = osVersion
         self.appVersion = appVersion
@@ -83,4 +87,5 @@ struct InAppMessageData {
     let modalProps: ModalProperties
     let url: URL
     let deadline: DispatchTime
+    let notiflyReEligibleCondition: ReEligibleCondition?
 }

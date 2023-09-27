@@ -97,6 +97,10 @@ struct AnyCodable: Codable {
             try container.encodeNil()
         }
     }
+    
+    func getValue() -> Any {
+        return self.value
+    }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
