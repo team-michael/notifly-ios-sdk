@@ -24,10 +24,6 @@ class UserManager {
         NotiflyCustomUserDefaults.externalUserIdInUserDefaults = newValue
     }
     
-    private func shouldMergeStateSynchronized() -> Bool {
-        return externalUserID == nil
-    }
-    
     func setExternalUserId(_ newExternalUserID: String?) {
         guard let notifly = try? Notifly.main else {
             Logger.error("Fail to Set or Remove User Id: Notifly is not initialized yet.")
@@ -87,5 +83,9 @@ class UserManager {
         
         let uuidV5 = UUID(name: uuidV5Name, namespace: uuidV5Namespace)
         return uuidV5.notiflyStyleString
+    }
+    
+    private func shouldMergeStateSynchronized() -> Bool {
+        return externalUserID == nil
     }
 }
