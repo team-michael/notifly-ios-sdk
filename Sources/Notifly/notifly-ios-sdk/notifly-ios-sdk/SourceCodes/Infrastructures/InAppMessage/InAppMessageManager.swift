@@ -8,9 +8,10 @@
 import Combine
 import Foundation
 import UIKit
+import Dispatch
 
 class InAppMessageManager {
-    static var shared: InAppMessageManager?
+    
     private var userData: UserData = .init(data: [:])
     private var campaignData: CampaignData = .init(inAppMessageCampaigns: [])
     private var eventData: EventData = .init(eventCounts: [:])
@@ -34,28 +35,55 @@ class InAppMessageManager {
     }
 
     var syncStateFinishedPromise: Future<Void, Error>.Promise?
+    var processSyncStateTimeout: DispatchWorkItem?
+    
     init(disabled: Bool) {
-        syncStateFinishedPub = Future { [weak self] promise in
-            self?.syncStateFinishedPromise = promise
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-                if let promise = self?.syncStateFinishedPromise {
-                    promise(.failure(NotiflyError.promiseTimeout))
-                }
-            }
-        }.eraseToAnyPublisher()
+        lock()
         if disabled {
             syncStateFinishedPromise?(.success(()))
         }
-        InAppMessageManager.shared = self
+    }
+    
+    private func lock() {
+        self.syncStateFinishedPub = Future { [weak self] promise in
+            self?.syncStateFinishedPromise = promise
+            self?.handleTimeout()
+        }.eraseToAnyPublisher()
+    }
+    
+    private func unlock(_ error: NotiflyError? = nil) {
+        guard let promise = self.syncStateFinishedPromise else {
+            Logger.error("Sync state promise is not exist")
+            return
+        }
+        if let err = error {
+            promise(.failure(err))
+        } else  {
+            promise(.success(()))
+        }
+        if let deadTask = self.processSyncStateTimeout {
+            deadTask.cancel()
+        }
+    }
+    
+    private func handleTimeout() {
+        if let deadTask = self.processSyncStateTimeout {
+            deadTask.cancel()
+        }
+        let newTask = DispatchWorkItem {
+            self.unlock(NotiflyError.promiseTimeout)
+        }
+        self.processSyncStateTimeout = newTask
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0, execute: newTask)
     }
 
-    func syncState() {
+    func syncState(merge: Bool) {
         guard let notifly = (try? Notifly.main) else {
             return
         }
 
         guard !Notifly.inAppMessageDisabled else {
-            syncStateFinishedPromise?(.success(()))
+            self.unlock()
             return
         }
 
@@ -66,24 +94,24 @@ class InAppMessageManager {
             Logger.error("Fail to sync user state because Notifly is not initalized yet.")
             return
         }
-
+        self.lock()
+        
         NotiflyAPI().requestSyncState(projectID: projectID, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID)
             .sink(receiveCompletion: { completion in
                 if case let .failure(error) = completion {
                     Logger.error("Fail to sync user state: " + error.localizedDescription)
-                    self.syncStateFinishedPromise?(.success(()))
+                    self.unlock(NotiflyError.unexpectedNil(error.localizedDescription))
                 }
             }, receiveValue: { [weak self] jsonString in
                 if let jsonData = jsonString.data(using: .utf8),
                    let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
                 {
                     if let userData = decodedData["userData"] as? [String: Any] {
-                        if let previousUserProperties = self?.userData.userProperties as? [String: Any] {
-                            self?.userData = UserData(data: userData)
-                            self?.updateUserProperties(properties: previousUserProperties)
-                        } else {
-                            self?.userData = UserData(data: userData)
+                        var newUserData = UserData(data: userData)
+                        if merge, let previousUserData = self?.userData as? UserData {
+                            newUserData.userProperties.merge(previousUserData.userProperties) { existing, _ in existing }
                         }
+                        self?.userData = newUserData
                     }
 
                     if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
@@ -91,10 +119,11 @@ class InAppMessageManager {
                     }
 
                     if let eicData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
-                        self?.constructEventIntermediateCountsData(eicData: eicData)
+                        self?.constructEventIntermediateCountsData(eicData: eicData, merge: merge)
                     }
                 }
-                self?.syncStateFinishedPromise?(.success(()))
+                Logger.info("Sync State Completed.")
+                self?.unlock()
             })
             .store(in: &requestSyncStateCancellables)
     }
@@ -341,7 +370,7 @@ class InAppMessageManager {
         return SegmentInfo(groups: groups.compactMap { $0 }, groupOperator: groupOperator)
     }
 
-    private func constructEventIntermediateCountsData(eicData: [[String: Any]]) {
+    private func constructEventIntermediateCountsData(eicData: [[String: Any]], merge: Bool) {
         guard eicData.count > 0 else {
             return
         }
@@ -364,7 +393,7 @@ class InAppMessageManager {
             }
 
             return (eicID, EventIntermediateCount(name: name, dt: dt, count: count, eventParams: eventParams))
-        }.compactMap { $0 }.reduce(into: [:]) { $0[$1.0] = $1.1 }
+        }.compactMap { $0 }.reduce(into: ( merge ? self.eventData.eventCounts : [:])) { $0[$1.0] = $1.1 }
     }
 
     private func getCurrentDate() -> String {

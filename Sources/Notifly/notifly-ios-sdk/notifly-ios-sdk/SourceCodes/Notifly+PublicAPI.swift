@@ -49,7 +49,7 @@ import UIKit
             }
             Notifly.coldStartNotificationData = nil
         }
-        main.inAppMessageManager.syncState()
+        main.inAppMessageManager.syncState(merge: false)
         Messaging.messaging().token { token, error in
             if let token = token,
                error == nil

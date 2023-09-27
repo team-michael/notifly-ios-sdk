@@ -18,21 +18,38 @@ class UserManager {
         externalUserID = NotiflyCustomUserDefaults.externalUserIdInUserDefaults
     }
     
+    private func changeExternalUserId(newValue: String?) {
+        self._notiflyUserIDCache = nil
+        externalUserID = newValue
+        NotiflyCustomUserDefaults.externalUserIdInUserDefaults = newValue
+    }
+    
+    private func shouldMergeStateSynchronized() -> Bool {
+        return externalUserID == nil
+    }
+    
     func setExternalUserId(_ newExternalUserID: String?) {
         guard let notifly = try? Notifly.main else {
             Logger.error("Fail to Set or Remove User Id: Notifly is not initialized yet.")
             return
         }
-        if let newExternalUserID = newExternalUserID, !newExternalUserID.isEmpty {
-            // `self.externalUserID` property is set in `setUserProperties` function.
-            setUserProperties([TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID])
-        } else {
-            externalUserID = nil
-            NotiflyCustomUserDefaults.externalUserIdInUserDefaults = nil
-            notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.removeUserPropertiesEventName, eventParams: nil)
+        
+        if let newExternalUserID = newExternalUserID,
+            !newExternalUserID.isEmpty,
+            let data = [
+                TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID,
+                TrackingConstant.Internal.previousExternalUserID: externalUserID,
+                TrackingConstant.Internal.previousNotiflyUserID: try? getNotiflyUserID(),
+            ] as? [String: Any] {
+            let shouldMergeState = shouldMergeStateSynchronized()
+            changeExternalUserId(newValue: newExternalUserID)
+            notifly.inAppMessageManager.syncState(merge: shouldMergeState)
+            setUserProperties(data)
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-            notifly.inAppMessageManager.syncState()
+        else {
+            self.changeExternalUserId(newValue: nil)
+            notifly.inAppMessageManager.syncState(merge: false)
+            notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.removeUserPropertiesEventName, eventParams: nil)
         }
     }
     
@@ -40,15 +57,6 @@ class UserManager {
         guard let notifly = try? Notifly.main else {
             Logger.error("Fail to Set User Properties: Notifly is not initialized yet.")
             return
-        }
-        var userProperties = userProperties
-        if let newExternalUserID = userProperties[TrackingConstant.Internal.notiflyExternalUserID] as? String {
-            userProperties[TrackingConstant.Internal.previousExternalUserID] = externalUserID
-            userProperties[TrackingConstant.Internal.previousNotiflyUserID] = try? getNotiflyUserID()
-            
-            externalUserID = newExternalUserID
-            NotiflyCustomUserDefaults.externalUserIdInUserDefaults = newExternalUserID
-            _notiflyUserIDCache = nil
         }
         notifly.inAppMessageManager.updateUserProperties(properties: userProperties)
         notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.setUserPropertiesEventName, eventParams: userProperties)
