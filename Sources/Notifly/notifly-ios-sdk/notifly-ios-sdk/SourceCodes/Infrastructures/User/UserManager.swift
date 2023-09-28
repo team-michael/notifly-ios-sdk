@@ -5,7 +5,7 @@ import Foundation
 class UserManager {
     
     var externalUserID: String? {
-        didSet {
+        didSet { // TODO:
             if externalUserID == nil {
                 _notiflyUserIDCache = nil
             }
