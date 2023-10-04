@@ -140,6 +140,7 @@ class TrackingManager {
             return Fail(outputType: TrackingRecord.self, failure: NotiflyError.unexpectedNil("APN Device Token is nil"))
                 .eraseToAnyPublisher()
         }
+        
         return deviceTokenPub.tryMap { pushToken in
             let userID = (try? notifly.userManager.getNotiflyUserID()) ?? ""
             if let notiflyDeviceID = AppHelper.getNotiflyDeviceID(),

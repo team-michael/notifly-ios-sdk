@@ -372,6 +372,9 @@ class InAppMessageManager {
 
     private func constructEventIntermediateCountsData(eicData: [[String: Any]], merge: Bool) {
         guard eicData.count > 0 else {
+            if !merge {
+                eventData.eventCounts = [:]
+            }
             return
         }
         eventData.eventCounts = eicData.compactMap { eic -> (String, EventIntermediateCount)? in
