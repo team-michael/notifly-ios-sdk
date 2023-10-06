@@ -109,7 +109,8 @@ class InAppMessageManager {
                     if let userData = decodedData["userData"] as? [String: Any] {
                         var newUserData = UserData(data: userData)
                         if merge, let previousUserData = self?.userData as? UserData {
-                            newUserData.userProperties.merge(previousUserData.userProperties) { existing, _ in existing }
+                            newUserData.userProperties.merge(previousUserData.userProperties) { _, new in new }
+                            newUserData.campaignHiddenUntil.merge(previousUserData.campaignHiddenUntil) { _, new in new }
                         }
                         self?.userData = newUserData
                     }
