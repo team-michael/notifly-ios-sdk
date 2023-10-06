@@ -2,6 +2,7 @@ import Foundation
 import UIKit
 import WebKit
 
+@available(iOSApplicationExtension, unavailable)
 class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate {
     static var openedInAppMessageCount: Int = 0
     var webView = FullScreenWKWebView()
@@ -13,7 +14,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     convenience init(notiflyInAppMessageData: InAppMessageData) throws {
         self.init(nibName: nil, bundle: nil)
-        self.view.isHidden = false
+        view.isHidden = false
         modalPresentationStyle = .overFullScreen
         notiflyCampaignID = notiflyInAppMessageData.notiflyCampaignId
         notiflyMessageID = notiflyInAppMessageData.notiflyMessageId
@@ -23,13 +24,13 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             self?.webView.load(URLRequest(url: notiflyInAppMessageData.url))
         }
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         webView.navigationDelegate = self
         webView.configuration.userContentController.add(self, name: "notiflyInAppMessageEventHandler")
     }
-    
+
     func setupUI() -> Bool {
         guard let modalSize = getModalSize() as? CGSize, let webViewLayer = getWebViewLayer(modalSize: modalSize) as? CALayer? else {
             return false
@@ -44,13 +45,14 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         } else {
             view.backgroundColor = UIColor.black.withAlphaComponent(0.2)
         }
-        
+
         webView.layer.mask = webViewLayer
-        if let shouldDismissCTATapped=modalProps?.dismissCTATapped,
-           shouldDismissCTATapped {
+        if let shouldDismissCTATapped = modalProps?.dismissCTATapped,
+           shouldDismissCTATapped
+        {
             view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissCTATapped)))
         }
-        
+
         view.addSubview(webView)
         NSLayoutConstraint.activate([
             webView.widthAnchor.constraint(equalToConstant: modalSize.width),
@@ -61,7 +63,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         AppHelper.present(self, completion: nil)
         return true
     }
-    
+
     @objc
     private func dismissCTATapped() {
         dismiss(animated: false)
@@ -70,28 +72,29 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {
         webView.evaluateJavaScript(InAppMessageConstant.injectedJavaScript, completionHandler: nil)
-        self.view.isHidden = true
-        if !self.setupUI() as Bool {
-            self.dismissCTATapped()
+        view.isHidden = true
+        if !setupUI() as Bool {
+            dismissCTATapped()
             return
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.view.isHidden=false
+            self.view.isHidden = false
         }
-        var hideUntilData: [String:Int]?
+        var hideUntilData: [String: Int]?
         if let campaignID = notiflyCampaignID,
            let reEligibleCondition = notiflyReEligibleCondition,
-           let hideUntil = calculateHideUntil(reEligibleCondition: reEligibleCondition) {
-            hideUntilData=[campaignID:hideUntil]
+           let hideUntil = calculateHideUntil(reEligibleCondition: reEligibleCondition)
+        {
+            hideUntilData = [campaignID: hideUntil]
             if let main = try? Notifly.main, let manager = main.inAppMessageManager as? InAppMessageManager {
                 manager.updateHideCampaignUntilData(hideUntilData: [
-                    campaignID:hideUntil
+                    campaignID: hideUntil,
                 ])
             } else {
                 Logger.error("InAppMessage manager is not exist.")
             }
         }
-        
+
         guard let notifly = try? Notifly.main else {
             Logger.error("Fail to Log In-App-Message Shown Event: Notifly is not initialized yet. ")
             return
@@ -101,11 +104,11 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             "channel": "in-app-message",
             "campaign_id": notiflyCampaignID,
             "notifly_message_id": notiflyMessageID,
-            "hide_until_data": hideUntilData ?? nil
+            "hide_until_data": hideUntilData ?? nil,
         ] as [String: Any]
         notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
     }
-    
+
     func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
         if message.name == "notiflyInAppMessageEventHandler" {
             guard let notifly = try? Notifly.main else {
@@ -123,7 +126,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 AppHelper.makeJsonCodable(extraData)?.forEach { convertedExtraData[$0] = $1 }
                 notiflyExtraData = convertedExtraData
             }
-            
+
             let params = [
                 "type": "message_event",
                 "channel": "in-app-message",
@@ -143,7 +146,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 {
                     UIApplication.shared.open(url, options: [:]) { _ in
                         notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked, eventParams: params)
-                        self.dismissCTATapped()   
+                        self.dismissCTATapped()
                     }
                 } else {
                     notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked, eventParams: params)
@@ -157,7 +160,8 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                     var hideUntil: Int
                     if let hideUntilInDaysData = notiflyExtraData?["hide_until_in_days"] as? AnyCodable,
                        let hideUntilInDays = hideUntilInDaysData.getValue() as? Int,
-                        hideUntilInDays > 0 {
+                       hideUntilInDays > 0
+                    {
                         hideUntil = now + 24 * 3600 * hideUntilInDays
                     } else {
                         hideUntil = -1
@@ -282,9 +286,9 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 class FullScreenWKWebView: WKWebView {
     override var safeAreaInsets: UIEdgeInsets {
         return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     }
 }
-

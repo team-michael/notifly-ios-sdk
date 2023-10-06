@@ -3,6 +3,7 @@ import Combine
 import Foundation
 import UIKit
 
+@available(iOSApplicationExtension, unavailable)
 class TrackingManager {
     // MARK: Constants
 
@@ -44,6 +45,7 @@ class TrackingManager {
     }
 
     // MARK: Methods
+
     func trackSessionStartInternalEvent() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             var authStatus: Int = 0
@@ -98,7 +100,7 @@ class TrackingManager {
         } else {
             trackingEventName = eventName
         }
-        
+
         guard let syncStateFinishedPub = try? Notifly.main.inAppMessageManager.syncStateFinishedPub else {
             Logger.error("Fail to track Event. \(trackingEventName)")
             return
@@ -107,9 +109,9 @@ class TrackingManager {
         syncStateFinishedPub.flatMap { _ in
             try? Notifly.main.inAppMessageManager.updateEventData(eventName: trackingEventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
             return self.createTrackingRecord(eventName: eventName,
-                                      eventParams: eventParams,
-                                      isInternal: isInternal,
-                                      segmentationEventParamKeys: segmentationEventParamKeys)
+                                             eventParams: eventParams,
+                                             isInternal: isInternal,
+                                             segmentationEventParamKeys: segmentationEventParamKeys)
         }
         .sink(receiveCompletion: { completion in
                   if case let .failure(error) = completion {
@@ -118,7 +120,6 @@ class TrackingManager {
               },
               receiveValue: { [weak self] record in
                   if isInternal {
-                      
                       self?.internalEventPublisher.send(record)
                   } else {
                       self?.eventPublisher.send(record)
@@ -140,7 +141,7 @@ class TrackingManager {
             return Fail(outputType: TrackingRecord.self, failure: NotiflyError.unexpectedNil("APN Device Token is nil"))
                 .eraseToAnyPublisher()
         }
-        
+
         return deviceTokenPub.tryMap { pushToken in
             let userID = (try? notifly.userManager.getNotiflyUserID()) ?? ""
             if let notiflyDeviceID = AppHelper.getNotiflyDeviceID(),
@@ -165,7 +166,7 @@ class TrackingManager {
                                        sdk_type: AppHelper.getSDKType(),
                                        event_params: AppHelper.makeJsonCodable(eventParams)) as? TrackingData,
                let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
-                
+
             {
                 return TrackingRecord(partitionKey: userID, data: stringfiedData)
             } else {
@@ -181,6 +182,7 @@ class TrackingManager {
     }
 
     // MARK: - Private Methods
+
     private func setup() {
         // Submit the tracking event to API & log result.
         eventRequestPayloadPublisher

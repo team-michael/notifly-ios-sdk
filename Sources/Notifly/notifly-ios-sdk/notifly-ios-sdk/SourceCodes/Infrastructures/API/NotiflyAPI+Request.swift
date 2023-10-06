@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 
+@available(iOSApplicationExtension, unavailable)
 extension NotiflyAPI {
     enum RequestMethod: String {
         case GET
@@ -49,6 +50,7 @@ extension NotiflyAPI {
                 return URLSession.shared.dataTaskPublisher(for: request)
                     .map(\.data)
                     .decode(type: Response<T>.self, decoder: JSONDecoder())
+                    .receive(on: DispatchQueue.main)
                     .tryCompactMap {
                         if let data = $0.data {
                             return data

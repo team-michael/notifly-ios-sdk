@@ -6,12 +6,12 @@
 //
 
 import Combine
+import Dispatch
 import Foundation
 import UIKit
-import Dispatch
 
+@available(iOSApplicationExtension, unavailable)
 class InAppMessageManager {
-    
     private var userData: UserData = .init(data: [:])
     private var campaignData: CampaignData = .init(inAppMessageCampaigns: [])
     private var eventData: EventData = .init(eventCounts: [:])
@@ -36,44 +36,44 @@ class InAppMessageManager {
 
     var syncStateFinishedPromise: Future<Void, Error>.Promise?
     var processSyncStateTimeout: DispatchWorkItem?
-    
+
     init(disabled: Bool) {
         lock()
         if disabled {
             syncStateFinishedPromise?(.success(()))
         }
     }
-    
+
     private func lock() {
-        self.syncStateFinishedPub = Future { [weak self] promise in
+        syncStateFinishedPub = Future { [weak self] promise in
             self?.syncStateFinishedPromise = promise
             self?.handleTimeout()
         }.eraseToAnyPublisher()
     }
-    
+
     private func unlock(_ error: NotiflyError? = nil) {
-        guard let promise = self.syncStateFinishedPromise else {
+        guard let promise = syncStateFinishedPromise else {
             Logger.error("Sync state promise is not exist")
             return
         }
         if let err = error {
             promise(.failure(err))
-        } else  {
+        } else {
             promise(.success(()))
         }
-        if let deadTask = self.processSyncStateTimeout {
+        if let deadTask = processSyncStateTimeout {
             deadTask.cancel()
         }
     }
-    
+
     private func handleTimeout() {
-        if let deadTask = self.processSyncStateTimeout {
+        if let deadTask = processSyncStateTimeout {
             deadTask.cancel()
         }
         let newTask = DispatchWorkItem {
             self.unlock(NotiflyError.promiseTimeout)
         }
-        self.processSyncStateTimeout = newTask
+        processSyncStateTimeout = newTask
         DispatchQueue.main.asyncAfter(deadline: .now() + 5.0, execute: newTask)
     }
 
@@ -83,7 +83,7 @@ class InAppMessageManager {
         }
 
         guard !Notifly.inAppMessageDisabled else {
-            self.unlock()
+            unlock()
             return
         }
 
@@ -94,8 +94,8 @@ class InAppMessageManager {
             Logger.error("Fail to sync user state because Notifly is not initalized yet.")
             return
         }
-        self.lock()
-        
+        lock()
+
         NotiflyAPI().requestSyncState(projectID: projectID, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID)
             .sink(receiveCompletion: { completion in
                 if case let .failure(error) = completion {
@@ -139,7 +139,7 @@ class InAppMessageManager {
         guard !Notifly.inAppMessageDisabled else {
             return
         }
-        
+
         if var campaignsToTrigger = inspectCampaignToTriggerAndGetCampaignData(eventName: eventName, eventParams: eventParams)
         {
             campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
@@ -149,7 +149,7 @@ class InAppMessageManager {
                 }
             }
         }
-        
+
         let dt = getCurrentDate()
         var eicID = eventName + InAppMessageConstant.idSeparator + dt + InAppMessageConstant.idSeparator
         if let segmentationEventParamKeys = segmentationEventParamKeys,
@@ -165,8 +165,6 @@ class InAppMessageManager {
             eicID += InAppMessageConstant.idSeparator
             updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
         }
-
-
     }
 
     private func updateEventCountsInEventData(eicID: String, eventName: String, dt: String, eventParams: [String: Any]?) {
@@ -224,14 +222,14 @@ class InAppMessageManager {
         Logger.error("Invalid user hide_in_app_message property.")
         return true
     }
-    
-    private func isHiddenCampaign(campaignID: String, reEligibleCondition: ReEligibleCondition) -> Bool {
+
+    private func isHiddenCampaign(campaignID: String, reEligibleCondition _: ReEligibleCondition) -> Bool {
         let now = Int(Date().timeIntervalSince1970)
-        if let hideUntil = self.userData.campaignHiddenUntil[campaignID] {
+        if let hideUntil = userData.campaignHiddenUntil[campaignID] {
             if hideUntil == -1 {
                 return true
             }
-            if (hideUntil >= now) {
+            if hideUntil >= now {
                 return true
             }
         }
@@ -245,7 +243,7 @@ class InAppMessageManager {
         let modalProperties = campaign.message.modalProperties
         let delay = DispatchTimeInterval.seconds(campaign.delay ?? 0)
         let deadline = DispatchTime.now() + delay
-        
+
         if let url = URL(string: urlString) {
             return InAppMessageData(notiflyMessageId: messageId, notiflyCampaignId: campaignId, modalProps: modalProperties, url: url, deadline: deadline, notiflyReEligibleCondition: campaign.reEligibleCondition)
         }
@@ -276,9 +274,9 @@ class InAppMessageManager {
             }
         }
     }
-    
-    func updateHideCampaignUntilData(hideUntilData: [String:Int]) {
-        self.userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }
+
+    func updateHideCampaignUntilData(hideUntilData: [String: Int]) {
+        userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }
     }
 
     /* method for showing in-app message */
@@ -304,12 +302,13 @@ class InAppMessageManager {
             }
 
             let message = Message(htmlURL: htmlURL, modalProperties: modalProperties)
-            var reEligibleCondition: ReEligibleCondition? = nil
+            var reEligibleCondition: ReEligibleCondition?
             if let rawReEligibleCondition = campaignDict["re_eligible_condition"] as? [String: Any],
-               let reEligibleConditionData = ReEligibleCondition(data: rawReEligibleCondition) {
-                    reEligibleCondition = reEligibleConditionData
+               let reEligibleConditionData = ReEligibleCondition(data: rawReEligibleCondition)
+            {
+                reEligibleCondition = reEligibleConditionData
             }
-            
+
             var whitelist: [String]?
             if testing == true {
                 guard let whiteList = campaignDict["whitelist"] as? [String] else {
@@ -331,7 +330,7 @@ class InAppMessageManager {
 
             let segmentInfo = self.constructSegmnentInfo(segmentInfoDict: segmentInfoDict)
             let lastUpdatedTimestamp = (campaignDict["last_updated_timestamp"] as? Int) ?? 0
-            
+
             return Campaign(id: id, channel: channel, segmentType: segmentType, message: message, segmentInfo: segmentInfo, triggeringEvent: triggeringEvent, campaignStart: campaignStart, campaignEnd: campaignEnd, delay: delay, status: campaignStatus, testing: testing, whitelist: whitelist,
                             lastUpdatedTimestamp: lastUpdatedTimestamp, reEligibleCondition: reEligibleCondition)
         }
@@ -396,7 +395,7 @@ class InAppMessageManager {
             }
 
             return (eicID, EventIntermediateCount(name: name, dt: dt, count: count, eventParams: eventParams))
-        }.compactMap { $0 }.reduce(into: ( merge ? self.eventData.eventCounts : [:])) { $0[$1.0] = $1.1 }
+        }.compactMap { $0 }.reduce(into: merge ? eventData.eventCounts : [:]) { $0[$1.0] = $1.1 }
     }
 
     private func getCurrentDate() -> String {

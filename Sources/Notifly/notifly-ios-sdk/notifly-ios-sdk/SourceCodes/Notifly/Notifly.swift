@@ -2,8 +2,8 @@ import Combine
 import Foundation
 import UIKit
 
+@available(iOSApplicationExtension, unavailable)
 @objc public class Notifly: NSObject {
-    
     static var main: Notifly {
         get throws {
             guard let notifly = _main else {
@@ -12,29 +12,29 @@ import UIKit
             return notifly
         }
     }
-    
+
     static var _main: Notifly?
     static var sdkVersion: String = NotiflyConstant.sdkVersion
     static var sdkType: SdkType = .native
     static var coldStartNotificationData: [AnyHashable: Any]?
     static var inAppMessageDisabled: Bool = false
-    
+
     let projectID: String
-    
+
     let auth: Auth
     let notificationsManager: NotificationsManager
     let trackingManager: TrackingManager
     let userManager: UserManager
     let inAppMessageManager: InAppMessageManager
-    
+
     var trackingCancellables = Set<AnyCancellable>()
+
     // MARK: Lifecycle
-    
+
     init(
         projectID: String,
         username: String,
-        password: String,
-        isMainApp: Bool
+        password: String
     ) {
         self.projectID = projectID
         NotiflyCustomUserDefaults.projectIdInUserDefaults = projectID
@@ -44,12 +44,8 @@ import UIKit
                     password: password)
         trackingManager = TrackingManager(projectID: projectID)
         userManager = UserManager()
-        
+
         notificationsManager = NotificationsManager()
-        if !isMainApp {
-            Notifly.inAppMessageDisabled = true
-            notificationsManager.deviceTokenPromise?(.success(""))
-        }
         inAppMessageManager = InAppMessageManager(disabled: Notifly.inAppMessageDisabled)
         super.init()
         Notifly._main = self
@@ -57,7 +53,7 @@ import UIKit
 }
 
 public enum SdkType: String {
-  case native = "native"
-  case react_native = "react_native"
-  case flutter = "flutter"
+    case native
+    case react_native
+    case flutter
 }
