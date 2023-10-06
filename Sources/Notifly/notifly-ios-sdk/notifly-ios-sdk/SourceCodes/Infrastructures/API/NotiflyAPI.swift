@@ -5,7 +5,7 @@ import Foundation
 class NotiflyAPI {
     // MARK: Public Methods
 
-    func authorizeSession(credentials: Auth.Credentials) -> AnyPublisher<String, Error> {
+    func authorizeSession(credentials: Credentials) -> AnyPublisher<String, Error> {
         return request(to: NotiflyConstant.EndPoint.authorizationEndPoint, method: .POST, authTokenRequired: false)
             .map { $0.set(body: ApiRequestBody(payload: .AuthCredentials(credentials))) }
             .flatMap { (builder: RequestBuilder) -> AnyPublisher<String, Error> in builder.buildAndFire() }
