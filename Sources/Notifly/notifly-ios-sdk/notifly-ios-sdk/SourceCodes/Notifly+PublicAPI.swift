@@ -122,8 +122,6 @@ import UIKit
         }
     }
 
-    // MARK: - On-demand APIs
-
     static func trackEvent(eventName: String,
                            eventParams: [String: Any]? = nil,
                            segmentationEventParamKeys: [String]? = nil)

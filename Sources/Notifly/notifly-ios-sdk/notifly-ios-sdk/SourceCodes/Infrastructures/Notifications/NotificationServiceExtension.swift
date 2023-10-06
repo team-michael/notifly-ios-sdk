@@ -83,7 +83,7 @@ import UserNotifications
 
     func track(eventName: String, params: [String: Any]?) {
         guard let payload = preparePayload(eventName: eventName, params: params) else {
-            Logger.error("Fail to Track Push_delivered event.")
+            Logger.error("Fail to track push_delivered event.")
             return
         }
 
@@ -92,9 +92,7 @@ import UserNotifications
             case .success:
                 return
             case let .failure(err):
-                print(eventName)
-                Logger.error("hi")
-                print(err)
+                Logger.error("Fail to track push_delivered event.: \(err.localizedDescription)")
             }
         }
     }
