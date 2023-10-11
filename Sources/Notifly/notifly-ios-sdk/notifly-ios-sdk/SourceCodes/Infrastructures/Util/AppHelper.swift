@@ -4,12 +4,15 @@ import UIKit
 
 class AppHelper {
     @available(iOSApplicationExtension, unavailable)
-    static func present(_ vc: UIViewController, animated: Bool = false, completion: (() -> Void)?) {
-        if let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
-           let topVC = window.topMostViewController
-        {
-            topVC.present(vc, animated: animated, completion: completion)
+    static func present(_ vc: UIViewController, animated: Bool = false, completion: (() -> Void)?) -> Bool {
+        guard let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
+              let topVC = window.topMostViewController,
+              !(vc.isBeingPresented) else {
+            Logger.error("Invalid status for presenting in-app-message.")
+            return false
         }
+        topVC.present(vc, animated: animated, completion: completion)
+        return true
     }
 
     static func getNotiflyDeviceID() -> String? {
