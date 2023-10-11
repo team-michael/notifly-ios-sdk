@@ -5,6 +5,7 @@ import SafariServices
 import UIKit
 import UserNotifications
 
+@available(iOSApplicationExtension, unavailable)
 class NotificationsManager: NSObject {
     // MARK: Properties
 
@@ -56,10 +57,10 @@ class NotificationsManager: NSObject {
             }
         }
     }
-    
+
     func registerFCMToken(token: String) {
-        self.deviceTokenPromise?(.success(token))
-        self.deviceTokenPub = Just(token).setFailureType(to: Error.self).eraseToAnyPublisher()
+        deviceTokenPromise?(.success(token))
+        deviceTokenPub = Just(token).setFailureType(to: Error.self).eraseToAnyPublisher()
         if let notifly = try? Notifly.main {
             notifly.trackingManager.trackSetDevicePropertiesInternalEvent(properties: [
                 "device_token": token,
@@ -153,6 +154,7 @@ class NotificationsManager: NSObject {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 extension NotificationsManager: UNUserNotificationCenterDelegate {
     /// The method will be called on the delegate when the user responded to the notification by opening the application, dismissing the notification or choosing a UNNotificationAction. The delegate must be set before the application returns from application:didFinishLaunchingWithOptions:.
     public func userNotificationCenter(_: UNUserNotificationCenter,

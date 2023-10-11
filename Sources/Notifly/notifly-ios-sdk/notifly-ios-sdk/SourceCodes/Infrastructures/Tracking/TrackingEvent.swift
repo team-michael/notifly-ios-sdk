@@ -33,7 +33,7 @@ struct ApiRequestBody: NotiflyApiRequestProtocol {
 
 enum RequestPayload: NotiflyApiRequestProtocol {
     case TrackingEvent(TrackingEvent)
-    case AuthCredentials(Auth.Credentials)
+    case AuthCredentials(Credentials)
     
     enum CodingKeys: String, CodingKey {
         case trackingEvent

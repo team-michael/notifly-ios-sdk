@@ -1,10 +1,11 @@
 import Combine
 import Foundation
 
+@available(iOSApplicationExtension, unavailable)
 class NotiflyAPI {
     // MARK: Public Methods
 
-    func authorizeSession(credentials: Auth.Credentials) -> AnyPublisher<String, Error> {
+    func authorizeSession(credentials: Credentials) -> AnyPublisher<String, Error> {
         return request(to: NotiflyConstant.EndPoint.authorizationEndPoint, method: .POST, authTokenRequired: false)
             .map { $0.set(body: ApiRequestBody(payload: .AuthCredentials(credentials))) }
             .flatMap { (builder: RequestBuilder) -> AnyPublisher<String, Error> in builder.buildAndFire() }
@@ -12,7 +13,7 @@ class NotiflyAPI {
     }
 
     func trackEvent(_ event: TrackingEvent) -> AnyPublisher<String, Error> {
-        request(to: NotiflyConstant.EndPoint.trackEventEndPoint, method: .POST, authTokenRequired: true)
+        return request(to: NotiflyConstant.EndPoint.trackEventEndPoint, method: .POST, authTokenRequired: true)
             .map { $0.set(body: ApiRequestBody(payload: .TrackingEvent(event))) }
             .flatMap { $0.buildAndFireWithRawJSONResponseType() }
             .flatMap { response -> AnyPublisher<String, Error> in
@@ -20,10 +21,10 @@ class NotiflyAPI {
                    let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                    let response = json["message"]
                 {
-                    if let auth = try? Notifly.main.auth,
-                       response as! String == "The incoming token has expired"
+                    if response as! String == "The incoming token has expired",
+                       let authorization = try? Notifly.main.auth
                     {
-                        return auth.refreshAuth()
+                        return authorization.refreshAuth()
                             .flatMap { _ in
                                 self.retryTrackEvent(event)
                             }
@@ -59,6 +60,7 @@ class NotiflyAPI {
 
     func requestSyncState(projectID: String, notiflyUserID: String, notiflyDeviceID: String) -> AnyPublisher<String, Error> {
         let endpoint = "\(NotiflyConstant.EndPoint.syncStateEndPoint)/\(projectID)/\(notiflyUserID)?deviceID=\(notiflyDeviceID)&channel=in-app-message"
+
         return request(to: endpoint, method: .GET, authTokenRequired: true)
             .map { $0.set(bearer: true) }
             .flatMap { $0.buildAndFireWithRawJSONResponseType() }
@@ -75,17 +77,20 @@ class NotiflyAPI {
             .set(url: URL(string: uri))
             .set(method: method)
 
-        if let notifly = try? Notifly.main,
-           authTokenRequired
-        {
-            return notifly.auth.authorizationPub.tryMap {
+        if authTokenRequired {
+            guard let authorization = try? Notifly.main.auth else {
+                Logger.error("Not Authorized.")
+                return Fail(outputType: RequestBuilder.self, failure: NotiflyError.notAuthorized)
+                    .eraseToAnyPublisher()
+            }
+
+            return authorization.authorizationPub.tryMap {
                 request.set(authorizationToken: $0)
             }
             .eraseToAnyPublisher()
-        } else {
-            return Just(request)
-                .setFailureType(to: Error.self)
-                .eraseToAnyPublisher()
         }
+        return Just(request)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
     }
 }

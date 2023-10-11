@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 
+@available(iOSApplicationExtension, unavailable)
 class Auth {
     // MARK: - Properties
 

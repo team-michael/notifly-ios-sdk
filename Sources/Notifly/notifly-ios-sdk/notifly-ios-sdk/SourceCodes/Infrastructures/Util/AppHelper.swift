@@ -3,20 +3,26 @@ import Security
 import UIKit
 
 class AppHelper {
-    static func present(_ vc: UIViewController, animated: Bool = false, completion: (() -> Void)?) {
-        if let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
-           let topVC = window.topMostViewController
-        {
-            topVC.present(vc, animated: animated, completion: completion)
+    @available(iOSApplicationExtension, unavailable)
+    static func present(_ vc: UIViewController, animated: Bool = false, completion: (() -> Void)?) -> Bool {
+        guard let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
+              let topVC = window.topMostViewController,
+              !(vc.isBeingPresented) else {
+            Logger.error("Invalid status for presenting in-app-message.")
+            return false
         }
+        topVC.present(vc, animated: animated, completion: completion)
+        return true
     }
+
     static func getNotiflyDeviceID() -> String? {
         guard let deviceID = AppHelper.getDeviceID() else {
             return nil
         }
         return UUID(name: deviceID,
-                            namespace: TrackingConstant.HashNamespace.deviceID).notiflyStyleString
+                    namespace: TrackingConstant.HashNamespace.deviceID).notiflyStyleString
     }
+
     static func getDeviceID() -> String? {
         if let deviceID = NotiflyCustomUserDefaults.deviceIdInUserDefaults {
             return deviceID
@@ -43,6 +49,7 @@ class AppHelper {
         return version
     }
 
+    @available(iOSApplicationExtension, unavailable)
     static func getSDKVersion() -> String? {
         return Notifly.sdkVersion
     }
@@ -55,6 +62,7 @@ class AppHelper {
         return UIDevice.current.systemVersion
     }
 
+    @available(iOSApplicationExtension, unavailable)
     static func getSDKType() -> String {
         return Notifly.sdkType.rawValue
     }
