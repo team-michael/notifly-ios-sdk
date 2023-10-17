@@ -3,18 +3,6 @@ import Security
 import UIKit
 
 class AppHelper {
-    @available(iOSApplicationExtension, unavailable)
-    static func present(_ vc: UIViewController, animated: Bool = false, completion: (() -> Void)?) -> Bool {
-        guard let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
-              let topVC = window.topMostViewController,
-              !(vc.isBeingPresented) else {
-            Logger.error("Invalid status for presenting in-app-message.")
-            return false
-        }
-        topVC.present(vc, animated: animated, completion: completion)
-        return true
-    }
-
     static func getNotiflyDeviceID() -> String? {
         guard let deviceID = AppHelper.getDeviceID() else {
             return nil
@@ -97,27 +85,6 @@ class AppHelper {
         } else {
             return AnyCodable(value)
         }
-    }
-}
-
-private extension UIWindow {
-    var topMostViewController: UIViewController? {
-        return rootViewController?.topMostViewController
-    }
-}
-
-private extension UIViewController {
-    var topMostViewController: UIViewController {
-        if let presented = presentedViewController {
-            return presented.topMostViewController
-        }
-        if let nav = self as? UINavigationController {
-            return nav.visibleViewController?.topMostViewController ?? nav
-        }
-        if let tab = self as? UITabBarController {
-            return (tab.selectedViewController ?? self).topMostViewController
-        }
-        return self
     }
 }
 

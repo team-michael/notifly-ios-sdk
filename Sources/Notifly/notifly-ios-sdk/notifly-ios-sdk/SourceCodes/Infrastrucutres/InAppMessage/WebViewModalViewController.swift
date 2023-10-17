@@ -60,7 +60,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             view.centerXAnchor.constraint(equalTo: webView.centerXAnchor),
             modalPositionConstraint,
         ])
-        return AppHelper.present(self, completion: nil)
+        return InAppMessageManager.present(self, completion: nil)
     }
 
     @objc
