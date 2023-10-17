@@ -1,23 +1,28 @@
 Pod::Spec.new do |s|
   s.name             = 'notifly_sdk'
-  s.version          = '1.2.1'
+  s.version          = '1.1.14'
   s.summary          = 'Notifly iOS SDK.'
 
   s.description      = <<-DESC
-  NOTIFLY iOS SDK : 1.2.1
+  NOTIFLY iOS SDK : 1.1.14
   DESC
 
   s.homepage         = 'https://github.com/team-michael/notifly-ios-sdk'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'daeseong' => 'daeseong@workmichael.com' }
+  s.author           = { 'daeseong' => 'daeseong@greyboxhq.com' }
   s.source           = { :git => 'https://github.com/team-michael/notifly-ios-sdk.git', :tag => s.version.to_s }
 
   s.ios.deployment_target = '13.0'
-
-  s.source_files = 'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/**/*'
   s.swift_versions = '5.0'
 
-  s.dependency 'Firebase/Core'
-  s.dependency 'FirebaseMessaging'
+  s.subspec 'Full' do |full|
+    full.source_files = 'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/**/*'
+    full.dependency 'Firebase/Core'
+    full.dependency 'FirebaseMessaging'
+  end
+
+  s.subspec 'Extension' do |e|
+    e.source_files = 'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Extension/**/*'
+  end
 
 end

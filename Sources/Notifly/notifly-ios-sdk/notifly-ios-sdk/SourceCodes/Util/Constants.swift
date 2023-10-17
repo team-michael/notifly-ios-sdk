@@ -1,5 +1,14 @@
 import Foundation
 
+enum NotiflyConstant {
+    static let sdkVersion: String = "1.2.1"
+    enum EndPoint {
+        static let trackEventEndPoint = "https://12lnng07q2.execute-api.ap-northeast-2.amazonaws.com/prod/records"
+        static let syncStateEndPoint = "https://api.notifly.tech/user-state"
+        static let authorizationEndPoint = "https://api.notifly.tech/authorize"
+    }
+}
+
 enum TrackingConstant {
     enum HashNamespace {
         static let eventID = UUID(uuidString: "830b5f7b-e392-43db-a17b-d835f0bcab2b")!
