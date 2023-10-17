@@ -37,22 +37,12 @@ class AppHelper {
         return version
     }
 
-    @available(iOSApplicationExtension, unavailable)
-    static func getSDKVersion() -> String? {
-        return Notifly.sdkVersion
-    }
-
     static func getDevicePlatform() -> String {
         return "ios"
     }
 
     static func getiOSVersion() -> String {
         return UIDevice.current.systemVersion
-    }
-
-    @available(iOSApplicationExtension, unavailable)
-    static func getSDKType() -> String {
-        return Notifly.sdkType.rawValue
     }
 
     static func getBundleIdentifier() -> String? {

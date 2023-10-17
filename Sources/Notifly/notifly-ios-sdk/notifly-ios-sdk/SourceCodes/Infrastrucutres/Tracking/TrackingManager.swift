@@ -147,7 +147,7 @@ class TrackingManager {
             if let notiflyDeviceID = AppHelper.getNotiflyDeviceID(),
                let deviceID = AppHelper.getDeviceID(),
                let appVersion = AppHelper.getAppVersion(),
-               let sdkVersion = AppHelper.getSDKVersion(),
+               let sdkVersion = NotiflyHelper.getSDKVersion(),
                let data = TrackingData(id: UUID().uuidString,
                                        name: eventName,
                                        notifly_user_id: userID,
@@ -163,7 +163,7 @@ class TrackingManager {
                                        os_version: AppHelper.getiOSVersion(),
                                        app_version: appVersion,
                                        sdk_version: sdkVersion,
-                                       sdk_type: AppHelper.getSDKType(),
+                                       sdk_type: NotiflyHelper.getSDKType(),
                                        event_params: AppHelper.makeJsonCodable(eventParams)) as? TrackingData,
                let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
 

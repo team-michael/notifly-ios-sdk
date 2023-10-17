@@ -33,8 +33,9 @@
 		F2E6699F2ADE60B500DF9CA0 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E6696F2ADE5F7E00DF9CA0 /* Logger.swift */; };
 		F2E669A02ADE60B700DF9CA0 /* MessageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669712ADE5F7E00DF9CA0 /* MessageData.swift */; };
 		F2E669A12ADE60B900DF9CA0 /* UUID+.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669732ADE5F7E00DF9CA0 /* UUID+.swift */; };
-		F2E669A22ADE60BC00DF9CA0 /* Auth+Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669722ADE5F7E00DF9CA0 /* Auth+Credentials.swift */; };
+		F2E669A22ADE60BC00DF9CA0 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669722ADE5F7E00DF9CA0 /* Credentials.swift */; };
 		F2E669A32ADE60BE00DF9CA0 /* TrackingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669742ADE5F7E00DF9CA0 /* TrackingEvent.swift */; };
+		F2E669A52ADE633400DF9CA0 /* Notifly+Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669A42ADE633400DF9CA0 /* Notifly+Helper.swift */; };
 		F2F732E22A26E3A5008BA9B1 /* notifly_sdk.h in Headers */ = {isa = PBXBuildFile; fileRef = F2F732E12A26E3A5008BA9B1 /* notifly_sdk.h */; };
 /* End PBXBuildFile section */
 
@@ -59,7 +60,7 @@
 		F2E6696F2ADE5F7E00DF9CA0 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		F2E669702ADE5F7E00DF9CA0 /* NotiflyCustomUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotiflyCustomUserDefaults.swift; sourceTree = "<group>"; };
 		F2E669712ADE5F7E00DF9CA0 /* MessageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageData.swift; sourceTree = "<group>"; };
-		F2E669722ADE5F7E00DF9CA0 /* Auth+Credentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Auth+Credentials.swift"; sourceTree = "<group>"; };
+		F2E669722ADE5F7E00DF9CA0 /* Credentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
 		F2E669732ADE5F7E00DF9CA0 /* UUID+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UUID+.swift"; sourceTree = "<group>"; };
 		F2E669742ADE5F7E00DF9CA0 /* TrackingEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingEvent.swift; sourceTree = "<group>"; };
 		F2E669762ADE5FD000DF9CA0 /* AppHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppHelper.swift; sourceTree = "<group>"; };
@@ -77,6 +78,7 @@
 		F2E6698A2ADE602900DF9CA0 /* NotiflyAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotiflyAPI.swift; sourceTree = "<group>"; };
 		F2E6698C2ADE602900DF9CA0 /* TrackingManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingManager.swift; sourceTree = "<group>"; };
 		F2E6698E2ADE602900DF9CA0 /* UserManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
+		F2E669A42ADE633400DF9CA0 /* Notifly+Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notifly+Helper.swift"; sourceTree = "<group>"; };
 		F2F732E12A26E3A5008BA9B1 /* notifly_sdk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = notifly_sdk.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -156,7 +158,7 @@
 				F2E6696F2ADE5F7E00DF9CA0 /* Logger.swift */,
 				F2E669702ADE5F7E00DF9CA0 /* NotiflyCustomUserDefaults.swift */,
 				F2E669712ADE5F7E00DF9CA0 /* MessageData.swift */,
-				F2E669722ADE5F7E00DF9CA0 /* Auth+Credentials.swift */,
+				F2E669722ADE5F7E00DF9CA0 /* Credentials.swift */,
 				F2E669732ADE5F7E00DF9CA0 /* UUID+.swift */,
 				F2E669742ADE5F7E00DF9CA0 /* TrackingEvent.swift */,
 			);
@@ -168,6 +170,7 @@
 			children = (
 				F2E669772ADE5FD000DF9CA0 /* Notifly.swift */,
 				673F0EBA29EC610400814217 /* Notifly+PublicAPI.swift */,
+				F2E669A42ADE633400DF9CA0 /* Notifly+Helper.swift */,
 			);
 			path = Notifly;
 			sourceTree = "<group>";
@@ -365,6 +368,7 @@
 				673F0EBB29EC610400814217 /* Notifly+PublicAPI.swift in Sources */,
 				F2E6699E2ADE60B300DF9CA0 /* NotiflyCustomUserDefaults.swift in Sources */,
 				F2E6699D2ADE60AF00DF9CA0 /* NotiflyError.swift in Sources */,
+				F2E669A52ADE633400DF9CA0 /* Notifly+Helper.swift in Sources */,
 				673F0E8529EBA7D200814217 /* notifly_ios_sdk.docc in Sources */,
 				F2E6699F2ADE60B500DF9CA0 /* Logger.swift in Sources */,
 				F2E669982ADE602900DF9CA0 /* TrackingManager.swift in Sources */,
@@ -374,7 +378,7 @@
 				F2E6697C2ADE600000DF9CA0 /* NotificationServiceExtension.swift in Sources */,
 				F2E669A12ADE60B900DF9CA0 /* UUID+.swift in Sources */,
 				F2E669942ADE602900DF9CA0 /* Campaign.swift in Sources */,
-				F2E669A22ADE60BC00DF9CA0 /* Auth+Credentials.swift in Sources */,
+				F2E669A22ADE60BC00DF9CA0 /* Credentials.swift in Sources */,
 				F2E669A32ADE60BE00DF9CA0 /* TrackingEvent.swift in Sources */,
 				F2E669A02ADE60B700DF9CA0 /* MessageData.swift in Sources */,
 				F2E669932ADE602900DF9CA0 /* InAppMessage.swift in Sources */,
