@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
   s.name             = 'notifly_sdk'
-  s.version          = '1.1.13'
+  s.version          = '1.1.14'
   s.summary          = 'Notifly iOS SDK.'
 
   s.description      = <<-DESC
-  NOTIFLY iOS SDK : 1.1.13
+  NOTIFLY iOS SDK : 1.1.14
   DESC
 
   s.homepage         = 'https://github.com/team-michael/notifly-ios-sdk'
@@ -22,7 +22,7 @@ Pod::Spec.new do |s|
   end
 
   s.subspec 'Extension' do |e|
-    e.source_files = 'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Extension/**/*.swift'
+    e.source_files = ['Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyExtension/**/*.swift', 'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/**/*.swift']
   end
 
 end
