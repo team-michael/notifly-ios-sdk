@@ -11,7 +11,12 @@ import UserNotifications
 @objc open class NotiflyNotificationServiceExtension: UNNotificationServiceExtension {
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
+    private var username: String?
 
+    open func register (username: String) {
+        NotiflyCustomUserDefaults.register(notiflyUserName: username)
+    }
+    
     override open func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         guard let bestAttemptContent = request.content.mutableCopy() as? UNMutableNotificationContent else {
             return
@@ -25,7 +30,7 @@ import UserNotifications
             contentHandler(bestAttemptContent)
             return
         }
-
+        
         if let projectId = NotiflyCustomUserDefaults.projectIdInUserDefaults,
            NotiflyCustomUserDefaults.usernameInUserDefaults != nil,
            NotiflyCustomUserDefaults.passwordInUserDefaults != nil
@@ -39,6 +44,7 @@ import UserNotifications
             ExtensionManager(projectId: projectId)
                 .track(eventName: TrackingConstant.Internal.pushNotificationMessageShown, params: data)
         }
+        
         ExtensionManager.show(bestAttemptContent: bestAttemptContent, contentHandler: contentHandler)
     }
 

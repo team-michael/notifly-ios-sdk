@@ -10,7 +10,12 @@ import notifly_ios_sdk
 
 
 class NotificationService: NotiflyNotificationServiceExtension {
-
+    override init() {
+        super.init()
+        self.setup()
+    }
     
- 
+    func setup() {
+        self.register(username: "minyong")
+    }
 }

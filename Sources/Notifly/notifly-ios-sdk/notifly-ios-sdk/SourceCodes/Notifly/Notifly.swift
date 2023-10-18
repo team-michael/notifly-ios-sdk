@@ -37,9 +37,11 @@ import UIKit
         password: String
     ) {
         self.projectID = projectID
+        NotiflyCustomUserDefaults.register(notiflyUserName: username)
         NotiflyCustomUserDefaults.projectIdInUserDefaults = projectID
         NotiflyCustomUserDefaults.usernameInUserDefaults = username
         NotiflyCustomUserDefaults.passwordInUserDefaults = password
+        
         auth = Auth(username: username,
                     password: password)
         trackingManager = TrackingManager(projectID: projectID)
@@ -50,10 +52,5 @@ import UIKit
         super.init()
         Notifly._main = self
     }
-}
-
-public enum SdkType: String {
-    case native
-    case react_native
-    case flutter
+    
 }

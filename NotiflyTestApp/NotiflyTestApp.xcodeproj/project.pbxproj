@@ -27,6 +27,7 @@
 		F2DF20DC2AB1EF7700CB9703 /* test.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F2DF20D52AB1EF7700CB9703 /* test.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		F2DF20E92AB424B800CB9703 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F260C4202AB17A9300394B5B /* notifly_ios_sdk.framework */; };
 		F2DF20EA2AB424B800CB9703 /* notifly_ios_sdk.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F260C4202AB17A9300394B5B /* notifly_ios_sdk.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F2F1BBA32ADFA6EE00A96B50 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DF20D72AB1EF7700CB9703 /* NotificationService.swift */; };
 		F2F3CE7D2A13A2DD009FEAF0 /* TestConstatns.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F3CE7A2A13A2DD009FEAF0 /* TestConstatns.swift */; };
 /* End PBXBuildFile section */
 
@@ -400,6 +401,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				675EB43929ED18B0001347FB /* MainViewController.swift in Sources */,
+				F2F1BBA32ADFA6EE00A96B50 /* NotificationService.swift in Sources */,
 				675EB43529ED18B0001347FB /* AppDelegate.swift in Sources */,
 				672E7B7C29EDF91800B3E9F2 /* UITextField+.swift in Sources */,
 				675EB43729ED18B0001347FB /* SceneDelegate.swift in Sources */,

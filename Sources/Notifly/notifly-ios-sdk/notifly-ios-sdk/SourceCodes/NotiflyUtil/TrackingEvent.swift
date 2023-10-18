@@ -131,3 +131,9 @@ struct AnyCodable: Codable {
         }
     }
 }
+
+public enum SdkType: String {
+    case native
+    case react_native
+    case flutter
+}
