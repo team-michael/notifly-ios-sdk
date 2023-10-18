@@ -68,16 +68,16 @@ class UserManager {
         guard let notifly = try? Notifly.main else {
             throw NotiflyError.notInitialized
         }
-        let projectID = notifly.projectID
+        let projectId = notifly.projectId
         let uuidV5Namespace: UUID
         let uuidV5Name: String
 
         if let externalUserID = externalUserID {
-            uuidV5Name = "\(projectID)\(externalUserID)"
+            uuidV5Name = "\(projectId)\(externalUserID)"
             uuidV5Namespace = TrackingConstant.HashNamespace.registeredUserID
         } else {
             let deviceID = try AppHelper.getDeviceID()
-            uuidV5Name = "\(projectID)\(deviceID)"
+            uuidV5Name = "\(projectId)\(deviceID)"
             uuidV5Namespace = TrackingConstant.HashNamespace.unregisteredUserID
         }
 

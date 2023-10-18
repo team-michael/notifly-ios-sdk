@@ -20,7 +20,7 @@ import UIKit
         }
 
         Notifly(
-            projectID: projectId,
+            projectId: projectId,
             username: username,
             password: password
         )

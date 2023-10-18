@@ -99,7 +99,7 @@ class InAppMessageManager {
             return
         }
 
-        guard let projectID = notifly.projectID as String?,
+        guard let projectId = notifly.projectId as String?,
               let notiflyUserID = (try? notifly.userManager.getNotiflyUserID()),
               let notiflyDeviceID = AppHelper.getNotiflyDeviceID()
         else {
@@ -108,7 +108,7 @@ class InAppMessageManager {
         }
         lock()
 
-        NotiflyAPI().requestSyncState(projectID: projectID, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID)
+        NotiflyAPI().requestSyncState(projectId: projectId, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID)
             .sink(receiveCompletion: { completion in
                 if case let .failure(error) = completion {
                     Logger.error("Fail to sync user state: " + error.localizedDescription)

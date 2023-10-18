@@ -11,10 +11,9 @@ import UserNotifications
 @objc open class NotiflyNotificationServiceExtension: UNNotificationServiceExtension {
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
-    private var username: String?
 
-    open func register (username: String) {
-        NotiflyCustomUserDefaults.register(notiflyUserName: username)
+    open func register(projectId: String, username: String) {
+        NotiflyCustomUserDefaults.register(projectId: projectId, org: username)
     }
     
     override open func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
@@ -43,6 +42,8 @@ import UserNotifications
             ] as [String: Any]
             ExtensionManager(projectId: projectId)
                 .track(eventName: TrackingConstant.Internal.pushNotificationMessageShown, params: data)
+        } else {
+            Logger.error("Cannot Access to NotiflyCustomUserDefaults. Please confirm that the app group identifier is 'group.notifly.{username}.'")
         }
         
         ExtensionManager.show(bestAttemptContent: bestAttemptContent, contentHandler: contentHandler)

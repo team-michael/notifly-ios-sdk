@@ -21,13 +21,13 @@ class TrackingManager {
     private let eventPublisher = PassthroughSubject<TrackingRecord, Never>()
     private let internalEventPublisher = PassthroughSubject<TrackingRecord, Never>()
 
-    private let projectID: String
+    private let projectId: String
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Lifecycle
 
-    init(projectID: String) {
-        self.projectID = projectID
+    init(projectId: String) {
+        self.projectId = projectId
         // Collect the events from the `eventPublisher` queue at specified interval and fire the event.
         eventRequestPayloadPublisher = eventPublisher
             // .collect(.byTimeOrCount(DispatchQueue.global(), .seconds(trackingFiringInterval), maxTrackingRecordsPerRequest))
@@ -158,7 +158,7 @@ class TrackingManager {
                                        device_token: pushToken,
                                        is_internal_event: isInternal,
                                        segmentation_event_param_keys: segmentationEventParamKeys,
-                                       project_id: notifly.projectID,
+                                       project_id: notifly.projectId,
                                        platform: AppHelper.getDevicePlatform(),
                                        os_version: AppHelper.getiOSVersion(),
                                        app_version: appVersion,

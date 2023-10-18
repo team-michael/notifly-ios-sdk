@@ -19,7 +19,7 @@ import UIKit
     static var coldStartNotificationData: [AnyHashable: Any]?
     static var inAppMessageDisabled: Bool = false
 
-    let projectID: String
+    let projectId: String
 
     let auth: Auth
     let notificationsManager: NotificationsManager
@@ -32,19 +32,19 @@ import UIKit
     // MARK: Lifecycle
 
     init(
-        projectID: String,
+        projectId: String,
         username: String,
         password: String
     ) {
-        self.projectID = projectID
-        NotiflyCustomUserDefaults.register(notiflyUserName: username)
-        NotiflyCustomUserDefaults.projectIdInUserDefaults = projectID
+        self.projectId = projectId
+        NotiflyCustomUserDefaults.register(projectId: projectId, org: username)
+        NotiflyCustomUserDefaults.projectIdInUserDefaults = projectId
         NotiflyCustomUserDefaults.usernameInUserDefaults = username
         NotiflyCustomUserDefaults.passwordInUserDefaults = password
         
         auth = Auth(username: username,
                     password: password)
-        trackingManager = TrackingManager(projectID: projectID)
+        trackingManager = TrackingManager(projectId: projectId)
         userManager = UserManager()
 
         notificationsManager = NotificationsManager()

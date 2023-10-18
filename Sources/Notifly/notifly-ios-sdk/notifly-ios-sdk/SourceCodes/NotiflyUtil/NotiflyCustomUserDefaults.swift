@@ -8,155 +8,107 @@
 import Foundation
 
 class NotiflyCustomUserDefaults {
+    private static var projectId: String?
     private static var notiflyUserDefaultsShared: UserDefaults?
-    static func register(notiflyUserName: String) {
-        NotiflyCustomUserDefaults.notiflyUserDefaultsShared = UserDefaults(suiteName: "group.notifly.\(notiflyUserName)") ?? UserDefaults.standard
+    
+    static func register(projectId: String, org: String) {
+        NotiflyCustomUserDefaults.projectId = projectId
+        NotiflyCustomUserDefaults.notiflyUserDefaultsShared = UserDefaults(suiteName: "group.notifly.\(org)") ?? UserDefaults.standard
     }
     
-    private static var notiflyProjectIdKey = "notifly_project_id"
+    private static func get(key: String) -> String? {
+        guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared, let projectId = NotiflyCustomUserDefaults.projectId else {
+            return nil
+        }
+        let dataKey = "\(projectId)_\(key)"
+        return shared.string(forKey: dataKey)
+    }
+    
+    private static func set(key: String, value: String?) -> Void {
+        guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared, let projectId = NotiflyCustomUserDefaults.projectId else {
+            return
+        }
+        let dataKey = "\(projectId)_\(key)"
+        if let value = value {
+            shared.set(value, forKey: dataKey)
+        } else {
+            shared.removeObject(forKey: dataKey)
+        }
+        return
+    }
+    
     static var projectIdInUserDefaults: String? {
         set {
-            guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared else {
-                return
-            }
-            if let value = newValue {
-                shared.set(value, forKey: notiflyProjectIdKey)
-            } else {
-                shared.removeObject(forKey: notiflyProjectIdKey)
-            }
-            shared.synchronize()
+            NotiflyCustomUserDefaults.set(key: NotiflyCustomDefaultKey.projectId, value: newValue)
         }
-        
         get {
-            guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared else {
-                return nil
-            }
-            return shared.string(forKey: notiflyProjectIdKey)
+            return NotiflyCustomUserDefaults.get(key: NotiflyCustomDefaultKey.projectId)
         }
     }
-    private static var notiflyUsernameKey = "notifly_username"
+    
     static var usernameInUserDefaults: String? {
         set {
-            guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared else {
-                return
-            }
-            if let value = newValue {
-                shared.set(value, forKey: notiflyUsernameKey)
-            } else {
-                shared.removeObject(forKey: notiflyUsernameKey)
-            }
-            shared.synchronize()
+            NotiflyCustomUserDefaults.set(key: NotiflyCustomDefaultKey.username, value: newValue)
         }
-        
         get {
-            guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared else {
-                return nil
-            }
-            return shared.string(forKey: notiflyUsernameKey)
+            return NotiflyCustomUserDefaults.get(key: NotiflyCustomDefaultKey.username)
         }
     }
-    private static var notiflyPasswordKey = "notifly_password"
+    
     static var passwordInUserDefaults: String? {
         set {
-            guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared else {
-                return
-            }
-            if let value = newValue {
-                shared.set(value, forKey: notiflyPasswordKey)
-            } else {
-                shared.removeObject(forKey: notiflyPasswordKey)
-            }
-            shared.synchronize()
+            NotiflyCustomUserDefaults.set(key: NotiflyCustomDefaultKey.password, value: newValue)
         }
-        
         get {
-            guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared else {
-                return nil
-            }
-            return shared.string(forKey: notiflyPasswordKey)
+            return NotiflyCustomUserDefaults.get(key: NotiflyCustomDefaultKey.password)
         }
     }
-    private static var notiflyAuthTokenKey = "notifly_authToken"
+    
     static var authTokenInUserDefaults: String? {
         set {
-            guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared else {
-                return
-            }
-            if let value = newValue {
-                shared.set(value, forKey: notiflyAuthTokenKey)
-            } else {
-                shared.removeObject(forKey: notiflyAuthTokenKey)
-            }
+            NotiflyCustomUserDefaults.set(key: NotiflyCustomDefaultKey.authToken, value: newValue)
         }
-        
         get {
-            guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared else {
-                return nil
-            }
-            return shared.string(forKey: notiflyAuthTokenKey)
+            return NotiflyCustomUserDefaults.get(key: NotiflyCustomDefaultKey.authToken)
         }
     }
     
-    private static var notiflyExternalUserIdKey = "notifly_external_user_id"
     static var externalUserIdInUserDefaults: String? {
         set {
-            guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared else {
-                return
-            }
-            if let value = newValue {
-                shared.set(value, forKey: notiflyExternalUserIdKey)
-            } else {
-                shared.removeObject(forKey: notiflyExternalUserIdKey)
-            }
+            NotiflyCustomUserDefaults.set(key: NotiflyCustomDefaultKey.externalUserId, value: newValue)
         }
-        
         get {
-            guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared else {
-                return nil
-            }
-            return shared.string(forKey: notiflyExternalUserIdKey)
+            return NotiflyCustomUserDefaults.get(key: NotiflyCustomDefaultKey.externalUserId)
         }
     }
     
-    private static var notiflyDeviceIdKey = "notifly_deviceId"
     static var deviceIdInUserDefaults: String? {
         set {
-            guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared else {
-                return
-            }
-            if let value = newValue {
-                shared.set(value, forKey: notiflyDeviceIdKey)
-            } else {
-                shared.removeObject(forKey: notiflyDeviceIdKey)
-            }
+            NotiflyCustomUserDefaults.set(key: NotiflyCustomDefaultKey.deviceId, value: newValue)
         }
-        
         get {
-            guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared else {
-                return nil
-            }
-            return shared.string(forKey: notiflyDeviceIdKey)
+            return NotiflyCustomUserDefaults.get(key: NotiflyCustomDefaultKey.deviceId)
         }
     }
     
-    private static var notiflyIsRegisteredAPNsKey: String = "notifly_isRegisteredAPNs"
     static var isRegisteredAPNsInUserDefaults: Bool? {
         set {
-            guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared else {
-                return
-            }
-            if let value = newValue {
-                shared.set(value, forKey: notiflyIsRegisteredAPNsKey)
-            } else {
-                shared.removeObject(forKey: notiflyIsRegisteredAPNsKey)
+            if newValue == true {
+                NotiflyCustomUserDefaults.set(key: NotiflyCustomDefaultKey.alreadyRegistered, value: "registered")
             }
         }
-        
         get {
-            guard let shared = NotiflyCustomUserDefaults.notiflyUserDefaultsShared else {
-                return nil
-            }
-            return shared.string(forKey: notiflyIsRegisteredAPNsKey) != nil
+            return NotiflyCustomUserDefaults.get(key: NotiflyCustomDefaultKey.alreadyRegistered) != nil
         }
     }
+}
+
+enum NotiflyCustomDefaultKey {
+    static let projectId = "notifly_project_id"
+    static let username = "notifly_username"
+    static let password = "notifly_password"
+    static let externalUserId = "notifly_external_user_id"
+    static let authToken = "notifly_authToken"
+    static let deviceId = "notifly_deviceId"
+    static let alreadyRegistered = "notifly_isRegisteredAPNs"
 }
