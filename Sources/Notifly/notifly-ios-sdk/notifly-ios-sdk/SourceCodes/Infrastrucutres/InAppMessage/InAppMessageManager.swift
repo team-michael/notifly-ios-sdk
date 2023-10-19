@@ -119,12 +119,12 @@ class InAppMessageManager {
                    let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
                 {
                     if let userData = decodedData["userData"] as? [String: Any] {
-                        var newUserData = UserData(data: userData)
+                        let newUserData = UserData(data: userData)
                         if merge, let previousUserData = self?.userData as? UserData {
-                            newUserData.userProperties.merge(previousUserData.userProperties) { _, new in new }
-                            newUserData.campaignHiddenUntil.merge(previousUserData.campaignHiddenUntil) { _, new in new }
+                            self?.userData = UserData.merge(p1: newUserData, p2: previousUserData)
+                        } else {
+                            self?.userData = newUserData
                         }
-                        self?.userData = newUserData
                     }
 
                     if let campaignData = decodedData["campaignData"] as? [[String: Any]] {

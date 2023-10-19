@@ -59,8 +59,8 @@ class NotiflyAPI {
     }
 
     func requestSyncState(projectId: String, notiflyUserID: String, notiflyDeviceID: String) -> AnyPublisher<String, Error> {
-        let endpoint = "\(NotiflyConstant.EndPoint.syncStateEndPoint)/\(projectId)/\(notiflyUserID)?deviceID=\(notiflyDeviceID)&channel=in-app-message"
-
+        let endpoint = "\(NotiflyConstant.EndPoint.syncStateEndPoint)/\(projectId)/\(notiflyUserID)?deviceId=\(notiflyDeviceID)&channel=in-app-message"
+        
         return request(to: endpoint, method: .GET, authTokenRequired: true)
             .map { $0.set(bearer: true) }
             .flatMap { $0.buildAndFireWithRawJSONResponseType() }
