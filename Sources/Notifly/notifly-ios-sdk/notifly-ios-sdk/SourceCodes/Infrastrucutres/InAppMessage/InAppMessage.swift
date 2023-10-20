@@ -34,6 +34,8 @@ struct UserData {
 
     func get(key: String) -> Any? {
         switch key {
+        case "external_user_id":
+            return try? Notifly.main.userManager.externalUserID
         case "platform":
             return platform
         case "os_version":

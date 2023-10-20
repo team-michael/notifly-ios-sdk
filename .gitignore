@@ -1,6 +1,7 @@
 .vscode/*
 NotiflyTestApp/NotiflyTestApp/GoogleService-Info.plist
-NotiflyTestApp/NotiflyTestApp/SourceCodes/TestConstatns.swift
+NotiflyTestApp/NotiflyTestApp/SourceCodes/TestConstants.swift
+NotiflyTestApp/NotiflyNotificationExtension/TestConstants.swift
 ### Xcode ###
 ## User settings
 xcuserdata/
