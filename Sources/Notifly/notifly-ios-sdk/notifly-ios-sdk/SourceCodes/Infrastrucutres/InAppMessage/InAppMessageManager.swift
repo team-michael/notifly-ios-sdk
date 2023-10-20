@@ -168,21 +168,23 @@ class InAppMessageManager {
         if let segmentationEventParamKeys = segmentationEventParamKeys,
            let eventParams = eventParams,
            segmentationEventParamKeys.count > 0,
-           eventParams.count > 0,
-           let keyField = segmentationEventParamKeys[0] as? String, // TODO: support multiple segmentationEventParamKey
-           let value = eventParams[keyField] as? String
+           eventParams.count > 0
         {
-            eicID += keyField + InAppMessageConstant.idSeparator + String(describing: value)
-            updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
-        } else {
-            eicID += InAppMessageConstant.idSeparator
-            updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
+            let keyField = segmentationEventParamKeys[0] // TODO: support multiple segmentationEventParamKey
+            if let value = eventParams[keyField] as? String {
+                eicID += keyField + InAppMessageConstant.idSeparator + String(describing: value)
+                updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
+                return
+            }
         }
+        eicID += InAppMessageConstant.idSeparator
+        updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
     }
 
     private func updateEventCountsInEventData(eicID: String, eventName: String, dt: String, eventParams: [String: Any]?) {
-        if var eicToUpdate = eventData.eventCounts[eicID] as? EventIntermediateCount {
+        if var eicToUpdate = eventData.eventCounts[eicID] {
             eicToUpdate.count += 1
+            eventData.eventCounts[eicID] = eicToUpdate
         } else {
             eventData.eventCounts[eicID] = EventIntermediateCount(name: eventName, dt: dt, count: 1, eventParams: eventParams ?? [:])
         }
@@ -566,12 +568,15 @@ class InAppMessageManager {
             default:
                 return false
             }
+        } else if condition.operator == "IS_NULL" {
+            return values.0 == nil
+        } else if condition.operator == "IS_NOT_NULL" {
+            return values.0 != nil
         }
-
         return false
     }
 
-    private func extractValuesOfUserBasedConditionToCompare(condition: UserBasedCondition, eventParams: [String: Any]?) -> (Any, Any)? {
+    private func extractValuesOfUserBasedConditionToCompare(condition: UserBasedCondition, eventParams: [String: Any]?) -> (Any?, Any?)? {
         var userRawValue: Any?
         if condition.unit == "user" {
             userRawValue = userData.userProperties[condition.attribute]
@@ -583,7 +588,7 @@ class InAppMessageManager {
         let useEventParamsAsCondition = condition.useEventParamsAsCondition
         if useEventParamsAsCondition {
             guard let eventParams = eventParams,
-                  let key = condition.comparisonParameter as? String,
+                  let key = condition.comparisonParameter,
                   let value = eventParams[key]
             else {
                 return nil
@@ -591,10 +596,6 @@ class InAppMessageManager {
             comparisonTargetRawValue = value
         } else {
             comparisonTargetRawValue = condition.value
-        }
-
-        guard let userRawValue = userRawValue, let comparisonTargetRawValue = comparisonTargetRawValue else {
-            return nil
         }
         return (userRawValue, comparisonTargetRawValue)
     }
