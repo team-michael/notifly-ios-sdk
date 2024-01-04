@@ -15,7 +15,7 @@ import UserNotifications
     open func register(projectId: String, username: String) {
         NotiflyCustomUserDefaults.register(projectId: projectId, org: username)
     }
-    
+
     override open func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         guard let bestAttemptContent = request.content.mutableCopy() as? UNMutableNotificationContent else {
             return
@@ -29,7 +29,7 @@ import UserNotifications
             contentHandler(bestAttemptContent)
             return
         }
-        
+
         if let projectId = NotiflyCustomUserDefaults.projectIdInUserDefaults,
            NotiflyCustomUserDefaults.usernameInUserDefaults != nil,
            NotiflyCustomUserDefaults.passwordInUserDefaults != nil
@@ -45,7 +45,7 @@ import UserNotifications
         } else {
             Logger.error("Cannot Access to NotiflyCustomUserDefaults. Please confirm that the app group identifier is 'group.notifly.{username}.'")
         }
-        
+
         ExtensionManager.show(bestAttemptContent: bestAttemptContent, contentHandler: contentHandler)
     }
 
@@ -113,7 +113,7 @@ import UserNotifications
                                    name: TrackingConstant.Internal.pushNotificationMessageShown,
                                    notifly_user_id: userID,
                                    external_user_id: NotiflyCustomUserDefaults.externalUserIdInUserDefaults,
-                                   time: Int(Date().timeIntervalSince1970),
+                                   time: AppHelper.getCurrentTimestamp(),
                                    notifly_device_id: notiflyDeviceID,
                                    external_device_id: deviceID,
                                    device_token: "",

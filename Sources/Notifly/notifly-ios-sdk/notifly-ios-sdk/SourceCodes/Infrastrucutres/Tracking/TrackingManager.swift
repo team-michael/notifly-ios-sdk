@@ -152,7 +152,7 @@ class TrackingManager {
                                        name: eventName,
                                        notifly_user_id: userID,
                                        external_user_id: notifly.userManager.externalUserID,
-                                       time: Int(Date().timeIntervalSince1970),
+                                       time: AppHelper.getCurrentTimestamp(),
                                        notifly_device_id: notiflyDeviceID,
                                        external_device_id: deviceID,
                                        device_token: pushToken,

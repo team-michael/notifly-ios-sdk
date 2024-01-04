@@ -81,14 +81,15 @@ class InAppMessageManager {
     static func present(_ vc: UIViewController, animated: Bool = false, completion: (() -> Void)?) -> Bool {
         guard let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
               let topVC = window.topMostViewController,
-              !(vc.isBeingPresented) else {
+              !(vc.isBeingPresented)
+        else {
             Logger.error("Invalid status for presenting in-app-message.")
             return false
         }
         topVC.present(vc, animated: animated, completion: completion)
         return true
     }
-    
+
     func syncState(merge: Bool) {
         guard let notifly = (try? Notifly.main) else {
             return
@@ -205,7 +206,7 @@ class InAppMessageManager {
     }
 
     private func isCampaignActive(campaign: Campaign) -> Bool {
-        let now = Int(Date().timeIntervalSince1970)
+        let now = AppHelper.getCurrentTimestamp(unit: .second)
         let startTimestamp = campaign.campaignStart
         if let endTimestamp = campaign.campaignEnd {
             return now >= startTimestamp && now <= endTimestamp
@@ -227,7 +228,7 @@ class InAppMessageManager {
             if intHideUntil == -1 {
                 return true
             }
-            let now = Int(Date().timeIntervalSince1970)
+            let now = AppHelper.getCurrentTimestamp(unit: .second)
             if now <= intHideUntil {
                 return true
             } else {
@@ -239,7 +240,7 @@ class InAppMessageManager {
     }
 
     private func isHiddenCampaign(campaignID: String, reEligibleCondition _: ReEligibleCondition) -> Bool {
-        let now = Int(Date().timeIntervalSince1970)
+        let now = AppHelper.getCurrentTimestamp(unit: .second)
         if let hideUntil = userData.campaignHiddenUntil[campaignID] {
             if hideUntil == -1 {
                 return true
@@ -749,7 +750,7 @@ enum CompareValueHelper {
 }
 
 func calculateHideUntil(reEligibleCondition: ReEligibleCondition) -> Int? {
-    let now = Int(Date().timeIntervalSince1970)
+    let now = AppHelper.getCurrentTimestamp(unit: .second)
     let oneDayTimeInterval = 24 * 60 * 60
     switch reEligibleCondition.unit {
     case "infinite":

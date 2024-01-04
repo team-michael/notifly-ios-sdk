@@ -29,6 +29,10 @@ class AppHelper {
         }
     }
 
+    static func getCurrentTimestamp(unit: TimestampUnit = .millisecond) -> Int {
+        return Int(Date().timeIntervalSince1970 * Double(unit.rawValue))
+    }
+
     static func getAppVersion() -> String? {
         guard let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
             Logger.error("Failed to get the App version.")
@@ -111,4 +115,9 @@ private func retrieveUniqueIdFromKeychain() -> String? {
         }
     }
     return nil
+}
+
+enum TimestampUnit: Int {
+    case second = 1
+    case millisecond = 1000
 }

@@ -155,7 +155,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked, eventParams: params)
                 dismissCTATapped()
                 if let templateName = modalProps?.templateName {
-                    let now = Int(Date().timeIntervalSince1970)
+                    let now = AppHelper.getCurrentTimestamp(unit: .second)
                     var hideUntil: Int
                     if let hideUntilInDaysData = notiflyExtraData?["hide_until_in_days"] as? AnyCodable,
                        let hideUntilInDays = hideUntilInDaysData.getValue() as? Int,
