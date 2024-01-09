@@ -88,7 +88,7 @@ enum NotiflySegmentation {
 
     struct SegmentInfo {
         let groups: [SegmentationGroup.Group]?
-        let groupOperator: String?
+        let groupOperator: SegmentationGroup.GroupOperator?
 
         init(segmentInfoDict: [String: Any]) {
             let rawGroups = segmentInfoDict["groups"] as? [[String: Any]] ?? []
@@ -100,7 +100,7 @@ enum NotiflySegmentation {
                     guard let unit = conditionDict["unit"] as? String else {
                         return nil
                     }
-                    if unit == "event" {
+                    if unit == SegmentationCondition.ConditionUnit.event.rawValue {
                         guard let condition = try? SegmentationCondition.Conditions.EventBased.Condition(condition: conditionDict) else {
                             return nil
                         }
@@ -114,10 +114,9 @@ enum NotiflySegmentation {
                 } as? [SegmentationCondition.ConditionType]
 
                 let conditionOperator = (groupDict["condition_operator"] as? String) ?? InAppMessageConstant.segmentInfoDefaultConditionOperator
-
                 return SegmentationGroup.Group(conditions: conditions ?? [], conditionOperator: conditionOperator)
             }
-            groupOperator = segmentInfoDict["group_operator"] as? String ?? InAppMessageConstant.segmentInfoDefaultGroupOperator
+            groupOperator = SegmentationGroup.GroupOperator(rawValue: segmentInfoDict["group_operator"] as? String ?? InAppMessageConstant.segmentInfoDefaultGroupOperator) ?? .or
         }
     }
 
@@ -128,7 +127,11 @@ enum NotiflySegmentation {
 
         struct Group {
             let conditions: [SegmentationCondition.ConditionType]?
-            let conditionOperator: String?
+            let conditionOperator: SegmentationCondition.ConditionOperator?
+            init(conditions: [SegmentationCondition.ConditionType], conditionOperator: String) {
+                self.conditions = conditions
+                self.conditionOperator = SegmentationCondition.ConditionOperator(rawValue: conditionOperator) ?? .and
+            }
         }
     }
 

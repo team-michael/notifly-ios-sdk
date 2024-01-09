@@ -421,20 +421,38 @@ enum SegmentationHelper {
                 return false
             }
         }
-
+        
+        
         guard let groups = segmentInfo.groups else {
+            return false;
+        }
+        
+        if isTargetAll(segmentInfo: segmentInfo) {
             return true // send to all
         }
 
         guard let groupOp = segmentInfo.groupOperator,
-              groupOp == "OR"
+              groupOp.rawValue == "OR"
         else {
             // now only supported for OR operator as group operator
             return false
         }
+        
         return groups.contains { group in
             self.isEntityOfGroup(group: group, eventParams: eventParams, userData: userData, eventData: eventData)
         }
+    }
+
+    static func isTargetAll(segmentInfo: NotiflySegmentation.SegmentInfo) -> Bool {
+        guard let groups = segmentInfo.groups else {
+            return false
+        }
+        
+        let groupOp = segmentInfo.groupOperator
+        if groups.count == 0 || groupOp == nil {
+            return true
+        }
+        return false
     }
 
     static func isEntityOfGroup(group: NotiflySegmentation.SegmentationGroup.Group, eventParams: [String: Any]?, userData: UserData, eventData: EventData) -> Bool {
@@ -444,7 +462,7 @@ enum SegmentationHelper {
             return false
         }
         guard let conditionOp = group.conditionOperator,
-              conditionOp == "AND"
+              conditionOp.rawValue == "AND"
         else {
             // now only supported for AND operator as conditon operator
             return false
@@ -546,15 +564,15 @@ enum SegmentationHelper {
         }
         if let operatorType = NotiflyOperator(rawValue: condition.operator) {
             switch operatorType {
-            case .isEqual:
+            case .equal:
                 return userCounts == condition.value
-            case .isGreaterOrEqualThan:
+            case .greaterOrEqualThan:
                 return userCounts >= condition.value
-            case .isLessOrEqualThan:
+            case .lessOrEqualThan:
                 return userCounts <= condition.value
-            case .isGreaterThan:
+            case .greaterThan:
                 return userCounts > condition.value
-            case .isLessThan:
+            case .lessThan:
                 return userCounts < condition.value
             default:
                 return false
