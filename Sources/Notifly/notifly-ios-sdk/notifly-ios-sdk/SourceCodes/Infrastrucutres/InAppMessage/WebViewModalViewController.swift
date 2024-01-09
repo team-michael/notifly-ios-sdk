@@ -9,7 +9,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     var notiflyCampaignID: String?
     var notiflyMessageID: String?
     var notiflyExtraData: [String: AnyCodable]?
-    var notiflyReEligibleCondition: ReEligibleCondition?
+    var notiflyReEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
     var modalProps: ModalProperties?
 
     convenience init(notiflyInAppMessageData: InAppMessageData) throws {
@@ -82,7 +82,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         var hideUntilData: [String: Int]?
         if let campaignID = notiflyCampaignID,
            let reEligibleCondition = notiflyReEligibleCondition,
-           let hideUntil = calculateHideUntil(reEligibleCondition: reEligibleCondition)
+           let hideUntil = NotiflyHelper.calculateHideUntil(reEligibleCondition: reEligibleCondition)
         {
             hideUntilData = [campaignID: hideUntil]
             if let main = try? Notifly.main, let manager = main.inAppMessageManager as? InAppMessageManager {

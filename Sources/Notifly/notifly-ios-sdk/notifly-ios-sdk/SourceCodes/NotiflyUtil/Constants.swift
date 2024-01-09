@@ -45,3 +45,36 @@ enum TrackingConstant {
         static let inAppMessageSurveySubmitButtonClicked = "survey_submit_button_click"
     }
 }
+
+enum TimeConstant {
+    static let oneMinuteInSeconds = 60
+    static let oneHourInSeconds = 60 * oneMinuteInSeconds
+    static let oneDayInSeconds = 24 * oneHourInSeconds
+    static let oneWeekInSeconds = 7 * oneDayInSeconds
+    static let oneMonthInSeconds = 30 * oneDayInSeconds
+
+    enum TimestampUnit: Int {
+        case second = 1
+        case microsecond = 1_000_000
+    }
+}
+
+enum NotiflyVariableType: String {
+    case string = "TEXT"
+    case int = "INT"
+    case bool = "BOOL"
+    case double = "DOUBLE"
+    case array = "ARRAY"
+}
+
+enum NotiflyOperator: String {
+    case isNull = "IS_NULL"
+    case isNotNull = "IS_NOT_NULL"
+    case equal = "="
+    case notEqual = "<>"
+    case contains = "@>"
+    case greaterThan = ">"
+    case greaterOrEqualThan = ">="
+    case lessThan = "<"
+    case lessOrEqualThan = "<="
+}

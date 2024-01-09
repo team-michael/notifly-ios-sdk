@@ -168,7 +168,7 @@ class InAppMessageManager {
             }
         }
 
-        let dt = getCurrentDate()
+        let dt = NotiflyHelper.getCurrentDate()
         var eicID = eventName + InAppMessageConstant.idSeparator + dt + InAppMessageConstant.idSeparator
         if let segmentationEventParamKeys = segmentationEventParamKeys,
            let eventParams = eventParams,
@@ -201,7 +201,7 @@ class InAppMessageManager {
             .filter { $0.triggeringEvent == eventName }
             .filter { isCampaignActive(campaign: $0) }
             .filter { !isBlacklistTemplate(templateName: $0.message.modalProperties.templateName) }
-            .filter { self.isEntityOfSegment(campaign: $0, eventParams: eventParams) }
+            .filter { SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: userData, eventData: eventData) }
 
         if campaignsToTrigger.count == 0 {
             return nil
@@ -243,7 +243,7 @@ class InAppMessageManager {
         return true
     }
 
-    private func isHiddenCampaign(campaignID: String, reEligibleCondition _: ReEligibleCondition) -> Bool {
+    private func isHiddenCampaign(campaignID: String) -> Bool {
         let now = AppHelper.getCurrentTimestamp(unit: .second)
         if let hideUntil = userData.campaignHiddenUntil[campaignID] {
             if hideUntil == -1 {
@@ -273,7 +273,7 @@ class InAppMessageManager {
     private func showInAppMessage(notiflyInAppMessageData: InAppMessageData) {
         DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline) {
             if let reEligibleCondition = notiflyInAppMessageData.notiflyReEligibleCondition {
-                guard !self.isHiddenCampaign(campaignID: notiflyInAppMessageData.notiflyCampaignId, reEligibleCondition: reEligibleCondition) else {
+                guard !self.isHiddenCampaign(campaignID: notiflyInAppMessageData.notiflyCampaignId) else {
                     return
                 }
             }
@@ -358,15 +358,16 @@ class InAppMessageManager {
                   let channel = campaignDict["channel"] as? String,
                   let segmentType = campaignDict["segment_type"] as? String,
                   channel == "in-app-message",
-                  segmentType == "condition"
+                  segmentType == NotiflySegmentation.SegmentationType.conditionBased.rawValue
             else {
                 return nil
             }
 
             let message = Message(htmlURL: htmlURL, modalProperties: modalProperties)
-            var reEligibleCondition: ReEligibleCondition?
+
+            var reEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
             if let rawReEligibleCondition = campaignDict["re_eligible_condition"] as? [String: Any],
-               let reEligibleConditionData = ReEligibleCondition(data: rawReEligibleCondition)
+               let reEligibleConditionData = NotiflyReEligibleConditionEnum.ReEligibleCondition(data: rawReEligibleCondition)
             {
                 reEligibleCondition = reEligibleConditionData
             }
@@ -389,8 +390,7 @@ class InAppMessageManager {
             }
             let delay = campaignDict["delay"] as? Int
             let campaignEnd = campaignDict["end"] as? Int
-
-            let segmentInfo = self.constructSegmnentInfo(segmentInfoDict: segmentInfoDict)
+            let segmentInfo = NotiflySegmentation.SegmentInfo(segmentInfoDict: segmentInfoDict)
             let lastUpdatedTimestamp = (campaignDict["last_updated_timestamp"] as? Int) ?? 0
 
             return Campaign(id: id, channel: channel, segmentType: segmentType, message: message, segmentInfo: segmentInfo, triggeringEvent: triggeringEvent, campaignStart: campaignStart, campaignEnd: campaignEnd, delay: delay, status: campaignStatus, testing: testing, whitelist: whitelist,
@@ -398,53 +398,21 @@ class InAppMessageManager {
         }
     }
 
-    private func constructSegmnentInfo(segmentInfoDict: [String: Any]) -> SegmentInfo? {
-        guard let rawGroups = segmentInfoDict["groups"] as? [[String: Any]], rawGroups.count > 0 else {
-            return SegmentInfo(groups: nil, groupOperator: nil)
-        }
-        let groups = rawGroups.compactMap { groupDict -> Group? in
-            guard let conditionDictionaries = groupDict["conditions"] as? [[String: Any]] else {
-                return nil
-            }
-            guard let conditions = conditionDictionaries.compactMap({ conditionDict -> Condition? in
-                guard let unit = conditionDict["unit"] as? String else {
-                    return nil
-                }
-                if unit == "event" {
-                    guard let condition = try? EventBasedCondition(condition: conditionDict) else {
-                        return nil
-                    }
-                    return .EventBasedCondition(condition)
-                } else {
-                    guard let condition = try? UserBasedCondition(condition: conditionDict) else {
-                        return nil
-                    }
-                    return .UserBasedCondition(condition)
-                }
-            }) as? [Condition] else {
-                return nil
-            }
-            let conditionOperator = (groupDict["condition_operator"] as? String) ?? InAppMessageConstant.segmentInfoDefaultConditionOperator
-            return Group(conditions: conditions.compactMap { $0 }, conditionOperator: conditionOperator)
-        }
-        let groupOperator = segmentInfoDict["group_operator"] as? String ?? InAppMessageConstant.segmentInfoDefaultGroupOperator
-        return SegmentInfo(groups: groups.compactMap { $0 }, groupOperator: groupOperator)
+    func updateHideCampaignUntilData(hideUntilData: [String: Int]) {
+        userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }
     }
+}
 
-    private func getCurrentDate() -> String {
-        let currentDate = Date()
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        return dateFormatter.string(from: currentDate)
-    }
-
-    private func isEntityOfSegment(campaign: Campaign, eventParams: [String: Any]?) -> Bool {
+struct SegmentationHelper {
+    static func isEntityOfSegment(campaign: Campaign, eventParams: [String: Any]?, userData: UserData, eventData: EventData) -> Bool {
         // now only support for the condition-based-segment type
-        guard campaign.segmentType == "condition",
+        guard let segmentationType = NotiflySegmentation.SegmentationType(rawValue: campaign.segmentType),
+              segmentationType == .conditionBased,
               let segmentInfo = campaign.segmentInfo
         else {
             return false
         }
+
         if campaign.testing {
             guard let whitelist = campaign.whitelist,
                   let externalUserId = try? Notifly.main.userManager.externalUserID,
@@ -453,6 +421,7 @@ class InAppMessageManager {
                 return false
             }
         }
+
         guard let groups = segmentInfo.groups else {
             return true // send to all
         }
@@ -464,11 +433,11 @@ class InAppMessageManager {
             return false
         }
         return groups.contains { group in
-            self.isEntityOfGroup(group: group, eventParams: eventParams)
+            self.isEntityOfGroup(group: group, eventParams: eventParams, userData: userData, eventData: eventData)
         }
     }
 
-    private func isEntityOfGroup(group: Group, eventParams: [String: Any]?) -> Bool {
+    static func isEntityOfGroup(group: NotiflySegmentation.SegmentationGroup.Group, eventParams: [String: Any]?, userData: UserData, eventData: EventData) -> Bool {
         guard let conditions = group.conditions,
               conditions.count > 0
         else {
@@ -482,89 +451,25 @@ class InAppMessageManager {
         }
 
         return conditions.allSatisfy { condition in
-            self.matchCondition(condition: condition, eventParams: eventParams)
+            self.matchCondition(condition: condition, eventParams: eventParams, userData: userData, eventData: eventData)
         }
     }
 
-    private func matchCondition(condition: Condition, eventParams: [String: Any]?) -> Bool {
+    static func matchCondition(condition: NotiflySegmentation.SegmentationCondition.ConditionType, eventParams: [String: Any]?, userData: UserData, eventData: EventData) -> Bool {
         switch condition {
-        case let .EventBasedCondition(eventCondition):
-            return matchEventBasedCondition(condition: eventCondition)
-        case let .UserBasedCondition(userCondition):
-            return matchUserBasedCondition(condition: userCondition, eventParams: eventParams)
+        case let .UserBasedType(userCondition):
+            return matchUserBasedCondition(condition: userCondition, eventParams: eventParams, userData: userData)
+        case let .EventBasedType(eventCondition):
+            return matchEventBasedCondition(condition: eventCondition, eventData: eventData)
         }
     }
 
-    private func matchEventBasedCondition(condition: EventBasedCondition) -> Bool {
-        guard condition.value >= 0 else {
+    static func matchUserBasedCondition(condition: NotiflySegmentation.SegmentationCondition.Conditions.UserBased.Condition, eventParams: [String: Any]?, userData: UserData) -> Bool {
+        guard let values = extractValuesOfUserBasedConditionToCompare(condition: condition, eventParams: eventParams, userData: userData) else {
             return false
         }
-        var startDate: String?
-        if condition.eventConditionType == .lastNDays {
-            startDate = getDateStringBeforeNDays(n: condition.secondaryValue)
-            guard startDate != nil else {
-                return false
-            }
-        }
-
-        let userCounts = caculateEventCounts(eventName: condition.event, startDate: startDate)
-        guard userCounts >= 0 else {
-            return false
-        }
-
-        switch condition.operator {
-        case "=":
-            return userCounts == condition.value
-        case ">=":
-            return userCounts >= condition.value
-        case "<=":
-            return userCounts <= condition.value
-        case ">":
-            return userCounts > condition.value
-        case "<":
-            return userCounts < condition.value
-        default:
-            return false
-        }
-    }
-
-    private func caculateEventCounts(eventName: String, startDate: String?) -> Int {
-        guard let eventCounts = Array(eventData.eventCounts.values) as? [EventIntermediateCount] else {
-            return -1
-        }
-
-        var targetEventCounts = eventCounts.filter { $0.name == eventName }
-        if let startDate = startDate {
-            targetEventCounts = targetEventCounts.filter { $0.dt >= startDate }
-        }
-        guard !targetEventCounts.isEmpty else {
-            return 0
-        }
-        return targetEventCounts.reduce(0) { $0 + $1.count }
-    }
-
-    private func getDateStringBeforeNDays(n: Int?) -> String? {
-        guard let n = n else {
-            return nil
-        }
-        guard n >= 0 else {
-            return nil
-        }
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        let currentDate = Date()
-        let calendar = Calendar.current
-        if let modifiedDate = calendar.date(byAdding: .day, value: -n, to: currentDate) {
-            return dateFormatter.string(from: modifiedDate)
-        }
-        return nil
-    }
-
-    private func matchUserBasedCondition(condition: UserBasedCondition, eventParams: [String: Any]?) -> Bool {
-        guard let values = extractValuesOfUserBasedConditionToCompare(condition: condition, eventParams: eventParams) else {
-            return false
-        }
-        if let operatorType = SegmentationOperator(rawValue: condition.operator) {
+        
+        if let operatorType = NotiflyOperator(rawValue: condition.operator) {
             switch operatorType {
             case .isNull:
                 return values.0 == nil
@@ -572,24 +477,24 @@ class InAppMessageManager {
                 return values.0 != nil
             default:
                 let valueType = condition.valueType
-                if let userValue = convertAnyToSpecifiedType(value: values.0, type: operatorType == .contains ? "ARRAY" : valueType),
-                   let comparisonTargetValue = convertAnyToSpecifiedType(value: values.1, type: valueType)
+                if let userValue = NotiflyComparingValueHelper.castAnyToSpecifiedType(value: values.0, type: operatorType == .contains ? "ARRAY" : valueType),
+                   let comparisonTargetValue = NotiflyComparingValueHelper.castAnyToSpecifiedType(value: values.1, type: valueType)
                 {
                     switch operatorType {
                     case .equal:
-                        return CompareValueHelper.isEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
+                        return NotiflyComparingValueHelper.isEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
                     case .notEqual:
-                        return CompareValueHelper.isNotEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
+                        return NotiflyComparingValueHelper.isNotEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
                     case .contains:
-                        return CompareValueHelper.isContains(value1: userValue, value2: comparisonTargetValue, type: valueType)
+                        return NotiflyComparingValueHelper.isContains(value1: userValue, value2: comparisonTargetValue, type: valueType)
                     case .greaterThan:
-                        return CompareValueHelper.isGreaterThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
+                        return NotiflyComparingValueHelper.isGreaterThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
                     case .greaterOrEqualThan:
-                        return CompareValueHelper.isGreaterOrEqualThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
+                        return NotiflyComparingValueHelper.isGreaterOrEqualThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
                     case .lessThan:
-                        return CompareValueHelper.isLessThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
+                        return NotiflyComparingValueHelper.isLessThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
                     case .lessOrEqualThan:
-                        return CompareValueHelper.isLessOrEqualThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
+                        return NotiflyComparingValueHelper.isLessOrEqualThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
                     default:
                         return false
                     }
@@ -599,7 +504,7 @@ class InAppMessageManager {
         return false
     }
 
-    private func extractValuesOfUserBasedConditionToCompare(condition: UserBasedCondition, eventParams: [String: Any]?) -> (Any?, Any?)? {
+    static func extractValuesOfUserBasedConditionToCompare(condition: NotiflySegmentation.SegmentationCondition.Conditions.UserBased.Condition, eventParams: [String: Any]?, userData: UserData) -> (Any?, Any?)? {
         var userRawValue: Any?
         if condition.unit == "user" {
             userRawValue = userData.userProperties[condition.attribute]
@@ -623,172 +528,52 @@ class InAppMessageManager {
         return (userRawValue, comparisonTargetRawValue)
     }
 
-    private func convertAnyToSpecifiedType(value: Any, type: String) -> Any? {
-        switch (value, type) {
-        case let (value as String, "TEXT"):
-            return value
-        case let (value as Int, "INT"):
-            return value
-        case let (value as String, "INT"):
-            return Int(value)
-        case let (value as Bool, "BOOL"):
-            return value
-        case let (value as String, "BOOL"):
-            return Bool(value)
-        case let (value as [Any], "ARRAY"):
-            return value
-        case (_, _):
-            return nil
+    static func matchEventBasedCondition(condition: NotiflySegmentation.SegmentationCondition.Conditions.EventBased.Condition, eventData: EventData) -> Bool {
+        guard condition.value >= 0 else {
+            return false
         }
-    }
+        var startDate: String?
+        if condition.eventConditionType == .lastNDays {
+            startDate = NotiflyHelper.getDateStringBeforeNDays(n: condition.secondaryValue)
+            guard startDate != nil else {
+                return false
+            }
+        }
 
-    func updateHideCampaignUntilData(hideUntilData: [String: Int]) {
-        userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }
-    }
-}
+        let userCounts = caculateEventCounts(eventName: condition.event, startDate: startDate, eventData: eventData)
+        guard userCounts >= 0 else {
+            return false
+        }
 
-enum CompareValueHelper {
-    static func isEqual(value1: Any, value2: Any, type: String) -> Bool {
-        switch type {
-        case "TEXT":
-            if let value1 = value1 as? String, let value2 = value2 as? String {
-                return value1 == value2
-            }
-            return false
-        case "INT":
-            if let value1 = value1 as? Int, let value2 = value2 as? Int {
-                return value1 == value2
-            }
-            return false
-        case "BOOL":
-            if let value1 = value1 as? Bool, let value2 = value2 as? Bool {
-                return value1 == value2
-            }
-            return false
+        switch condition.operator {
+        case "=":
+            return userCounts == condition.value
+        case ">=":
+            return userCounts >= condition.value
+        case "<=":
+            return userCounts <= condition.value
+        case ">":
+            return userCounts > condition.value
+        case "<":
+            return userCounts < condition.value
         default:
             return false
         }
     }
 
-    static func isNotEqual(value1: Any, value2: Any, type: String) -> Bool {
-        switch type {
-        case "TEXT":
-            if let value1 = value1 as? String, let value2 = value2 as? String {
-                return value1 != value2
-            }
-            return false
-        case "INT":
-            if let value1 = value1 as? Int, let value2 = value2 as? Int {
-                return value1 != value2
-            }
-            return false
-        case "BOOL":
-            if let value1 = value1 as? Bool, let value2 = value2 as? Bool {
-                return value1 != value2
-            }
-            return false
-        default:
-            return false
+    static func caculateEventCounts(eventName: String, startDate: String?, eventData: EventData) -> Int {
+        guard let eventCounts = Array(eventData.eventCounts.values) as? [EventIntermediateCount] else {
+            return -1
         }
-    }
 
-    static func isContains(value1: Any, value2: Any, type: String) -> Bool {
-        guard let array = value1 as? [Any] else {
-            return false
+        var targetEventCounts = eventCounts.filter { $0.name == eventName }
+        if let startDate = startDate {
+            targetEventCounts = targetEventCounts.filter { $0.dt >= startDate }
         }
-        for element in array {
-            if CompareValueHelper.isEqual(value1: element, value2: value2, type: type) {
-                return true
-            }
+        guard !targetEventCounts.isEmpty else {
+            return 0
         }
-        return false
-    }
-
-    static func isLessOrEqualThan(value1: Any, value2: Any, type: String) -> Bool {
-        switch type {
-        case "TEXT":
-            if let value1 = value1 as? String, let value2 = value2 as? String {
-                return value1 <= value2
-            }
-            return false
-        case "INT":
-            if let value1 = value1 as? Int, let value2 = value2 as? Int {
-                return value1 <= value2
-            }
-            return false
-        default:
-            return false
-        }
-    }
-
-    static func isLessThan(value1: Any, value2: Any, type: String) -> Bool {
-        switch type {
-        case "TEXT":
-            if let value1 = value1 as? String, let value2 = value2 as? String {
-                return value1 < value2
-            }
-            return false
-        case "INT":
-            if let value1 = value1 as? Int, let value2 = value2 as? Int {
-                return value1 < value2
-            }
-            return false
-        default:
-            return false
-        }
-    }
-
-    static func isGreaterOrEqualThan(value1: Any, value2: Any, type: String) -> Bool {
-        switch type {
-        case "TEXT":
-            if let value1 = value1 as? String, let value2 = value2 as? String {
-                return value1 >= value2
-            }
-            return false
-        case "INT":
-            if let value1 = value1 as? Int, let value2 = value2 as? Int {
-                return value1 >= value2
-            }
-            return false
-        default:
-            return false
-        }
-    }
-
-    static func isGreaterThan(value1: Any, value2: Any, type: String) -> Bool {
-        switch type {
-        case "TEXT":
-            if let value1 = value1 as? String, let value2 = value2 as? String {
-                return value1 > value2
-            }
-            return false
-        case "INT":
-            if let value1 = value1 as? Int, let value2 = value2 as? Int {
-                return value1 > value2
-            }
-            return false
-        default:
-            return false
-        }
-    }
-}
-
-func calculateHideUntil(reEligibleCondition: ReEligibleCondition) -> Int? {
-    let now = AppHelper.getCurrentTimestamp(unit: .second)
-    let oneDayTimeInterval = 24 * 60 * 60
-    switch reEligibleCondition.unit {
-    case "infinite":
-        return -1
-    case "h":
-        return now + reEligibleCondition.value * 3600
-    case "d":
-        return now + reEligibleCondition.value * oneDayTimeInterval
-    case "w":
-        return now + reEligibleCondition.value * 7 * oneDayTimeInterval
-    case "m":
-        return now + reEligibleCondition.value * 30 * oneDayTimeInterval
-    default:
-        return nil
+        return targetEventCounts.reduce(0) { $0 + $1.count }
     }
 }
 

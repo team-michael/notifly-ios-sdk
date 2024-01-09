@@ -28,7 +28,7 @@ class AppHelper {
         }
     }
 
-    static func getCurrentTimestamp(unit: TimestampUnit = .microsecond) -> Int {
+    static func getCurrentTimestamp(unit: TimeConstant.TimestampUnit = .microsecond) -> Int {
         return Int(Date().timeIntervalSince1970 * Double(unit.rawValue))
     }
 
@@ -114,9 +114,4 @@ private func retrieveUniqueIdFromKeychain() -> String? {
         }
     }
     return nil
-}
-
-enum TimestampUnit: Int {
-    case second = 1
-    case microsecond = 1_000_000
 }

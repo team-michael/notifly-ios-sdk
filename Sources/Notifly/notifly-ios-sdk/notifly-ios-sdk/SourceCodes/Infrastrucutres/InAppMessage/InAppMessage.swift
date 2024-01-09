@@ -134,7 +134,7 @@ struct InAppMessageData {
     let modalProps: ModalProperties
     let url: URL
     let deadline: DispatchTime
-    let notiflyReEligibleCondition: ReEligibleCondition?
+    let notiflyReEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
 }
 
 struct PostProcessConfigForSyncState {

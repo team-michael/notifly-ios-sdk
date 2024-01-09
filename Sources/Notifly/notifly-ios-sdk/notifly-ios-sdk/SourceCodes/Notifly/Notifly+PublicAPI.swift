@@ -52,8 +52,8 @@ import UIKit
                 main.notificationsManager.setDeviceTokenPub(token: token)
             }
             try? main.trackingManager.trackSessionStartInternalEvent()
+            Logger.info("📡 Notifly SDK is successfully initialized.")
         }
-        Logger.info("📡 Notifly SDK is successfully initialized.")
     }
 
     static func application(_ application: UIApplication,
