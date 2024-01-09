@@ -403,7 +403,7 @@ class InAppMessageManager {
     }
 }
 
-struct SegmentationHelper {
+enum SegmentationHelper {
     static func isEntityOfSegment(campaign: Campaign, eventParams: [String: Any]?, userData: UserData, eventData: EventData) -> Bool {
         // now only support for the condition-based-segment type
         guard let segmentationType = NotiflySegmentation.SegmentationType(rawValue: campaign.segmentType),
@@ -468,7 +468,7 @@ struct SegmentationHelper {
         guard let values = extractValuesOfUserBasedConditionToCompare(condition: condition, eventParams: eventParams, userData: userData) else {
             return false
         }
-        
+
         if let operatorType = NotiflyOperator(rawValue: condition.operator) {
             switch operatorType {
             case .isNull:
@@ -544,21 +544,23 @@ struct SegmentationHelper {
         guard userCounts >= 0 else {
             return false
         }
-
-        switch condition.operator {
-        case "=":
-            return userCounts == condition.value
-        case ">=":
-            return userCounts >= condition.value
-        case "<=":
-            return userCounts <= condition.value
-        case ">":
-            return userCounts > condition.value
-        case "<":
-            return userCounts < condition.value
-        default:
-            return false
+        if let operatorType = NotiflyOperator(rawValue: condition.operator) {
+            switch operatorType {
+            case .isEqual:
+                return userCounts == condition.value
+            case .isGreaterOrEqualThan:
+                return userCounts >= condition.value
+            case .isLessOrEqualThan:
+                return userCounts <= condition.value
+            case .isGreaterThan:
+                return userCounts > condition.value
+            case .isLessThan:
+                return userCounts < condition.value
+            default:
+                return false
+            }
         }
+        return false
     }
 
     static func caculateEventCounts(eventName: String, startDate: String?, eventData: EventData) -> Int {
