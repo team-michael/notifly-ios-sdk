@@ -25,21 +25,24 @@ class UserManager {
     }
 
     func setExternalUserId(_ newExternalUserID: String?) {
-        
         if newExternalUserID == nil {
             unregisteredUserId()
             return
         }
-        
+
         guard let notifly = try? Notifly.main else {
             Logger.error("Fail to Set User Id: Notifly is not initialized yet.")
             return
         }
 
-        guard let newExternalUserID = newExternalUserID as? String,
-              !newExternalUserID.isEmpty,
-              externalUserID != newExternalUserID
+        guard let newExternalUserID = newExternalUserID,
+              !newExternalUserID.isEmpty
         else {
+            Logger.error("Fail to Set User Id.")
+            return
+        }
+
+        guard externalUserID != newExternalUserID else {
             Logger.info("External User Id is not changed because the new user id is same as the current user id.")
             return
         }
@@ -49,9 +52,15 @@ class UserManager {
             TrackingConstant.Internal.previousExternalUserID: externalUserID,
             TrackingConstant.Internal.previousNotiflyUserID: try? getNotiflyUserID(),
         ] as? [String: Any] {
-            let shouldMergeState = shouldMergeStateSynchronized()
+            let previousExternalUserID = externalUserID
+            let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(previousExternalUserID: externalUserID, newExternalUserID: nil)
             changeExternalUserId(newValue: newExternalUserID)
-            notifly.inAppMessageManager.syncState(merge: shouldMergeState, clear: false)
+
+            if shouldRequestSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: newExternalUserID) {
+                let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(previousExternalUserID: externalUserID, newExternalUserID: newExternalUserID)
+                notifly.inAppMessageManager.syncState(postProcessConfig: postProcessConfigForSyncState)
+            }
+
             setUserProperties(data)
         } else {
             Logger.error("Fail to Set User Id.")
@@ -63,8 +72,12 @@ class UserManager {
             Logger.error("Fail to Remove User Id: Notifly is not initialized yet.")
             return
         }
+        let previousExternalUserID = externalUserID
+        let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(previousExternalUserID: externalUserID, newExternalUserID: nil)
         changeExternalUserId(newValue: nil)
-        notifly.inAppMessageManager.syncState(merge: false, clear: true)
+        if shouldRequestSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: nil) {
+            notifly.inAppMessageManager.syncState(postProcessConfig: postProcessConfigForSyncState)
+        }
         notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.removeUserPropertiesEventName, eventParams: nil)
     }
 
@@ -104,7 +117,19 @@ class UserManager {
         return uuidV5.notiflyStyleString
     }
 
-    private func shouldMergeStateSynchronized() -> Bool {
-        return externalUserID == nil
+    private func constructPostProcessConfigForSyncState(previousExternalUserID: String?, newExternalUserID: String?) -> PostProcessConfigForSyncState {
+        return PostProcessConfigForSyncState(merge: shouldMergeStateAfterSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: newExternalUserID), clear: shouldClearStateAfterSyncState(newExternalUserID: newExternalUserID))
+    }
+
+    private func shouldMergeStateAfterSyncState(previousExternalUserID: String?, newExternalUserID _: String?) -> Bool {
+        return externalUserID != nil && previousExternalUserID == nil
+    }
+
+    private func shouldClearStateAfterSyncState(newExternalUserID: String?) -> Bool {
+        return newExternalUserID == nil
+    }
+
+    private func shouldRequestSyncState(previousExternalUserID: String?, newExternalUserID: String?) -> Bool {
+        return newExternalUserID != previousExternalUserID
     }
 }

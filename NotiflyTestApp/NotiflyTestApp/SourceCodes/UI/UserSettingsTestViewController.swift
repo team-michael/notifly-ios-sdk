@@ -33,6 +33,7 @@ class UserSettingsTestViewController: UIViewController {
         let userID = userIDTextField.checkAndRetrieveValueText(changeBorderColorOnError: false)
         Notifly.setUserId(userId: userID)
         Notifly.trackEvent(eventName: "test_user_id")
+        Notifly.trackEvent(eventName: "test_user_id2")
         userIDTrackingResponseTextView.text = "User ID successfully set to: \(userID ?? "<null>")"
     }
 

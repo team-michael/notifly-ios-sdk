@@ -107,9 +107,9 @@ struct UserData {
     }
 
     mutating func clearUserData() {
-        self.userProperties = [:]
-        self.campaignHiddenUntil = [:]
-        self.updatedAt = TimeInterval(AppHelper.getCurrentTimestamp(unit: .second))
+        userProperties = [:]
+        campaignHiddenUntil = [:]
+        updatedAt = TimeInterval(AppHelper.getCurrentTimestamp(unit: .second))
     }
 }
 
@@ -135,4 +135,9 @@ struct InAppMessageData {
     let url: URL
     let deadline: DispatchTime
     let notiflyReEligibleCondition: ReEligibleCondition?
+}
+
+struct PostProcessConfigForSyncState {
+    let merge: Bool
+    let clear: Bool
 }

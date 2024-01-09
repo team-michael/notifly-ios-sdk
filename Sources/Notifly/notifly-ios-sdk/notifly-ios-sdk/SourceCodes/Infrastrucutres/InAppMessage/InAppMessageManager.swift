@@ -90,7 +90,7 @@ class InAppMessageManager {
         return true
     }
 
-    func syncState(merge: Bool, clear: Bool = false) {
+    func syncState(postProcessConfig: PostProcessConfigForSyncState) {
         guard let notifly = (try? Notifly.main) else {
             return
         }
@@ -121,23 +121,23 @@ class InAppMessageManager {
                 {
                     if let userData = decodedData["userData"] as? [String: Any] {
                         let newUserData = UserData(data: userData)
-                        if merge, let previousUserData = self?.userData as? UserData {
+                        if postProcessConfig.merge, let previousUserData = self?.userData as? UserData {
                             self?.userData = UserData.merge(p1: newUserData, p2: previousUserData)
                         } else {
                             self?.userData = newUserData
                         }
 
-                        if clear {
+                        if postProcessConfig.clear {
                             self?.userData.clearUserData()
                         }
                     }
 
-                    if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
-                        self?.constructCampaignData(campaignData: campaignData)
+                    if let eicData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
+                        self?.constructEventIntermediateCountsData(eicData: eicData, postProcessConfig: postProcessConfig)
                     }
 
-                    if let eicData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
-                        self?.constructEventIntermediateCountsData(eicData: eicData, merge: merge)
+                    if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
+                        self?.constructCampaignData(campaignData: campaignData)
                     }
                 }
                 Logger.info("Sync State Completed.")
@@ -158,7 +158,7 @@ class InAppMessageManager {
             return
         }
 
-        if var campaignsToTrigger = inspectCampaignToTriggerAndGetCampaignData(eventName: eventName, eventParams: eventParams)
+        if var campaignsToTrigger = getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams)
         {
             campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
             for campaignToTrigger in campaignsToTrigger {
@@ -196,7 +196,7 @@ class InAppMessageManager {
     }
 
     /* method for showing in-app message */
-    private func inspectCampaignToTriggerAndGetCampaignData(eventName: String, eventParams: [String: Any]?) -> [Campaign]? {
+    private func getCampaignsShouldBeTriggered(eventName: String, eventParams: [String: Any]?) -> [Campaign]? {
         let campaignsToTrigger = campaignData.inAppMessageCampaigns
             .filter { $0.triggeringEvent == eventName }
             .filter { isCampaignActive(campaign: $0) }
@@ -295,11 +295,53 @@ class InAppMessageManager {
         }
     }
 
-    func updateHideCampaignUntilData(hideUntilData: [String: Int]) {
-        userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }
+    private func constructUserData(userData: [String: Any], postProcessConfig: PostProcessConfigForSyncState) {
+        let newUserData = UserData(data: userData)
+        if postProcessConfig.merge, let previousUserData = self.userData as? UserData {
+            self.userData = UserData.merge(p1: newUserData, p2: previousUserData)
+        } else {
+            self.userData = newUserData
+        }
+
+        if postProcessConfig.clear {
+            self.userData.clearUserData()
+        }
     }
 
-    /* method for showing in-app message */
+    private func constructEventIntermediateCountsData(eicData: [[String: Any]], postProcessConfig: PostProcessConfigForSyncState) {
+        guard eicData.count > 0 else {
+            if !postProcessConfig.merge {
+                eventData.eventCounts = [:]
+            }
+            return
+        }
+
+        if postProcessConfig.clear {
+            eventData.eventCounts = [:]
+        }
+
+        eventData.eventCounts = eicData.compactMap { eic -> (String, EventIntermediateCount)? in
+            guard let name = eic["name"] as? String,
+                  let dt = eic["dt"] as? String,
+                  let count = eic["count"] as? Int,
+                  let eventParams = eic["event_params"] as? [String: Any]
+            else {
+                return nil
+            }
+            var eicID = name + InAppMessageConstant.idSeparator + dt + InAppMessageConstant.idSeparator
+            if eventParams.count > 0,
+               let key = eventParams.keys.first,
+               let value = eventParams.values.first
+            {
+                eicID += key + InAppMessageConstant.idSeparator + String(describing: value)
+            } else {
+                eicID += InAppMessageConstant.idSeparator
+            }
+
+            return (eicID, EventIntermediateCount(name: name, dt: dt, count: count, eventParams: eventParams))
+        }.compactMap { $0 }.reduce(into: postProcessConfig.merge ? eventData.eventCounts : [:]) { $0[$1.0] = $1.1 }
+    }
+
     private func constructCampaignData(campaignData: [[String: Any]]) {
         self.campaignData.inAppMessageCampaigns = campaignData.compactMap { campaignDict -> Campaign? in
             guard let id = campaignDict["id"] as? String,
@@ -387,35 +429,6 @@ class InAppMessageManager {
         }
         let groupOperator = segmentInfoDict["group_operator"] as? String ?? InAppMessageConstant.segmentInfoDefaultGroupOperator
         return SegmentInfo(groups: groups.compactMap { $0 }, groupOperator: groupOperator)
-    }
-
-    private func constructEventIntermediateCountsData(eicData: [[String: Any]], merge: Bool) {
-        guard eicData.count > 0 else {
-            if !merge {
-                eventData.eventCounts = [:]
-            }
-            return
-        }
-        eventData.eventCounts = eicData.compactMap { eic -> (String, EventIntermediateCount)? in
-            guard let name = eic["name"] as? String,
-                  let dt = eic["dt"] as? String,
-                  let count = eic["count"] as? Int,
-                  let eventParams = eic["event_params"] as? [String: Any]
-            else {
-                return nil
-            }
-            var eicID = name + InAppMessageConstant.idSeparator + dt + InAppMessageConstant.idSeparator
-            if eventParams.count > 0,
-               let key = eventParams.keys.first,
-               let value = eventParams.values.first
-            {
-                eicID += key + InAppMessageConstant.idSeparator + String(describing: value)
-            } else {
-                eicID += InAppMessageConstant.idSeparator
-            }
-
-            return (eicID, EventIntermediateCount(name: name, dt: dt, count: count, eventParams: eventParams))
-        }.compactMap { $0 }.reduce(into: merge ? eventData.eventCounts : [:]) { $0[$1.0] = $1.1 }
     }
 
     private func getCurrentDate() -> String {
@@ -627,6 +640,10 @@ class InAppMessageManager {
         case (_, _):
             return nil
         }
+    }
+
+    func updateHideCampaignUntilData(hideUntilData: [String: Int]) {
+        userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }
     }
 }
 
