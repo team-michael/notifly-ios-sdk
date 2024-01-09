@@ -43,7 +43,7 @@ struct ModalProperties {
     let borderTopRightRadius: CGFloat?
     let backgroundOpacity: CGFloat?
     let dismissCTATapped: Bool?
-    
+
     init?(properties: [String: Any]) {
         guard let name = properties["template_name"] as? String else {
             return nil
@@ -72,10 +72,11 @@ struct ModalProperties {
 struct ReEligibleCondition {
     let value: Int
     let unit: String
-    
+
     init?(data: [String: Any]) {
         guard let unit = data["unit"] as? String,
-              let value = data["value"] as? Int else {
+              let value = data["value"] as? Int
+        else {
             return nil
         }
         self.value = value
@@ -97,14 +98,14 @@ struct UserBasedCondition {
     let unit: String
     let attribute: String
     let `operator`: String
-    
+
     let useEventParamsAsCondition: Bool
     let comparisonEvent: String?
     let comparisonParameter: String?
-    
+
     let valueType: String
     let value: Any
-    
+
     init(condition: [String: Any]) throws {
         let useEventParamsAsConditionInDict = condition["useEventParamsAsConditionValue"] as? Bool
         guard useEventParamsAsConditionInDict != nil else {
@@ -120,12 +121,12 @@ struct UserBasedCondition {
         }
         self.unit = unit
         self.attribute = attribute
-        self.`operator` = `operator`
-        self.useEventParamsAsCondition = Bool(useEventParamsAsConditionInDict ?? false)
+        self.operator = `operator`
+        useEventParamsAsCondition = Bool(useEventParamsAsConditionInDict ?? false)
         self.valueType = valueType
         self.value = value
-        self.comparisonEvent = condition["comparison_event"] as? String
-        self.comparisonParameter = condition["comparison_parameter"] as? String
+        comparisonEvent = condition["comparison_event"] as? String
+        comparisonParameter = condition["comparison_parameter"] as? String
     }
 }
 
@@ -135,7 +136,7 @@ struct EventBasedCondition {
     let secondaryValue: Int?
     let `operator`: String
     let value: Int
-    
+
     init(condition: [String: Any]) throws {
         guard let event = condition["event"] as? String,
               let eventConditionTypeStr = condition["event_condition_type"] as? String,
@@ -147,9 +148,9 @@ struct EventBasedCondition {
         }
         self.event = event
         self.eventConditionType = eventConditionType
-        self.secondaryValue = condition["secondary_value"] as? Int
+        secondaryValue = condition["secondary_value"] as? Int
         self.value = value
-        self.`operator` = `operator`
+        self.operator = `operator`
     }
 }
 
@@ -157,6 +158,7 @@ enum eventBasedConditionType: String {
     case allTime = "count X"
     case lastNDays = "count X in Y days"
 }
+
 struct Group {
     let conditions: [Condition]?
     let conditionOperator: String?
@@ -172,4 +174,16 @@ enum CampaignStatus: Int {
     case active = 1
     case inactive = 2
     case completed = 3
+}
+
+enum SegmentationOperator: String {
+    case isNull = "IS_NULL"
+    case isNotNull = "IS_NOT_NULL"
+    case equal = "="
+    case notEqual = "<>"
+    case contains = "@>"
+    case greaterThan = ">"
+    case greaterOrEqualThan = ">="
+    case lessThan = "<"
+    case lessOrEqualThan = "<="
 }

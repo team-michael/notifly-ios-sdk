@@ -1,7 +1,6 @@
 import Foundation
 import Security
 import UIKit
-
 class AppHelper {
     static func getNotiflyDeviceID() -> String? {
         guard let deviceID = AppHelper.getDeviceID() else {
@@ -29,7 +28,7 @@ class AppHelper {
         }
     }
 
-    static func getCurrentTimestamp(unit: TimestampUnit = .millisecond) -> Int {
+    static func getCurrentTimestamp(unit: TimestampUnit = .microsecond) -> Int {
         return Int(Date().timeIntervalSince1970 * Double(unit.rawValue))
     }
 
@@ -42,7 +41,7 @@ class AppHelper {
     }
 
     static func getDevicePlatform() -> String {
-        return "ios"
+        return NotiflyConstant.iosPlatform
     }
 
     static func getiOSVersion() -> String {
@@ -119,5 +118,5 @@ private func retrieveUniqueIdFromKeychain() -> String? {
 
 enum TimestampUnit: Int {
     case second = 1
-    case millisecond = 1000
+    case microsecond = 1_000_000
 }

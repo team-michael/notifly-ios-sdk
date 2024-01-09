@@ -10,25 +10,37 @@ import Foundation
 struct UserData {
     var userProperties: [String: Any]
     var campaignHiddenUntil: [String: Int]
+    var randomBucketNumber: Int?
     var platform: String?
     var osVersion: String?
     var appVersion: String?
     var sdkVersion: String?
     var sdkType: String?
+    var createdAt: TimeInterval?
     var updatedAt: TimeInterval?
 
     init(data: [String: Any]) {
-        self.userProperties = (data["user_properties"] as? [String: Any]) ?? [:]
-        self.campaignHiddenUntil = (data["campaign_hidden_until"] as? [String: Int]) ?? [:]
-        self.platform = data["platform"] as? String
-        self.osVersion = data["os_version"] as? String
-        self.appVersion = data["app_version"] as? String
-        self.sdkVersion = data["sdk_version"] as? String
-        self.sdkType = data["sdk_type"] as? String
+        userProperties = (data["user_properties"] as? [String: Any]) ?? [:]
+        campaignHiddenUntil = (data["campaign_hidden_until"] as? [String: Int]) ?? [:]
+        platform = data["platform"] as? String
+        osVersion = data["os_version"] as? String
+        appVersion = data["app_version"] as? String
+        sdkVersion = data["sdk_version"] as? String
+        sdkType = data["sdk_type"] as? String
+        randomBucketNumber = data["random_bucket_number"] as? Int
+
+        if let createdAtStr = data["created_at"] as? String {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+            createdAt = dateFormatter.date(from: createdAtStr)?.timeIntervalSince1970
+        }
+
         if let updatedAtStr = data["updated_at"] as? String {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
-            self.updatedAt = dateFormatter.date(from: updatedAtStr)?.timeIntervalSince1970
+            updatedAt = dateFormatter.date(from: updatedAtStr)?.timeIntervalSince1970
+        } else {
+            updatedAt = TimeInterval(AppHelper.getCurrentTimestamp(unit: .second))
         }
     }
 
@@ -46,21 +58,25 @@ struct UserData {
             return sdkVersion
         case "sdk_type":
             return sdkType
+        case "created_at":
+            return createdAt
         case "updated_at":
             return updatedAt
+        case "random_bucket_number":
+            return randomBucketNumber
         default:
             return nil
         }
     }
-    
+
     static func merge(p1: UserData, p2: UserData) -> UserData {
-        var mergedUserProperties:[String:Any] = [:]
-        var mergedCampaignHiddenUntil:[String:Int] = [:]
+        var mergedUserProperties: [String: Any] = [:]
+        var mergedCampaignHiddenUntil: [String: Int] = [:]
         mergedUserProperties.merge(p2.userProperties) { _, new in new }
         mergedUserProperties.merge(p1.userProperties) { _, new in new }
         mergedCampaignHiddenUntil.merge(p2.campaignHiddenUntil) { _, new in new }
         mergedCampaignHiddenUntil.merge(p1.campaignHiddenUntil) { _, new in new }
-        var data: [String:Any] = [
+        var data: [String: Any] = [
             "user_properties": mergedUserProperties,
             "campaign_hidden_until": mergedCampaignHiddenUntil,
         ]
@@ -79,11 +95,23 @@ struct UserData {
         if let sdkType = p1.sdkType ?? p2.sdkType {
             data["sdk_type"] = sdkType
         }
+        if let randomBucketNumber = p1.randomBucketNumber ?? p2.randomBucketNumber {
+            data["random_bucket_number"] = randomBucketNumber
+        }
+        if let createdAt = p1.createdAt ?? p2.createdAt {
+            data["created_at"] = createdAt
+        }
 
+        // updatedAt is always updated with current timestamp
         return UserData(data: data)
     }
-}
 
+    mutating func clearUserData() {
+        self.userProperties = [:]
+        self.campaignHiddenUntil = [:]
+        self.updatedAt = TimeInterval(AppHelper.getCurrentTimestamp(unit: .second))
+    }
+}
 
 struct CampaignData {
     var inAppMessageCampaigns: [Campaign]

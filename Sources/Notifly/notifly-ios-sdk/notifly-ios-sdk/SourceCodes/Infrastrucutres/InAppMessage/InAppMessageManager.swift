@@ -90,7 +90,7 @@ class InAppMessageManager {
         return true
     }
 
-    func syncState(merge: Bool) {
+    func syncState(merge: Bool, clear: Bool = false) {
         guard let notifly = (try? Notifly.main) else {
             return
         }
@@ -125,6 +125,10 @@ class InAppMessageManager {
                             self?.userData = UserData.merge(p1: newUserData, p2: previousUserData)
                         } else {
                             self?.userData = newUserData
+                        }
+
+                        if clear {
+                            self?.userData.clearUserData()
                         }
                     }
 
@@ -547,32 +551,35 @@ class InAppMessageManager {
         guard let values = extractValuesOfUserBasedConditionToCompare(condition: condition, eventParams: eventParams) else {
             return false
         }
-        if condition.operator == "IS_NULL" {
-            return values.0 == nil
-        } else if condition.operator == "IS_NOT_NULL" {
-            return values.0 != nil
-        } else {
-            let valueType = condition.valueType
-            if let userValue = convertAnyToSpecifiedType(value: values.0, type: condition.operator == "@>" ? "ARRAY" : valueType),
-               let comparisonTargetValue = convertAnyToSpecifiedType(value: values.1, type: valueType)
-            {
-                switch condition.operator {
-                case "=":
-                    return CompareValueHelper.isEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
-                case "<>":
-                    return CompareValueHelper.isNotEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
-                case "@>":
-                    return CompareValueHelper.isContains(value1: userValue, value2: comparisonTargetValue, type: valueType)
-                case ">":
-                    return CompareValueHelper.isGreaterThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
-                case ">=":
-                    return CompareValueHelper.isGreaterOrEqualThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
-                case "<":
-                    return CompareValueHelper.isLessThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
-                case "<=":
-                    return CompareValueHelper.isLessOrEqualThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
-                default:
-                    return false
+        if let operatorType = SegmentationOperator(rawValue: condition.operator) {
+            switch operatorType {
+            case .isNull:
+                return values.0 == nil
+            case .isNotNull:
+                return values.0 != nil
+            default:
+                let valueType = condition.valueType
+                if let userValue = convertAnyToSpecifiedType(value: values.0, type: operatorType == .contains ? "ARRAY" : valueType),
+                   let comparisonTargetValue = convertAnyToSpecifiedType(value: values.1, type: valueType)
+                {
+                    switch operatorType {
+                    case .equal:
+                        return CompareValueHelper.isEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
+                    case .notEqual:
+                        return CompareValueHelper.isNotEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
+                    case .contains:
+                        return CompareValueHelper.isContains(value1: userValue, value2: comparisonTargetValue, type: valueType)
+                    case .greaterThan:
+                        return CompareValueHelper.isGreaterThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
+                    case .greaterOrEqualThan:
+                        return CompareValueHelper.isGreaterOrEqualThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
+                    case .lessThan:
+                        return CompareValueHelper.isLessThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
+                    case .lessOrEqualThan:
+                        return CompareValueHelper.isLessOrEqualThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
+                    default:
+                        return false
+                    }
                 }
             }
         }

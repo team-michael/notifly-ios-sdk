@@ -100,7 +100,7 @@ class TrackingManager {
         } else {
             trackingEventName = eventName
         }
-
+        let currentTimestamp = AppHelper.getCurrentTimestamp()
         guard let syncStateFinishedPub = try? Notifly.main.inAppMessageManager.syncStateFinishedPub else {
             Logger.error("Fail to track Event. \(trackingEventName)")
             return
@@ -111,7 +111,8 @@ class TrackingManager {
             return self.createTrackingRecord(eventName: eventName,
                                              eventParams: eventParams,
                                              isInternal: isInternal,
-                                             segmentationEventParamKeys: segmentationEventParamKeys)
+                                             segmentationEventParamKeys: segmentationEventParamKeys,
+                                             currentTimestamp: currentTimestamp)
         }
         .sink(receiveCompletion: { completion in
                   if case let .failure(error) = completion {
@@ -131,7 +132,8 @@ class TrackingManager {
     func createTrackingRecord(eventName: String,
                               eventParams: [String: Any]?,
                               isInternal: Bool,
-                              segmentationEventParamKeys: [String]?) -> AnyPublisher<TrackingRecord, Error>
+                              segmentationEventParamKeys: [String]?,
+                              currentTimestamp: Int) -> AnyPublisher<TrackingRecord, Error>
     {
         guard let notifly = try? Notifly.main else {
             return Fail(outputType: TrackingRecord.self, failure: NotiflyError.notInitialized)
@@ -152,7 +154,7 @@ class TrackingManager {
                                        name: eventName,
                                        notifly_user_id: userID,
                                        external_user_id: notifly.userManager.externalUserID,
-                                       time: AppHelper.getCurrentTimestamp(),
+                                       time: currentTimestamp,
                                        notifly_device_id: notiflyDeviceID,
                                        external_device_id: deviceID,
                                        device_token: pushToken,
