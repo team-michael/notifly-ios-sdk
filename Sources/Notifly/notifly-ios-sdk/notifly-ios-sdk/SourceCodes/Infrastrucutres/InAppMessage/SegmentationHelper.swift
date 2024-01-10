@@ -88,7 +88,6 @@ enum SegmentationHelper {
             return false
         }
 
-        
         switch condition.operator {
         case .isNull:
             return values.0 == nil
@@ -119,7 +118,7 @@ enum SegmentationHelper {
                 }
             }
         }
-        
+
         return false
     }
 
@@ -163,7 +162,7 @@ enum SegmentationHelper {
         guard userCounts >= 0 else {
             return false
         }
-        
+
         switch condition.operator {
         case .equal:
             return userCounts == condition.value
@@ -178,7 +177,7 @@ enum SegmentationHelper {
         default:
             return false
         }
-        
+
         return false
     }
 
