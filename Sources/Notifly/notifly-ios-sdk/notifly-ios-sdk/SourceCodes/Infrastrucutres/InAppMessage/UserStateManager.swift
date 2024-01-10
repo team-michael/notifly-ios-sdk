@@ -61,7 +61,6 @@ class UserStateManager {
     }
 
     private func unlock(lockId: Int, _ error: NotiflyError? = nil) {
-        Logger.error("UN_LOCK \(lockId)")
         guard let promise = lockPromises[safe: lockId] else {
             return
         }
@@ -101,47 +100,54 @@ class UserStateManager {
             Logger.error("Fail to sync user state because Notifly is not initalized yet.")
             return
         }
-        
+
         let lockId = lock()
-        NotiflyAPI().requestSyncState(projectId: projectId, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID)
-            .sink(receiveCompletion: { completion in
-                if case let .failure(error) = completion {
-                    Logger.error("Fail to sync user state: " + error.localizedDescription)
-                    self.unlock(lockId: lockId, NotiflyError.unexpectedNil(error.localizedDescription))
-                }
+        
+        var parentPub: AnyPublisher<Void, Error>
+        if let lastPub = try? self.syncStateFinishedPub {
+            parentPub = lastPub
+        } else {
+            parentPub = Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
+        }
+        
+        parentPub.tryMap { _ in
+            NotiflyAPI().requestSyncState(projectId: projectId, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID)
+                .sink(receiveCompletion: { completion in
+                    if case let .failure(error) = completion {
+                        Logger.error("Fail to sync user state: " + error.localizedDescription)
+                        self.unlock(lockId: lockId, NotiflyError.unexpectedNil(error.localizedDescription))
+                    }
 
-            }, receiveValue: { [weak self] jsonString in
-                if let jsonData = jsonString.data(using: .utf8),
-                   let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
-                {
-                    if let userData = decodedData["userData"] as? [String: Any] {
-                        let newUserData = UserData(data: userData)
-                        if postProcessConfig.merge, let previousUserData = self?.userData as? UserData {
-                            self?.userData = UserData.merge(p1: newUserData, p2: previousUserData)
-                        } else {
-                            print(external)
-                            print(decodedData["userData"])
-                            self?.userData = newUserData
+                }, receiveValue: { [weak self] jsonString in
+                    if let jsonData = jsonString.data(using: .utf8),
+                       let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
+                    {
+                        if let userData = decodedData["userData"] as? [String: Any] {
+                            let newUserData = UserData(data: userData)
+                            if postProcessConfig.merge, let previousUserData = self?.userData as? UserData {
+                                self?.userData = UserData.merge(p1: newUserData, p2: previousUserData)
+                            } else {
+                                self?.userData = newUserData
+                            }
+
+                            if postProcessConfig.clear {
+                                self?.userData.clearUserData()
+                            }
                         }
 
-                        if postProcessConfig.clear {
-                            self?.userData.clearUserData()
+                        if let eicData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
+                            self?.constructEventIntermediateCountsData(eicData: eicData, postProcessConfig: postProcessConfig)
                         }
-                        print("USER END", self?.userData)
-                    }
 
-                    if let eicData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
-                        self?.constructEventIntermediateCountsData(eicData: eicData, postProcessConfig: postProcessConfig)
+                        if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
+                            self?.constructCampaignData(campaignData: campaignData)
+                        }
                     }
-
-                    if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
-                        self?.constructCampaignData(campaignData: campaignData)
-                    }
-                }
-                Logger.info("Sync State Completed.")
-                self?.unlock(lockId: lockId)
-            })
-            .store(in: &requestSyncStateCancellables)
+                    Logger.info("Sync State Completed.")
+                    self?.unlock(lockId: lockId)
+                })
+                .store(in: &self.requestSyncStateCancellables)
+        }
     }
 
     /* post-process of sync state */

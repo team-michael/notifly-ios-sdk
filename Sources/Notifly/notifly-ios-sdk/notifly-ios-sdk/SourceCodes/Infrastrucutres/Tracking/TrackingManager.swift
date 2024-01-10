@@ -154,6 +154,8 @@ class TrackingManager {
             return Fail(outputType: TrackingRecord.self, failure: NotiflyError.unexpectedNil("Device data is invalid."))
                 .eraseToAnyPublisher()
         }
+        
+        print(externalUserID, currentTimestamp, eventName)
 
         return deviceTokenPub.tryMap { pushToken in
             if let data = TrackingData(id: UUID().uuidString,
