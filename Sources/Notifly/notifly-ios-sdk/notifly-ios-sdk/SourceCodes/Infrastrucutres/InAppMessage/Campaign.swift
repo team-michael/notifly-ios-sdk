@@ -155,9 +155,9 @@ enum NotiflySegmentation {
         enum Conditions {
             enum UserBased {
                 struct Condition {
-                    let unit: String
+                    let unit: ConditionUnit
                     let attribute: String
-                    let `operator`: String
+                    let `operator`: NotiflyOperator
 
                     let useEventParamsAsCondition: Bool
                     let comparisonEvent: String?
@@ -171,9 +171,11 @@ enum NotiflySegmentation {
                         guard useEventParamsAsConditionInDict != nil else {
                             throw NotiflyError.unexpectedNil("segment_info is not valid.")
                         }
-                        guard let unit = condition["unit"] as? String,
+                        guard let unitStr = condition["unit"] as? String,
+                              let unit = ConditionUnit(rawValue: unitStr),
                               let attribute = condition["attribute"] as? String,
-                              let `operator` = condition["operator"] as? String,
+                              let operatorStr = condition["operator"] as? String,
+                              let `operator` = NotiflyOperator(rawValue: operatorStr),
                               let valueType = condition["valueType"] as? String,
                               let value = condition["value"]
                         else {
@@ -193,17 +195,19 @@ enum NotiflySegmentation {
 
             enum EventBased {
                 struct Condition {
+                    let unit: ConditionUnit = .event
                     let event: String
                     let eventConditionType: EventBasedConditionType
                     let secondaryValue: Int?
-                    let `operator`: String
+                    let `operator`: NotiflyOperator
                     let value: Int
 
                     init(condition: [String: Any]) throws {
                         guard let event = condition["event"] as? String,
                               let eventConditionTypeStr = condition["event_condition_type"] as? String,
                               let eventConditionType = EventBasedConditionType(rawValue: eventConditionTypeStr),
-                              let `operator` = condition["operator"] as? String,
+                              let operatorStr = condition["operator"] as? String,
+                              let `operator` = NotiflyOperator(rawValue: operatorStr),
                               let value = condition["value"] as? Int
                         else {
                             throw NotiflyError.unexpectedNil("segment_info is not valid.")

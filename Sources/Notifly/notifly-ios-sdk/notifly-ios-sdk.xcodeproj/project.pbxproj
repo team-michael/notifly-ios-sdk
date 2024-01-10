@@ -36,6 +36,7 @@
 		F2E669A22ADE60BC00DF9CA0 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669722ADE5F7E00DF9CA0 /* Credentials.swift */; };
 		F2E669A32ADE60BE00DF9CA0 /* TrackingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669742ADE5F7E00DF9CA0 /* TrackingEvent.swift */; };
 		F2E669A52ADE633400DF9CA0 /* Notifly+Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669A42ADE633400DF9CA0 /* Notifly+Helper.swift */; };
+		F2E92DA12B4DC6FD00EAB6AB /* SegmentationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E92DA02B4DC6FD00EAB6AB /* SegmentationHelper.swift */; };
 		F2F732E22A26E3A5008BA9B1 /* notifly_sdk.h in Headers */ = {isa = PBXBuildFile; fileRef = F2F732E12A26E3A5008BA9B1 /* notifly_sdk.h */; };
 /* End PBXBuildFile section */
 
@@ -79,6 +80,7 @@
 		F2E6698C2ADE602900DF9CA0 /* TrackingManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingManager.swift; sourceTree = "<group>"; };
 		F2E6698E2ADE602900DF9CA0 /* UserManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
 		F2E669A42ADE633400DF9CA0 /* Notifly+Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notifly+Helper.swift"; sourceTree = "<group>"; };
+		F2E92DA02B4DC6FD00EAB6AB /* SegmentationHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentationHelper.swift; sourceTree = "<group>"; };
 		F2F732E12A26E3A5008BA9B1 /* notifly_sdk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = notifly_sdk.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -221,6 +223,7 @@
 				F2E669852ADE602900DF9CA0 /* InAppMessage.swift */,
 				F2E669862ADE602900DF9CA0 /* Campaign.swift */,
 				F2E669872ADE602900DF9CA0 /* WebViewModalViewController.swift */,
+				F2E92DA02B4DC6FD00EAB6AB /* SegmentationHelper.swift */,
 			);
 			path = InAppMessage;
 			sourceTree = "<group>";
@@ -387,6 +390,7 @@
 				F2E669922ADE602900DF9CA0 /* InAppMessageManager.swift in Sources */,
 				F2E6699A2ADE60A600DF9CA0 /* AppHelper.swift in Sources */,
 				F2E669952ADE602900DF9CA0 /* WebViewModalViewController.swift in Sources */,
+				F2E92DA12B4DC6FD00EAB6AB /* SegmentationHelper.swift in Sources */,
 				F2E6697B2ADE600000DF9CA0 /* NotiflyExtensionAPI.swift in Sources */,
 				F2E669902ADE602900DF9CA0 /* Auth.swift in Sources */,
 				F2E669912ADE602900DF9CA0 /* InAppMessage+Constant.swift in Sources */,
