@@ -37,6 +37,7 @@
 		F2E669A32ADE60BE00DF9CA0 /* TrackingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669742ADE5F7E00DF9CA0 /* TrackingEvent.swift */; };
 		F2E669A52ADE633400DF9CA0 /* Notifly+Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669A42ADE633400DF9CA0 /* Notifly+Helper.swift */; };
 		F2E92DA12B4DC6FD00EAB6AB /* SegmentationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E92DA02B4DC6FD00EAB6AB /* SegmentationHelper.swift */; };
+		F2E92DA52B4EE4F900EAB6AB /* UserStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E92DA42B4EE4F900EAB6AB /* UserStateManager.swift */; };
 		F2F732E22A26E3A5008BA9B1 /* notifly_sdk.h in Headers */ = {isa = PBXBuildFile; fileRef = F2F732E12A26E3A5008BA9B1 /* notifly_sdk.h */; };
 /* End PBXBuildFile section */
 
@@ -81,6 +82,7 @@
 		F2E6698E2ADE602900DF9CA0 /* UserManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
 		F2E669A42ADE633400DF9CA0 /* Notifly+Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notifly+Helper.swift"; sourceTree = "<group>"; };
 		F2E92DA02B4DC6FD00EAB6AB /* SegmentationHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentationHelper.swift; sourceTree = "<group>"; };
+		F2E92DA42B4EE4F900EAB6AB /* UserStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserStateManager.swift; sourceTree = "<group>"; };
 		F2F732E12A26E3A5008BA9B1 /* notifly_sdk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = notifly_sdk.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -224,6 +226,7 @@
 				F2E669862ADE602900DF9CA0 /* Campaign.swift */,
 				F2E669872ADE602900DF9CA0 /* WebViewModalViewController.swift */,
 				F2E92DA02B4DC6FD00EAB6AB /* SegmentationHelper.swift */,
+				F2E92DA42B4EE4F900EAB6AB /* UserStateManager.swift */,
 			);
 			path = InAppMessage;
 			sourceTree = "<group>";
@@ -368,6 +371,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F2E92DA52B4EE4F900EAB6AB /* UserStateManager.swift in Sources */,
 				673F0EBB29EC610400814217 /* Notifly+PublicAPI.swift in Sources */,
 				F2E6699E2ADE60B300DF9CA0 /* NotiflyCustomUserDefaults.swift in Sources */,
 				F2E6699D2ADE60AF00DF9CA0 /* NotiflyError.swift in Sources */,

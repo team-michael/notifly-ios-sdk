@@ -53,15 +53,16 @@ class UserManager {
             TrackingConstant.Internal.previousNotiflyUserID: try? getNotiflyUserID(),
         ] as? [String: Any] {
             let previousExternalUserID = externalUserID
-            let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(previousExternalUserID: externalUserID, newExternalUserID: nil)
+
             changeExternalUserId(newValue: newExternalUserID)
 
+            let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(previousExternalUserID: externalUserID, newExternalUserID: newExternalUserID)
             if shouldRequestSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: newExternalUserID) {
-                let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(previousExternalUserID: externalUserID, newExternalUserID: newExternalUserID)
-                notifly.inAppMessageManager.syncState(postProcessConfig: postProcessConfigForSyncState)
+                notifly.inAppMessageManager.userStateManager.syncState(postProcessConfig: postProcessConfigForSyncState)
             }
 
-            setUserProperties(data)
+            notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.setUserPropertiesEventName, eventParams: data)
+
         } else {
             Logger.error("Fail to Set User Id.")
         }
@@ -74,9 +75,11 @@ class UserManager {
         }
         let previousExternalUserID = externalUserID
         let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(previousExternalUserID: externalUserID, newExternalUserID: nil)
+
         changeExternalUserId(newValue: nil)
+
         if shouldRequestSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: nil) {
-            notifly.inAppMessageManager.syncState(postProcessConfig: postProcessConfigForSyncState)
+            notifly.inAppMessageManager.userStateManager.syncState(postProcessConfig: postProcessConfigForSyncState)
         }
         notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.removeUserPropertiesEventName, eventParams: nil)
     }

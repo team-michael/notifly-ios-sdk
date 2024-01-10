@@ -31,9 +31,14 @@ class UserSettingsTestViewController: UIViewController {
 
     func submitUserIDTrackingEventWithCurrentInput() throws {
         let userID = userIDTextField.checkAndRetrieveValueText(changeBorderColorOnError: false)
-        Notifly.setUserId(userId: userID)
-        Notifly.trackEvent(eventName: "test_user_id")
-        Notifly.trackEvent(eventName: "test_user_id2")
+        // for testing
+        for i in 0 ..< 100 {
+            Notifly.setUserId(userId: nil)
+            Notifly.setUserId(userId: (userID ?? "") + "\(i)")
+            Notifly.setUserProperties(userProperties: ["test": "\(i)"])
+            Notifly.trackEvent(eventName: "after")
+        }
+
         userIDTrackingResponseTextView.text = "User ID successfully set to: \(userID ?? "<null>")"
     }
 

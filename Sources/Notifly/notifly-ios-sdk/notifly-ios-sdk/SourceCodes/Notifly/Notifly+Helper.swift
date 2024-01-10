@@ -9,6 +9,10 @@ import Foundation
 
 @available(iOSApplicationExtension, unavailable)
 enum NotiflyHelper {
+    static func getEventName(event: String, isInternalEvent: Bool) -> String {
+        return isInternalEvent ? "notifly__" + event : event
+    }
+
     static func getSDKVersion() -> String? {
         return Notifly.sdkVersion
     }

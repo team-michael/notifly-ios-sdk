@@ -23,4 +23,5 @@ enum InAppMessageConstant {
     }));
         });
     """
+    static let inAppMessageChannel = "in-app-message"
 }

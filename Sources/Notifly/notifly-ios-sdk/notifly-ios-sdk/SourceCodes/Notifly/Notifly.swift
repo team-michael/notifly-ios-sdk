@@ -13,6 +13,10 @@ import UIKit
         }
     }
 
+    static var waitPub: AnyPublisher<Void, Error>? {
+        return try? Notifly.main.inAppMessageManager.userStateManager.syncStateFinishedPub
+    }
+
     static var _main: Notifly?
     static var sdkVersion: String = NotiflyConstant.sdkVersion
     static var sdkType: SdkType = .native
@@ -41,7 +45,7 @@ import UIKit
         NotiflyCustomUserDefaults.projectIdInUserDefaults = projectId
         NotiflyCustomUserDefaults.usernameInUserDefaults = username
         NotiflyCustomUserDefaults.passwordInUserDefaults = password
-        
+
         auth = Auth(username: username,
                     password: password)
         trackingManager = TrackingManager(projectId: projectId)
@@ -52,5 +56,4 @@ import UIKit
         super.init()
         Notifly._main = self
     }
-    
 }

@@ -12,145 +12,17 @@ import UIKit
 
 @available(iOSApplicationExtension, unavailable)
 class InAppMessageManager {
-    private var userData: UserData = .init(data: [:])
-    private var campaignData: CampaignData = .init(inAppMessageCampaigns: [])
-    private var eventData: EventData = .init(eventCounts: [:])
-    private var requestSyncStateCancellables = Set<AnyCancellable>()
-    private var _syncStateFinishedPub: AnyPublisher<Void, Error>?
-    private(set) var syncStateFinishedPub: AnyPublisher<Void, Error>? {
-        get {
-            if let pub = _syncStateFinishedPub {
-                return pub
-                    .catch { _ in
-                        Just(()).setFailureType(to: Error.self)
-                    }
-                    .eraseToAnyPublisher()
-            } else {
-                return Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
-            }
-        }
-        set {
-            _syncStateFinishedPub = newValue
-        }
-    }
-
-    var syncStateFinishedPromise: Future<Void, Error>.Promise?
-    var processSyncStateTimeout: DispatchWorkItem?
+    let userStateManager: UserStateManager
 
     init(disabled: Bool) {
-        lock()
-        if disabled {
-            syncStateFinishedPromise?(.success(()))
-        }
-    }
-
-    private func lock() {
-        syncStateFinishedPub = Future { [weak self] promise in
-            self?.syncStateFinishedPromise = promise
-            self?.handleTimeout()
-        }.eraseToAnyPublisher()
-    }
-
-    private func unlock(_ error: NotiflyError? = nil) {
-        guard let promise = syncStateFinishedPromise else {
-            Logger.error("Sync state promise is not exist")
-            return
-        }
-        if let err = error {
-            promise(.failure(err))
-        } else {
-            promise(.success(()))
-        }
-        if let deadTask = processSyncStateTimeout {
-            deadTask.cancel()
-        }
-    }
-
-    private func handleTimeout() {
-        if let deadTask = processSyncStateTimeout {
-            deadTask.cancel()
-        }
-        let newTask = DispatchWorkItem {
-            self.unlock(NotiflyError.promiseTimeout)
-        }
-        processSyncStateTimeout = newTask
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0, execute: newTask)
-    }
-
-    @available(iOSApplicationExtension, unavailable)
-    static func present(_ vc: UIViewController, animated: Bool = false, completion: (() -> Void)?) -> Bool {
-        guard let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
-              let topVC = window.topMostViewController,
-              !(vc.isBeingPresented)
-        else {
-            Logger.error("Invalid status for presenting in-app-message.")
-            return false
-        }
-        topVC.present(vc, animated: animated, completion: completion)
-        return true
-    }
-
-    func syncState(postProcessConfig: PostProcessConfigForSyncState) {
-        guard let notifly = (try? Notifly.main) else {
-            return
-        }
-
-        guard !Notifly.inAppMessageDisabled else {
-            unlock()
-            return
-        }
-
-        guard let projectId = notifly.projectId as String?,
-              let notiflyUserID = (try? notifly.userManager.getNotiflyUserID()),
-              let notiflyDeviceID = AppHelper.getNotiflyDeviceID()
-        else {
-            Logger.error("Fail to sync user state because Notifly is not initalized yet.")
-            return
-        }
-        lock()
-
-        NotiflyAPI().requestSyncState(projectId: projectId, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID)
-            .sink(receiveCompletion: { completion in
-                if case let .failure(error) = completion {
-                    Logger.error("Fail to sync user state: " + error.localizedDescription)
-                    self.unlock(NotiflyError.unexpectedNil(error.localizedDescription))
-                }
-            }, receiveValue: { [weak self] jsonString in
-                if let jsonData = jsonString.data(using: .utf8),
-                   let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
-                {
-                    if let userData = decodedData["userData"] as? [String: Any] {
-                        let newUserData = UserData(data: userData)
-                        if postProcessConfig.merge, let previousUserData = self?.userData as? UserData {
-                            self?.userData = UserData.merge(p1: newUserData, p2: previousUserData)
-                        } else {
-                            self?.userData = newUserData
-                        }
-
-                        if postProcessConfig.clear {
-                            self?.userData.clearUserData()
-                        }
-                    }
-
-                    if let eicData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
-                        self?.constructEventIntermediateCountsData(eicData: eicData, postProcessConfig: postProcessConfig)
-                    }
-
-                    if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
-                        self?.constructCampaignData(campaignData: campaignData)
-                    }
-                }
-                Logger.info("Sync State Completed.")
-                self?.unlock()
-            })
-            .store(in: &requestSyncStateCancellables)
+        userStateManager = UserStateManager(disabled: disabled)
     }
 
     func updateUserProperties(properties: [String: Any]) {
         guard !Notifly.inAppMessageDisabled else {
             return
         }
-        userData.userProperties.merge(properties) { _, new in new }
+        userStateManager.userData.userProperties.merge(properties) { _, new in new }
     }
 
     func updateEventData(eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) {
@@ -187,21 +59,21 @@ class InAppMessageManager {
     }
 
     private func updateEventCountsInEventData(eicID: String, eventName: String, dt: String, eventParams: [String: Any]?) {
-        if var eicToUpdate = eventData.eventCounts[eicID] {
+        if var eicToUpdate = userStateManager.eventData.eventCounts[eicID] {
             eicToUpdate.count += 1
-            eventData.eventCounts[eicID] = eicToUpdate
+            userStateManager.eventData.eventCounts[eicID] = eicToUpdate
         } else {
-            eventData.eventCounts[eicID] = EventIntermediateCount(name: eventName, dt: dt, count: 1, eventParams: eventParams ?? [:])
+            userStateManager.eventData.eventCounts[eicID] = EventIntermediateCount(name: eventName, dt: dt, count: 1, eventParams: eventParams ?? [:])
         }
     }
 
     /* method for showing in-app message */
     private func getCampaignsShouldBeTriggered(eventName: String, eventParams: [String: Any]?) -> [Campaign]? {
-        let campaignsToTrigger = campaignData.inAppMessageCampaigns
+        let campaignsToTrigger = userStateManager.campaignData.inAppMessageCampaigns
             .filter { $0.triggeringEvent == eventName }
             .filter { isCampaignActive(campaign: $0) }
             .filter { !isBlacklistTemplate(templateName: $0.message.modalProperties.templateName) }
-            .filter { SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: userData, eventData: eventData) }
+            .filter { SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: userStateManager.userData, eventData: userStateManager.eventData) }
 
         if campaignsToTrigger.count == 0 {
             return nil
@@ -221,10 +93,10 @@ class InAppMessageManager {
     private func isBlacklistTemplate(templateName: String) -> Bool {
         let outdatedPropertyKeyForBlacklist = "hide_in_app_message_" + templateName
         let propertyKeyForBlacklist = "hide_in_app_message_until_" + templateName
-        if let hide = userData.userProperties[outdatedPropertyKeyForBlacklist] as? Bool {
+        if let hide = userStateManager.userData.userProperties[outdatedPropertyKeyForBlacklist] as? Bool {
             return hide
         }
-        let hideUntil = userData.userProperties[propertyKeyForBlacklist]
+        let hideUntil = userStateManager.userData.userProperties[propertyKeyForBlacklist]
         if hideUntil == nil {
             return false
         }
@@ -245,7 +117,8 @@ class InAppMessageManager {
 
     private func isHiddenCampaign(campaignID: String) -> Bool {
         let now = AppHelper.getCurrentTimestamp(unit: .second)
-        if let hideUntil = userData.campaignHiddenUntil[campaignID] {
+
+        if let hideUntil = userStateManager.userData.campaignHiddenUntil[campaignID] {
             if hideUntil == -1 {
                 return true
             }
@@ -295,111 +168,20 @@ class InAppMessageManager {
         }
     }
 
-    private func constructUserData(userData: [String: Any], postProcessConfig: PostProcessConfigForSyncState) {
-        let newUserData = UserData(data: userData)
-        if postProcessConfig.merge, let previousUserData = self.userData as? UserData {
-            self.userData = UserData.merge(p1: newUserData, p2: previousUserData)
-        } else {
-            self.userData = newUserData
-        }
-
-        if postProcessConfig.clear {
-            self.userData.clearUserData()
-        }
-    }
-
-    private func constructEventIntermediateCountsData(eicData: [[String: Any]], postProcessConfig: PostProcessConfigForSyncState) {
-        guard eicData.count > 0 else {
-            if !postProcessConfig.merge {
-                eventData.eventCounts = [:]
-            }
-            return
-        }
-
-        if postProcessConfig.clear {
-            eventData.eventCounts = [:]
-        }
-
-        eventData.eventCounts = eicData.compactMap { eic -> (String, EventIntermediateCount)? in
-            guard let name = eic["name"] as? String,
-                  let dt = eic["dt"] as? String,
-                  let count = eic["count"] as? Int,
-                  let eventParams = eic["event_params"] as? [String: Any]
-            else {
-                return nil
-            }
-            var eicID = name + InAppMessageConstant.idSeparator + dt + InAppMessageConstant.idSeparator
-            if eventParams.count > 0,
-               let key = eventParams.keys.first,
-               let value = eventParams.values.first
-            {
-                eicID += key + InAppMessageConstant.idSeparator + String(describing: value)
-            } else {
-                eicID += InAppMessageConstant.idSeparator
-            }
-
-            return (eicID, EventIntermediateCount(name: name, dt: dt, count: count, eventParams: eventParams))
-        }.compactMap { $0 }.reduce(into: postProcessConfig.merge ? eventData.eventCounts : [:]) { $0[$1.0] = $1.1 }
-    }
-
-    private func constructCampaignData(campaignData: [[String: Any]]) {
-        self.campaignData.inAppMessageCampaigns = campaignData.compactMap { campaignDict -> Campaign? in
-            guard let id = campaignDict["id"] as? String,
-                  let testing = campaignDict["testing"] as? Bool,
-                  let triggeringEvent = campaignDict["triggering_event"] as? String,
-                  let statusRawValue = campaignDict["status"] as? Int,
-                  statusRawValue == 1,
-                  let campaignStatus = CampaignStatus(rawValue: statusRawValue),
-                  let messageDict = campaignDict["message"] as? [String: Any],
-                  let htmlURL = messageDict["html_url"] as? String,
-                  let modalPropertiesDict = messageDict["modal_properties"] as? [String: Any],
-                  let modalProperties = ModalProperties(properties: modalPropertiesDict),
-                  let segmentInfoDict = campaignDict["segment_info"] as? [String: Any],
-                  let channel = campaignDict["channel"] as? String,
-                  let segmentType = campaignDict["segment_type"] as? String,
-                  channel == "in-app-message",
-                  segmentType == NotiflySegmentation.SegmentationType.conditionBased.rawValue
-            else {
-                return nil
-            }
-
-            let message = Message(htmlURL: htmlURL, modalProperties: modalProperties)
-
-            var reEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
-            if let rawReEligibleCondition = campaignDict["re_eligible_condition"] as? [String: Any],
-               let reEligibleConditionData = NotiflyReEligibleConditionEnum.ReEligibleCondition(data: rawReEligibleCondition)
-            {
-                reEligibleCondition = reEligibleConditionData
-            }
-
-            var whitelist: [String]?
-            if testing == true {
-                guard let whiteList = campaignDict["whitelist"] as? [String] else {
-                    return nil
-                }
-                whitelist = whiteList
-            } else {
-                whitelist = nil
-            }
-
-            var campaignStart: Int
-            if let starts = campaignDict["starts"] as? [Int] {
-                campaignStart = starts[0]
-            } else {
-                campaignStart = 0
-            }
-            let delay = campaignDict["delay"] as? Int
-            let campaignEnd = campaignDict["end"] as? Int
-            let segmentInfo = NotiflySegmentation.SegmentInfo(segmentInfoDict: segmentInfoDict)
-            let lastUpdatedTimestamp = (campaignDict["last_updated_timestamp"] as? Int) ?? 0
-
-            return Campaign(id: id, channel: channel, segmentType: segmentType, message: message, segmentInfo: segmentInfo, triggeringEvent: triggeringEvent, campaignStart: campaignStart, campaignEnd: campaignEnd, delay: delay, status: campaignStatus, testing: testing, whitelist: whitelist,
-                            lastUpdatedTimestamp: lastUpdatedTimestamp, reEligibleCondition: reEligibleCondition)
-        }
-    }
-
     func updateHideCampaignUntilData(hideUntilData: [String: Int]) {
-        userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }
+        userStateManager.userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }
+    }
+
+    static func present(_ vc: UIViewController, animated: Bool = false, completion: (() -> Void)?) -> Bool {
+        guard let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
+              let topVC = window.topMostViewController,
+              !(vc.isBeingPresented)
+        else {
+            Logger.error("Invalid status for presenting in-app-message.")
+            return false
+        }
+        topVC.present(vc, animated: animated, completion: completion)
+        return true
     }
 }
 
