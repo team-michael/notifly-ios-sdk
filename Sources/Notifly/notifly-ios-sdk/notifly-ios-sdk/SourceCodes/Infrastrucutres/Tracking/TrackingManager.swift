@@ -103,14 +103,13 @@ class TrackingManager {
 
         let externalUserID = notifly.userManager.externalUserID
         let currentTimestamp = AppHelper.getCurrentTimestamp()
-
         Notifly.keepGoingPub.flatMap { _ in
             try? Notifly.main.inAppMessageManager.updateEventData(eventName: trackingEventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
             return self.createTrackingRecord(eventName: eventName,
-                                             eventParams: eventParams,
-                                             isInternal: isInternal,
-                                             segmentationEventParamKeys: segmentationEventParamKeys,
-                                             currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID)
+                                      eventParams: eventParams,
+                                      isInternal: isInternal,
+                                      segmentationEventParamKeys: segmentationEventParamKeys,
+                                      currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID)
         }
         .sink(receiveCompletion: { completion in
                   if case let .failure(error) = completion {
@@ -151,7 +150,7 @@ class TrackingManager {
             return Fail(outputType: TrackingRecord.self, failure: NotiflyError.unexpectedNil("Device data is invalid."))
                 .eraseToAnyPublisher()
         }
-        
+
         print(externalUserID, currentTimestamp, eventName)
 
         return deviceTokenPub.tryMap { pushToken in

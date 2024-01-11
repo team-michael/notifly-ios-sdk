@@ -32,23 +32,18 @@ class InAppMessageManager {
         guard !Notifly.inAppMessageDisabled else {
             return
         }
-        Notifly.keepGoingPub.sink(
-            receiveCompletion: { _ in },
-            receiveValue: { _ in
-                if var campaignsToTrigger = self.getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams)
-                {
-                    campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
-                    for campaignToTrigger in campaignsToTrigger {
-                        if let notiflyInAppMessageData = self.prepareInAppMessageData(campaign: campaignToTrigger) {
-                            self.showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
-                        }
-                    }
+        print("UPDATE EVENT")
+        if var campaignsToTrigger = getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams)
+        {
+            campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
+            for campaignToTrigger in campaignsToTrigger {
+                if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger) {
+                    showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
                 }
-
-                self.userStateManager.incrementEic(eventName: eventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
             }
-        )
-        .store(in: &Notifly.cancellables)
+        }
+        print("END")
+        userStateManager.incrementEic(eventName: eventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
     }
 
     func updateHideCampaignUntilData(hideUntilData: [String: Int]) {
@@ -57,7 +52,10 @@ class InAppMessageManager {
         }
         Notifly.keepGoingPub.sink(
             receiveCompletion: { _ in },
-            receiveValue: { _ in self.userStateManager.userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }}
+            receiveValue: { _ in
+                Logger.error("UPDATE HIDE CAMPAIGN")
+                self.userStateManager.userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }
+            }
         )
         .store(in: &Notifly.cancellables)
     }

@@ -103,7 +103,6 @@ class UserStateManager {
             return
         }
 
-        let external = notifly.userManager.externalUserID
         guard let projectId = notifly.projectId as String?,
               let notiflyUserID = (try? notifly.userManager.getNotiflyUserID()),
               let notiflyDeviceID = AppHelper.getNotiflyDeviceID()
@@ -134,16 +133,7 @@ class UserStateManager {
                    let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
                 {
                     if let userData = decodedData["userData"] as? [String: Any] {
-                        let newUserData = UserData(data: userData)
-                        if postProcessConfig.merge, let previousUserData = self?.userData as? UserData {
-                            self?.userData = UserData.merge(p1: newUserData, p2: previousUserData)
-                        } else {
-                            self?.userData = newUserData
-                        }
-
-                        if postProcessConfig.clear {
-                            self?.userData.clearUserData()
-                        }
+                        self?.constructUserData(userData: userData, postProcessConfig: postProcessConfig)
                     }
 
                     if let eicData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
@@ -195,12 +185,12 @@ class UserStateManager {
             else {
                 return nil
             }
-            
+
             var segmentationEventParamKeys: [String]?
             if let key = eventParams.first?.key as? String {
                 segmentationEventParamKeys = [key]
             }
-              
+
             let eicID = constructEicId(eventName: name, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys, dt: dt)
 
             return (eicID, EventIntermediateCount(name: name, dt: dt, count: count, eventParams: eventParams))
