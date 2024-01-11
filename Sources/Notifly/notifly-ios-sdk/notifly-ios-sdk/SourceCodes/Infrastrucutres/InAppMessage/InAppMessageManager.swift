@@ -13,58 +13,53 @@ import UIKit
 @available(iOSApplicationExtension, unavailable)
 class InAppMessageManager {
     let userStateManager: UserStateManager
-
-    init(disabled: Bool) {
-        userStateManager = UserStateManager(disabled: disabled)
+    init() {
+        userStateManager = UserStateManager()
     }
 
     func updateUserProperties(properties: [String: Any]) {
         guard !Notifly.inAppMessageDisabled else {
             return
         }
-        userStateManager.userData.userProperties.merge(properties) { _, new in new }
+        Notifly.keepGoingPub.sink(
+            receiveCompletion: { _ in },
+            receiveValue: { _ in self.userStateManager.userData.userProperties.merge(properties) { _, new in new }}
+        )
+        .store(in: &Notifly.cancellables)
     }
 
     func updateEventData(eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) {
         guard !Notifly.inAppMessageDisabled else {
             return
         }
-
-        if var campaignsToTrigger = getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams)
-        {
-            campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
-            for campaignToTrigger in campaignsToTrigger {
-                if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger) {
-                    showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
+        Notifly.keepGoingPub.sink(
+            receiveCompletion: { _ in },
+            receiveValue: { _ in
+                if var campaignsToTrigger = self.getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams)
+                {
+                    campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
+                    for campaignToTrigger in campaignsToTrigger {
+                        if let notiflyInAppMessageData = self.prepareInAppMessageData(campaign: campaignToTrigger) {
+                            self.showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
+                        }
+                    }
                 }
-            }
-        }
 
-        let dt = NotiflyHelper.getCurrentDate()
-        var eicID = eventName + InAppMessageConstant.idSeparator + dt + InAppMessageConstant.idSeparator
-        if let segmentationEventParamKeys = segmentationEventParamKeys,
-           let eventParams = eventParams,
-           segmentationEventParamKeys.count > 0,
-           eventParams.count > 0
-        {
-            let keyField = segmentationEventParamKeys[0] // TODO: support multiple segmentationEventParamKey
-            if let value = eventParams[keyField] as? String {
-                eicID += keyField + InAppMessageConstant.idSeparator + String(describing: value)
-                updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
-                return
+                self.userStateManager.incrementEic(eventName: eventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
             }
-        }
-        eicID += InAppMessageConstant.idSeparator
-        updateEventCountsInEventData(eicID: eicID, eventName: eventName, dt: dt, eventParams: [:])
+        )
+        .store(in: &Notifly.cancellables)
     }
 
-    private func updateEventCountsInEventData(eicID: String, eventName: String, dt: String, eventParams: [String: Any]?) {
-        if var eicToUpdate = userStateManager.eventData.eventCounts[eicID] {
-            eicToUpdate.count += 1
-            userStateManager.eventData.eventCounts[eicID] = eicToUpdate
-        } else {
-            userStateManager.eventData.eventCounts[eicID] = EventIntermediateCount(name: eventName, dt: dt, count: 1, eventParams: eventParams ?? [:])
+    func updateHideCampaignUntilData(hideUntilData: [String: Int]) {
+        guard !Notifly.inAppMessageDisabled else {
+            return
         }
+        Notifly.keepGoingPub.sink(
+            receiveCompletion: { _ in },
+            receiveValue: { _ in self.userStateManager.userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }}
+        )
+        .store(in: &Notifly.cancellables)
     }
 
     /* method for showing in-app message */
@@ -166,10 +161,6 @@ class InAppMessageManager {
                 return
             }
         }
-    }
-
-    func updateHideCampaignUntilData(hideUntilData: [String: Int]) {
-        userStateManager.userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }
     }
 
     static func present(_ vc: UIViewController, animated: Bool = false, completion: (() -> Void)?) -> Bool {

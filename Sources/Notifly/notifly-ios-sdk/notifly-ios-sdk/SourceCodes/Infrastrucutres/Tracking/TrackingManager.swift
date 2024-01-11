@@ -103,11 +103,8 @@ class TrackingManager {
 
         let externalUserID = notifly.userManager.externalUserID
         let currentTimestamp = AppHelper.getCurrentTimestamp()
-        guard let waitPub = try? Notifly.waitPub else {
-            Logger.error("Fail to track Event. \(trackingEventName)")
-            return
-        }
-        waitPub.flatMap { _ in
+
+        Notifly.keepGoingPub.flatMap { _ in
             try? Notifly.main.inAppMessageManager.updateEventData(eventName: trackingEventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
             return self.createTrackingRecord(eventName: eventName,
                                              eventParams: eventParams,

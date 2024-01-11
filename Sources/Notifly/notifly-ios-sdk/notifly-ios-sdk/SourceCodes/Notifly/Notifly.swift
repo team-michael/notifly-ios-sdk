@@ -13,8 +13,8 @@ import UIKit
         }
     }
 
-    static var waitPub: AnyPublisher<Void, Error>? {
-        return try? Notifly.main.inAppMessageManager.userStateManager.syncStateFinishedPub
+    static var keepGoingPub: AnyPublisher<Void, Error> {
+        return (try? Notifly.main.inAppMessageManager.userStateManager.waitSyncStateFinishedPub) ?? Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
     }
 
     static var _main: Notifly?
@@ -22,6 +22,7 @@ import UIKit
     static var sdkType: SdkType = .native
     static var coldStartNotificationData: [AnyHashable: Any]?
     static var inAppMessageDisabled: Bool = false
+    static var cancellables = Set<AnyCancellable>()
 
     let projectId: String
 
@@ -52,7 +53,7 @@ import UIKit
         userManager = UserManager()
 
         notificationsManager = NotificationsManager()
-        inAppMessageManager = InAppMessageManager(disabled: Notifly.inAppMessageDisabled)
+        inAppMessageManager = InAppMessageManager()
         super.init()
         Notifly._main = self
     }

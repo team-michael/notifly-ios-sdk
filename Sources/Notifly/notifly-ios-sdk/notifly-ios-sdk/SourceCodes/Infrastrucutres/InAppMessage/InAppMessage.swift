@@ -122,7 +122,7 @@ struct EventData {
 }
 
 enum UserStateConstant {
-    static let syncStateLockTimeout = 5.0
+    static let syncStateLockTimeout = 100.0
     enum States {
         case campaignData(CampaignData)
         case userData(UserData)

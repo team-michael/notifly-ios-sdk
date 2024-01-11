@@ -15,11 +15,10 @@ class UserStateManager {
     var userData: UserData = .init(data: [:])
     var eventData: EventData = .init(eventCounts: [:])
 
-    private var requestSyncStateCancellables = Set<AnyCancellable>()
-    private var _syncStateFinishedPub: AnyPublisher<Void, Error>?
-    private(set) var syncStateFinishedPub: AnyPublisher<Void, Error>? {
+    private var _waitSyncStateFinishedPub: AnyPublisher<Void, Error>?
+    private(set) var waitSyncStateFinishedPub: AnyPublisher<Void, Error> {
         get {
-            if let pub = syncStateFinishedPubishers.last as? AnyPublisher<Void, Error> {
+            if let pub = waitSyncStateFinishedPubs.last as? AnyPublisher<Void, Error> {
                 return pub
                     .catch { _ in
                         Just(()).setFailureType(to: Error.self)
@@ -30,33 +29,40 @@ class UserStateManager {
             }
         }
         set {
-            _syncStateFinishedPub = newValue
+            _waitSyncStateFinishedPub = newValue
         }
     }
 
-    var syncStateFinishedPromise: Future<Void, Error>.Promise? {
-        return lockPromises.last
+    var waitParentUnlockPub: AnyPublisher<Void, Never> {
+        let lockCount = waitSyncStateFinishedPubs.count
+        let parentLockIndex = lockCount > 1 ? lockCount - 2 : -1
+        let parentLock = lockCount > 1 ? waitSyncStateFinishedPubs[parentLockIndex] : nil
+        return Future<Void, Never> { promise in
+            if let parentLock = parentLock {
+                parentLock
+                    .sink(receiveCompletion: { _ in
+                        promise(.success(()))
+                    }, receiveValue: { _ in })
+                    .store(in: &Notifly.cancellables)
+            } else {
+                promise(.success(()))
+            }
+        }.eraseToAnyPublisher()
     }
 
-    var syncStateFinishedPubishers: [AnyPublisher<Void, Error>] = []
+    var waitSyncStateFinishedPubs: [AnyPublisher<Void, Error>] = []
     var lockPromises: [Future<Void, Error>.Promise] = []
-    var processSyncStateTimeout: DispatchWorkItem?
-
-    init(disabled: Bool) {
-        if disabled {
-            syncStateFinishedPromise?(.success(()))
-        }
-    }
+    var tasksHandlingTimeout: [DispatchWorkItem] = []
 
     /* manage sync state finished pub */
     func lock() -> Int {
         let lockId = lockPromises.count
-        Logger.error("LOCK \(lockId)")
         let newSyncStateFinishedPub = Future { [weak self] promise in
             self?.lockPromises.append(promise)
             self?.handleTimeout(lockId: lockId)
         }.eraseToAnyPublisher()
-        syncStateFinishedPubishers.append(newSyncStateFinishedPub)
+        waitSyncStateFinishedPubs.append(newSyncStateFinishedPub)
+        Logger.error("LOCK \(lockId)")
         return lockId
     }
 
@@ -69,13 +75,18 @@ class UserStateManager {
         } else {
             promise(.success(()))
         }
+
+        if let task = tasksHandlingTimeout[safe: lockId] {
+            task.cancel()
+        }
+        Logger.error("UNLOCK \(lockId)")
     }
 
     private func handleTimeout(lockId: Int) {
         let newTask = DispatchWorkItem {
             self.unlock(lockId: lockId)
         }
-        processSyncStateTimeout = newTask
+        tasksHandlingTimeout.append(newTask)
         DispatchQueue.main.asyncAfter(deadline: .now() + UserStateConstant.syncStateLockTimeout, execute: newTask)
     }
 
@@ -89,9 +100,9 @@ class UserStateManager {
             for index in 0 ..< lockPromises.count {
                 unlock(lockId: index)
             }
-
             return
         }
+
         let external = notifly.userManager.externalUserID
         guard let projectId = notifly.projectId as String?,
               let notiflyUserID = (try? notifly.userManager.getNotiflyUserID()),
@@ -102,52 +113,51 @@ class UserStateManager {
         }
 
         let lockId = lock()
-        
-        var parentPub: AnyPublisher<Void, Error>
-        if let lastPub = try? self.syncStateFinishedPub {
-            parentPub = lastPub
-        } else {
-            parentPub = Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
-        }
-        
-        parentPub.tryMap { _ in
-            NotiflyAPI().requestSyncState(projectId: projectId, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID)
-                .sink(receiveCompletion: { completion in
-                    if case let .failure(error) = completion {
-                        Logger.error("Fail to sync user state: " + error.localizedDescription)
-                        self.unlock(lockId: lockId, NotiflyError.unexpectedNil(error.localizedDescription))
-                    }
+        waitParentUnlockPub
+            .sink(receiveCompletion: { _ in
+                      self.fetchUserCampaignContext(projectId: projectId, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID, lockId: lockId, postProcessConfig: postProcessConfig)
+                  },
+                  receiveValue: { _ in })
+            .store(in: &Notifly.cancellables)
+    }
 
-                }, receiveValue: { [weak self] jsonString in
-                    if let jsonData = jsonString.data(using: .utf8),
-                       let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
-                    {
-                        if let userData = decodedData["userData"] as? [String: Any] {
-                            let newUserData = UserData(data: userData)
-                            if postProcessConfig.merge, let previousUserData = self?.userData as? UserData {
-                                self?.userData = UserData.merge(p1: newUserData, p2: previousUserData)
-                            } else {
-                                self?.userData = newUserData
-                            }
+    private func fetchUserCampaignContext(projectId: String, notiflyUserID: String, notiflyDeviceID: String, lockId: Int, postProcessConfig: PostProcessConfigForSyncState) {
+        return NotiflyAPI().requestSyncState(projectId: projectId, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID)
+            .sink(receiveCompletion: { completion in
+                if case let .failure(error) = completion {
+                    Logger.error("Fail to sync user state: " + error.localizedDescription)
+                    self.unlock(lockId: lockId, NotiflyError.unexpectedNil(error.localizedDescription))
+                }
 
-                            if postProcessConfig.clear {
-                                self?.userData.clearUserData()
-                            }
+            }, receiveValue: { [weak self] jsonString in
+                if let jsonData = jsonString.data(using: .utf8),
+                   let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
+                {
+                    if let userData = decodedData["userData"] as? [String: Any] {
+                        let newUserData = UserData(data: userData)
+                        if postProcessConfig.merge, let previousUserData = self?.userData as? UserData {
+                            self?.userData = UserData.merge(p1: newUserData, p2: previousUserData)
+                        } else {
+                            self?.userData = newUserData
                         }
 
-                        if let eicData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
-                            self?.constructEventIntermediateCountsData(eicData: eicData, postProcessConfig: postProcessConfig)
-                        }
-
-                        if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
-                            self?.constructCampaignData(campaignData: campaignData)
+                        if postProcessConfig.clear {
+                            self?.userData.clearUserData()
                         }
                     }
-                    Logger.info("Sync State Completed.")
-                    self?.unlock(lockId: lockId)
-                })
-                .store(in: &self.requestSyncStateCancellables)
-        }
+
+                    if let eicData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
+                        self?.constructEventIntermediateCountsData(eicData: eicData, postProcessConfig: postProcessConfig)
+                    }
+
+                    if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
+                        self?.constructCampaignData(campaignData: campaignData)
+                    }
+                }
+                Logger.info("Sync State Completed. \(lockId)")
+                self?.unlock(lockId: lockId)
+            })
+            .store(in: &Notifly.cancellables)
     }
 
     /* post-process of sync state */
@@ -185,15 +195,13 @@ class UserStateManager {
             else {
                 return nil
             }
-            var eicID = name + InAppMessageConstant.idSeparator + dt + InAppMessageConstant.idSeparator
-            if eventParams.count > 0,
-               let key = eventParams.keys.first,
-               let value = eventParams.values.first
-            {
-                eicID += key + InAppMessageConstant.idSeparator + String(describing: value)
-            } else {
-                eicID += InAppMessageConstant.idSeparator
+            
+            var segmentationEventParamKeys: [String]?
+            if let key = eventParams.first?.key as? String {
+                segmentationEventParamKeys = [key]
             }
+              
+            let eicID = constructEicId(eventName: name, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys, dt: dt)
 
             return (eicID, EventIntermediateCount(name: name, dt: dt, count: count, eventParams: eventParams))
         }.compactMap { $0 }.reduce(into: postProcessConfig.merge ? eventData.eventCounts : [:]) { $0[$1.0] = $1.1 }
@@ -253,6 +261,42 @@ class UserStateManager {
             return Campaign(id: id, channel: channel, segmentType: segmentType, message: message, segmentInfo: segmentInfo, triggeringEvent: triggeringEvent, campaignStart: campaignStart, campaignEnd: campaignEnd, delay: delay, status: campaignStatus, testing: testing, whitelist: whitelist,
                             lastUpdatedTimestamp: lastUpdatedTimestamp, reEligibleCondition: reEligibleCondition)
         }
+    }
+
+    func incrementEic(eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) {
+        let dt = NotiflyHelper.getCurrentDate()
+        let eicID = constructEicId(eventName: eventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys, dt: dt)
+        if var eicToUpdate = eventData.eventCounts[eicID] {
+            eicToUpdate.count += 1
+            eventData.eventCounts[eicID] = eicToUpdate
+        } else {
+            eventData.eventCounts[eicID] = EventIntermediateCount(name: eventName, dt: dt, count: 1, eventParams: eventParams ?? [:])
+        }
+    }
+
+    func constructEicId(eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?, dt: String) -> String {
+        var eicID = eventName + InAppMessageConstant.eicIdSeparator + dt
+        guard let selectedEventParams = selectEventParams(eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys),
+              let (selectedKey, selectedValue) = selectedEventParams.first
+        else {
+            return eicID + String(repeating: InAppMessageConstant.eicIdSeparator, count: 2)
+        }
+
+        return eicID + InAppMessageConstant.eicIdSeparator + selectedKey + InAppMessageConstant.eicIdSeparator + selectedValue
+    }
+
+    private func selectEventParams(eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) -> [String: String]? {
+        if let segmentationEventParamKeys = segmentationEventParamKeys,
+           let eventParams = eventParams,
+           segmentationEventParamKeys.count > 0,
+           eventParams.count > 0
+        {
+            let keyField = segmentationEventParamKeys[0]
+            if let value = eventParams[keyField] as? String {
+                return [keyField: value]
+            }
+        }
+        return nil
     }
 }
 
