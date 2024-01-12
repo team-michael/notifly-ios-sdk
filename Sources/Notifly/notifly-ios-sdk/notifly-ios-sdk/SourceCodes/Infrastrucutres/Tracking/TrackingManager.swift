@@ -82,6 +82,13 @@ class TrackingManager {
         )
     }
 
+    func trackSyncStateCompletedInternalEvent(properties: [String: Any]?) {
+        return trackInternalEvent(
+            eventName: TrackingConstant.Internal.syncStateCompletedEventName,
+            eventParams: properties
+        )
+    }
+
     func trackInternalEvent(eventName: String, eventParams: [String: Any]?) {
         return track(eventName: eventName,
                      eventParams: eventParams,
@@ -106,10 +113,10 @@ class TrackingManager {
         Notifly.keepGoingPub.flatMap { _ in
             try? Notifly.main.inAppMessageManager.updateEventData(eventName: trackingEventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
             return self.createTrackingRecord(eventName: eventName,
-                                      eventParams: eventParams,
-                                      isInternal: isInternal,
-                                      segmentationEventParamKeys: segmentationEventParamKeys,
-                                      currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID)
+                                             eventParams: eventParams,
+                                             isInternal: isInternal,
+                                             segmentationEventParamKeys: segmentationEventParamKeys,
+                                             currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID)
         }
         .sink(receiveCompletion: { completion in
                   if case let .failure(error) = completion {

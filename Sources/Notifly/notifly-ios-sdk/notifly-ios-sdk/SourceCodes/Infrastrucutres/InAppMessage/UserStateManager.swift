@@ -144,6 +144,11 @@ class UserStateManager {
                         self?.constructCampaignData(campaignData: campaignData)
                     }
                 }
+
+                let userDataAsEventParams = self?.userData.destruct()
+                print(userDataAsEventParams)
+                try? Notifly.main.trackingManager.trackSyncStateCompletedInternalEvent(properties: userDataAsEventParams)
+
                 Logger.info("Sync State Completed. \(lockId)")
                 self?.unlock(lockId: lockId)
             })

@@ -1,3 +1,4 @@
+import Foundation
 //
 //  InAppMessage.swift
 //  notifly-ios-sdk
@@ -5,7 +6,14 @@
 //  Created by 김대성 on 2023/06/12.
 //
 
-import Foundation
+enum UserStateConstant {
+    static let syncStateLockTimeout = 5.0
+    enum States {
+        case campaignData(CampaignData)
+        case userData(UserData)
+        case eventData(EventData)
+    }
+}
 
 struct UserData {
     var userProperties: [String: Any]
@@ -111,6 +119,38 @@ struct UserData {
         campaignHiddenUntil = [:]
         updatedAt = TimeInterval(AppHelper.getCurrentTimestamp(unit: .second))
     }
+
+    func destruct() -> [String: Any] {
+        var data: [String: Any] = [
+            "user_properties": userProperties,
+            "campaign_hidden_until": campaignHiddenUntil,
+        ]
+        if let platform = platform {
+            data["platform"] = platform
+        }
+        if let osVersion = osVersion {
+            data["os_version"] = osVersion
+        }
+        if let appVersion = appVersion {
+            data["app_version"] = appVersion
+        }
+        if let sdkVersion = sdkVersion {
+            data["sdk_version"] = sdkVersion
+        }
+        if let sdkType = sdkType {
+            data["sdk_type"] = sdkType
+        }
+        if let randomBucketNumber = randomBucketNumber {
+            data["random_bucket_number"] = randomBucketNumber
+        }
+        if let createdAt = createdAt {
+            data["created_at"] = createdAt
+        }
+        if let updatedAt = updatedAt {
+            data["updated_at"] = updatedAt
+        }
+        return data
+    }
 }
 
 struct CampaignData {
@@ -126,15 +166,6 @@ struct EventIntermediateCount {
     let dt: String
     var count: Int
     let eventParams: [String: Any]
-}
-
-struct InAppMessageData {
-    let notiflyMessageId: String
-    let notiflyCampaignId: String
-    let modalProps: ModalProperties
-    let url: URL
-    let deadline: DispatchTime
-    let notiflyReEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
 }
 
 struct PostProcessConfigForSyncState {

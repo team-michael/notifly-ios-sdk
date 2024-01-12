@@ -1,7 +1,7 @@
 import Foundation
 
 enum NotiflyConstant {
-    static let sdkVersion: String = "1.3.0"
+    static let sdkVersion: String = "1.4.0"
     static let iosPlatform: String = "ios"
     enum EndPoint {
         static let trackEventEndPoint = "https://12lnng07q2.execute-api.ap-northeast-2.amazonaws.com/prod/records"
@@ -23,18 +23,15 @@ enum TrackingConstant {
 
         static let sessionStartEventName = "session_start"
         static let setDevicePropertiesEventName = "set_device_properties"
-
-        // MARK: User Properties
+        static let syncStateCompletedEventName = "sync_state_completed"
 
         static let setUserPropertiesEventName = "set_user_properties"
         static let removeUserPropertiesEventName = "remove_external_user_id"
+
         static let notiflyExternalUserID = "external_user_id"
         static let notiflyUserID = "notifly_user_id"
         static let previousNotiflyUserID = "previous_notifly_user_id"
         static let previousExternalUserID = "previous_external_user_id"
-        static let setUserProperties = "set_user_properties"
-
-        // MARK: Push Notification Handlling
 
         static let pushClickEventName = "push_click"
         static let pushNotificationMessageShown = "push_delivered"
