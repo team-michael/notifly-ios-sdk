@@ -18,7 +18,7 @@ class UserStateManager {
     private var _waitSyncStateFinishedPub: AnyPublisher<Void, Error>?
     private(set) var waitSyncStateFinishedPub: AnyPublisher<Void, Error> {
         get {
-            if let pub = waitSyncStateFinishedPubs.last as? AnyPublisher<Void, Error> {
+            if let pub = waitSyncStateCompletedPubs.last as? AnyPublisher<Void, Error> {
                 return pub
                     .catch { _ in
                         Just(()).setFailureType(to: Error.self)
@@ -34,9 +34,9 @@ class UserStateManager {
     }
 
     var waitParentUnlockPub: AnyPublisher<Void, Never> {
-        let lockCount = waitSyncStateFinishedPubs.count
+        let lockCount = waitSyncStateCompletedPubs.count
         let parentLockIndex = lockCount > 1 ? lockCount - 2 : -1
-        let parentLock = lockCount > 1 ? waitSyncStateFinishedPubs[parentLockIndex] : nil
+        let parentLock = lockCount > 1 ? waitSyncStateCompletedPubs[parentLockIndex] : nil
         return Future<Void, Never> { promise in
             if let parentLock = parentLock {
                 parentLock
@@ -50,24 +50,23 @@ class UserStateManager {
         }.eraseToAnyPublisher()
     }
 
-    var waitSyncStateFinishedPubs: [AnyPublisher<Void, Error>] = []
-    var lockPromises: [Future<Void, Error>.Promise] = []
+    var waitSyncStateCompletedPubs: [AnyPublisher<Void, Error>] = []
+    var resolveLockPromises: [Future<Void, Error>.Promise] = []
     var tasksHandlingTimeout: [DispatchWorkItem] = []
 
     /* manage sync state finished pub */
     func lock() -> Int {
-        let lockId = lockPromises.count
-        let newSyncStateFinishedPub = Future { [weak self] promise in
-            self?.lockPromises.append(promise)
-            self?.handleTimeout(lockId: lockId)
+        let lockId = resolveLockPromises.count
+        let waitSyncStateCompletedPub = Future { [weak self] promise in
+            self?.resolveLockPromises.append(promise)
         }.eraseToAnyPublisher()
-        waitSyncStateFinishedPubs.append(newSyncStateFinishedPub)
+        waitSyncStateCompletedPubs.append(waitSyncStateCompletedPub)
         Logger.error("LOCK \(lockId)")
         return lockId
     }
 
     private func unlock(lockId: Int, _ error: NotiflyError? = nil) {
-        guard let promise = lockPromises[safe: lockId] else {
+        guard let promise = resolveLockPromises[safe: lockId] else {
             return
         }
         if let err = error {
@@ -82,7 +81,7 @@ class UserStateManager {
         Logger.error("UNLOCK \(lockId)")
     }
 
-    private func handleTimeout(lockId: Int) {
+    private func setTimeoutForLock(lockId: Int) {
         let newTask = DispatchWorkItem {
             self.unlock(lockId: lockId)
         }
@@ -97,7 +96,7 @@ class UserStateManager {
         }
 
         guard !Notifly.inAppMessageDisabled else {
-            for index in 0 ..< lockPromises.count {
+            for index in 0 ..< resolveLockPromises.count {
                 unlock(lockId: index)
             }
             return
@@ -121,6 +120,7 @@ class UserStateManager {
     }
 
     private func fetchUserCampaignContext(projectId: String, notiflyUserID: String, notiflyDeviceID: String, lockId: Int, postProcessConfig: PostProcessConfigForSyncState) {
+        setTimeoutForLock(lockId: lockId)
         return NotiflyAPI().requestSyncState(projectId: projectId, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID)
             .sink(receiveCompletion: { completion in
                 if case let .failure(error) = completion {

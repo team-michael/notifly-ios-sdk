@@ -32,7 +32,6 @@ class InAppMessageManager {
         guard !Notifly.inAppMessageDisabled else {
             return
         }
-        print("UPDATE EVENT")
         if var campaignsToTrigger = getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams)
         {
             campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
@@ -42,7 +41,6 @@ class InAppMessageManager {
                 }
             }
         }
-        print("END")
         userStateManager.incrementEic(eventName: eventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
     }
 
