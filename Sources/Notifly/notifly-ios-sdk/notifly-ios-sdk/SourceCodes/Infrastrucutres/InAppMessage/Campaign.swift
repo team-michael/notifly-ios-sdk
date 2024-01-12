@@ -252,4 +252,6 @@ enum NotiflyReEligibleConditionEnum {
             self.unit = unit
         }
     }
+
+    static let defaultValue = -1
 }

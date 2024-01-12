@@ -25,3 +25,12 @@ enum InAppMessageConstant {
     """
     static let inAppMessageChannel = "in-app-message"
 }
+
+enum UserStateConstant {
+    static let syncStateLockTimeout = 5.0
+    enum States {
+        case campaignData(CampaignData)
+        case userData(UserData)
+        case eventData(EventData)
+    }
+}

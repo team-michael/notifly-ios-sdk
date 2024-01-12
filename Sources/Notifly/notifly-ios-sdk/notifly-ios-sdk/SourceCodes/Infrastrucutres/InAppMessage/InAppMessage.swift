@@ -121,15 +121,6 @@ struct EventData {
     var eventCounts: [String: EventIntermediateCount]
 }
 
-enum UserStateConstant {
-    static let syncStateLockTimeout = 5.0
-    enum States {
-        case campaignData(CampaignData)
-        case userData(UserData)
-        case eventData(EventData)
-    }
-}
-
 struct EventIntermediateCount {
     let name: String
     let dt: String

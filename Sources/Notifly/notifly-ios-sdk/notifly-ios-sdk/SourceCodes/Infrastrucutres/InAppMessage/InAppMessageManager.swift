@@ -87,30 +87,28 @@ class InAppMessageManager {
         if let hide = userStateManager.userData.userProperties[outdatedPropertyKeyForBlacklist] as? Bool {
             return hide
         }
-        let hideUntil = userStateManager.userData.userProperties[propertyKeyForBlacklist]
-        if hideUntil == nil {
+        guard let hideUntil = userStateManager.userData.userProperties[propertyKeyForBlacklist] as? Int else {
+            Logger.error("Invalid user hide_in_app_message property.")
             return false
         }
-        if let intHideUntil = hideUntil as? Int {
-            if intHideUntil == -1 {
-                return true
-            }
-            let now = AppHelper.getCurrentTimestamp(unit: .second)
-            if now <= intHideUntil {
-                return true
-            } else {
-                return false
-            }
+
+        if hideUntil == NotiflyReEligibleConditionEnum.defaultValue {
+            return true
         }
-        Logger.error("Invalid user hide_in_app_message property.")
+        let now = AppHelper.getCurrentTimestamp(unit: .second)
+        if now <= hideUntil {
+            return true
+        } else {
+            return false
+        }
+
         return true
     }
 
     private func isHiddenCampaign(campaignID: String) -> Bool {
         let now = AppHelper.getCurrentTimestamp(unit: .second)
-
         if let hideUntil = userStateManager.userData.campaignHiddenUntil[campaignID] {
-            if hideUntil == -1 {
+            if hideUntil == NotiflyReEligibleConditionEnum.defaultValue {
                 return true
             }
             if hideUntil >= now {
@@ -120,7 +118,7 @@ class InAppMessageManager {
         return false
     }
 
-    func prepareInAppMessageData(campaign: Campaign) -> InAppMessageData? {
+    private func prepareInAppMessageData(campaign: Campaign) -> InAppMessageData? {
         let messageId = UUID().uuidString.replacingOccurrences(of: "-", with: "")
         let campaignId = campaign.id
         let urlString = campaign.message.htmlURL
