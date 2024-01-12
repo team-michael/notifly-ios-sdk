@@ -65,6 +65,40 @@ enum NotiflyHelper {
 }
 
 enum NotiflyComparingValueHelper {
+    static func compare(type: String?, sourceValue: Any, operator: NotiflyOperator, targetValue: Any?) -> Bool {
+        switch `operator` {
+        case .isNull:
+            return sourceValue == nil
+        case .isNotNull:
+            return sourceValue != nil
+        default:
+            if let type = type,
+               let typedSourceValue = NotiflyComparingValueHelper.castAnyToSpecifiedType(value: sourceValue, type: `operator` == .contains ? "ARRAY" : type),
+               let typedTargetValue = NotiflyComparingValueHelper.castAnyToSpecifiedType(value: targetValue, type: type)
+            {
+                switch `operator` {
+                case .equal:
+                    return NotiflyComparingValueHelper.isEqual(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                case .notEqual:
+                    return NotiflyComparingValueHelper.isNotEqual(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                case .contains:
+                    return NotiflyComparingValueHelper.isContains(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                case .greaterThan:
+                    return NotiflyComparingValueHelper.isGreaterThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                case .greaterOrEqualThan:
+                    return NotiflyComparingValueHelper.isGreaterOrEqualThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                case .lessThan:
+                    return NotiflyComparingValueHelper.isLessThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                case .lessOrEqualThan:
+                    return NotiflyComparingValueHelper.isLessOrEqualThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                default:
+                    return false
+                }
+            }
+            return false
+        }
+    }
+
     static func isEqual(value1: Any, value2: Any, type: String) -> Bool {
         switch NotiflyValueType(rawValue: type) {
         case .string:
@@ -189,7 +223,7 @@ enum NotiflyComparingValueHelper {
         return false
     }
 
-    static func castAnyToSpecifiedType(value: Any, type: String) -> Any? {
+    static func castAnyToSpecifiedType(value: Any?, type: String) -> Any? {
         switch (value, NotiflyValueType(rawValue: type)) {
         case let (value as String, .string):
             return value

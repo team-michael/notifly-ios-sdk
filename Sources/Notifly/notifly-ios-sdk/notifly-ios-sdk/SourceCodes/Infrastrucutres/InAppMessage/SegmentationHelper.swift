@@ -87,39 +87,7 @@ enum SegmentationHelper {
         guard let values = extractValuesOfUserBasedConditionToCompare(condition: condition, eventParams: eventParams, userData: userData) else {
             return false
         }
-
-        switch condition.operator {
-        case .isNull:
-            return values.0 == nil
-        case .isNotNull:
-            return values.0 != nil
-        default:
-            let valueType = condition.valueType
-            if let userValue = NotiflyComparingValueHelper.castAnyToSpecifiedType(value: values.0, type: condition.operator == .contains ? "ARRAY" : valueType),
-               let comparisonTargetValue = NotiflyComparingValueHelper.castAnyToSpecifiedType(value: values.1, type: valueType)
-            {
-                switch condition.operator {
-                case .equal:
-                    return NotiflyComparingValueHelper.isEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
-                case .notEqual:
-                    return NotiflyComparingValueHelper.isNotEqual(value1: userValue, value2: comparisonTargetValue, type: valueType)
-                case .contains:
-                    return NotiflyComparingValueHelper.isContains(value1: userValue, value2: comparisonTargetValue, type: valueType)
-                case .greaterThan:
-                    return NotiflyComparingValueHelper.isGreaterThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
-                case .greaterOrEqualThan:
-                    return NotiflyComparingValueHelper.isGreaterOrEqualThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
-                case .lessThan:
-                    return NotiflyComparingValueHelper.isLessThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
-                case .lessOrEqualThan:
-                    return NotiflyComparingValueHelper.isLessOrEqualThan(value1: userValue, value2: comparisonTargetValue, type: valueType)
-                default:
-                    return false
-                }
-            }
-        }
-
-        return false
+        return NotiflyComparingValueHelper.compare(type: condition.valueType, sourceValue: values.0, operator: condition.operator, targetValue: values.1)
     }
 
     static func extractValuesOfUserBasedConditionToCompare(condition: NotiflySegmentation.SegmentationCondition.Conditions.UserBased.Condition, eventParams: [String: Any]?, userData: UserData) -> (Any?, Any?)? {

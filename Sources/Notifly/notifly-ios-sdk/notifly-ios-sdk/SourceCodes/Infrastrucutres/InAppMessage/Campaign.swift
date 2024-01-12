@@ -75,8 +75,10 @@ struct ModalProperties {
     }
 }
 
+typealias TriggeringEventFilterUnitArray = [TriggeringEventFilter.Unit]
+typealias TriggeringEventFilterArray = [TriggeringEventFilterUnitArray]
+
 struct TriggeringEventFilters {
-    typealias TriggeringEventFilterArray = [[TriggeringEventFilter.Unit]]
     var filters: TriggeringEventFilterArray
 
     init(from: Any) throws {
@@ -100,11 +102,10 @@ struct TriggeringEventFilters {
 }
 
 enum TriggeringEventFilter {
-    typealias TriggeringEventFilterUnitArray = [TriggeringEventFilter.Unit]
     struct Unit {
         let key: String
         let `operator`: NotiflyOperator
-        let value: NotiflyValue?
+        let targetValue: NotiflyValue?
 
         init?(from: [String: Any]) {
             guard let key = from["key"] as? String,
@@ -115,7 +116,7 @@ enum TriggeringEventFilter {
             }
             self.key = key
             self.operator = `operator`
-            value = NotiflyValue(type: from["value_type"] as? String, value: from["value"])
+            targetValue = NotiflyValue(type: from["value_type"] as? String, value: from["value"])
         }
     }
 
@@ -128,6 +129,25 @@ enum TriggeringEventFilter {
             throw NotiflyError.invalidPayload
         }
         return filters
+    }
+
+    static func matchFilterCondition(filters: TriggeringEventFilterArray, eventParams: [String: Any]?) -> Bool {
+        guard let params = eventParams, params.count > 0 else {
+            return false
+        }
+
+        func matchFilterCondition(filterUnit: TriggeringEventFilter.Unit) -> Bool {
+            guard let sourceValue = params[filterUnit.key] else {
+                return false
+            }
+            return NotiflyComparingValueHelper.compare(type: filterUnit.targetValue?.type, sourceValue: sourceValue, operator: filterUnit.operator, targetValue: filterUnit.targetValue?.value)
+        }
+
+        func matchFilterCondition(filter: TriggeringEventFilterUnitArray) -> Bool {
+            return filter.allSatisfy { matchFilterCondition(filterUnit: $0) }
+        }
+
+        return filters.contains { matchFilterCondition(filter: $0) }
     }
 }
 
