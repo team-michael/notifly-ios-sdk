@@ -81,8 +81,7 @@ class InAppMessageManager {
     private func getCampaignsShouldBeTriggered(eventName: String, eventParams: [String: Any]?) -> [Campaign]? {
         let campaignsToTrigger = userStateManager.campaignData.inAppMessageCampaigns
             .filter { isCampaignActive(campaign: $0) }
-            .filter { $0.triggeringEvent == eventName }
-//            .filter { matchTriggeringEventParamsFilterCondition(campaign: $0, eventParams: eventParams) }
+            .filter { matchTriggeringEventCondition(campaign: $0, eventName: eventName, eventParams: eventParams) }
             .filter { !isBlacklistTemplate(templateName: $0.message.modalProperties.templateName) }
             .filter { SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: userStateManager.userData, eventData: userStateManager.eventData) }
 
