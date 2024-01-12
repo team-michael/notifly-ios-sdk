@@ -66,7 +66,7 @@ enum NotiflyHelper {
 
 enum NotiflyComparingValueHelper {
     static func isEqual(value1: Any, value2: Any, type: String) -> Bool {
-        switch NotiflyVariableType(rawValue: type) {
+        switch NotiflyValueType(rawValue: type) {
         case .string:
             if let value1 = value1 as? String, let value2 = value2 as? String {
                 return value1 == value2
@@ -88,7 +88,7 @@ enum NotiflyComparingValueHelper {
     }
 
     static func isNotEqual(value1: Any, value2: Any, type: String) -> Bool {
-        switch NotiflyVariableType(rawValue: type) {
+        switch NotiflyValueType(rawValue: type) {
         case .string:
             if let value1 = value1 as? String, let value2 = value2 as? String {
                 return value1 != value2
@@ -110,7 +110,7 @@ enum NotiflyComparingValueHelper {
     }
 
     static func isLessOrEqualThan(value1: Any, value2: Any, type: String) -> Bool {
-        switch NotiflyVariableType(rawValue: type) {
+        switch NotiflyValueType(rawValue: type) {
         case .string:
             if let value1 = value1 as? String, let value2 = value2 as? String {
                 return value1 <= value2
@@ -127,7 +127,7 @@ enum NotiflyComparingValueHelper {
     }
 
     static func isLessThan(value1: Any, value2: Any, type: String) -> Bool {
-        switch NotiflyVariableType(rawValue: type) {
+        switch NotiflyValueType(rawValue: type) {
         case .string:
             if let value1 = value1 as? String, let value2 = value2 as? String {
                 return value1 < value2
@@ -144,7 +144,7 @@ enum NotiflyComparingValueHelper {
     }
 
     static func isGreaterOrEqualThan(value1: Any, value2: Any, type: String) -> Bool {
-        switch NotiflyVariableType(rawValue: type) {
+        switch NotiflyValueType(rawValue: type) {
         case .string:
             if let value1 = value1 as? String, let value2 = value2 as? String {
                 return value1 >= value2
@@ -161,7 +161,7 @@ enum NotiflyComparingValueHelper {
     }
 
     static func isGreaterThan(value1: Any, value2: Any, type: String) -> Bool {
-        switch NotiflyVariableType(rawValue: type) {
+        switch NotiflyValueType(rawValue: type) {
         case .string:
             if let value1 = value1 as? String, let value2 = value2 as? String {
                 return value1 > value2
@@ -190,7 +190,7 @@ enum NotiflyComparingValueHelper {
     }
 
     static func castAnyToSpecifiedType(value: Any, type: String) -> Any? {
-        switch (value, NotiflyVariableType(rawValue: type)) {
+        switch (value, NotiflyValueType(rawValue: type)) {
         case let (value as String, .string):
             return value
         case let (value as Int, .int):

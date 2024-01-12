@@ -56,12 +56,45 @@ enum TimeConstant {
     }
 }
 
-enum NotiflyVariableType: String {
+enum NotiflyValueType: String {
     case string = "TEXT"
     case int = "INT"
     case bool = "BOOL"
     case double = "DOUBLE"
     case array = "ARRAY"
+}
+
+struct NotiflyValue {
+    let type: NotiflyValueType
+    let value: Any?
+
+    init?(type: String?, value: Any?) {
+        guard let typeStr = type as? String,
+              let type = NotiflyValueType(rawValue: typeStr)
+        else {
+            return nil
+        }
+
+        self.type = type
+        self.value = value
+    }
+
+    static func get(value: NotiflyValue) -> Any? {
+        switch value.type {
+        case .string:
+            return value.value as? String
+        case .int:
+            return value.value as? Int
+        case .bool:
+            return value.value as? Bool
+        case .double:
+            return value.value as? Double
+        case .array:
+            return value.value as? [Any]
+        default:
+            return nil
+        }
+    }
 }
 
 enum NotiflyOperator: String {

@@ -150,7 +150,7 @@ class InAppMessageManager {
                 return
             }
             guard let vc = try? WebViewModalViewController(notiflyInAppMessageData: notiflyInAppMessageData) else {
-                Logger.error("Error presenting in-app message")
+                Logger.error("Error presenting in app message")
                 WebViewModalViewController.openedInAppMessageCount = 0
                 return
             }
@@ -162,7 +162,7 @@ class InAppMessageManager {
               let topVC = window.topMostViewController,
               !(vc.isBeingPresented)
         else {
-            Logger.error("Invalid status for presenting in-app-message.")
+            Logger.error("Fail to present in app message.")
             return false
         }
         topVC.present(vc, animated: animated, completion: completion)

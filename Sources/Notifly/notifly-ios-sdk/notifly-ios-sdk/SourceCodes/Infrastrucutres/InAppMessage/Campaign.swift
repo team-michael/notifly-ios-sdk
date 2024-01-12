@@ -14,6 +14,7 @@ struct Campaign {
     let message: Message
     let segmentInfo: NotiflySegmentation.SegmentInfo?
     let triggeringEvent: String
+    let triggeringEventFilters: TriggeringEventFilters?
     let campaignStart: Int
     let campaignEnd: Int?
     let delay: Int?
@@ -22,6 +23,11 @@ struct Campaign {
     let whitelist: [String]?
     let lastUpdatedTimestamp: Int
     let reEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
+}
+
+struct Message {
+    let htmlURL: String
+    let modalProperties: ModalProperties
 }
 
 struct ModalProperties {
@@ -69,9 +75,60 @@ struct ModalProperties {
     }
 }
 
-struct Message {
-    let htmlURL: String
-    let modalProperties: ModalProperties
+struct TriggeringEventFilters {
+    typealias TriggeringEventFilterArray = [[TriggeringEventFilter.Unit]]
+    var filters: TriggeringEventFilterArray
+
+    init(from: Any) throws {
+        print("1", from)
+        guard let from = from as? [[[String: Any]]] else {
+            throw NotiflyError.nilValueReceived
+        }
+        print("2")
+
+        filters = []
+        for filter in from {
+            guard let rawFilter = filter as? [[String: Any]] else {
+                throw NotiflyError.invalidPayload
+            }
+            guard let filter = try? TriggeringEventFilter.fromArray(rawFilter) else {
+                throw NotiflyError.invalidPayload
+            }
+            filters.append(filter)
+        }
+    }
+}
+
+enum TriggeringEventFilter {
+    typealias TriggeringEventFilterUnitArray = [TriggeringEventFilter.Unit]
+    struct Unit {
+        let key: String
+        let `operator`: NotiflyOperator
+        let value: NotiflyValue?
+
+        init?(from: [String: Any]) {
+            guard let key = from["key"] as? String,
+                  let operatorStr = from["operator"] as? String,
+                  let `operator` = NotiflyOperator(rawValue: operatorStr)
+            else {
+                return nil
+            }
+            self.key = key
+            self.operator = `operator`
+            value = NotiflyValue(type: from["value_type"] as? String, value: from["value"])
+        }
+    }
+
+    static func fromArray(_ array: [[String: Any]]) throws -> TriggeringEventFilterUnitArray {
+        let units = array.map { Unit(from: $0) }
+        if units.contains(where: { $0 == nil }) {
+            throw NotiflyError.invalidPayload
+        }
+        guard let filters = units as? TriggeringEventFilterUnitArray else {
+            throw NotiflyError.invalidPayload
+        }
+        return filters
+    }
 }
 
 enum CampaignStatus: Int {

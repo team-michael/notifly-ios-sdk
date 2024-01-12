@@ -100,7 +100,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         }
         let params = [
             "type": "message_event",
-            "channel": "in-app-message",
+            "channel": InAppMessageConstant.inAppMessageChannel,
             "campaign_id": notiflyCampaignID,
             "notifly_message_id": notiflyMessageID,
             "hide_until_data": hideUntilData ?? nil,
@@ -128,7 +128,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
             let params = [
                 "type": "message_event",
-                "channel": "in-app-message",
+                "channel": InAppMessageConstant.inAppMessageChannel,
                 "button_name": buttonName,
                 "campaign_id": notiflyCampaignID,
                 "notifly_message_id": notiflyMessageID,

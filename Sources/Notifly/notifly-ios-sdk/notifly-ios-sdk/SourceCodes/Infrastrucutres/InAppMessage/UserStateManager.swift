@@ -223,7 +223,16 @@ class UserStateManager {
                 return nil
             }
 
-            let message = Message(htmlURL: htmlURL, modalProperties: modalProperties)
+            let triggeringEventFilters: TriggeringEventFilters? = try? TriggeringEventFilters(from: campaignDict["triggering_event_filters"])
+
+            var campaignStart: Int
+            if let starts = campaignDict["starts"] as? [Int] {
+                campaignStart = starts[0]
+            } else {
+                campaignStart = 0
+            }
+            let delay = campaignDict["delay"] as? Int
+            let campaignEnd = campaignDict["end"] as? Int
 
             var reEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
             if let rawReEligibleCondition = campaignDict["re_eligible_condition"] as? [String: Any],
@@ -242,18 +251,13 @@ class UserStateManager {
                 whitelist = nil
             }
 
-            var campaignStart: Int
-            if let starts = campaignDict["starts"] as? [Int] {
-                campaignStart = starts[0]
-            } else {
-                campaignStart = 0
-            }
-            let delay = campaignDict["delay"] as? Int
-            let campaignEnd = campaignDict["end"] as? Int
             let segmentInfo = NotiflySegmentation.SegmentInfo(segmentInfoDict: segmentInfoDict)
+
+            let message = Message(htmlURL: htmlURL, modalProperties: modalProperties)
+
             let lastUpdatedTimestamp = (campaignDict["last_updated_timestamp"] as? Int) ?? 0
 
-            return Campaign(id: id, channel: channel, segmentType: segmentType, message: message, segmentInfo: segmentInfo, triggeringEvent: triggeringEvent, campaignStart: campaignStart, campaignEnd: campaignEnd, delay: delay, status: campaignStatus, testing: testing, whitelist: whitelist,
+            return Campaign(id: id, channel: channel, segmentType: segmentType, message: message, segmentInfo: segmentInfo, triggeringEvent: triggeringEvent, triggeringEventFilters: triggeringEventFilters, campaignStart: campaignStart, campaignEnd: campaignEnd, delay: delay, status: campaignStatus, testing: testing, whitelist: whitelist,
                             lastUpdatedTimestamp: lastUpdatedTimestamp, reEligibleCondition: reEligibleCondition)
         }
     }
