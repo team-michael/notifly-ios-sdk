@@ -160,7 +160,7 @@ class TrackingManager {
                 .eraseToAnyPublisher()
         }
 
-        print(externalUserID, currentTimestamp, eventName)
+        // print(externalUserID, currentTimestamp, eventName)
 
         return deviceTokenPub.tryMap { pushToken in
             if let data = TrackingData(id: UUID().uuidString,

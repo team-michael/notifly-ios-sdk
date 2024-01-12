@@ -82,11 +82,9 @@ struct TriggeringEventFilters {
     var filters: TriggeringEventFilterArray
 
     init(from: Any) throws {
-        print("1", from)
         guard let from = from as? [[[String: Any]]] else {
             throw NotiflyError.nilValueReceived
         }
-        print("2")
 
         filters = []
         for filter in from {
