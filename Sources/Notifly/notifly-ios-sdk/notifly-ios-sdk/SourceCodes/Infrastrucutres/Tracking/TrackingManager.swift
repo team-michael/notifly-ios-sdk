@@ -111,7 +111,9 @@ class TrackingManager {
         let externalUserID = notifly.userManager.externalUserID
         let currentTimestamp = AppHelper.getCurrentTimestamp()
         Notifly.keepGoingPub.flatMap { _ in
-            try? Notifly.main.inAppMessageManager.updateEventData(eventName: trackingEventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
+            try? Notifly.main.inAppMessageManager.updateEventData(userID:
+                userID,
+                eventName: trackingEventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
             return self.createTrackingRecord(eventName: eventName,
                                              eventParams: eventParams,
                                              isInternal: isInternal,

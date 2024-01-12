@@ -86,9 +86,12 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         {
             hideUntilData = [campaignID: hideUntil]
             if let main = try? Notifly.main, let manager = main.inAppMessageManager as? InAppMessageManager {
-                manager.updateHideCampaignUntilData(hideUntilData: [
-                    campaignID: hideUntil,
-                ])
+                manager.updateHideCampaignUntilData(
+                    userID: try? main.userManager.getNotiflyUserID(),
+                    hideUntilData: [
+                        campaignID: hideUntil,
+                    ]
+                )
             } else {
                 Logger.error("InAppMessage manager is not exist.")
             }

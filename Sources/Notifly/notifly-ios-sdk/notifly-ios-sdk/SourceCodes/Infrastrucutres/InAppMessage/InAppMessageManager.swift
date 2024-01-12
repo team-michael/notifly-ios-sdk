@@ -13,14 +13,21 @@ import UIKit
 @available(iOSApplicationExtension, unavailable)
 class InAppMessageManager {
     let userStateManager: UserStateManager
-    init() {
-        userStateManager = UserStateManager()
+
+    init(owner: String?) {
+        userStateManager = UserStateManager(owner: owner)
     }
 
-    func updateUserProperties(properties: [String: Any]) {
+    func updateUserProperties(userID: String?, properties: [String: Any]) {
         guard !Notifly.inAppMessageDisabled else {
             return
         }
+
+        guard userID == userStateManager.owner else {
+            Logger.error("Fail to update client-side user state (user properties): owner mismatch")
+            return
+        }
+
         Notifly.keepGoingPub.sink(
             receiveCompletion: { _ in },
             receiveValue: { _ in self.userStateManager.userData.userProperties.merge(properties) { _, new in new }}
@@ -28,10 +35,16 @@ class InAppMessageManager {
         .store(in: &Notifly.cancellables)
     }
 
-    func updateEventData(eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) {
+    func updateEventData(userID: String?, eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) {
         guard !Notifly.inAppMessageDisabled else {
             return
         }
+
+        guard userID == userStateManager.owner else {
+            Logger.error("Fail to update client-side user state (event): owner mismatch")
+            return
+        }
+
         if var campaignsToTrigger = getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams)
         {
             campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
@@ -44,10 +57,16 @@ class InAppMessageManager {
         userStateManager.incrementEic(eventName: eventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
     }
 
-    func updateHideCampaignUntilData(hideUntilData: [String: Int]) {
+    func updateHideCampaignUntilData(userID: String?, hideUntilData: [String: Int]) {
         guard !Notifly.inAppMessageDisabled else {
             return
         }
+
+        guard userID == userStateManager.owner else {
+            Logger.error("Fail to update client-side user state (user campaign hidden until): owner mismatch")
+            return
+        }
+
         Notifly.keepGoingPub.sink(
             receiveCompletion: { _ in },
             receiveValue: { _ in
@@ -86,12 +105,13 @@ class InAppMessageManager {
         if campaign.triggeringEvent != eventName {
             return false
         }
-        
+
         if let paramsFilterCondition = campaign.triggeringEventFilters,
-           !TriggeringEventFilter.matchFilterCondition(filters: paramsFilterCondition.filters, eventParams: eventParams) {
+           !TriggeringEventFilter.matchFilterCondition(filters: paramsFilterCondition.filters, eventParams: eventParams)
+        {
             return false
         }
-        
+
         return true
     }
 

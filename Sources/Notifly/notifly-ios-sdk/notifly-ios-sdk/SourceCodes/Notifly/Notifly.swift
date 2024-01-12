@@ -53,7 +53,7 @@ import UIKit
         userManager = UserManager()
 
         notificationsManager = NotificationsManager()
-        inAppMessageManager = InAppMessageManager()
+        inAppMessageManager = InAppMessageManager(owner: (try? userManager.getNotiflyUserID()))
         super.init()
         Notifly._main = self
     }

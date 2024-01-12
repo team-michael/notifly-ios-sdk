@@ -11,6 +11,7 @@ import Foundation
 
 @available(iOSApplicationExtension, unavailable)
 class UserStateManager {
+    var owner: String?
     var campaignData: CampaignData = .init(inAppMessageCampaigns: [])
     var userData: UserData = .init(data: [:])
     var eventData: EventData = .init(eventCounts: [:])
@@ -53,6 +54,10 @@ class UserStateManager {
     var waitSyncStateCompletedPubs: [AnyPublisher<Void, Error>] = []
     var resolveLockPromises: [Future<Void, Error>.Promise] = []
     var tasksHandlingTimeout: [DispatchWorkItem] = []
+
+    init(owner: String?) {
+        self.owner = owner
+    }
 
     /* manage sync state finished pub */
     func lock() -> Int {
@@ -146,10 +151,9 @@ class UserStateManager {
                 }
 
                 let userDataAsEventParams = self?.userData.destruct()
-                print(userDataAsEventParams)
                 try? Notifly.main.trackingManager.trackSyncStateCompletedInternalEvent(properties: userDataAsEventParams)
-
                 Logger.info("Sync State Completed. \(lockId)")
+                self?.owner = notiflyUserID
                 self?.unlock(lockId: lockId)
             })
             .store(in: &Notifly.cancellables)

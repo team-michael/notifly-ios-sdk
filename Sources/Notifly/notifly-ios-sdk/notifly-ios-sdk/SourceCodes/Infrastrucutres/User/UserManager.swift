@@ -60,8 +60,7 @@ class UserManager {
             if shouldRequestSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: newExternalUserID) {
                 notifly.inAppMessageManager.userStateManager.syncState(postProcessConfig: postProcessConfigForSyncState)
             }
-
-            notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.setUserPropertiesEventName, eventParams: data)
+            setUserProperties(data)
 
         } else {
             Logger.error("Fail to Set User Id.")
@@ -89,7 +88,10 @@ class UserManager {
             Logger.error("Fail to Set User Properties: Notifly is not initialized yet.")
             return
         }
-        notifly.inAppMessageManager.updateUserProperties(properties: userProperties)
+        notifly.inAppMessageManager.updateUserProperties(
+            userID: (try? getNotiflyUserID()),
+            properties: userProperties
+        )
         notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.setUserPropertiesEventName, eventParams: userProperties)
     }
 
