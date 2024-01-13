@@ -155,10 +155,37 @@ struct UserData {
 
 struct CampaignData {
     var inAppMessageCampaigns: [Campaign]
+
+    init(from: [[String: Any]]) {
+        inAppMessageCampaigns = from.compactMap { Campaign(from: $0) }
+    }
 }
 
 struct EventData {
     var eventCounts: [String: EventIntermediateCount]
+    init(from: [[String: Any]]) {
+        eventCounts = from
+            .compactMap { EventIntermediateCount(from: $0) }
+            .reduce(into: [String: EventIntermediateCount]()) { result, eventIntermediateCount in
+                let id = EventIntermediateCount.generateId(eventName: eventIntermediateCount.name, eventParams: eventIntermediateCount.eventParams, segmentationEventParamKeys: eventIntermediateCount.eventParams.keys.sorted(), dt: eventIntermediateCount.dt)
+                if var existingEventIntermediateCount = result[id] {
+                    existingEventIntermediateCount.addCount(count: eventIntermediateCount.count)
+                } else {
+                    result[id] = eventIntermediateCount
+                }
+            }
+    }
+
+    init(eventCounts: [String: EventIntermediateCount]) {
+        self.eventCounts = eventCounts
+    }
+
+    static func merge(p1: EventData, p2: EventData) -> EventData {
+        var mergedEventCounts: [String: EventIntermediateCount] = [:]
+        mergedEventCounts.merge(p2.eventCounts) { _, new in new }
+        mergedEventCounts.merge(p1.eventCounts) { _, new in new }
+        return EventData(eventCounts: mergedEventCounts)
+    }
 }
 
 struct EventIntermediateCount {
@@ -166,6 +193,58 @@ struct EventIntermediateCount {
     let dt: String
     var count: Int
     let eventParams: [String: Any]
+
+    init?(from: [String: Any]) {
+        guard let name = from["name"] as? String,
+              let dt = from["dt"] as? String,
+              let count = from["count"] as? Int,
+              let eventParams = from["event_params"] as? [String: Any]
+        else {
+            return nil
+        }
+        self.name = name
+        self.dt = dt
+        self.count = count
+        self.eventParams = eventParams
+    }
+
+    init(name: String, dt: String, count: Int, eventParams: [String: Any]) {
+        self.name = name
+        self.dt = dt
+        self.count = count
+        self.eventParams = eventParams
+    }
+
+    static func generateId(eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?, dt: String) -> String {
+        var eicID = eventName + InAppMessageConstant.eicIdSeparator + dt
+        guard let selectedEventParams = EicHelper.selectEventParamsWithKeys(eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys),
+              let (selectedKey, selectedValue) = selectedEventParams.first
+        else {
+            return eicID + String(repeating: InAppMessageConstant.eicIdSeparator, count: 2)
+        }
+
+        return eicID + InAppMessageConstant.eicIdSeparator + selectedKey + InAppMessageConstant.eicIdSeparator + selectedValue
+    }
+
+    mutating func addCount(count: Int) {
+        self.count = self.count + count
+    }
+}
+
+enum EicHelper {
+    static func selectEventParamsWithKeys(eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) -> [String: String]? {
+        if let segmentationEventParamKeys = segmentationEventParamKeys,
+           let eventParams = eventParams,
+           segmentationEventParamKeys.count > 0,
+           eventParams.count > 0
+        {
+            let keyField = segmentationEventParamKeys[0]
+            if let value = eventParams[keyField] as? String {
+                return [keyField: value]
+            }
+        }
+        return nil
+    }
 }
 
 struct PostProcessConfigForSyncState {

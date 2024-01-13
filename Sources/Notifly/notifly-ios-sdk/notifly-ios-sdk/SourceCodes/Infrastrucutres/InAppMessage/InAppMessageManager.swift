@@ -23,14 +23,15 @@ class InAppMessageManager {
             return
         }
 
-        guard userID == userStateManager.owner else {
-            Logger.error("Fail to update client-side user state (user properties): owner mismatch")
-            return
-        }
-
         Notifly.keepGoingPub.sink(
             receiveCompletion: { _ in },
-            receiveValue: { _ in self.userStateManager.userData.userProperties.merge(properties) { _, new in new }}
+            receiveValue: { _ in
+                guard userID == self.userStateManager.owner else {
+                    Logger.error("Fail to update client-side user state (user properties): owner mismatch")
+                    return
+                }
+                self.userStateManager.userData.userProperties.merge(properties) { _, new in new }
+            }
         )
         .store(in: &Notifly.cancellables)
     }
@@ -121,7 +122,6 @@ class InAppMessageManager {
             return hide
         }
         guard let hideUntil = userStateManager.userData.userProperties[propertyKeyForBlacklist] as? Int else {
-            Logger.error("Invalid user hide_in_app_message property.")
             return false
         }
 
@@ -156,7 +156,7 @@ class InAppMessageManager {
         let campaignId = campaign.id
         let urlString = campaign.message.htmlURL
         let modalProperties = campaign.message.modalProperties
-        let delay = DispatchTimeInterval.seconds(campaign.delay ?? 0)
+        let delay = DispatchTimeInterval.seconds(campaign.delay)
         let deadline = DispatchTime.now() + delay
 
         if let url = URL(string: urlString) {

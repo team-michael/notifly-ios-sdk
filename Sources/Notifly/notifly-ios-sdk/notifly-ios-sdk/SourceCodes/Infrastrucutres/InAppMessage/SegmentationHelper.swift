@@ -8,8 +8,7 @@
 enum SegmentationHelper {
     static func isEntityOfSegment(campaign: Campaign, eventParams: [String: Any]?, userData: UserData, eventData: EventData) -> Bool {
         // now only support for the condition-based-segment type
-        guard let segmentationType = NotiflySegmentation.SegmentationType(rawValue: campaign.segmentType),
-              segmentationType == .conditionBased,
+        guard campaign.segmentType == .conditionBased,
               let segmentInfo = campaign.segmentInfo
         else {
             return false

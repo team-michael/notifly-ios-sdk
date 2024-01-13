@@ -82,11 +82,22 @@ class TrackingManager {
         )
     }
 
-    func trackSyncStateCompletedInternalEvent(properties: [String: Any]?) {
-        return trackInternalEvent(
-            eventName: TrackingConstant.Internal.syncStateCompletedEventName,
-            eventParams: properties
-        )
+    func trackSyncStateCompletedInternalEvent(userID: String, externalUserID: String?, properties: [String: Any]?) {
+        let currentTimestamp = AppHelper.getCurrentTimestamp()
+        createTrackingRecord(eventName: TrackingConstant.Internal.syncStateCompletedEventName,
+                             eventParams: properties,
+                             isInternal: true,
+                             segmentationEventParamKeys: nil,
+                             currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID)
+            .sink(receiveCompletion: { completion in
+                      if case let .failure(error) = completion {
+                          Logger.error("Failed to Track Event \(TrackingConstant.Internal.syncStateCompletedEventName). Error: \(error)")
+                      }
+                  },
+                  receiveValue: { [weak self] record in
+                      self?.internalEventPublisher.send(record)
+                  })
+            .store(in: &cancellables)
     }
 
     func trackInternalEvent(eventName: String, eventParams: [String: Any]?) {
@@ -160,8 +171,7 @@ class TrackingManager {
                 .eraseToAnyPublisher()
         }
 
-        // print(externalUserID, currentTimestamp, eventName)
-
+        print(externalUserID, currentTimestamp, eventName, userID)
         return deviceTokenPub.tryMap { pushToken in
             if let data = TrackingData(id: UUID().uuidString,
                                        name: eventName,

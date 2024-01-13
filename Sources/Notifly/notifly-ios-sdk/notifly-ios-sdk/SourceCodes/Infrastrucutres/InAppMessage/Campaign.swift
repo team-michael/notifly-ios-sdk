@@ -9,20 +9,86 @@ import Foundation
 
 struct Campaign {
     let id: String
+
     let channel: String
-    let segmentType: String
-    let message: Message
-    let segmentInfo: NotiflySegmentation.SegmentInfo?
+    let status: CampaignStatus
+
     let triggeringEvent: String
     let triggeringEventFilters: TriggeringEventFilters?
+
     let campaignStart: Int
     let campaignEnd: Int?
-    let delay: Int?
-    let status: CampaignStatus
+    let delay: Int
+    let reEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
+
     let testing: Bool
     let whitelist: [String]?
+
+    let segmentType: NotiflySegmentation.SegmentationType
+    let segmentInfo: NotiflySegmentation.SegmentInfo?
+
+    let message: Message
+
     let lastUpdatedTimestamp: Int
-    let reEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
+
+    init?(from: [String: Any]) {
+        guard let id = from["id"] as? String,
+              let channel = from["channel"] as? String,
+              channel == InAppMessageConstant.inAppMessageChannel,
+
+              let rawStatusValue = from["status"] as? Int,
+              let campaignStatus = CampaignStatus(rawValue: rawStatusValue),
+              campaignStatus == .active,
+
+              let triggeringEvent = from["triggering_event"] as? String,
+
+              let testing = from["testing"] as? Bool,
+
+              let messageDict = from["message"] as? [String: Any],
+              let htmlURL = messageDict["html_url"] as? String,
+              let modalProperties = ModalProperties(properties: messageDict["modal_properties"] as? [String: Any]),
+
+              let rawSegmentType = from["segment_type"] as? String,
+              let segmentType = NotiflySegmentation.SegmentationType(rawValue: rawSegmentType),
+              segmentType == .conditionBased,
+              let segmentInfoDict = from["segment_info"] as? [String: Any]
+
+        else {
+            return nil
+        }
+
+        self.id = id
+
+        self.channel = channel
+        status = campaignStatus
+
+        self.triggeringEvent = triggeringEvent
+        triggeringEventFilters = try? TriggeringEventFilters(from: from["triggering_event_filters"])
+
+        let campaignStarts: [Int] = (from["starts"] as? [Int]) ?? []
+        campaignStart = campaignStarts.count > 0 ? campaignStarts[0] : 0
+        campaignEnd = from["end"] as? Int
+        delay = (from["delay"] as? Int) ?? 0
+        reEligibleCondition = NotiflyReEligibleConditionEnum.ReEligibleCondition(from: from["reEligibleCondition"] as? [String: Any])
+
+        self.testing = testing
+        self.whitelist = testing ? from["whitelist"] as? [String] : []
+
+        self.segmentType = segmentType
+        segmentInfo = NotiflySegmentation.SegmentInfo(from: segmentInfoDict)
+
+        message = Message(htmlURL: htmlURL, modalProperties: modalProperties)
+
+        lastUpdatedTimestamp = (from["last_updated_timestamp"] as? Int) ?? 0
+    }
+}
+
+enum CampaignStatus: Int {
+    case invalid = -1
+    case draft = 0
+    case active = 1
+    case inactive = 2
+    case completed = 3
 }
 
 struct Message {
@@ -50,7 +116,10 @@ struct ModalProperties {
     let backgroundOpacity: CGFloat?
     let dismissCTATapped: Bool?
 
-    init?(properties: [String: Any]) {
+    init?(properties: [String: Any]?) {
+        guard let properties = properties else {
+            return nil
+        }
         guard let name = properties["template_name"] as? String else {
             return nil
         }
@@ -81,7 +150,7 @@ typealias TriggeringEventFilterArray = [TriggeringEventFilterUnitArray]
 struct TriggeringEventFilters {
     var filters: TriggeringEventFilterArray
 
-    init(from: Any) throws {
+    init(from: Any?) throws {
         guard let from = from as? [[[String: Any]]] else {
             throw NotiflyError.nilValueReceived
         }
@@ -149,13 +218,6 @@ enum TriggeringEventFilter {
     }
 }
 
-enum CampaignStatus: Int {
-    case draft = 0
-    case active = 1
-    case inactive = 2
-    case completed = 3
-}
-
 enum NotiflySegmentation {
     enum SegmentationType: String {
         case conditionBased = "condition"
@@ -165,8 +227,8 @@ enum NotiflySegmentation {
         let groups: [SegmentationGroup.Group]?
         let groupOperator: SegmentationGroup.GroupOperator?
 
-        init(segmentInfoDict: [String: Any]) {
-            let rawGroups = segmentInfoDict["groups"] as? [[String: Any]] ?? []
+        init(from: [String: Any]) {
+            let rawGroups = from["groups"] as? [[String: Any]] ?? []
             groups = rawGroups.compactMap { groupDict -> NotiflySegmentation.SegmentationGroup.Group? in
                 guard let conditionDictionaries = groupDict["conditions"] as? [[String: Any]] else {
                     return nil
@@ -191,7 +253,7 @@ enum NotiflySegmentation {
                 let conditionOperator = (groupDict["condition_operator"] as? String) ?? InAppMessageConstant.segmentInfoDefaultConditionOperator
                 return SegmentationGroup.Group(conditions: conditions ?? [], conditionOperator: conditionOperator)
             }
-            groupOperator = SegmentationGroup.GroupOperator(rawValue: segmentInfoDict["group_operator"] as? String ?? InAppMessageConstant.segmentInfoDefaultGroupOperator) ?? .or
+            groupOperator = SegmentationGroup.GroupOperator(rawValue: from["group_operator"] as? String ?? InAppMessageConstant.segmentInfoDefaultGroupOperator) ?? .or
         }
     }
 
@@ -317,9 +379,12 @@ enum NotiflyReEligibleConditionEnum {
         let value: Int
         let unit: String
 
-        init?(data: [String: Any]) {
-            guard let unit = data["unit"] as? String,
-                  let value = data["value"] as? Int
+        init?(from: [String: Any]?) {
+            guard let from = from else {
+                return nil
+            }
+            guard let unit = from["unit"] as? String,
+                  let value = from["value"] as? Int
             else {
                 return nil
             }
