@@ -66,7 +66,6 @@ class UserStateManager {
             self?.resolveLockPromises.append(promise)
         }.eraseToAnyPublisher()
         waitSyncStateCompletedPubs.append(waitSyncStateCompletedPub)
-        Logger.error("LOCK \(lockId)")
         return lockId
     }
 
@@ -83,7 +82,6 @@ class UserStateManager {
         if let task = tasksHandlingTimeout[safe: lockId] {
             task.cancel()
         }
-        Logger.error("UNLOCK \(lockId)")
     }
 
     private func setTimeoutForLock(lockId: Int) {
@@ -94,7 +92,20 @@ class UserStateManager {
         DispatchQueue.main.asyncAfter(deadline: .now() + UserStateConstant.syncStateLockTimeout, execute: newTask)
     }
 
-    /* sync state */
+    /* change owner of current state */
+    func changeOwner(userID: String?) {
+        guard !Notifly.inAppMessageDisabled else {
+            return
+        }
+
+        guard let userID = userID else {
+            return
+        }
+
+        owner = userID
+    }
+
+    /* sync state from notifly server */
     func syncState(postProcessConfig: PostProcessConfigForSyncState) {
         guard let notifly = (try? Notifly.main) else {
             return
@@ -146,16 +157,16 @@ class UserStateManager {
                         self?.constructEventData(rawEventData: rawEventData, postProcessConfig: postProcessConfig)
                     }
 
-                    if let campaignData = decodedData["campaignData"] as? [[String: Any]] {
-                        self?.constructCampaignData(campaignData: campaignData)
+                    if let rawCampaignData = decodedData["campaignData"] as? [[String: Any]] {
+                        self?.constructCampaignData(rawCampaignData: rawCampaignData)
                     }
                 }
 
                 let userDataAsEventParams = self?.userData.destruct()
                 try? Notifly.main.trackingManager.trackSyncStateCompletedInternalEvent(userID: notiflyUserID, externalUserID: externalUserID, properties: userDataAsEventParams)
-                Logger.info("Sync State Completed. \(lockId)")
+                Logger.info("Sync State Completed.")
                 self?.owner = notiflyUserID
-                Logger.info("Owner: \(String(describing: self?.owner))")
+
                 self?.unlock(lockId: lockId)
             })
             .store(in: &Notifly.cancellables)
@@ -172,7 +183,7 @@ class UserStateManager {
         }
 
         if postProcessConfig.clear {
-            userData.clearUserData()
+            userData.clear()
         }
     }
 
@@ -182,8 +193,8 @@ class UserStateManager {
         eventData = EventData.merge(p1: existing, p2: new)
     }
 
-    private func constructCampaignData(campaignData: [[String: Any]]) {
-        self.campaignData = CampaignData(from: campaignData)
+    private func constructCampaignData(rawCampaignData: [[String: Any]]) {
+        campaignData = CampaignData(from: rawCampaignData)
     }
 
     /* update client state */
@@ -195,6 +206,13 @@ class UserStateManager {
         } else {
             eventData.eventCounts[eicID] = EventIntermediateCount(name: eventName, dt: dt, count: 1, eventParams: eventParams ?? [:])
         }
+    }
+
+    func getUserData(userID: String) -> UserData? {
+        guard owner == userID else {
+            return nil
+        }
+        return userData
     }
 }
 

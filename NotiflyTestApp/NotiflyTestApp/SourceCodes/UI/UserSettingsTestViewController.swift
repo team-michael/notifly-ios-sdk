@@ -32,15 +32,19 @@ class UserSettingsTestViewController: UIViewController {
     func submitUserIDTrackingEventWithCurrentInput() throws {
         let userID = userIDTextField.checkAndRetrieveValueText(changeBorderColorOnError: false)
         let multiple = 1
-        // for testing
-        for i in 0 ..< 10 {
-            Notifly.setUserId(userId: nil)
-            // Notifly.setUserId(userId:( userID ?? ""))
-            // Notifly.trackEvent(eventName: "ABC")
-            // Notifly.track
 
-            Notifly.setUserId(userId: (userID ?? "") + "\(i)")
-            // Notifly.setUserProperties(userProperties: ["test": "test\(i)"])
+        // Notifly.setUserId(userId: userID)
+        // Notifly.trackEvent(eventName: "ios", eventParams: ["abcde": [123]]) // true
+        // Notifly.trackEvent(eventName: "ios", eventParams: ["abcde": ["1234"]]) // false
+        // Notifly.trackEvent(eventName: "ios", eventParams: ["abcde": ["1234"], "abc": "123"]) // false
+        // Notifly.trackEvent(eventName: "ios", eventParams: ["abcde": ["1234"], "abc": "123", "abcd": -1]) // false
+        // Notifly.trackEvent(eventName: "ios", eventParams: ["abcde": ["1234"], "abc": "123", "abcd": 1]) // true
+        // Notifly.trackEvent(eventName: "ios", eventParams: ["abcde": ["1234"], "abc": "1234", "abcd": "12"]) // false
+
+        for _ in 0 ..< 1 {
+            // Notifly.setUserId(userId: nil)
+            Notifly.setUserId(userId: userID)
+            Notifly.trackEvent(eventName: "ios", eventParams: ["abcde": ["1234"], "abc": "123", "abcd": 1]) // true
         }
 
         userIDTrackingResponseTextView.text = "User ID successfully set to: \(userID ?? "<null>")"

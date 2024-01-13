@@ -83,34 +83,35 @@ enum SegmentationHelper {
     }
 
     static func matchUserBasedCondition(condition: NotiflySegmentation.SegmentationCondition.Conditions.UserBased.Condition, eventParams: [String: Any]?, userData: UserData) -> Bool {
-        guard let values = extractValuesOfUserBasedConditionToCompare(condition: condition, eventParams: eventParams, userData: userData) else {
-            return false
-        }
-        return NotiflyComparingValueHelper.compare(type: condition.valueType, sourceValue: values.0, operator: condition.operator, targetValue: values.1)
+        let sourceValue = selectSourceValueFromUserData(condition: condition, userData: userData)
+        let targetValue = selectTargetValue(condition: condition, eventParams: eventParams)
+
+        return NotiflyComparingValueHelper.compare(type: condition.valueType, sourceValue: sourceValue, operator: condition.operator, targetValue: targetValue)
     }
 
-    static func extractValuesOfUserBasedConditionToCompare(condition: NotiflySegmentation.SegmentationCondition.Conditions.UserBased.Condition, eventParams: [String: Any]?, userData: UserData) -> (Any?, Any?)? {
+    static func selectSourceValueFromUserData(condition: NotiflySegmentation.SegmentationCondition.Conditions.UserBased.Condition, userData: UserData) -> Any? {
         var userRawValue: Any?
         if condition.unit == .user {
             userRawValue = userData.userProperties[condition.attribute]
         } else {
             userRawValue = userData.get(key: condition.attribute)
         }
+        return userRawValue
+    }
 
-        var comparisonTargetRawValue: Any?
+    static func selectTargetValue(condition: NotiflySegmentation.SegmentationCondition.Conditions.UserBased.Condition, eventParams: [String: Any]?) -> Any? {
         let useEventParamsAsCondition = condition.useEventParamsAsCondition
-        if useEventParamsAsCondition {
-            guard let eventParams = eventParams,
-                  let key = condition.comparisonParameter,
-                  let value = eventParams[key]
-            else {
-                return nil
-            }
-            comparisonTargetRawValue = value
-        } else {
-            comparisonTargetRawValue = condition.value
+        if !useEventParamsAsCondition {
+            return condition.value
         }
-        return (userRawValue, comparisonTargetRawValue)
+
+        guard let eventParams = eventParams,
+              let key = condition.comparisonParameter,
+              let value = eventParams[key]
+        else {
+            return nil
+        }
+        return value
     }
 
     static func matchEventBasedCondition(condition: NotiflySegmentation.SegmentationCondition.Conditions.EventBased.Condition, eventData: EventData) -> Bool {

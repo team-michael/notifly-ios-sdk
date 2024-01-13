@@ -69,10 +69,10 @@ struct Campaign {
         campaignStart = campaignStarts.count > 0 ? campaignStarts[0] : 0
         campaignEnd = from["end"] as? Int
         delay = (from["delay"] as? Int) ?? 0
-        reEligibleCondition = NotiflyReEligibleConditionEnum.ReEligibleCondition(from: from["reEligibleCondition"] as? [String: Any])
+        reEligibleCondition = NotiflyReEligibleConditionEnum.ReEligibleCondition(from: from["re_eligible_condition"] as? [String: Any])
 
         self.testing = testing
-        self.whitelist = testing ? from["whitelist"] as? [String] : []
+        whitelist = testing ? from["whitelist"] as? [String] : []
 
         self.segmentType = segmentType
         segmentInfo = NotiflySegmentation.SegmentInfo(from: segmentInfoDict)

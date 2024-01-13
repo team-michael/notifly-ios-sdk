@@ -35,8 +35,9 @@ struct UserData {
         appVersion = data["app_version"] as? String
         sdkVersion = data["sdk_version"] as? String
         sdkType = data["sdk_type"] as? String
-        randomBucketNumber = data["random_bucket_number"] as? Int
-
+        randomBucketNumber = NotiflyHelper.parseRandomBucketNumber(num: data["random_bucket_number"])
+        
+        
         if let createdAtStr = data["created_at"] as? String {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
@@ -114,7 +115,7 @@ struct UserData {
         return UserData(data: data)
     }
 
-    mutating func clearUserData() {
+    mutating func clear() {
         userProperties = [:]
         campaignHiddenUntil = [:]
         updatedAt = TimeInterval(AppHelper.getCurrentTimestamp(unit: .second))
@@ -185,6 +186,10 @@ struct EventData {
         mergedEventCounts.merge(p2.eventCounts) { _, new in new }
         mergedEventCounts.merge(p1.eventCounts) { _, new in new }
         return EventData(eventCounts: mergedEventCounts)
+    }
+
+    mutating func clear() {
+        eventCounts = [:]
     }
 }
 

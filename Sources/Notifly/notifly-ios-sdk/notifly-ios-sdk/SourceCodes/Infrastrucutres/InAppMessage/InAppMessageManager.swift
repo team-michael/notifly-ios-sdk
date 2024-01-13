@@ -51,7 +51,7 @@ class InAppMessageManager {
             campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
             for campaignToTrigger in campaignsToTrigger {
                 if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger) {
-                    showInAppMessage(notiflyInAppMessageData: notiflyInAppMessageData)
+                    showInAppMessage(userID: userID, notiflyInAppMessageData: notiflyInAppMessageData)
                 }
             }
         }
@@ -83,7 +83,6 @@ class InAppMessageManager {
         let campaignsToTrigger = userStateManager.campaignData.inAppMessageCampaigns
             .filter { isCampaignActive(campaign: $0) }
             .filter { matchTriggeringEventCondition(campaign: $0, eventName: eventName, eventParams: eventParams) }
-            .filter { !isBlacklistTemplate(templateName: $0.message.modalProperties.templateName) }
             .filter { SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: userStateManager.userData, eventData: userStateManager.eventData) }
 
         if campaignsToTrigger.count == 0 {
@@ -115,13 +114,13 @@ class InAppMessageManager {
         return true
     }
 
-    private func isBlacklistTemplate(templateName: String) -> Bool {
+    private func isBlacklistTemplate(templateName: String, userData: UserData) -> Bool {
         let outdatedPropertyKeyForBlacklist = "hide_in_app_message_" + templateName
         let propertyKeyForBlacklist = "hide_in_app_message_until_" + templateName
-        if let hide = userStateManager.userData.userProperties[outdatedPropertyKeyForBlacklist] as? Bool {
+        if let hide = userData.userProperties[outdatedPropertyKeyForBlacklist] as? Bool {
             return hide
         }
-        guard let hideUntil = userStateManager.userData.userProperties[propertyKeyForBlacklist] as? Int else {
+        guard let hideUntil = userData.userProperties[propertyKeyForBlacklist] as? Int else {
             return false
         }
 
@@ -138,9 +137,9 @@ class InAppMessageManager {
         return true
     }
 
-    private func isHiddenCampaign(campaignID: String) -> Bool {
-        let now = AppHelper.getCurrentTimestamp(unit: .second)
-        if let hideUntil = userStateManager.userData.campaignHiddenUntil[campaignID] {
+    private func isHiddenCampaign(campaignID: String, userData: UserData) -> Bool {
+        if let hideUntil = userData.campaignHiddenUntil[campaignID] {
+            let now = AppHelper.getCurrentTimestamp(unit: .second)
             if hideUntil == NotiflyReEligibleConditionEnum.defaultValue {
                 return true
             }
@@ -165,13 +164,32 @@ class InAppMessageManager {
         return nil
     }
 
-    private func showInAppMessage(notiflyInAppMessageData: InAppMessageData) {
+    private func showInAppMessage(userID: String?, notiflyInAppMessageData: InAppMessageData) {
+        guard let userID = userID else {
+            return
+        }
         DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline) {
+            guard let currentUserID = try? Notifly.main.userManager.getNotiflyUserID(), userID == currentUserID else {
+                Logger.error("Skip to present in app message schedule: user id is changed.")
+                return
+            }
+
+            guard let currentStateOfUser = self.userStateManager.getUserData(userID: userID)
+            else {
+                Logger.error("Skip to present in app message schedule: current state owner is changed.")
+                return
+            }
+
             if let reEligibleCondition = notiflyInAppMessageData.notiflyReEligibleCondition {
-                guard !self.isHiddenCampaign(campaignID: notiflyInAppMessageData.notiflyCampaignId) else {
+                guard !self.isHiddenCampaign(campaignID: notiflyInAppMessageData.notiflyCampaignId, userData: currentStateOfUser) else {
                     return
                 }
             }
+
+            guard !self.isBlacklistTemplate(templateName: notiflyInAppMessageData.modalProps.templateName, userData: currentStateOfUser) else {
+                return
+            }
+
             guard WebViewModalViewController.openedInAppMessageCount == 0 else {
                 Logger.error("Already In App Message Opened. New In App Message Ignored.")
                 return
