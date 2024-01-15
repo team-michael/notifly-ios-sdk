@@ -43,7 +43,8 @@ import UIKit
             }
             Notifly.coldStartNotificationData = nil
         }
-        main.inAppMessageManager.syncState(merge: false)
+        main.inAppMessageManager.userStateManager.syncState(postProcessConfig:
+            PostProcessConfigForSyncState(merge: false, clear: false))
         Messaging.messaging().token { token, error in
             if let token = token,
                error == nil
@@ -52,8 +53,8 @@ import UIKit
                 main.notificationsManager.setDeviceTokenPub(token: token)
             }
             try? main.trackingManager.trackSessionStartInternalEvent()
+            Logger.info("📡 Notifly SDK is successfully initialized.")
         }
-        Logger.info("📡 Notifly SDK is successfully initialized.")
     }
 
     static func application(_ application: UIApplication,

@@ -1,7 +1,8 @@
 import Foundation
 
 enum NotiflyConstant {
-    static let sdkVersion: String = "1.3.0"
+    static let sdkVersion: String = "1.4.0"
+    static let iosPlatform: String = "ios"
     enum EndPoint {
         static let trackEventEndPoint = "https://12lnng07q2.execute-api.ap-northeast-2.amazonaws.com/prod/records"
         static let syncStateEndPoint = "https://api.notifly.tech/user-state"
@@ -22,18 +23,15 @@ enum TrackingConstant {
 
         static let sessionStartEventName = "session_start"
         static let setDevicePropertiesEventName = "set_device_properties"
-
-        // MARK: User Properties
+        static let syncStateCompletedEventName = "sync_state_completed"
 
         static let setUserPropertiesEventName = "set_user_properties"
         static let removeUserPropertiesEventName = "remove_external_user_id"
+
         static let notiflyExternalUserID = "external_user_id"
         static let notiflyUserID = "notifly_user_id"
         static let previousNotiflyUserID = "previous_notifly_user_id"
         static let previousExternalUserID = "previous_external_user_id"
-        static let setUserProperties = "set_user_properties"
-
-        // MARK: Push Notification Handlling
 
         static let pushClickEventName = "push_click"
         static let pushNotificationMessageShown = "push_delivered"
@@ -43,4 +41,51 @@ enum TrackingConstant {
         static let inAppMessageDontShowAgainButtonClicked = "hide_in_app_message_button_click"
         static let inAppMessageSurveySubmitButtonClicked = "survey_submit_button_click"
     }
+}
+
+enum TimeConstant {
+    static let oneMinuteInSeconds = 60
+    static let oneHourInSeconds = 60 * oneMinuteInSeconds
+    static let oneDayInSeconds = 24 * oneHourInSeconds
+    static let oneWeekInSeconds = 7 * oneDayInSeconds
+    static let oneMonthInSeconds = 30 * oneDayInSeconds
+
+    enum TimestampUnit: Int {
+        case second = 1
+        case microsecond = 1_000_000
+    }
+}
+
+enum NotiflyValueType: String {
+    case string = "TEXT"
+    case int = "INT"
+    case bool = "BOOL"
+    case double = "DOUBLE"
+    case array = "ARRAY"
+}
+
+struct NotiflyValue {
+    let type: String?
+    let value: Any?
+
+    init?(type: String?, value: Any?) {
+        guard let type = type else {
+            return nil
+        }
+        
+        self.type = type
+        self.value = value
+    }
+}
+
+enum NotiflyOperator: String {
+    case isNull = "IS_NULL"
+    case isNotNull = "IS_NOT_NULL"
+    case equal = "="
+    case notEqual = "<>"
+    case contains = "@>"
+    case greaterThan = ">"
+    case greaterOrEqualThan = ">="
+    case lessThan = "<"
+    case lessOrEqualThan = "<="
 }

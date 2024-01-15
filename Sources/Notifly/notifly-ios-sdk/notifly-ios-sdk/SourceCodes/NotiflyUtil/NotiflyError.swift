@@ -6,5 +6,7 @@ enum NotiflyError: Error {
     case notInitialized
     case promiseTimeout
     case deviceTokenError
+    case invalidPayload
+    case nilValueReceived
     case unexpectedNil(_ descripiton: String)
 }

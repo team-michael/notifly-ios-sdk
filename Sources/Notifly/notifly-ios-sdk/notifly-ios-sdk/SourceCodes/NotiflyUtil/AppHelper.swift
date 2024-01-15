@@ -1,7 +1,6 @@
 import Foundation
 import Security
 import UIKit
-
 class AppHelper {
     static func getNotiflyDeviceID() -> String? {
         guard let deviceID = AppHelper.getDeviceID() else {
@@ -29,6 +28,10 @@ class AppHelper {
         }
     }
 
+    static func getCurrentTimestamp(unit: TimeConstant.TimestampUnit = .microsecond) -> Int {
+        return Int(Date().timeIntervalSince1970 * Double(unit.rawValue))
+    }
+
     static func getAppVersion() -> String? {
         guard let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
             Logger.error("Failed to get the App version.")
@@ -38,7 +41,7 @@ class AppHelper {
     }
 
     static func getDevicePlatform() -> String {
-        return "ios"
+        return NotiflyConstant.iosPlatform
     }
 
     static func getiOSVersion() -> String {

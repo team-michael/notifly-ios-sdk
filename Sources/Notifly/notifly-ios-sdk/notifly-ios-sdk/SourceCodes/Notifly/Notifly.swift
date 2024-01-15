@@ -13,11 +13,16 @@ import UIKit
         }
     }
 
+    static var keepGoingPub: AnyPublisher<Void, Error> {
+        return (try? Notifly.main.inAppMessageManager.userStateManager.waitSyncStateFinishedPub) ?? Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
+    }
+
     static var _main: Notifly?
     static var sdkVersion: String = NotiflyConstant.sdkVersion
     static var sdkType: SdkType = .native
     static var coldStartNotificationData: [AnyHashable: Any]?
     static var inAppMessageDisabled: Bool = false
+    static var cancellables = Set<AnyCancellable>()
 
     let projectId: String
 
@@ -41,16 +46,15 @@ import UIKit
         NotiflyCustomUserDefaults.projectIdInUserDefaults = projectId
         NotiflyCustomUserDefaults.usernameInUserDefaults = username
         NotiflyCustomUserDefaults.passwordInUserDefaults = password
-        
+
         auth = Auth(username: username,
                     password: password)
         trackingManager = TrackingManager(projectId: projectId)
         userManager = UserManager()
 
         notificationsManager = NotificationsManager()
-        inAppMessageManager = InAppMessageManager(disabled: Notifly.inAppMessageDisabled)
+        inAppMessageManager = InAppMessageManager(owner: (try? userManager.getNotiflyUserID()))
         super.init()
         Notifly._main = self
     }
-    
 }

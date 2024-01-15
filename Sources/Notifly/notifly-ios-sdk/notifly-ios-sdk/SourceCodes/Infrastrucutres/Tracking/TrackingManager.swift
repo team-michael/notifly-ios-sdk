@@ -94,24 +94,24 @@ class TrackingManager {
                isInternal: Bool,
                segmentationEventParamKeys: [String]?)
     {
-        var trackingEventName: String
-        if isInternal {
-            trackingEventName = "notifly__" + eventName
-        } else {
-            trackingEventName = eventName
-        }
-
-        guard let syncStateFinishedPub = try? Notifly.main.inAppMessageManager.syncStateFinishedPub else {
-            Logger.error("Fail to track Event. \(trackingEventName)")
+        guard let notifly = try? Notifly.main else {
+            Logger.error("Fail to track Event. \(eventName)")
             return
         }
+        let trackingEventName = NotiflyHelper.getEventName(event: eventName, isInternalEvent: isInternal)
+        let userID = (try? notifly.userManager.getNotiflyUserID()) ?? ""
 
-        syncStateFinishedPub.flatMap { _ in
-            try? Notifly.main.inAppMessageManager.updateEventData(eventName: trackingEventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
+        let externalUserID = notifly.userManager.externalUserID
+        let currentTimestamp = AppHelper.getCurrentTimestamp()
+        Notifly.keepGoingPub.flatMap { _ in
+            try? Notifly.main.inAppMessageManager.updateEventData(userID:
+                userID,
+                eventName: trackingEventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
             return self.createTrackingRecord(eventName: eventName,
                                              eventParams: eventParams,
                                              isInternal: isInternal,
-                                             segmentationEventParamKeys: segmentationEventParamKeys)
+                                             segmentationEventParamKeys: segmentationEventParamKeys,
+                                             currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID)
         }
         .sink(receiveCompletion: { completion in
                   if case let .failure(error) = completion {
@@ -128,10 +128,29 @@ class TrackingManager {
         .store(in: &cancellables)
     }
 
+    func trackSyncStateCompletedInternalEvent(userID: String, externalUserID: String?, properties: [String: Any]?) {
+        let currentTimestamp = AppHelper.getCurrentTimestamp()
+        createTrackingRecord(eventName: TrackingConstant.Internal.syncStateCompletedEventName,
+                             eventParams: properties,
+                             isInternal: true,
+                             segmentationEventParamKeys: nil,
+                             currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID)
+            .sink(receiveCompletion: { completion in
+                      if case let .failure(error) = completion {
+                          Logger.error("Failed to Track Event \(TrackingConstant.Internal.syncStateCompletedEventName). Error: \(error)")
+                      }
+                  },
+                  receiveValue: { [weak self] record in
+                      self?.internalEventPublisher.send(record)
+                  })
+            .store(in: &cancellables)
+    }
+
     func createTrackingRecord(eventName: String,
                               eventParams: [String: Any]?,
                               isInternal: Bool,
-                              segmentationEventParamKeys: [String]?) -> AnyPublisher<TrackingRecord, Error>
+                              segmentationEventParamKeys: [String]?,
+                              currentTimestamp: Int, userID: String, externalUserID: String?) -> AnyPublisher<TrackingRecord, Error>
     {
         guard let notifly = try? Notifly.main else {
             return Fail(outputType: TrackingRecord.self, failure: NotiflyError.notInitialized)
@@ -142,17 +161,22 @@ class TrackingManager {
                 .eraseToAnyPublisher()
         }
 
+        guard let notiflyDeviceID = AppHelper.getNotiflyDeviceID(),
+              let deviceID = AppHelper.getDeviceID(),
+              let appVersion = AppHelper.getAppVersion(),
+              let sdkVersion = NotiflyHelper.getSDKVersion()
+        else {
+            Logger.error("Failed to track event: " + eventName)
+            return Fail(outputType: TrackingRecord.self, failure: NotiflyError.unexpectedNil("Device data is invalid."))
+                .eraseToAnyPublisher()
+        }
+
         return deviceTokenPub.tryMap { pushToken in
-            let userID = (try? notifly.userManager.getNotiflyUserID()) ?? ""
-            if let notiflyDeviceID = AppHelper.getNotiflyDeviceID(),
-               let deviceID = AppHelper.getDeviceID(),
-               let appVersion = AppHelper.getAppVersion(),
-               let sdkVersion = NotiflyHelper.getSDKVersion(),
-               let data = TrackingData(id: UUID().uuidString,
+            if let data = TrackingData(id: UUID().uuidString,
                                        name: eventName,
                                        notifly_user_id: userID,
-                                       external_user_id: notifly.userManager.externalUserID,
-                                       time: Int(Date().timeIntervalSince1970),
+                                       external_user_id: externalUserID,
+                                       time: currentTimestamp,
                                        notifly_device_id: notiflyDeviceID,
                                        external_device_id: deviceID,
                                        device_token: pushToken,
@@ -165,7 +189,7 @@ class TrackingManager {
                                        sdk_version: sdkVersion,
                                        sdk_type: NotiflyHelper.getSDKType(),
                                        event_params: AppHelper.makeJsonCodable(eventParams)) as? TrackingData,
-               let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
+                let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
 
             {
                 return TrackingRecord(partitionKey: userID, data: stringfiedData)
@@ -180,8 +204,6 @@ class TrackingManager {
         }
         .eraseToAnyPublisher()
     }
-
-    // MARK: - Private Methods
 
     private func setup() {
         // Submit the tracking event to API & log result.

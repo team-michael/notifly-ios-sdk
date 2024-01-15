@@ -9,7 +9,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     var notiflyCampaignID: String?
     var notiflyMessageID: String?
     var notiflyExtraData: [String: AnyCodable]?
-    var notiflyReEligibleCondition: ReEligibleCondition?
+    var notiflyReEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
     var modalProps: ModalProperties?
 
     convenience init(notiflyInAppMessageData: InAppMessageData) throws {
@@ -82,13 +82,16 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         var hideUntilData: [String: Int]?
         if let campaignID = notiflyCampaignID,
            let reEligibleCondition = notiflyReEligibleCondition,
-           let hideUntil = calculateHideUntil(reEligibleCondition: reEligibleCondition)
+           let hideUntil = NotiflyHelper.calculateHideUntil(reEligibleCondition: reEligibleCondition)
         {
             hideUntilData = [campaignID: hideUntil]
             if let main = try? Notifly.main, let manager = main.inAppMessageManager as? InAppMessageManager {
-                manager.updateHideCampaignUntilData(hideUntilData: [
-                    campaignID: hideUntil,
-                ])
+                manager.updateHideCampaignUntilData(
+                    userID: try? main.userManager.getNotiflyUserID(),
+                    hideUntilData: [
+                        campaignID: hideUntil,
+                    ]
+                )
             } else {
                 Logger.error("InAppMessage manager is not exist.")
             }
@@ -100,7 +103,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         }
         let params = [
             "type": "message_event",
-            "channel": "in-app-message",
+            "channel": InAppMessageConstant.inAppMessageChannel,
             "campaign_id": notiflyCampaignID,
             "notifly_message_id": notiflyMessageID,
             "hide_until_data": hideUntilData ?? nil,
@@ -128,7 +131,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
             let params = [
                 "type": "message_event",
-                "channel": "in-app-message",
+                "channel": InAppMessageConstant.inAppMessageChannel,
                 "button_name": buttonName,
                 "campaign_id": notiflyCampaignID,
                 "notifly_message_id": notiflyMessageID,
@@ -155,7 +158,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked, eventParams: params)
                 dismissCTATapped()
                 if let templateName = modalProps?.templateName {
-                    let now = Int(Date().timeIntervalSince1970)
+                    let now = AppHelper.getCurrentTimestamp(unit: .second)
                     var hideUntil: Int
                     if let hideUntilInDaysData = notiflyExtraData?["hide_until_in_days"] as? AnyCodable,
                        let hideUntilInDays = hideUntilInDaysData.getValue() as? Int,

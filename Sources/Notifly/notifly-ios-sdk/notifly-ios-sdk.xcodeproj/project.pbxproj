@@ -18,7 +18,6 @@
 		F2E669902ADE602900DF9CA0 /* Auth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669812ADE602900DF9CA0 /* Auth.swift */; };
 		F2E669912ADE602900DF9CA0 /* InAppMessage+Constant.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669832ADE602900DF9CA0 /* InAppMessage+Constant.swift */; };
 		F2E669922ADE602900DF9CA0 /* InAppMessageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669842ADE602900DF9CA0 /* InAppMessageManager.swift */; };
-		F2E669932ADE602900DF9CA0 /* InAppMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669852ADE602900DF9CA0 /* InAppMessage.swift */; };
 		F2E669942ADE602900DF9CA0 /* Campaign.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669862ADE602900DF9CA0 /* Campaign.swift */; };
 		F2E669952ADE602900DF9CA0 /* WebViewModalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669872ADE602900DF9CA0 /* WebViewModalViewController.swift */; };
 		F2E669962ADE602900DF9CA0 /* NotiflyAPI+Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669892ADE602900DF9CA0 /* NotiflyAPI+Request.swift */; };
@@ -36,6 +35,9 @@
 		F2E669A22ADE60BC00DF9CA0 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669722ADE5F7E00DF9CA0 /* Credentials.swift */; };
 		F2E669A32ADE60BE00DF9CA0 /* TrackingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669742ADE5F7E00DF9CA0 /* TrackingEvent.swift */; };
 		F2E669A52ADE633400DF9CA0 /* Notifly+Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669A42ADE633400DF9CA0 /* Notifly+Helper.swift */; };
+		F2E92DA12B4DC6FD00EAB6AB /* SegmentationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E92DA02B4DC6FD00EAB6AB /* SegmentationHelper.swift */; };
+		F2E92DA52B4EE4F900EAB6AB /* UserStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E92DA42B4EE4F900EAB6AB /* UserStateManager.swift */; };
+		F2E92DA72B50F68C00EAB6AB /* UserState+Constant.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E92DA62B50F68C00EAB6AB /* UserState+Constant.swift */; };
 		F2F732E22A26E3A5008BA9B1 /* notifly_sdk.h in Headers */ = {isa = PBXBuildFile; fileRef = F2F732E12A26E3A5008BA9B1 /* notifly_sdk.h */; };
 /* End PBXBuildFile section */
 
@@ -71,7 +73,6 @@
 		F2E669812ADE602900DF9CA0 /* Auth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Auth.swift; sourceTree = "<group>"; };
 		F2E669832ADE602900DF9CA0 /* InAppMessage+Constant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "InAppMessage+Constant.swift"; sourceTree = "<group>"; };
 		F2E669842ADE602900DF9CA0 /* InAppMessageManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppMessageManager.swift; sourceTree = "<group>"; };
-		F2E669852ADE602900DF9CA0 /* InAppMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppMessage.swift; sourceTree = "<group>"; };
 		F2E669862ADE602900DF9CA0 /* Campaign.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Campaign.swift; sourceTree = "<group>"; };
 		F2E669872ADE602900DF9CA0 /* WebViewModalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebViewModalViewController.swift; sourceTree = "<group>"; };
 		F2E669892ADE602900DF9CA0 /* NotiflyAPI+Request.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NotiflyAPI+Request.swift"; sourceTree = "<group>"; };
@@ -79,6 +80,9 @@
 		F2E6698C2ADE602900DF9CA0 /* TrackingManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingManager.swift; sourceTree = "<group>"; };
 		F2E6698E2ADE602900DF9CA0 /* UserManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
 		F2E669A42ADE633400DF9CA0 /* Notifly+Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notifly+Helper.swift"; sourceTree = "<group>"; };
+		F2E92DA02B4DC6FD00EAB6AB /* SegmentationHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentationHelper.swift; sourceTree = "<group>"; };
+		F2E92DA42B4EE4F900EAB6AB /* UserStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserStateManager.swift; sourceTree = "<group>"; };
+		F2E92DA62B50F68C00EAB6AB /* UserState+Constant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserState+Constant.swift"; sourceTree = "<group>"; };
 		F2F732E12A26E3A5008BA9B1 /* notifly_sdk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = notifly_sdk.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -218,9 +222,11 @@
 			children = (
 				F2E669832ADE602900DF9CA0 /* InAppMessage+Constant.swift */,
 				F2E669842ADE602900DF9CA0 /* InAppMessageManager.swift */,
-				F2E669852ADE602900DF9CA0 /* InAppMessage.swift */,
 				F2E669862ADE602900DF9CA0 /* Campaign.swift */,
 				F2E669872ADE602900DF9CA0 /* WebViewModalViewController.swift */,
+				F2E92DA02B4DC6FD00EAB6AB /* SegmentationHelper.swift */,
+				F2E92DA42B4EE4F900EAB6AB /* UserStateManager.swift */,
+				F2E92DA62B50F68C00EAB6AB /* UserState+Constant.swift */,
 			);
 			path = InAppMessage;
 			sourceTree = "<group>";
@@ -365,6 +371,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F2E92DA52B4EE4F900EAB6AB /* UserStateManager.swift in Sources */,
 				673F0EBB29EC610400814217 /* Notifly+PublicAPI.swift in Sources */,
 				F2E6699E2ADE60B300DF9CA0 /* NotiflyCustomUserDefaults.swift in Sources */,
 				F2E6699D2ADE60AF00DF9CA0 /* NotiflyError.swift in Sources */,
@@ -376,17 +383,18 @@
 				F2E669962ADE602900DF9CA0 /* NotiflyAPI+Request.swift in Sources */,
 				F2E6699B2ADE60AA00DF9CA0 /* Notifly.swift in Sources */,
 				F2E6697C2ADE600000DF9CA0 /* NotificationServiceExtension.swift in Sources */,
+				F2E92DA72B50F68C00EAB6AB /* UserState+Constant.swift in Sources */,
 				F2E669A12ADE60B900DF9CA0 /* UUID+.swift in Sources */,
 				F2E669942ADE602900DF9CA0 /* Campaign.swift in Sources */,
 				F2E669A22ADE60BC00DF9CA0 /* Credentials.swift in Sources */,
 				F2E669A32ADE60BE00DF9CA0 /* TrackingEvent.swift in Sources */,
 				F2E669A02ADE60B700DF9CA0 /* MessageData.swift in Sources */,
-				F2E669932ADE602900DF9CA0 /* InAppMessage.swift in Sources */,
 				F2E669972ADE602900DF9CA0 /* NotiflyAPI.swift in Sources */,
 				F2E6698F2ADE602900DF9CA0 /* NotificationsManager.swift in Sources */,
 				F2E669922ADE602900DF9CA0 /* InAppMessageManager.swift in Sources */,
 				F2E6699A2ADE60A600DF9CA0 /* AppHelper.swift in Sources */,
 				F2E669952ADE602900DF9CA0 /* WebViewModalViewController.swift in Sources */,
+				F2E92DA12B4DC6FD00EAB6AB /* SegmentationHelper.swift in Sources */,
 				F2E6697B2ADE600000DF9CA0 /* NotiflyExtensionAPI.swift in Sources */,
 				F2E669902ADE602900DF9CA0 /* Auth.swift in Sources */,
 				F2E669912ADE602900DF9CA0 /* InAppMessage+Constant.swift in Sources */,
