@@ -7,6 +7,7 @@
 
 import Foundation
 
+@available(iOSApplicationExtension, unavailable)
 struct Campaign {
     let id: String
 
@@ -83,6 +84,7 @@ struct Campaign {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 enum CampaignStatus: Int {
     case invalid = -1
     case draft = 0
@@ -91,11 +93,13 @@ enum CampaignStatus: Int {
     case completed = 3
 }
 
+@available(iOSApplicationExtension, unavailable)
 struct Message {
     let htmlURL: String
     let modalProperties: ModalProperties
 }
 
+@available(iOSApplicationExtension, unavailable)
 struct ModalProperties {
     let templateName: String
     let position: String?
@@ -144,9 +148,12 @@ struct ModalProperties {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 typealias TriggeringEventFilterUnitArray = [TriggeringEventFilter.Unit]
+@available(iOSApplicationExtension, unavailable)
 typealias TriggeringEventFilterArray = [TriggeringEventFilterUnitArray]
 
+@available(iOSApplicationExtension, unavailable)
 struct TriggeringEventFilters {
     var filters: TriggeringEventFilterArray
 
@@ -168,6 +175,7 @@ struct TriggeringEventFilters {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 enum TriggeringEventFilter {
     struct Unit {
         let key: String
@@ -218,6 +226,7 @@ enum TriggeringEventFilter {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 enum NotiflySegmentation {
     enum SegmentationType: String {
         case conditionBased = "condition"
@@ -366,6 +375,7 @@ enum NotiflySegmentation {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 enum NotiflyReEligibleConditionEnum {
     enum Unit: String {
         case hour = "h"

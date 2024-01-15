@@ -5,6 +5,7 @@
 //  Created by 김대성 on 2024/01/10.
 //
 
+@available(iOSApplicationExtension, unavailable)
 enum SegmentationHelper {
     static func isEntityOfSegment(campaign: Campaign, eventParams: [String: Any]?, userData: UserData, eventData: EventData) -> Bool {
         // now only support for the condition-based-segment type

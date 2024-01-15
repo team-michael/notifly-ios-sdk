@@ -5,7 +5,7 @@ import Foundation
 //
 //  Created by 김대성 on 2023/06/12.
 //
-
+@available(iOSApplicationExtension, unavailable)
 enum UserStateConstant {
     static let syncStateLockTimeout = 5.0
     enum States {
@@ -15,6 +15,7 @@ enum UserStateConstant {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 struct UserData {
     var userProperties: [String: Any]
     var campaignHiddenUntil: [String: Int]
@@ -140,6 +141,7 @@ struct UserData {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 struct CampaignData {
     var inAppMessageCampaigns: [Campaign]
 
@@ -148,6 +150,7 @@ struct CampaignData {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 struct EventData {
     var eventCounts: [String: EventIntermediateCount]
     init(from: [[String: Any]]) {
@@ -185,6 +188,7 @@ struct EventData {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 struct EventIntermediateCount {
     let name: String
     let dt: String
@@ -228,6 +232,7 @@ struct EventIntermediateCount {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 enum EicHelper {
     static func selectEventParamsWithKeys(eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) -> [String: String]? {
         if let segmentationEventParamKeys = segmentationEventParamKeys,
@@ -244,6 +249,7 @@ enum EicHelper {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 struct PostProcessConfigForSyncState {
     let merge: Bool
     let clear: Bool

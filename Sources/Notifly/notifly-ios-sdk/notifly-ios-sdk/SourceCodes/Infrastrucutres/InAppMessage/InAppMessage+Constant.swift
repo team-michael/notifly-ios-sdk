@@ -7,6 +7,7 @@
 
 import Foundation
 
+@available(iOSApplicationExtension, unavailable)
 enum InAppMessageConstant {
     static let syncStateURL = "https://om97mq7cx4.execute-api.ap-northeast-2.amazonaws.com/default/notifly-js-sdk-user-state-retrieval"
     static let segmentInfoDefaultGroupOperator = "OR"
@@ -26,6 +27,7 @@ enum InAppMessageConstant {
     static let inAppMessageChannel = "in-app-message"
 }
 
+@available(iOSApplicationExtension, unavailable)
 struct InAppMessageData {
     let notiflyMessageId: String
     let notiflyCampaignId: String
