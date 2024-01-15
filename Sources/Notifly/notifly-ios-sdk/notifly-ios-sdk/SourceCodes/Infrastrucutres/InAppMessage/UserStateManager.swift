@@ -177,7 +177,7 @@ class UserStateManager {
     {
         let newUserData = UserData(data: rawUserData)
         if postProcessConfig.merge, let previousUserData = userData as? UserData {
-            userData = UserData.merge(p1: newUserData, p2: previousUserData)
+            userData = UserData.merge(p1: previousUserData, p2: newUserData)
         } else {
             userData = newUserData
         }
@@ -203,6 +203,7 @@ class UserStateManager {
         let eicID = EventIntermediateCount.generateId(eventName: eventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys, dt: dt)
         if var eic = eventData.eventCounts[eicID] {
             eic.addCount(count: 1)
+            eventData.eventCounts[eicID] = eic
         } else {
             eventData.eventCounts[eicID] = EventIntermediateCount(name: eventName, dt: dt, count: 1, eventParams: eventParams ?? [:])
         }
@@ -213,6 +214,11 @@ class UserStateManager {
             return nil
         }
         return userData
+    }
+
+    func clear() {
+        userData.clear()
+        eventData.clear()
     }
 }
 

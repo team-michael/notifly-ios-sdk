@@ -19,24 +19,23 @@ struct UserData {
     var userProperties: [String: Any]
     var campaignHiddenUntil: [String: Int]
     var randomBucketNumber: Int?
-    var platform: String?
-    var osVersion: String?
+    var platform: String
+    var osVersion: String
     var appVersion: String?
     var sdkVersion: String?
-    var sdkType: String?
+    var sdkType: String
     var createdAt: TimeInterval?
     var updatedAt: TimeInterval?
 
     init(data: [String: Any]) {
         userProperties = (data["user_properties"] as? [String: Any]) ?? [:]
         campaignHiddenUntil = (data["campaign_hidden_until"] as? [String: Int]) ?? [:]
-        platform = data["platform"] as? String
-        osVersion = data["os_version"] as? String
-        appVersion = data["app_version"] as? String
-        sdkVersion = data["sdk_version"] as? String
-        sdkType = data["sdk_type"] as? String
+        platform = (data["platform"] as? String) ?? (AppHelper.getDevicePlatform())
+        osVersion = (data["os_version"] as? String) ?? (AppHelper.getiOSVersion())
+        appVersion = (data["app_version"] as? String) ?? (AppHelper.getAppVersion())
+        sdkVersion = (data["sdk_version"] as? String) ?? (NotiflyHelper.getSDKVersion())
+        sdkType = (data["sdk_type"] as? String) ?? (NotiflyHelper.getSDKType())
         randomBucketNumber = NotiflyHelper.parseRandomBucketNumber(num: data["random_bucket_number"])
-        
         
         if let createdAtStr = data["created_at"] as? String {
             let dateFormatter = DateFormatter()
@@ -89,24 +88,17 @@ struct UserData {
             "user_properties": mergedUserProperties,
             "campaign_hidden_until": mergedCampaignHiddenUntil,
         ]
-        if let platform = p1.platform ?? p2.platform {
-            data["platform"] = platform
-        }
-        if let osVersion = p1.osVersion ?? p2.osVersion {
-            data["os_version"] = osVersion
-        }
+        
+        data["platform"] = p1.platform
+        data["os_version"] = p1.osVersion
+        data["sdk_type"] = p1.sdkType
         if let appVersion = p1.appVersion ?? p2.appVersion {
             data["app_version"] = appVersion
         }
         if let sdkVersion = p1.sdkVersion ?? p2.sdkVersion {
             data["sdk_version"] = sdkVersion
         }
-        if let sdkType = p1.sdkType ?? p2.sdkType {
-            data["sdk_type"] = sdkType
-        }
-        if let randomBucketNumber = p1.randomBucketNumber ?? p2.randomBucketNumber {
-            data["random_bucket_number"] = randomBucketNumber
-        }
+        data["random_bucket_number"] = p1.randomBucketNumber
         if let createdAt = p1.createdAt ?? p2.createdAt {
             data["created_at"] = createdAt
         }
@@ -126,24 +118,18 @@ struct UserData {
             "user_properties": userProperties,
             "campaign_hidden_until": campaignHiddenUntil,
         ]
-        if let platform = platform {
-            data["platform"] = platform
-        }
-        if let osVersion = osVersion {
-            data["os_version"] = osVersion
-        }
+        
+        data["platform"] = platform
+        data["os_version"] = osVersion
+        data["sdk_type"] = sdkType
+        data["random_bucket_number"] = randomBucketNumber
         if let appVersion = appVersion {
             data["app_version"] = appVersion
         }
         if let sdkVersion = sdkVersion {
             data["sdk_version"] = sdkVersion
         }
-        if let sdkType = sdkType {
-            data["sdk_type"] = sdkType
-        }
-        if let randomBucketNumber = randomBucketNumber {
-            data["random_bucket_number"] = randomBucketNumber
-        }
+        
         if let createdAt = createdAt {
             data["created_at"] = createdAt
         }
@@ -182,9 +168,15 @@ struct EventData {
     }
 
     static func merge(p1: EventData, p2: EventData) -> EventData {
-        var mergedEventCounts: [String: EventIntermediateCount] = [:]
-        mergedEventCounts.merge(p2.eventCounts) { _, new in new }
-        mergedEventCounts.merge(p1.eventCounts) { _, new in new }
+        var mergedEventCounts: [String: EventIntermediateCount] = p1.eventCounts
+        for (id, eventIntermediateCount) in p2.eventCounts {
+            if var existingEventIntermediateCount = mergedEventCounts[id] {
+                existingEventIntermediateCount.addCount(count: eventIntermediateCount.count)
+                mergedEventCounts[id] = existingEventIntermediateCount
+            } else {
+                mergedEventCounts[id] = eventIntermediateCount
+            }
+        }
         return EventData(eventCounts: mergedEventCounts)
     }
 

@@ -56,12 +56,11 @@ class UserManager {
 
             changeExternalUserId(newValue: newExternalUserID)
 
-            let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(previousExternalUserID: externalUserID, newExternalUserID: newExternalUserID)
+            let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: newExternalUserID)
             if shouldRequestSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: newExternalUserID) {
                 notifly.inAppMessageManager.userStateManager.syncState(postProcessConfig: postProcessConfigForSyncState)
             }
             setUserProperties(data)
-
         } else {
             Logger.error("Fail to Set User Id.")
         }
@@ -79,6 +78,8 @@ class UserManager {
         
         if shouldRequestSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: nil) {
             notifly.inAppMessageManager.userStateManager.syncState(postProcessConfig: postProcessConfigForSyncState)
+        } else {
+            notifly.inAppMessageManager.userStateManager.clear()
         }
 
         notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.removeUserPropertiesEventName, eventParams: nil)

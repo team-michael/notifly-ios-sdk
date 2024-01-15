@@ -71,7 +71,6 @@ class InAppMessageManager {
         Notifly.keepGoingPub.sink(
             receiveCompletion: { _ in },
             receiveValue: { _ in
-                Logger.error("UPDATE HIDE CAMPAIGN")
                 self.userStateManager.userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }
             }
         )
