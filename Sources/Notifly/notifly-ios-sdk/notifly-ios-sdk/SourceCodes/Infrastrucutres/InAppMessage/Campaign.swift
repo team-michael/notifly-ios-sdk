@@ -212,10 +212,13 @@ enum TriggeringEventFilter {
         }
 
         func matchFilterCondition(filterUnit: TriggeringEventFilter.Unit) -> Bool {
-            guard let sourceValue = params[filterUnit.key] else {
-                return false
+            if filterUnit.operator != .isNull {
+                guard let sourceValue = params[filterUnit.key]
+                else {
+                    return false
+                }
             }
-            return NotiflyComparingValueHelper.compare(type: filterUnit.targetValue?.type, sourceValue: sourceValue, operator: filterUnit.operator, targetValue: filterUnit.targetValue?.value)
+            return NotiflyComparingValueHelper.compare(type: filterUnit.targetValue?.type, sourceValue: params[filterUnit.key], operator: filterUnit.operator, targetValue: filterUnit.targetValue?.value)
         }
 
         func matchFilterCondition(filter: TriggeringEventFilterUnitArray) -> Bool {
