@@ -22,6 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
         }
+        
         FirebaseApp.configure()
         Notifly.initialize(projectId: TestConstant.projectID, username: TestConstant.username, password: TestConstant.password)
         
