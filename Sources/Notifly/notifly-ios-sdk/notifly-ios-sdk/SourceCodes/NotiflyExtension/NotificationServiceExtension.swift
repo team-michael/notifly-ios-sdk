@@ -29,7 +29,6 @@ import UserNotifications
             contentHandler(bestAttemptContent)
             return
         }
-        print(bestAttemptContent.userInfo)
 
         if let projectId = NotiflyCustomUserDefaults.projectIdInUserDefaults,
            NotiflyCustomUserDefaults.usernameInUserDefaults != nil,
