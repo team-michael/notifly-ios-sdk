@@ -148,7 +148,7 @@ class NotificationsManager: NSObject {
                 "notifly_message_id": messageID,
                 "click_status": clickStatus,
             ] as? [String: Any] {
-                notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.pushClickEventName, eventParams: pushClickEventParams)
+                notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.pushClickEventName, eventParams: pushClickEventParams, urgent: true)
             }
         }
     }
