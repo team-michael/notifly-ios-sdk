@@ -13,7 +13,7 @@
 # 1.3.0
 
 - Feature: Make Push Extension Module As SubSpec
-- Feature: 
+- Feature:
 - Fix: fix some bugs
 
 # 1.4.0
@@ -22,3 +22,7 @@
 - Feature: Support IS_NULL, IS_NOT_NULL operator As User Segmentation Operator
 - Feature: Support TriggeringEventFilters With Event Params
 - Fix: Make Sync State Tasks Asynchronous
+
+# 1.4.1
+
+- Chore: Remove version dependency on `FirebaseMessaging`
