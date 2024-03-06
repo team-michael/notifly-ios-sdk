@@ -19,7 +19,7 @@ import UserNotifications
     override open func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         guard let bestAttemptContent = request.content.mutableCopy() as? UNMutableNotificationContent else {
             return
-        }
+        }        
         self.bestAttemptContent = bestAttemptContent
         self.contentHandler = contentHandler
 
@@ -34,14 +34,17 @@ import UserNotifications
            NotiflyCustomUserDefaults.usernameInUserDefaults != nil,
            NotiflyCustomUserDefaults.passwordInUserDefaults != nil
         {
+            let gcmMessageId = bestAttemptContent.userInfo["gcm.message_id"] as? String
+            let notiflyUserId = bestAttemptContent.userInfo["notifly_user_id"] as? String
             let data = [
                 "type": "message_event",
                 "channel": "push-notification",
                 "campaign_id": bestAttemptContent.userInfo["campaign_id"] ?? "",
                 "notifly_message_id": bestAttemptContent.userInfo["notifly_message_id"] ?? "",
+                "gcm_message_id": gcmMessageId ?? "",
             ] as [String: Any]
             ExtensionManager(projectId: projectId)
-                .track(eventName: TrackingConstant.Internal.pushNotificationMessageShown, params: data)
+                .track(eventName: TrackingConstant.Internal.pushNotificationMessageShown, params: data, notiflyUserId: notiflyUserId)
         } else {
             Logger.error("Cannot Access to NotiflyCustomUserDefaults. Please confirm that the app group identifier is 'group.notifly.{username}.'")
         }
@@ -88,8 +91,8 @@ import UserNotifications
         task.resume()
     }
 
-    func track(eventName: String, params: [String: Any]?) {
-        guard let payload = preparePayload(eventName: eventName, params: params) else {
+    func track(eventName: String, params: [String: Any]?, notiflyUserId: String?) {
+        guard let payload = preparePayload(eventName: eventName, params: params, notiflyUserId: notiflyUserId) else {
             Logger.error("Fail to track push_delivered event.")
             return
         }
@@ -104,8 +107,8 @@ import UserNotifications
         }
     }
 
-    private func preparePayload(eventName: String, params: [String: Any]?) -> TrackingRecord? {
-        let userID = getUserId()
+    private func preparePayload(eventName: String, params: [String: Any]?, notiflyUserId: String?) -> TrackingRecord? {
+        let userID = notiflyUserId ?? getUserId()
         if let notiflyDeviceID = AppHelper.getNotiflyDeviceID(),
            let deviceID = AppHelper.getDeviceID(),
            let appVersion = AppHelper.getAppVersion(),

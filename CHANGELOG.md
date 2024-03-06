@@ -26,3 +26,8 @@
 # 1.4.1
 
 - Chore: Remove version dependency on `FirebaseMessaging`
+
+# 1.5.0
+
+- Chore: Track GCM Message Id In Push Extension
+- Feature: Urgent tracking event
