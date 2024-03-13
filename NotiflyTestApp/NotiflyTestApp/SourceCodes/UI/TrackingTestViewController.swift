@@ -139,3 +139,26 @@ extension TrackingTestViewController: KeyValueDataInputViewControllerDelegate {
         customEventParams = keyPairs
     }
 }
+
+
+private extension UIWindow {
+    var topMostViewController: UIViewController? {
+        return rootViewController?.topMostViewController
+    }
+}
+
+private extension UIViewController {
+    var topMostViewController: UIViewController {
+        if let presented = presentedViewController {
+            return presented.topMostViewController
+        }
+        if let nav = self as? UINavigationController {
+            return nav.visibleViewController?.topMostViewController ?? nav
+        }
+        if let tab = self as? UITabBarController {
+            return (tab.selectedViewController ?? self).topMostViewController
+        }
+        return self
+    }
+}
+
