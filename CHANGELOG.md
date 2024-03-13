@@ -35,4 +35,3 @@
 # 1.6.0
 
 - Fix: Additional Validation Before In App Popup Presented
-- Chore: Change Tracking Event Endpoint

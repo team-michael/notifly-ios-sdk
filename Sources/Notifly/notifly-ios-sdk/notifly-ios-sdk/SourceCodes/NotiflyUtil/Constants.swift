@@ -4,7 +4,7 @@ enum NotiflyConstant {
     static let sdkVersion: String = "1.6.0"
     static let iosPlatform: String = "ios"
     enum EndPoint {
-        static let trackEventEndPoint = "https://log.notifly.tech/prod/records"
+        static let trackEventEndPoint = "https://12lnng07q2.execute-api.ap-northeast-2.amazonaws.com/prod/records"
         static let syncStateEndPoint = "https://api.notifly.tech/user-state"
         static let authorizationEndPoint = "https://api.notifly.tech/authorize"
     }
