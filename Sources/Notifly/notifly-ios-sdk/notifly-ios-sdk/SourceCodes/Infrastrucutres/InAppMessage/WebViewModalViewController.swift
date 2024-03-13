@@ -89,6 +89,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {
         webView.evaluateJavaScript(InAppMessageConstant.injectedJavaScript, completionHandler: nil)
         if !setupUI() as Bool {
+            WebViewModalViewController.openedInAppMessageCount = 0
             return
         }
         view.isHidden = true
