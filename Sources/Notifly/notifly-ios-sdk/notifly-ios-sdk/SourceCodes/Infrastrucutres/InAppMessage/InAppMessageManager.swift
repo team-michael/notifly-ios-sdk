@@ -213,7 +213,6 @@ class InAppMessageManager {
                 WebViewModalViewController.openedInAppMessageCount = 0
                 return
             }
-            vc.show()
         }
     }
 
