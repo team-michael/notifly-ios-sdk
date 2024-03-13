@@ -201,6 +201,7 @@ class InAppMessageManager {
                 Logger.error("Already In App Message Opened. New In App Message Ignored.")
                 return
             }
+
             WebViewModalViewController.openedInAppMessageCount = 1
             guard UIApplication.shared.applicationState == .active else {
                 Logger.error("Due to being in a background state, in-app messages are being ignored.")

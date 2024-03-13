@@ -62,10 +62,12 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         return shown
     }
 
-    private func show(animated: Bool = false, completion: (() -> Void)? = nil) -> Bool {
+    func show(animated: Bool = false, completion: (() -> Void)? = nil) -> Bool {
         guard let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
               let topVC = window.topMostViewController,
-              !(self.isBeingPresented)
+              !(self.isBeingPresented),
+              !(self.isBeingDismissed),
+              self.presentingViewController == nil
         else {
             Logger.error("Fail to present in app message.")
             return false
@@ -73,7 +75,6 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         topVC.present(self, animated: animated, completion: completion)
         return true
     }
-
 
     @objc
     private func dismissCTATapped() {
