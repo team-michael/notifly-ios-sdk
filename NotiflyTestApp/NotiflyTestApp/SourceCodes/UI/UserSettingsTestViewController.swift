@@ -75,11 +75,11 @@ class UserSettingsTestViewController: UIViewController {
         view.addSubview(stackView)
         stackView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: stackView.topAnchor),
-            view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: stackView.bottomAnchor),
-            view.safeAreaLayoutGuide.leftAnchor.constraint(equalTo: stackView.leftAnchor, constant: -12),
-            view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: stackView.rightAnchor, constant: 12),
-        ])
+                                        view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: stackView.topAnchor),
+                                        view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: stackView.bottomAnchor),
+                                        view.safeAreaLayoutGuide.leftAnchor.constraint(equalTo: stackView.leftAnchor, constant: -12),
+                                        view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: stackView.rightAnchor, constant: 12),
+                                    ])
 
         // StackView Config
         stackView.axis = .vertical

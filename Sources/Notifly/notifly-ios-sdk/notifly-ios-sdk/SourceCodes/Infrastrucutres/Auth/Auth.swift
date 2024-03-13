@@ -11,12 +11,12 @@ class Auth {
         get {
             if let pub = _authorizationPub {
                 return pub
-                    .catch { _ -> AnyPublisher<String, Error> in
-                        Logger.error("Failed to get authorization.")
-                        return Fail(outputType: String.self, failure: NotiflyError.notAuthorized)
-                            .eraseToAnyPublisher()
-                    }
-                    .eraseToAnyPublisher()
+                .catch { _ -> AnyPublisher<String, Error> in
+                    Logger.error("Failed to get authorization.")
+                    return Fail(outputType: String.self, failure: NotiflyError.notAuthorized)
+                        .eraseToAnyPublisher()
+                }
+                .eraseToAnyPublisher()
             } else {
                 Logger.error("Failed to get authorization ")
                 return Fail(outputType: String.self, failure: NotiflyError.notAuthorized)
@@ -44,25 +44,28 @@ class Auth {
                     promise(.failure(NotiflyError.promiseTimeout))
                 }
             }
-        }.eraseToAnyPublisher()
+        }
+        .eraseToAnyPublisher()
         setup()
     }
 
     private func setup() {
         NotiflyAPI().authorizeSession(credentials: loginCred)
-            .tryMap {
-                NotiflyCustomUserDefaults.authTokenInUserDefaults = $0
-                return $0
-            }.sink(receiveCompletion: { completion in
-                if case let .failure(error) = completion {
-                    Logger.error("Authorization error: \(error)")
-                }
-            }, receiveValue: { [weak self] authToken in
-                self?.authorizationPromise?(.success(authToken))
-                self?.authorizationPub = Just(authToken)
-                    .setFailureType(to: Error.self)
-                    .eraseToAnyPublisher()
-            }).store(in: &authorizationRequestCancellable)
+        .tryMap {
+            NotiflyCustomUserDefaults.authTokenInUserDefaults = $0
+            return $0
+        }
+        .sink(receiveCompletion: { completion in
+            if case let .failure(error) = completion {
+                Logger.error("Authorization error: \(error)")
+            }
+        }, receiveValue: { [weak self] authToken in
+            self?.authorizationPromise?(.success(authToken))
+            self?.authorizationPub = Just(authToken)
+                .setFailureType(to: Error.self)
+                .eraseToAnyPublisher()
+        })
+        .store(in: &authorizationRequestCancellable)
     }
 
     func refreshAuth() -> AnyPublisher<String, Error> {

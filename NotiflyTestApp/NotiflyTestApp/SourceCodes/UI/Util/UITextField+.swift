@@ -1,7 +1,7 @@
 import UIKit
 
 extension UITextField {
-    
+
     func checkAndRetrieveValueText(changeBorderColorOnError: Bool = true) -> String? {
         guard let text = text?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty else {
             if changeBorderColorOnError {
@@ -14,11 +14,11 @@ extension UITextField {
         }
         return text
     }
-    
+
     func setToErrorUI() {
         layer.borderColor = UIColor.red.cgColor
     }
-    
+
     func setToDefaultUI(borderColor: UIColor = .black) {
         layer.borderColor = borderColor.cgColor
     }

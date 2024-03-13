@@ -14,7 +14,7 @@ struct ApiRequestBody: NotiflyApiRequestProtocol {
     init(payload: RequestPayload) {
         self.payload = payload
     }
-
+    
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         

@@ -22,6 +22,7 @@ enum APIError: Error {
 
 class NotiflyExtensionAPI {
     private var authToken: String?
+
     private func cleanAuth() {
         authToken = nil
         NotiflyCustomUserDefaults.authTokenInUserDefaults = nil
@@ -82,9 +83,9 @@ class NotiflyExtensionAPI {
 
         guard let url = URL(string: NotiflyConstant.EndPoint.authorizationEndPoint),
               let request = try? ExtensionRequestBuilder()
-              .set(url: url)
-              .set(method: .POST)
-              .set(body: ApiRequestBody(payload: .AuthCredentials(Credentials(userName: username, password: password))))
+                  .set(url: url)
+                  .set(method: .POST)
+                  .set(body: ApiRequestBody(payload: .AuthCredentials(Credentials(userName: username, password: password))))
         else {
             Logger.error("ExtensionAPI: Fail to Authorize.")
             completion(.failure(APIError.invalidData))
@@ -207,7 +208,8 @@ class NotiflyExtensionAPI {
             } else {
                 completion(.failure(.requestFailed))
             }
-        }.resume()
+        }
+        .resume()
     }
 
     func retryTrack(request: ExtensionRequestBuilder, completion: @escaping (Result<[String: Any], APIError>) -> Void) {

@@ -14,7 +14,7 @@ class NotificationService: NotiflyNotificationServiceExtension {
         super.init()
         self.setup()
     }
-    
+
     func setup() {
         self.register(projectId: TestConstant.projectID, username: TestConstant.username)
     }

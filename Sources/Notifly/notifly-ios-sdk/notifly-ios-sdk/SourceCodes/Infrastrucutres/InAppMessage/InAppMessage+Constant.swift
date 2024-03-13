@@ -14,16 +14,16 @@ enum InAppMessageConstant {
     static let segmentInfoDefaultConditionOperator = "AND"
     static let eicIdSeparator = "~|~"
     static let injectedJavaScript = """
-    const button_trigger = document.getElementById('notifly-button-trigger'); button_trigger.addEventListener('click', function(event){
-    if (!event.notifly_button_click_type) return;
-    window.webkit.messageHandlers.notiflyInAppMessageEventHandler.postMessage(JSON.stringify({
-        type: event.notifly_button_click_type,
-        button_name: event.notifly_button_name,
-        link: event.notifly_button_click_link,
-        extra_data: event.notifly_extra_data,
-    }));
-        });
-    """
+                                    const button_trigger = document.getElementById('notifly-button-trigger'); button_trigger.addEventListener('click', function(event){
+                                    if (!event.notifly_button_click_type) return;
+                                    window.webkit.messageHandlers.notiflyInAppMessageEventHandler.postMessage(JSON.stringify({
+                                        type: event.notifly_button_click_type,
+                                        button_name: event.notifly_button_name,
+                                        link: event.notifly_button_click_link,
+                                        extra_data: event.notifly_extra_data,
+                                    }));
+                                        });
+                                    """
     static let inAppMessageChannel = "in-app-message"
 }
 

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2DAF8CEEC186B5033134A598 /* TestConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DAF89B288095960129EB78C /* TestConstants.swift */; };
 		672E7B7529EDF1C400B3E9F2 /* TrackingTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7429EDF1C400B3E9F2 /* TrackingTestViewController.swift */; };
 		672E7B7A29EDF22F00B3E9F2 /* UIStackView+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7929EDF22F00B3E9F2 /* UIStackView+.swift */; };
 		672E7B7C29EDF91800B3E9F2 /* UITextField+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7B29EDF91800B3E9F2 /* UITextField+.swift */; };
@@ -106,6 +107,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2DAF89B288095960129EB78C /* TestConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConstants.swift; sourceTree = "<group>"; };
 		672E7B7429EDF1C400B3E9F2 /* TrackingTestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingTestViewController.swift; sourceTree = "<group>"; };
 		672E7B7929EDF22F00B3E9F2 /* UIStackView+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIStackView+.swift"; sourceTree = "<group>"; };
 		672E7B7B29EDF91800B3E9F2 /* UITextField+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITextField+.swift"; sourceTree = "<group>"; };
@@ -242,6 +244,7 @@
 				F237A4532AE257D0001E74A1 /* NotiflyNotificationExtension.entitlements */,
 				F237A44A2AE257C8001E74A1 /* NotificationService.swift */,
 				F237A44C2AE257C8001E74A1 /* Info.plist */,
+				2DAF89B288095960129EB78C /* TestConstants.swift */,
 			);
 			path = NotiflyNotificationExtension;
 			sourceTree = "<group>";
@@ -419,6 +422,7 @@
 			files = (
 				F237A44B2AE257C8001E74A1 /* NotificationService.swift in Sources */,
 				F237A4542AE25818001E74A1 /* TestConstatns.swift in Sources */,
+				2DAF8CEEC186B5033134A598 /* TestConstants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

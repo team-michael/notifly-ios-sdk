@@ -48,17 +48,17 @@ extension NotiflyAPI {
             do {
                 let request = try build()
                 return URLSession.shared.dataTaskPublisher(for: request)
-                    .map(\.data)
-                    .decode(type: Response<T>.self, decoder: JSONDecoder())
-                    .receive(on: DispatchQueue.main)
-                    .tryCompactMap {
-                        if let data = $0.data {
-                            return data
-                        } else {
-                            throw NotiflyError.unexpectedNil("Response has empty payload")
-                        }
+                .map(\.data)
+                .decode(type: Response<T>.self, decoder: JSONDecoder())
+                .receive(on: DispatchQueue.main)
+                .tryCompactMap {
+                    if let data = $0.data {
+                        return data
+                    } else {
+                        throw NotiflyError.unexpectedNil("Response has empty payload")
                     }
-                    .eraseToAnyPublisher()
+                }
+                .eraseToAnyPublisher()
             } catch {
                 return Fail(outputType: T.self, failure: error)
                     .eraseToAnyPublisher()
@@ -69,15 +69,15 @@ extension NotiflyAPI {
             do {
                 let request = try build()
                 return URLSession.shared.dataTaskPublisher(for: request)
-                    .map(\.data)
-                    .tryMap {
-                        if let response = String(data: $0, encoding: .utf8) {
-                            return response
-                        } else {
-                            throw NotiflyError.unexpectedNil("Response is corrupted.")
-                        }
+                .map(\.data)
+                .tryMap {
+                    if let response = String(data: $0, encoding: .utf8) {
+                        return response
+                    } else {
+                        throw NotiflyError.unexpectedNil("Response is corrupted.")
                     }
-                    .eraseToAnyPublisher()
+                }
+                .eraseToAnyPublisher()
             } catch {
                 return Fail(outputType: String.self, failure: error)
                     .eraseToAnyPublisher()

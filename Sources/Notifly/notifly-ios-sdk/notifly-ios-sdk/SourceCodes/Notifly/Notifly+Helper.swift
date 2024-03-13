@@ -62,7 +62,7 @@ enum NotiflyHelper {
             return nil
         }
     }
-    
+
     static func parseRandomBucketNumber(num: Any?) -> Int? {
         if let str = num as? String {
             return Int(str)
@@ -70,7 +70,7 @@ enum NotiflyHelper {
             return intNum
         }
         return nil
-        
+
     }
 }
 
@@ -94,8 +94,7 @@ enum NotiflyComparingValueHelper {
         default:
             if let type = type,
                let typedSourceValue = NotiflyComparingValueHelper.castAnyToSpecifiedType(value: sourceValue, type: `operator` == .contains ? "ARRAY" : type),
-               let typedTargetValue = NotiflyComparingValueHelper.castAnyToSpecifiedType(value: targetValue, type: type)
-            {
+               let typedTargetValue = NotiflyComparingValueHelper.castAnyToSpecifiedType(value: targetValue, type: type) {
                 switch `operator` {
                 case .equal:
                     return NotiflyComparingValueHelper.isEqual(value1: typedSourceValue, value2: typedTargetValue, type: type)

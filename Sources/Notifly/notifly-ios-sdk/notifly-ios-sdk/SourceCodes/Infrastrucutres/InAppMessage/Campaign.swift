@@ -196,7 +196,9 @@ enum TriggeringEventFilter {
     }
 
     static func fromArray(_ array: [[String: Any]]) throws -> TriggeringEventFilterUnitArray {
-        let units = array.map { Unit(from: $0) }
+        let units = array.map {
+            Unit(from: $0)
+        }
         if units.contains(where: { $0 == nil }) {
             throw NotiflyError.invalidPayload
         }
@@ -222,10 +224,14 @@ enum TriggeringEventFilter {
         }
 
         func matchFilterCondition(filter: TriggeringEventFilterUnitArray) -> Bool {
-            return filter.allSatisfy { matchFilterCondition(filterUnit: $0) }
+            return filter.allSatisfy {
+                matchFilterCondition(filterUnit: $0)
+            }
         }
 
-        return filters.contains { matchFilterCondition(filter: $0) }
+        return filters.contains {
+            matchFilterCondition(filter: $0)
+        }
     }
 }
 
@@ -277,6 +283,7 @@ enum NotiflySegmentation {
         struct Group {
             let conditions: [SegmentationCondition.ConditionType]?
             let conditionOperator: SegmentationCondition.ConditionOperator?
+
             init(conditions: [SegmentationCondition.ConditionType], conditionOperator: String) {
                 self.conditions = conditions
                 self.conditionOperator = SegmentationCondition.ConditionOperator(rawValue: conditionOperator) ?? .and

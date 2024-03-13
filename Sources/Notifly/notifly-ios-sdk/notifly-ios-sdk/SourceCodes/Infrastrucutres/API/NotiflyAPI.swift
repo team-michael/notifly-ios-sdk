@@ -7,72 +7,84 @@ class NotiflyAPI {
 
     func authorizeSession(credentials: Credentials) -> AnyPublisher<String, Error> {
         return request(to: NotiflyConstant.EndPoint.authorizationEndPoint, method: .POST, authTokenRequired: false)
-            .map { $0.set(body: ApiRequestBody(payload: .AuthCredentials(credentials))) }
-            .flatMap { (builder: RequestBuilder) -> AnyPublisher<String, Error> in builder.buildAndFire() }
-            .eraseToAnyPublisher()
+        .map {
+            $0.set(body: ApiRequestBody(payload: .AuthCredentials(credentials)))
+        }
+        .flatMap { (builder: RequestBuilder) -> AnyPublisher<String, Error> in
+            builder.buildAndFire()
+        }
+        .eraseToAnyPublisher()
     }
 
     func trackEvent(_ event: TrackingEvent) -> AnyPublisher<String, Error> {
         return request(to: NotiflyConstant.EndPoint.trackEventEndPoint, method: .POST, authTokenRequired: true)
-            .map { $0.set(body: ApiRequestBody(payload: .TrackingEvent(event))) }
-            .flatMap { $0.buildAndFireWithRawJSONResponseType() }
-            .flatMap { response -> AnyPublisher<String, Error> in
-                if let data = response.data(using: .utf8) as Data?,
-                   let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let response = json["message"]
-                {
-                    if response as! String == "The incoming token has expired",
-                       let authorization = try? Notifly.main.auth
-                    {
-                        return authorization.refreshAuth()
-                            .flatMap { _ in
-                                self.retryTrackEvent(event)
-                            }
-                            .eraseToAnyPublisher()
+        .map {
+            $0.set(body: ApiRequestBody(payload: .TrackingEvent(event)))
+        }
+        .flatMap {
+            $0.buildAndFireWithRawJSONResponseType()
+        }
+        .flatMap { response -> AnyPublisher<String, Error> in
+            if let data = response.data(using: .utf8) as Data?,
+               let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+               let response = json["message"] {
+                if response as! String == "The incoming token has expired",
+                   let authorization = try? Notifly.main.auth {
+                    return authorization.refreshAuth()
+                    .flatMap { _ in
+                        self.retryTrackEvent(event)
                     }
-                    Logger.error("Failed to track event with error: \(response)")
-                }
-
-                return Just(response)
-                    .setFailureType(to: Error.self)
                     .eraseToAnyPublisher()
+                }
+                Logger.error("Failed to track event with error: \(response)")
             }
-            .eraseToAnyPublisher()
+
+            return Just(response)
+                .setFailureType(to: Error.self)
+                .eraseToAnyPublisher()
+        }
+        .eraseToAnyPublisher()
     }
 
     func retryTrackEvent(_ event: TrackingEvent) -> AnyPublisher<String, Error> {
         request(to: NotiflyConstant.EndPoint.trackEventEndPoint, method: .POST, authTokenRequired: true)
-            .map { $0.set(body: ApiRequestBody(payload: .TrackingEvent(event))) }
-            .flatMap { $0.buildAndFireWithRawJSONResponseType() }
-            .flatMap { response -> AnyPublisher<String, Error> in
-                if let data = response.data(using: .utf8) as Data?,
-                   let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let response = json["message"]
-                {
-                    Logger.error("Failed to track event with error: \(response)")
-                }
-                return Just(response)
-                    .setFailureType(to: Error.self)
-                    .eraseToAnyPublisher()
+        .map {
+            $0.set(body: ApiRequestBody(payload: .TrackingEvent(event)))
+        }
+        .flatMap {
+            $0.buildAndFireWithRawJSONResponseType()
+        }
+        .flatMap { response -> AnyPublisher<String, Error> in
+            if let data = response.data(using: .utf8) as Data?,
+               let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+               let response = json["message"] {
+                Logger.error("Failed to track event with error: \(response)")
             }
-            .eraseToAnyPublisher()
+            return Just(response)
+                .setFailureType(to: Error.self)
+                .eraseToAnyPublisher()
+        }
+        .eraseToAnyPublisher()
     }
 
     func requestSyncState(projectId: String, notiflyUserID: String, notiflyDeviceID: String) -> AnyPublisher<String, Error> {
         let endpoint = "\(NotiflyConstant.EndPoint.syncStateEndPoint)/\(projectId)/\(notiflyUserID)?deviceId=\(notiflyDeviceID)&channel=\(InAppMessageConstant.inAppMessageChannel)"
 
         return request(to: endpoint, method: .GET, authTokenRequired: true)
-            .map { $0.set(bearer: true) }
-            .flatMap { $0.buildAndFireWithRawJSONResponseType() }
-            .eraseToAnyPublisher()
+        .map {
+            $0.set(bearer: true)
+        }
+        .flatMap {
+            $0.buildAndFireWithRawJSONResponseType()
+        }
+        .eraseToAnyPublisher()
     }
 
     // MARK: Private Methods
 
     private func request(to uri: String,
                          method: RequestMethod,
-                         authTokenRequired: Bool) -> AnyPublisher<RequestBuilder, Error>
-    {
+                         authTokenRequired: Bool) -> AnyPublisher<RequestBuilder, Error> {
         let request = RequestBuilder()
             .set(url: URL(string: uri))
             .set(method: method)
