@@ -31,3 +31,8 @@
 
 - Chore: Track GCM Message Id In Push Extension
 - Feature: Urgent tracking event
+
+# 1.6.0
+
+- Fix: Additional Validation Before In App Popup Presented
+- Chore: Change Tracking Event Endpoint
