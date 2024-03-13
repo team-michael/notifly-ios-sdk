@@ -30,7 +30,9 @@ class InAppMessageManager {
                     Logger.error("Fail to update client-side user state (user properties): owner mismatch")
                     return
                 }
-                self.userStateManager.userData.userProperties.merge(properties) { _, new in new }
+                self.userStateManager.userData.userProperties.merge(properties) { _, new in
+                    new
+                }
             }
         )
         .store(in: &Notifly.cancellables)
@@ -46,8 +48,7 @@ class InAppMessageManager {
             return
         }
 
-        if var campaignsToTrigger = getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams)
-        {
+        if var campaignsToTrigger = getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams) {
             campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
             for campaignToTrigger in campaignsToTrigger {
                 if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger) {
@@ -71,7 +72,9 @@ class InAppMessageManager {
         Notifly.keepGoingPub.sink(
             receiveCompletion: { _ in },
             receiveValue: { _ in
-                self.userStateManager.userData.campaignHiddenUntil.merge(hideUntilData) { _, new in new }
+                self.userStateManager.userData.campaignHiddenUntil.merge(hideUntilData) { _, new in
+                    new
+                }
             }
         )
         .store(in: &Notifly.cancellables)
@@ -80,9 +83,15 @@ class InAppMessageManager {
     /* method for showing in-app message */
     private func getCampaignsShouldBeTriggered(eventName: String, eventParams: [String: Any]?) -> [Campaign]? {
         let campaignsToTrigger = userStateManager.campaignData.inAppMessageCampaigns
-            .filter { isCampaignActive(campaign: $0) }
-            .filter { matchTriggeringEventCondition(campaign: $0, eventName: eventName, eventParams: eventParams) }
-            .filter { SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: userStateManager.userData, eventData: userStateManager.eventData) }
+        .filter {
+            isCampaignActive(campaign: $0)
+        }
+        .filter {
+            matchTriggeringEventCondition(campaign: $0, eventName: eventName, eventParams: eventParams)
+        }
+        .filter {
+            SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: userStateManager.userData, eventData: userStateManager.eventData)
+        }
 
         if campaignsToTrigger.count == 0 {
             return nil
@@ -105,8 +114,7 @@ class InAppMessageManager {
         }
 
         if let paramsFilterCondition = campaign.triggeringEventFilters,
-           !TriggeringEventFilter.matchFilterCondition(filters: paramsFilterCondition.filters, eventParams: eventParams)
-        {
+           !TriggeringEventFilter.matchFilterCondition(filters: paramsFilterCondition.filters, eventParams: eventParams) {
             return false
         }
 
@@ -207,36 +215,5 @@ class InAppMessageManager {
         }
     }
 
-    static func present(_ vc: UIViewController, animated: Bool = false, completion: (() -> Void)?) -> Bool {
-        guard let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
-              let topVC = window.topMostViewController,
-              !(vc.isBeingPresented)
-        else {
-            Logger.error("Fail to present in app message.")
-            return false
-        }
-        topVC.present(vc, animated: animated, completion: completion)
-        return true
-    }
 }
 
-private extension UIWindow {
-    var topMostViewController: UIViewController? {
-        return rootViewController?.topMostViewController
-    }
-}
-
-private extension UIViewController {
-    var topMostViewController: UIViewController {
-        if let presented = presentedViewController {
-            return presented.topMostViewController
-        }
-        if let nav = self as? UINavigationController {
-            return nav.visibleViewController?.topMostViewController ?? nav
-        }
-        if let tab = self as? UITabBarController {
-            return (tab.selectedViewController ?? self).topMostViewController
-        }
-        return self
-    }
-}

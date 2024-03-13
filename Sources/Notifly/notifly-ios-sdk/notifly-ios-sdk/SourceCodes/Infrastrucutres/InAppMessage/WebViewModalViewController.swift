@@ -39,8 +39,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
         webView.translatesAutoresizingMaskIntoConstraints = false
         if let backgroundOpacity = modalProps?.backgroundOpacity as? CGFloat,
-           backgroundOpacity >= 0 && backgroundOpacity <= 1
-        {
+           backgroundOpacity >= 0 && backgroundOpacity <= 1 {
             view.backgroundColor = UIColor.black.withAlphaComponent(CGFloat(backgroundOpacity))
         } else {
             view.backgroundColor = UIColor.black.withAlphaComponent(0.2)
@@ -48,20 +47,33 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
         webView.layer.mask = webViewLayer
         if let shouldDismissCTATapped = modalProps?.dismissCTATapped,
-           shouldDismissCTATapped
-        {
+           shouldDismissCTATapped {
             view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissCTATapped)))
         }
 
         view.addSubview(webView)
         NSLayoutConstraint.activate([
-            webView.widthAnchor.constraint(equalToConstant: modalSize.width),
-            webView.heightAnchor.constraint(equalToConstant: modalSize.height),
-            view.centerXAnchor.constraint(equalTo: webView.centerXAnchor),
-            modalPositionConstraint,
-        ])
-        return InAppMessageManager.present(self, completion: nil)
+                                        webView.widthAnchor.constraint(equalToConstant: modalSize.width),
+                                        webView.heightAnchor.constraint(equalToConstant: modalSize.height),
+                                        view.centerXAnchor.constraint(equalTo: webView.centerXAnchor),
+                                        modalPositionConstraint,
+                                    ])
+        let shown = show()
+        return shown
     }
+
+    private func show(animated: Bool = false, completion: (() -> Void)? = nil) -> Bool {
+        guard let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
+              let topVC = window.topMostViewController,
+              !(self.isBeingPresented)
+        else {
+            Logger.error("Fail to present in app message.")
+            return false
+        }
+        topVC.present(self, animated: animated, completion: completion)
+        return true
+    }
+
 
     @objc
     private func dismissCTATapped() {
@@ -82,8 +94,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         var hideUntilData: [String: Int]?
         if let campaignID = notiflyCampaignID,
            let reEligibleCondition = notiflyReEligibleCondition,
-           let hideUntil = NotiflyHelper.calculateHideUntil(reEligibleCondition: reEligibleCondition)
-        {
+           let hideUntil = NotiflyHelper.calculateHideUntil(reEligibleCondition: reEligibleCondition) {
             hideUntilData = [campaignID: hideUntil]
             if let main = try? Notifly.main, let manager = main.inAppMessageManager as? InAppMessageManager {
                 manager.updateHideCampaignUntilData(
@@ -118,14 +129,22 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 return
             }
             guard let body = message.body as? String,
-                  let messageEventData = convertStringToJson(body) as [String: Any]? else { return }
+                  let messageEventData = convertStringToJson(body) as [String: Any]?
+            else {
+                return
+            }
 
             guard let type = messageEventData["type"] as? String,
-                  let buttonName = messageEventData["button_name"] as? String else { return }
+                  let buttonName = messageEventData["button_name"] as? String
+            else {
+                return
+            }
 
             if let extraData = messageEventData["extra_data"] as? [String: Any] {
                 var convertedExtraData: [String: AnyCodable] = [:]
-                AppHelper.makeJsonCodable(extraData)?.forEach { convertedExtraData[$0] = $1 }
+                AppHelper.makeJsonCodable(extraData)?.forEach {
+                    convertedExtraData[$0] = $1
+                }
                 notiflyExtraData = convertedExtraData
             }
 
@@ -144,8 +163,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 dismissCTATapped()
             case "main_button":
                 if let urlString = messageEventData["link"] as? String,
-                   let url = URL(string: urlString)
-                {
+                   let url = URL(string: urlString) {
                     UIApplication.shared.open(url, options: [:]) { _ in
                         notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked, eventParams: params)
                         self.dismissCTATapped()
@@ -162,8 +180,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                     var hideUntil: Int
                     if let hideUntilInDaysData = notiflyExtraData?["hide_until_in_days"] as? AnyCodable,
                        let hideUntilInDays = hideUntilInDaysData.getValue() as? Int,
-                       hideUntilInDays > 0
-                    {
+                       hideUntilInDays > 0 {
                         hideUntil = now + 24 * 3600 * hideUntilInDays
                     } else {
                         hideUntil = -1
@@ -252,8 +269,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     private func getModalPositionConstraint() -> NSLayoutConstraint {
         if let modalProps = modalProps,
            let position = modalProps.position as? String,
-           position == "bottom"
-        {
+           position == "bottom" {
             return view.bottomAnchor.constraint(equalTo: webView.bottomAnchor)
         }
 
@@ -292,5 +308,27 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 class FullScreenWKWebView: WKWebView {
     override var safeAreaInsets: UIEdgeInsets {
         return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    }
+}
+
+
+private extension UIWindow {
+    var topMostViewController: UIViewController? {
+        return rootViewController?.topMostViewController
+    }
+}
+
+private extension UIViewController {
+    var topMostViewController: UIViewController {
+        if let presented = presentedViewController {
+            return presented.topMostViewController
+        }
+        if let nav = self as? UINavigationController {
+            return nav.visibleViewController?.topMostViewController ?? nav
+        }
+        if let tab = self as? UITabBarController {
+            return (tab.selectedViewController ?? self).topMostViewController
+        }
+        return self
     }
 }
