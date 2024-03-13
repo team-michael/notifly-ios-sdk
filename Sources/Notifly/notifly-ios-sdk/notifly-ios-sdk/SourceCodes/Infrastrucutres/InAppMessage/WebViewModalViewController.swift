@@ -20,6 +20,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         notiflyMessageID = notiflyInAppMessageData.notiflyMessageId
         notiflyReEligibleCondition = notiflyInAppMessageData.notiflyReEligibleCondition
         modalProps = notiflyInAppMessageData.modalProps
+        guard UIApplication.shared.canOpenURL(notiflyInAppMessageData.url) else {
+            Logger.error("Fail to load in app message: invalid url.")
+            throw NotiflyError.unexpectedNil("Fail to load in app message: invalid url or Network issue.")
+        }
         DispatchQueue.main.async { [weak self] in
             self?.webView.load(URLRequest(url: notiflyInAppMessageData.url))
         }
@@ -72,7 +76,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             Logger.error("Fail to present in app message.")
             return false
         }
-        topVC.present(self, animated: animated, completion: completion)
+        topVC.present(self, animated: animated)
         return true
     }
 
@@ -84,11 +88,11 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {
         webView.evaluateJavaScript(InAppMessageConstant.injectedJavaScript, completionHandler: nil)
-        view.isHidden = true
         if !setupUI() as Bool {
-            dismissCTATapped()
+            WebViewModalViewController.openedInAppMessageCount = 0
             return
         }
+        view.isHidden = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.view.isHidden = false
         }
