@@ -14,6 +14,9 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     convenience init(notiflyInAppMessageData: InAppMessageData) throws {
         self.init(nibName: nil, bundle: nil)
+        if #available(iOS 16.4, *) {
+            self.webView.isInspectable = true
+        }
         view.isHidden = false
         modalPresentationStyle = .overFullScreen
         notiflyCampaignID = notiflyInAppMessageData.notiflyCampaignId
