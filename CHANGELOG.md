@@ -35,3 +35,7 @@
 # 1.6.0
 
 - Fix: Additional Validation Before In App Popup Presented
+
+# 1.6.1
+
+- Chore: Add .list option to the default foreground push notification presentation options
