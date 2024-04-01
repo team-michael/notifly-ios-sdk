@@ -190,7 +190,7 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
                                        withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void)
     {
         if #available(iOS 14.0, *) {
-            completion([.banner, .badge, .sound])
+            completion([.banner, .badge, .sound, .list])
         } else {
             completion([.alert, .badge, .sound])
         }
