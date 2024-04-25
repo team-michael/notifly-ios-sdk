@@ -39,3 +39,7 @@
 # 1.6.1
 
 - Chore: Add .list option to the default foreground push notification presentation options
+
+# 1.7.0
+
+- Chore: Add Privacy Manifest 

@@ -1,7 +1,7 @@
 import Foundation
 
 enum NotiflyConstant {
-    static let sdkVersion: String = "1.6.1"
+    static let sdkVersion: String = "1.7.0"
     static let iosPlatform: String = "ios"
     enum EndPoint {
         static let trackEventEndPoint = "https://12lnng07q2.execute-api.ap-northeast-2.amazonaws.com/prod/records"
