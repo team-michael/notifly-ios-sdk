@@ -23,7 +23,11 @@ let package = Package(
                 .product(name: "FirebaseMessaging", package: "Firebase"),
             ],
             path: "Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk",
-            sources: ["SourceCodes"]
+            sources: ["SourceCodes"],
+            resources: [
+                .copy("PrivacyInfo.xcprivacy"),
+            ]
+            
         ),
     ]
 )

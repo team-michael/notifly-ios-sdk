@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
   s.name             = 'notifly_sdk'
-  s.version          = '1.6.1'
+  s.version          = '1.7.0'
   s.summary          = 'Notifly iOS SDK.'
 
   s.description      = <<-DESC
-  NOTIFLY iOS SDK : 1.6.1
+  NOTIFLY iOS SDK : 1.7.0
   DESC
 
   s.homepage         = 'https://github.com/team-michael/notifly-ios-sdk'
@@ -19,10 +19,12 @@ Pod::Spec.new do |s|
     full.source_files = 'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/**/*'
     full.dependency 'Firebase/Core'
     full.dependency 'FirebaseMessaging'
+    full.resource_bundles = { "notifly_sdk" => "Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/PrivacyInfo.xcprivacy" }
   end
 
   s.subspec 'Extension' do |e|
     e.source_files = ['Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyExtension/**/*.swift', 'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/**/*.swift']
+    e.resource_bundles = { "notifly_sdk-Extension" => "Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/PrivacyInfo.xcprivacy" }
   end
 
 end
