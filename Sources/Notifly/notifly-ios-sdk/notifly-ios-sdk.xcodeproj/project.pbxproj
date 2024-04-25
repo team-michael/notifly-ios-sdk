@@ -52,6 +52,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2B91499B2BDA3C3A0066CDD0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = notifly_ios_sdk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		673F0E8429EBA7D200814217 /* notifly_ios_sdk.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = notifly_ios_sdk.docc; sourceTree = "<group>"; };
 		673F0E8A29EBA7D200814217 /* notifly-ios-sdkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "notifly-ios-sdkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -128,6 +129,7 @@
 			isa = PBXGroup;
 			children = (
 				F2F732E12A26E3A5008BA9B1 /* notifly_sdk.h */,
+				2B91499B2BDA3C3A0066CDD0 /* PrivacyInfo.xcprivacy */,
 				673F0EA529EBC65000814217 /* SourceCodes */,
 				673F0E8429EBA7D200814217 /* notifly_ios_sdk.docc */,
 			);
