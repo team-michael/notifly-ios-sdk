@@ -42,4 +42,8 @@
 
 # 1.7.0
 
-- Chore: Add Privacy Manifest 
+- Chore: Add Privacy Manifest
+
+# 1.7.1
+
+- Fix: Defending against crashes due to concurrency issues in the process of updating the user's event data.
