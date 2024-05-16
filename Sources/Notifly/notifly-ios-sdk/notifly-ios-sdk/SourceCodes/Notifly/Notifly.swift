@@ -18,8 +18,11 @@ import UIKit
     }
 
     static var _main: Notifly?
-    static var sdkVersion: String = NotiflyConstant.sdkVersion
-    static var sdkType: SdkType = .native
+
+    static var sdkVersion: String = NotiflyConstant.sdkVersion // Native SDK version
+    static var sdkWrapperVersion: String? = nil
+    static var sdkWrapperType: SdkWrapperType? = nil
+
     static var coldStartNotificationData: [AnyHashable: Any]?
     static var inAppMessageDisabled: Bool = false
     static var cancellables = Set<AnyCancellable>()

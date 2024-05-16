@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/google/GoogleDataTransport.git",
         "state": {
           "branch": null,
-          "revision": "aae45a320fd0d11811820335b1eabc8753902a40",
-          "version": "9.2.5"
+          "revision": "a637d318ae7ae246b02d7305121275bc75ed5565",
+          "version": "9.4.0"
         }
       },
       {
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/google/GoogleUtilities.git",
         "state": {
           "branch": null,
-          "revision": "c38ce365d77b04a9a300c31061c5227589e5597b",
-          "version": "7.11.5"
+          "revision": "57a1d307f42df690fdef2637f3e5b776da02aad6",
+          "version": "7.13.3"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/firebase/leveldb.git",
         "state": {
           "branch": null,
-          "revision": "0706abcc6b0bd9cedfbb015ba840e4a780b5159b",
-          "version": "1.22.2"
+          "revision": "a0bc79961d7be727d258d33d5a6b2f1023270ba1",
+          "version": "1.22.5"
         }
       },
       {
@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/google/promises.git",
         "state": {
           "branch": null,
-          "revision": "e70e889c0196c76d22759eb50d6a0270ca9f1d9e",
-          "version": "2.3.1"
+          "revision": "540318ecedd63d883069ae7f1ed811a2df00b6ac",
+          "version": "2.4.0"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/apple/swift-protobuf.git",
         "state": {
           "branch": null,
-          "revision": "cf62cdaea48b77f1a631e5cb3aeda6047c2cba1d",
-          "version": "1.23.0"
+          "revision": "9f0c76544701845ad98716f3f6a774a892152bcb",
+          "version": "1.26.0"
         }
       }
     ]

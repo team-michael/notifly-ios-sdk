@@ -14,7 +14,7 @@ struct Campaign {
     let channel: String
     let status: CampaignStatus
 
-    let triggeringEvent: String
+    let triggeringConditions: TriggeringConditions
     let triggeringEventFilters: TriggeringEventFilters?
 
     let campaignStart: Int
@@ -30,18 +30,18 @@ struct Campaign {
 
     let message: Message
 
-    let lastUpdatedTimestamp: Int
+    let updatedAt: String
 
     init?(from: [String: Any]) {
         guard let id = from["id"] as? String,
               let channel = from["channel"] as? String,
               channel == InAppMessageConstant.inAppMessageChannel,
+              
+              let triggeringConditions = try? TriggeringConditions(from: from["triggering_conditions"]),
 
               let rawStatusValue = from["status"] as? Int,
               let campaignStatus = CampaignStatus(rawValue: rawStatusValue),
               campaignStatus == .active,
-
-              let triggeringEvent = from["triggering_event"] as? String,
 
               let testing = from["testing"] as? Bool,
 
@@ -52,8 +52,9 @@ struct Campaign {
               let rawSegmentType = from["segment_type"] as? String,
               let segmentType = NotiflySegmentation.SegmentationType(rawValue: rawSegmentType),
               segmentType == .conditionBased,
-              let segmentInfoDict = from["segment_info"] as? [String: Any]
+              let segmentInfoDict = from["segment_info"] as? [String: Any],
 
+              let updatedAt = from["updated_at"] as? String
         else {
             return nil
         }
@@ -61,26 +62,26 @@ struct Campaign {
         self.id = id
 
         self.channel = channel
-        status = campaignStatus
+        self.status = campaignStatus
 
-        self.triggeringEvent = triggeringEvent
-        triggeringEventFilters = try? TriggeringEventFilters(from: from["triggering_event_filters"])
+        self.triggeringConditions = triggeringConditions
+        self.triggeringEventFilters = try? TriggeringEventFilters(from: from["triggering_event_filters"])
 
         let campaignStarts: [Int] = (from["starts"] as? [Int]) ?? []
-        campaignStart = campaignStarts.count > 0 ? campaignStarts[0] : 0
-        campaignEnd = from["end"] as? Int
-        delay = (from["delay"] as? Int) ?? 0
-        reEligibleCondition = NotiflyReEligibleConditionEnum.ReEligibleCondition(from: from["re_eligible_condition"] as? [String: Any])
+        self.campaignStart = campaignStarts.count > 0 ? campaignStarts[0] : 0
+        self.campaignEnd = from["end"] as? Int
+        self.delay = (from["delay"] as? Int) ?? 0
+        self.reEligibleCondition = NotiflyReEligibleConditionEnum.ReEligibleCondition(from: from["re_eligible_condition"] as? [String: Any])
 
         self.testing = testing
-        whitelist = testing ? from["whitelist"] as? [String] : []
+        self.whitelist = testing ? from["whitelist"] as? [String] : []
 
         self.segmentType = segmentType
-        segmentInfo = NotiflySegmentation.SegmentInfo(from: segmentInfoDict)
+        self.segmentInfo = NotiflySegmentation.SegmentInfo(from: segmentInfoDict)
 
-        message = Message(htmlURL: htmlURL, modalProperties: modalProperties)
+        self.message = Message(htmlURL: htmlURL, modalProperties: modalProperties)
 
-        lastUpdatedTimestamp = (from["last_updated_timestamp"] as? Int) ?? 0
+        self.updatedAt = updatedAt
     }
 }
 
@@ -145,6 +146,64 @@ struct ModalProperties {
         borderTopRightRadius = (properties["borderTopRightRadius"] ?? 0.0) as? CGFloat
         backgroundOpacity = (properties["backgroundOpacity"] ?? 0.2) as? CGFloat
         dismissCTATapped = (properties["dismissCTATapped"] ?? false) as? Bool
+    }
+}
+
+@available(iOSApplicationExtension, unavailable)
+struct TriggeringConditions {
+    var conditions: [TriggeringConditionGroup]
+
+    init(from: Any?) throws {
+        guard let from = from as? [[[String: Any]]] else {
+        throw NotiflyError.invalidPayload
+        }
+
+        conditions = []
+        for condition in from {
+            guard let rawCondition = condition as? [[String: Any]] else {
+                throw NotiflyError.invalidPayload
+            }
+            var conditionGroup: TriggeringConditionGroup = []
+            for unit in rawCondition {
+                guard let unit = try? TriggeringConditionUnit(from: unit) else {
+                    throw NotiflyError.invalidPayload
+                }
+                conditionGroup.append(unit)
+            }
+            conditions.append(conditionGroup)
+        }
+    }
+
+    func match(eventName: String) -> Bool {
+        return conditions.contains {
+            $0.allSatisfy({
+                NotiflyStringComparator.compare(reference: eventName, operator: $0.operator, rhs: $0.operand)
+            })
+        }
+    }
+}
+
+@available(iOSApplicationExtension, unavailable)
+typealias TriggeringConditionGroup = [TriggeringConditionUnit]
+
+@available(iOSApplicationExtension, unavailable)
+struct TriggeringConditionUnit {
+    let type: NotiflyTriggeringConditonType
+    let `operator`: NotiflyStringOperator
+    let operand: String
+
+    init(from: [String: Any]) throws {
+        guard let typeStr = from["type"] as? String,
+            let type = NotiflyTriggeringConditonType(rawValue: typeStr),
+            let operatorStr = from["operator"] as? String,
+            let `operator` = NotiflyStringOperator(rawValue: operatorStr),
+            let operand = from["operand"] as? String
+        else {
+            throw NotiflyError.invalidPayload
+        }
+        self.type = type
+        self.operator = `operator`
+        self.operand = operand
     }
 }
 
@@ -220,7 +279,7 @@ enum TriggeringEventFilter {
                     return false
                 }
             }
-            return NotiflyComparingValueHelper.compare(type: filterUnit.targetValue?.type, sourceValue: params[filterUnit.key], operator: filterUnit.operator, targetValue: filterUnit.targetValue?.value)
+            return NotiflyValueComparator.compare(type: filterUnit.targetValue?.type, sourceValue: params[filterUnit.key], operator: filterUnit.operator, targetValue: filterUnit.targetValue?.value)
         }
 
         func matchFilterCondition(filter: TriggeringEventFilterUnitArray) -> Bool {

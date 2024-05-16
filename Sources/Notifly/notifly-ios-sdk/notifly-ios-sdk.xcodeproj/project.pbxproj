@@ -190,7 +190,7 @@
 			path = NotiflyExtension;
 			sourceTree = "<group>";
 		};
-		F2E6697D2ADE600F00DF9CA0 /* Infrastrucutres */ = {
+		F2E6697D2ADE600F00DF9CA0 /* Infrastructures */ = {
 			isa = PBXGroup;
 			children = (
 				F2E669882ADE602900DF9CA0 /* API */,
@@ -200,7 +200,7 @@
 				F2E6698B2ADE602900DF9CA0 /* Tracking */,
 				F2E6698D2ADE602900DF9CA0 /* User */,
 			);
-			path = Infrastrucutres;
+			path = Infrastructures;
 			sourceTree = "<group>";
 		};
 		F2E6697E2ADE602900DF9CA0 /* Notifications */ = {
