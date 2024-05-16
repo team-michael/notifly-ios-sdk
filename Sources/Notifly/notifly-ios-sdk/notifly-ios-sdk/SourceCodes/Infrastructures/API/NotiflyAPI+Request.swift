@@ -104,9 +104,6 @@ extension NotiflyAPI {
                 request.httpBody = try? JSONEncoder().encode(body)
             }
 
-            Logger.info("Request headers: \(request.allHTTPHeaderFields ?? [:])")
-            Logger.info("Request body: \(String(data: request.httpBody ?? Data(), encoding: .utf8) ?? "")")
-
             return request
         }
         

@@ -147,7 +147,6 @@ struct CampaignData {
 
     init(from: [[String: Any]]) {
         inAppMessageCampaigns = from.compactMap { Campaign(from: $0) }
-        Logger.info(String(describing: inAppMessageCampaigns))
     }
 }
 
