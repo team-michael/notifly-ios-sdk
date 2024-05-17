@@ -47,3 +47,8 @@
 # 1.7.1
 
 - Fix: Defending against crashes due to concurrency issues in the process of updating the user's event data.
+
+# 1.8.0
+
+- Feature: Support advanced triggering conditions
+- Feature: Add custom headers to identify platform and SDK version / SDK wrapper version

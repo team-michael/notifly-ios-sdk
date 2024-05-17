@@ -1,15 +1,15 @@
 Pod::Spec.new do |s|
   s.name             = 'notifly_sdk'
-  s.version          = '1.7.1'
+  s.version          = '1.8.0'
   s.summary          = 'Notifly iOS SDK.'
 
   s.description      = <<-DESC
-  NOTIFLY iOS SDK : 1.7.1
+  NOTIFLY iOS SDK : 1.8.0
   DESC
 
   s.homepage         = 'https://github.com/team-michael/notifly-ios-sdk'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'daeseong' => 'daeseong@greyboxhq.com' }
+  s.author           = { 'Grey Box Inc.' => 'team@greyboxhq.com' }
   s.source           = { :git => 'https://github.com/team-michael/notifly-ios-sdk.git', :tag => s.version.to_s, :submodules => true }
 
   s.ios.deployment_target = '13.0'
