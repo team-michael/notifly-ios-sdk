@@ -31,11 +31,11 @@ struct UserData {
     init(data: [String: Any]) {
         userProperties = (data["user_properties"] as? [String: Any]) ?? [:]
         campaignHiddenUntil = (data["campaign_hidden_until"] as? [String: Int]) ?? [:]
-        platform = (data["platform"] as? String) ?? (AppHelper.getDevicePlatform())
-        osVersion = (data["os_version"] as? String) ?? (AppHelper.getiOSVersion())
-        appVersion = (data["app_version"] as? String) ?? (AppHelper.getAppVersion())
-        sdkVersion = (data["sdk_version"] as? String) ?? (NotiflyHelper.getSDKVersion())
-        sdkType = (data["sdk_type"] as? String) ?? (NotiflyHelper.getSDKType())
+        platform = AppHelper.getDevicePlatform()
+        osVersion = AppHelper.getiOSVersion()
+        appVersion = AppHelper.getAppVersion()
+        sdkVersion = NotiflyHelper.getSdkVersion()
+        sdkType = NotiflyHelper.getSdkType()
         randomBucketNumber = NotiflyHelper.parseRandomBucketNumber(num: data["random_bucket_number"])
         
         if let createdAtStr = data["created_at"] as? String {

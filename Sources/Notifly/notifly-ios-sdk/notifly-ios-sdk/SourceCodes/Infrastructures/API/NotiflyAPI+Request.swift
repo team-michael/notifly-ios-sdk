@@ -11,7 +11,7 @@ extension NotiflyAPI {
     class RequestBuilder {
         var url: URL?
         var method: RequestMethod?
-        var headers: [String: String] = ["Content-Type": "application/json"]
+        var headers: [String: String] = getDefaultHeaders()
         var body: ApiRequestBody?
 
         func set(url: URL?) -> RequestBuilder {
@@ -64,6 +64,7 @@ extension NotiflyAPI {
                     .eraseToAnyPublisher()
             }
         }
+        
 
         func buildAndFireWithRawJSONResponseType() -> AnyPublisher<String, Error> {
             do {
@@ -102,7 +103,19 @@ extension NotiflyAPI {
             if let body = body {
                 request.httpBody = try? JSONEncoder().encode(body)
             }
+
             return request
+        }
+        
+        private static func getDefaultHeaders() -> [String: String] {
+            var result = [
+                "Content-Type": "application/json",
+                "X-Notifly-SDK-Version": "notifly/ios/\(NotiflyHelper.getNativeSdkVersion())"
+            ]
+            if let sdkWrapperVersion = NotiflyHelper.getSdkWrapperVersion(), let sdkWrapperType = NotiflyHelper.getSdkWrapperType() {
+                result["X-Notifly-SDK-Wrapper"] = "notifly/\(sdkWrapperType.lowercased())/\(sdkWrapperVersion)"
+            }
+            return result
         }
     }
 

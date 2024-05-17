@@ -1,8 +1,9 @@
 import Foundation
 
 enum NotiflyConstant {
-    static let sdkVersion: String = "1.7.1"
+    static let sdkVersion: String = "1.8.0"
     static let iosPlatform: String = "ios"
+    static let projectIdRegex: String = "^[0-9a-fA-F]{32}$"
     enum EndPoint {
         static let trackEventEndPoint = "https://12lnng07q2.execute-api.ap-northeast-2.amazonaws.com/prod/records"
         static let syncStateEndPoint = "https://api.notifly.tech/user-state"
@@ -88,4 +89,21 @@ enum NotiflyOperator: String {
     case greaterOrEqualThan = ">="
     case lessThan = "<"
     case lessOrEqualThan = "<="
+}
+
+enum NotiflyTriggeringConditonType: String {
+    case eventName = "event_name"
+}
+
+enum NotiflyStringOperator: String {
+    case equals = "="
+    case notEquals = "!="
+    case startsWith = "starts_with"
+    case doesNotStartWith = "does_not_start_with"
+    case endsWith = "ends_with"
+    case doesNotEndWith = "does_not_end_with"
+    case contains = "contains"
+    case doesNotContain = "does_not_contain"
+    case matchesRegex = "matches_regex"
+    case doesNotMatchRegex = "does_not_match_regex"
 }

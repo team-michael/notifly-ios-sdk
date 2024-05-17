@@ -12,13 +12,25 @@ enum NotiflyHelper {
     static func getEventName(event: String, isInternalEvent: Bool) -> String {
         return isInternalEvent ? "notifly__" + event : event
     }
-
-    static func getSDKVersion() -> String? {
+    
+    static func getNativeSdkVersion() -> String {
         return Notifly.sdkVersion
     }
+    
+    static func getSdkWrapperVersion() -> String? {
+        return Notifly.sdkWrapperVersion
+    }
 
-    static func getSDKType() -> String {
-        return Notifly.sdkType.rawValue
+    static func getSdkVersion() -> String {
+        return getSdkWrapperVersion() ?? getNativeSdkVersion()
+    }
+    
+    static func getSdkWrapperType() -> String? {
+        return Notifly.sdkWrapperType?.rawValue
+    }
+
+    static func getSdkType() -> String {
+        return getSdkWrapperType() ?? "native"
     }
 
     static func getDateStringBeforeNDays(n: Int?) -> String? {
@@ -70,11 +82,21 @@ enum NotiflyHelper {
             return intNum
         }
         return nil
-
+    }
+    
+    static func testRegex(_ reference: String, regex: String) -> Bool {
+        do {
+            let regex = try NSRegularExpression(pattern: regex)
+            let results = regex.firstMatch(in: reference, options: [], range: NSRange(reference.startIndex..., in: reference))
+            return results != nil
+        } catch {
+            Logger.info("Invalid regex pattern \(regex)")
+            return false
+        }
     }
 }
 
-enum NotiflyComparingValueHelper {
+enum NotiflyValueComparator {
     static func compare(type: String?, sourceValue: Any, operator: NotiflyOperator, targetValue: Any?) -> Bool {
         switch `operator` {
         case .isNull:
@@ -93,23 +115,23 @@ enum NotiflyComparingValueHelper {
             }
         default:
             if let type = type,
-               let typedSourceValue = NotiflyComparingValueHelper.castAnyToSpecifiedType(value: sourceValue, type: `operator` == .contains ? "ARRAY" : type),
-               let typedTargetValue = NotiflyComparingValueHelper.castAnyToSpecifiedType(value: targetValue, type: type) {
+               let typedSourceValue = NotiflyValueComparator.castAnyToSpecifiedType(value: sourceValue, type: `operator` == .contains ? "ARRAY" : type),
+               let typedTargetValue = NotiflyValueComparator.castAnyToSpecifiedType(value: targetValue, type: type) {
                 switch `operator` {
                 case .equal:
-                    return NotiflyComparingValueHelper.isEqual(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                    return NotiflyValueComparator.isEqual(value1: typedSourceValue, value2: typedTargetValue, type: type)
                 case .notEqual:
-                    return NotiflyComparingValueHelper.isNotEqual(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                    return NotiflyValueComparator.isNotEqual(value1: typedSourceValue, value2: typedTargetValue, type: type)
                 case .contains:
-                    return NotiflyComparingValueHelper.isContains(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                    return NotiflyValueComparator.doesContain(value1: typedSourceValue, value2: typedTargetValue, type: type)
                 case .greaterThan:
-                    return NotiflyComparingValueHelper.isGreaterThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                    return NotiflyValueComparator.isGreaterThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
                 case .greaterOrEqualThan:
-                    return NotiflyComparingValueHelper.isGreaterOrEqualThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                    return NotiflyValueComparator.isGreaterOrEqualThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
                 case .lessThan:
-                    return NotiflyComparingValueHelper.isLessThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                    return NotiflyValueComparator.isLessThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
                 case .lessOrEqualThan:
-                    return NotiflyComparingValueHelper.isLessOrEqualThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                    return NotiflyValueComparator.isLessOrEqualThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
                 default:
                     return false
                 }
@@ -230,12 +252,12 @@ enum NotiflyComparingValueHelper {
         }
     }
 
-    static func isContains(value1: Any, value2: Any, type: String) -> Bool {
+    static func doesContain(value1: Any, value2: Any, type: String) -> Bool {
         guard let array = value1 as? [Any] else {
             return false
         }
         for element in array {
-            if NotiflyComparingValueHelper.isEqual(value1: element, value2: value2, type: type) {
+            if NotiflyValueComparator.isEqual(value1: element, value2: value2, type: type) {
                 return true
             }
         }
@@ -258,6 +280,33 @@ enum NotiflyComparingValueHelper {
             return value
         case (_, _):
             return nil
+        }
+    }
+}
+
+enum NotiflyStringComparator {
+    static func compare(reference: String, operator: NotiflyStringOperator, rhs: String) -> Bool {
+        switch `operator` {
+        case .equals:
+            return reference == rhs
+        case .notEquals:
+            return reference != rhs
+        case .startsWith:
+            return reference.hasPrefix(rhs)
+        case .doesNotStartWith:
+            return !reference.hasPrefix(rhs)
+        case .contains:
+            return reference.contains(rhs)
+        case .doesNotContain:
+            return !reference.contains(rhs)
+        case .endsWith:
+            return reference.hasSuffix(rhs)
+        case .doesNotEndWith:
+            return !reference.hasSuffix(rhs)
+        case .matchesRegex:
+            return NotiflyHelper.testRegex(reference, regex: rhs)
+        case .doesNotMatchRegex:
+            return !NotiflyHelper.testRegex(reference, regex: rhs)
         }
     }
 }

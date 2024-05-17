@@ -87,7 +87,7 @@ enum SegmentationHelper {
         let sourceValue = selectSourceValueFromUserData(condition: condition, userData: userData)
         let targetValue = selectTargetValue(condition: condition, eventParams: eventParams)
 
-        return NotiflyComparingValueHelper.compare(type: condition.valueType, sourceValue: sourceValue, operator: condition.operator, targetValue: targetValue)
+        return NotiflyValueComparator.compare(type: condition.valueType, sourceValue: sourceValue, operator: condition.operator, targetValue: targetValue)
     }
 
     static func selectSourceValueFromUserData(condition: NotiflySegmentation.SegmentationCondition.Conditions.UserBased.Condition, userData: UserData) -> Any? {

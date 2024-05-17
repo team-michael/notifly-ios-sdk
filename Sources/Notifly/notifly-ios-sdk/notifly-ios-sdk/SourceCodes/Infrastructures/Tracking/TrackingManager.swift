@@ -177,8 +177,7 @@ class TrackingManager {
 
         guard let notiflyDeviceID = AppHelper.getNotiflyDeviceID(),
               let deviceID = AppHelper.getDeviceID(),
-              let appVersion = AppHelper.getAppVersion(),
-              let sdkVersion = NotiflyHelper.getSDKVersion()
+              let appVersion = AppHelper.getAppVersion()
         else {
             Logger.error("Failed to track event: " + eventName)
             return Fail(outputType: TrackingRecord.self, failure: NotiflyError.unexpectedNil("Device data is invalid."))
@@ -200,8 +199,8 @@ class TrackingManager {
                                        platform: AppHelper.getDevicePlatform(),
                                        os_version: AppHelper.getiOSVersion(),
                                        app_version: appVersion,
-                                       sdk_version: sdkVersion,
-                                       sdk_type: NotiflyHelper.getSDKType(),
+                                       sdk_version: NotiflyHelper.getSdkVersion(),
+                                       sdk_type: NotiflyHelper.getSdkType(),
                                        event_params: AppHelper.makeJsonCodable(eventParams)) as? TrackingData,
                 let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
 

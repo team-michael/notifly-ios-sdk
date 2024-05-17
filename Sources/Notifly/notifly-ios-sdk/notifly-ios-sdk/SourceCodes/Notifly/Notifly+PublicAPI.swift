@@ -19,6 +19,11 @@ import UIKit
             return
         }
 
+        if (!NotiflyHelper.testRegex(projectId, regex: NotiflyConstant.projectIdRegex)) {
+            Logger.error("Invalid Project ID. Please provide a valid Project ID.")
+            return
+        }
+
         Notifly(
             projectId: projectId,
             username: username,
@@ -149,16 +154,16 @@ import UIKit
     }
 
     static func setSdkType(type: String) {
-        if let sdkType = SdkType(rawValue: type) {
-            Notifly.sdkType = sdkType
-            Logger.info("Notifly SDK type is set to \(sdkType.rawValue).")
+        if let sdkType = SdkWrapperType(rawValue: type) {
+            Notifly.sdkWrapperType = sdkType
+            Logger.info("Notifly SDK type has been set to \(sdkType.rawValue).")
         } else {
-            Logger.error("Notifly SDK type is invalid. Please set Notifly.sdkType to one of the following: react_native, flutter, native (default)")
+            Logger.error("Notifly SDK type is invalid. Please set type to one of the following: 'react_native', 'flutter'")
         }
     }
 
     static func setSdkVersion(version: String) {
-        Notifly.sdkVersion = version
+        Notifly.sdkWrapperVersion = version
     }
 
     static func disableInAppMessage() {

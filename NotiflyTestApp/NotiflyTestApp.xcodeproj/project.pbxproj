@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2B19B0552BA161E500E33F4B /* TestConstatns.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F3CE7A2A13A2DD009FEAF0 /* TestConstatns.swift */; };
+		2B19B0552BA161E500E33F4B /* TestConstant.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F3CE7A2A13A2DD009FEAF0 /* TestConstant.swift */; };
 		672E7B7529EDF1C400B3E9F2 /* TrackingTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7429EDF1C400B3E9F2 /* TrackingTestViewController.swift */; };
 		672E7B7A29EDF22F00B3E9F2 /* UIStackView+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7929EDF22F00B3E9F2 /* UIStackView+.swift */; };
 		672E7B7C29EDF91800B3E9F2 /* UITextField+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7B29EDF91800B3E9F2 /* UITextField+.swift */; };
@@ -24,7 +24,7 @@
 		F22B77BC2AA98B6800F7C432 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F22B77B72AA989A400F7C432 /* notifly_ios_sdk.framework */; };
 		F237A44B2AE257C8001E74A1 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F237A44A2AE257C8001E74A1 /* NotificationService.swift */; };
 		F237A44F2AE257C8001E74A1 /* NotiflyNotificationExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F237A4482AE257C8001E74A1 /* NotiflyNotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		F237A4542AE25818001E74A1 /* TestConstatns.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F3CE7A2A13A2DD009FEAF0 /* TestConstatns.swift */; };
+		F237A4542AE25818001E74A1 /* TestConstant.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F3CE7A2A13A2DD009FEAF0 /* TestConstant.swift */; };
 		F237A4572AE258C8001E74A1 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F260C4202AB17A9300394B5B /* notifly_ios_sdk.framework */; };
 		F237A4582AE258C8001E74A1 /* notifly_ios_sdk.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F260C4202AB17A9300394B5B /* notifly_ios_sdk.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F2DF20CC2AB17AB700CB9703 /* notifly_ios_sdk.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F260C4202AB17A9300394B5B /* notifly_ios_sdk.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -128,7 +128,7 @@
 		F237A44C2AE257C8001E74A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F237A4532AE257D0001E74A1 /* NotiflyNotificationExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotiflyNotificationExtension.entitlements; sourceTree = "<group>"; };
 		F260C41A2AB17A9200394B5B /* notifly-ios-sdk.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "notifly-ios-sdk.xcodeproj"; path = "../Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk.xcodeproj"; sourceTree = "<group>"; };
-		F2F3CE7A2A13A2DD009FEAF0 /* TestConstatns.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConstatns.swift; sourceTree = "<group>"; };
+		F2F3CE7A2A13A2DD009FEAF0 /* TestConstant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConstant.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -162,7 +162,7 @@
 		672E7B6B29ED1E2000B3E9F2 /* SourceCodes */ = {
 			isa = PBXGroup;
 			children = (
-				F2F3CE7A2A13A2DD009FEAF0 /* TestConstatns.swift */,
+				F2F3CE7A2A13A2DD009FEAF0 /* TestConstant.swift */,
 				672E7B6E29ED1EF100B3E9F2 /* UI */,
 			);
 			path = SourceCodes;
@@ -400,7 +400,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2B19B0552BA161E500E33F4B /* TestConstatns.swift in Sources */,
+				2B19B0552BA161E500E33F4B /* TestConstant.swift in Sources */,
 				675EB43929ED18B0001347FB /* MainViewController.swift in Sources */,
 				675EB43529ED18B0001347FB /* AppDelegate.swift in Sources */,
 				672E7B7C29EDF91800B3E9F2 /* UITextField+.swift in Sources */,
@@ -418,7 +418,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F237A44B2AE257C8001E74A1 /* NotificationService.swift in Sources */,
-				F237A4542AE25818001E74A1 /* TestConstatns.swift in Sources */,
+				F237A4542AE25818001E74A1 /* TestConstant.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

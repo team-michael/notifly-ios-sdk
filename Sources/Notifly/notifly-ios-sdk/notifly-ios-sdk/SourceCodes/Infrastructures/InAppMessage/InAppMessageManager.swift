@@ -49,7 +49,7 @@ class InAppMessageManager {
         }
 
         if var campaignsToTrigger = getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams) {
-            campaignsToTrigger.sort(by: { $0.lastUpdatedTimestamp > $1.lastUpdatedTimestamp })
+            campaignsToTrigger.sort(by: { $0.updatedAt > $1.updatedAt })
             for campaignToTrigger in campaignsToTrigger {
                 if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger) {
                     showInAppMessage(userID: userID, notiflyInAppMessageData: notiflyInAppMessageData)
@@ -87,12 +87,14 @@ class InAppMessageManager {
             isCampaignActive(campaign: $0)
         }
         .filter {
-            matchTriggeringEventCondition(campaign: $0, eventName: eventName, eventParams: eventParams)
+            matchTriggeringConditions(campaign: $0, eventName: eventName)
+        }
+        .filter {
+            matchTriggeringFilters(campaign: $0, eventName: eventName, eventParams: eventParams)
         }
         .filter {
             SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: userStateManager.userData, eventData: userStateManager.eventData)
         }
-
         if campaignsToTrigger.count == 0 {
             return nil
         }
@@ -107,12 +109,12 @@ class InAppMessageManager {
         }
         return now >= startTimestamp
     }
+    
+    private func matchTriggeringConditions(campaign: Campaign, eventName: String) -> Bool {
+        return campaign.triggeringConditions.match(eventName: eventName)
+    }
 
-    private func matchTriggeringEventCondition(campaign: Campaign, eventName: String, eventParams: [String: Any]?) -> Bool {
-        if campaign.triggeringEvent != eventName {
-            return false
-        }
-
+    private func matchTriggeringFilters(campaign: Campaign, eventName: String, eventParams: [String: Any]?) -> Bool {
         if let paramsFilterCondition = campaign.triggeringEventFilters,
            !TriggeringEventFilter.matchFilterCondition(filters: paramsFilterCondition.filters, eventParams: eventParams) {
             return false
@@ -140,8 +142,6 @@ class InAppMessageManager {
         } else {
             return false
         }
-
-        return true
     }
 
     private func isHiddenCampaign(campaignID: String, userData: UserData) -> Bool {
