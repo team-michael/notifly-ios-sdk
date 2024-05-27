@@ -29,9 +29,7 @@ class InAppMessageManager {
                     Logger.error("Fail to update client-side user state (user properties): owner mismatch")
                     return
                 }
-                self.userStateManager.userData.userProperties.merge(properties) { _, new in
-                    new
-                }
+                self.userStateManager.updateUserData(userID: userID, properties: properties)
             }
         )
         guard let main = try? Notifly.main, updateTask != nil else {
