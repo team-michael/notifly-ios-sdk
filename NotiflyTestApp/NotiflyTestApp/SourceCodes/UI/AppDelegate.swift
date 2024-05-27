@@ -6,7 +6,8 @@ import UserNotifications
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication,
-                     didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+                     didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
+    {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
             if let error = error {
                 print("Failed to request authorization: \(error)")
@@ -30,13 +31,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication,
-                     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+                     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data)
+    {
         Notifly.application(application,
                             didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
     }
 
     func application(_ application: UIApplication,
-                     didFailToRegisterForRemoteNotificationsWithError error: Error) {
+                     didFailToRegisterForRemoteNotificationsWithError error: Error)
+    {
         Notifly.application(application,
                             didFailToRegisterForRemoteNotificationsWithError: error)
     }
@@ -45,7 +48,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
-                                withCompletionHandler completion: () -> Void) {
+                                withCompletionHandler completion: () -> Void)
+    {
         Notifly.userNotificationCenter(notificationCenter,
                                        didReceive: response)
         completion()
@@ -53,7 +57,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
     func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                 willPresent notification: UNNotification,
-                                withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void) {
+                                withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void)
+    {
         Notifly.userNotificationCenter(notificationCenter,
                                        willPresent: notification,
                                        withCompletionHandler: completion)

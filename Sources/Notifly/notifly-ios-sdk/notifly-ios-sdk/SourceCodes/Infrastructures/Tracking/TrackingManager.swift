@@ -22,6 +22,8 @@ class TrackingManager {
     private let internalEventPublisher = PassthroughSubject<TrackingRecord, Never>()
 
     private let projectId: String
+
+    private let accessQueue = DispatchQueue(label: "TrackingManagerAccessQueue")
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Lifecycle
@@ -44,11 +46,15 @@ class TrackingManager {
         setup()
     }
 
-    // MARK: Methods
+    private func storeCanellables(cancellable: AnyCancellable) {
+        accessQueue.async {
+            cancellable.store(in: &self.cancellables)
+        }
+    }
 
     func trackSessionStartInternalEvent() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
-            var authStatus: Int = 0
+            var authStatus = 0
             switch settings.authorizationStatus {
             case .authorized:
                 authStatus = 1
@@ -82,82 +88,75 @@ class TrackingManager {
         )
     }
 
-    func trackInternalEvent(eventName: String, eventParams: [String: Any]?, urgent: Bool = false) {
+    func trackSyncStateCompletedInternalEvent(userID _: String, externalUserID _: String?, properties: [String: Any]?) {
+        trackInternalEvent(eventName: TrackingConstant.Internal.syncStateCompletedEventName,
+                           eventParams: properties,
+                           urgent: true, skipUpdatingState: true)
+    }
+
+    func trackInternalEvent(eventName: String, eventParams: [String: Any]?, urgent: Bool = false, skipUpdatingState: Bool = false) {
         return track(eventName: eventName,
                      eventParams: eventParams,
                      isInternal: true,
                      segmentationEventParamKeys: nil,
-                     urgent: urgent)
+                     urgent: urgent,
+                     skipUpdatingState: skipUpdatingState)
     }
 
     func track(eventName: String,
                eventParams: [String: Any]?,
                isInternal: Bool,
                segmentationEventParamKeys: [String]?,
-               urgent: Bool = false)
+               urgent: Bool = false,
+               skipUpdatingState: Bool = false)
     {
         guard let notifly = try? Notifly.main else {
             Logger.error("Fail to track Event. \(eventName)")
             return
         }
         let userID = (try? notifly.userManager.getNotiflyUserID()) ?? ""
-        
+
         let externalUserID = notifly.userManager.externalUserID
         let currentTimestamp = AppHelper.getCurrentTimestamp()
-        
+
         var trackingTask: AnyPublisher<TrackingRecord, Error>?
         if urgent {
-            trackingTask = handleTrackEvent(eventName: eventName, eventParams: eventParams, isInternal: isInternal, segmentationEventParamKeys: segmentationEventParamKeys, currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID)
+            trackingTask = handleTrackEvent(eventName: eventName, eventParams: eventParams, isInternal: isInternal, segmentationEventParamKeys: segmentationEventParamKeys, currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID, skipUpdatingState: skipUpdatingState)
         } else {
             trackingTask = Notifly.keepGoingPub.flatMap { _ in
-                return self.handleTrackEvent(eventName: eventName, eventParams: eventParams, isInternal: isInternal, segmentationEventParamKeys: segmentationEventParamKeys, currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID)
+                self.handleTrackEvent(eventName: eventName, eventParams: eventParams, isInternal: isInternal, segmentationEventParamKeys: segmentationEventParamKeys, currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID, skipUpdatingState: skipUpdatingState)
             }.eraseToAnyPublisher()
         }
-        trackingTask?.sink(receiveCompletion: { completion in
-            if case let .failure(error) = completion {
-                Logger.error("Failed to Track Event \(eventName). Error: \(error)")
-            }
-        },
-                   receiveValue: { [weak self] record in
-            if isInternal {
-                self?.internalEventPublisher.send(record)
-            } else {
-                self?.eventPublisher.send(record)
-            }
-        })
-        .store(in: &cancellables)
+
+        let requestTask = trackingTask?.sink(receiveCompletion: { completion in
+                                                 if case let .failure(error) = completion {
+                                                     Logger.error("Failed to Track Event \(eventName). Error: \(error)")
+                                                 }
+                                             },
+                                             receiveValue: { [weak self] record in
+                                                 if isInternal {
+                                                     self?.internalEventPublisher.send(record)
+                                                 } else {
+                                                     self?.eventPublisher.send(record)
+                                                 }
+                                             })
+        if let requestTask = requestTask {
+            storeCanellables(cancellable: requestTask)
+        }
     }
-                   
-    
-    private func handleTrackEvent(eventName: String, eventParams: [String: Any]?, isInternal: Bool, segmentationEventParamKeys: [String]?, currentTimestamp: Int, userID: String, externalUserID: String?) -> AnyPublisher<TrackingRecord, Error> {
-        let trackingEventName = NotiflyHelper.getEventName(event: eventName, isInternalEvent: isInternal)
-        try? Notifly.main.inAppMessageManager.updateEventData(userID:
+
+    private func handleTrackEvent(eventName: String, eventParams: [String: Any]?, isInternal: Bool, segmentationEventParamKeys: [String]?, currentTimestamp: Int, userID: String, externalUserID: String?, skipUpdatingState: Bool = false) -> AnyPublisher<TrackingRecord, Error> {
+        if !skipUpdatingState {
+            let trackingEventName = NotiflyHelper.getEventName(event: eventName, isInternalEvent: isInternal)
+            try? Notifly.main.inAppMessageManager.updateEventData(userID:
                 userID,
                 eventName: trackingEventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
-            return createTrackingRecord(eventName: eventName,
-                                             eventParams: eventParams,
-                                             isInternal: isInternal,
-                                             segmentationEventParamKeys: segmentationEventParamKeys,
-                                             currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID)
-
-    }
-
-    func trackSyncStateCompletedInternalEvent(userID: String, externalUserID: String?, properties: [String: Any]?) {
-        let currentTimestamp = AppHelper.getCurrentTimestamp()
-        createTrackingRecord(eventName: TrackingConstant.Internal.syncStateCompletedEventName,
-                             eventParams: properties,
-                             isInternal: true,
-                             segmentationEventParamKeys: nil,
-                             currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID)
-            .sink(receiveCompletion: { completion in
-                      if case let .failure(error) = completion {
-                          Logger.error("Failed to Track Event \(TrackingConstant.Internal.syncStateCompletedEventName). Error: \(error)")
-                      }
-                  },
-                  receiveValue: { [weak self] record in
-                      self?.internalEventPublisher.send(record)
-                  })
-            .store(in: &cancellables)
+        }
+        return createTrackingRecord(eventName: eventName,
+                                    eventParams: eventParams,
+                                    isInternal: isInternal,
+                                    segmentationEventParamKeys: segmentationEventParamKeys,
+                                    currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID)
     }
 
     func createTrackingRecord(eventName: String,
@@ -220,7 +219,7 @@ class TrackingManager {
 
     private func setup() {
         // Submit the tracking event to API & log result.
-        eventRequestPayloadPublisher
+        let firingCustomEventTask = eventRequestPayloadPublisher
             .flatMap { payload in
                 NotiflyAPI().trackEvent(payload)
                     .catch { error in
@@ -230,19 +229,23 @@ class TrackingManager {
             .sink { [weak self] result in
                 self?.eventRequestResponsePublisher.send(result)
             }
-            .store(in: &cancellables)
 
-        internalEventRequestPayloadPublisher
+        let firingInternalEventTask = internalEventRequestPayloadPublisher
             .flatMap { payload in
                 NotiflyAPI().trackEvent(payload)
                     .catch { error in
                         Just("Tracking Event request failed with error: \(error)")
                     }
             }
-
             .sink { [weak self] result in
                 self?.internalEventRequestResponsePublisher.send(result)
             }
-            .store(in: &cancellables)
+
+        if let firingCustomEventTask = firingCustomEventTask as? AnyCancellable {
+            storeCanellables(cancellable: firingCustomEventTask)
+        }
+        if let firingInternalEventTask = firingInternalEventTask as? AnyCancellable {
+            storeCanellables(cancellable: firingInternalEventTask)
+        }
     }
 }

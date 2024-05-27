@@ -25,7 +25,9 @@ import UIKit
 
     static var coldStartNotificationData: [AnyHashable: Any]?
     static var inAppMessageDisabled: Bool = false
-    static var cancellables = Set<AnyCancellable>()
+
+    var cancellables = Set<AnyCancellable>()
+    let accessQueue = DispatchQueue(label: "com.notifly.manager.access.queue")
 
     let projectId: String
 
@@ -34,8 +36,6 @@ import UIKit
     let trackingManager: TrackingManager
     let userManager: UserManager
     let inAppMessageManager: InAppMessageManager
-
-    var trackingCancellables = Set<AnyCancellable>()
 
     // MARK: Lifecycle
 
@@ -59,5 +59,11 @@ import UIKit
         inAppMessageManager = InAppMessageManager(owner: (try? userManager.getNotiflyUserID()))
         super.init()
         Notifly._main = self
+    }
+
+    func storeCancellable(cancellable: AnyCancellable) {
+        self.accessQueue.async {
+            cancellable.store(in: &self.cancellables)
+        }
     }
 }

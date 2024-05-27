@@ -16,6 +16,7 @@ class UserStateManager {
     var userData: UserData = .init(data: [:])
     var eventData: EventData = .init(eventCounts: [:])
 
+    private let userStateAccessQueue = DispatchQueue(label: "com.notifly.userStateAccessQueue")
     private var _waitSyncStateFinishedPub: AnyPublisher<Void, Error>?
     private(set) var waitSyncStateFinishedPub: AnyPublisher<Void, Error> {
         get {
@@ -40,11 +41,15 @@ class UserStateManager {
         let parentLock = lockCount > 1 ? waitSyncStateCompletedPubs[parentLockIndex] : nil
         return Future<Void, Never> { promise in
             if let parentLock = parentLock {
-                parentLock
+                let task = parentLock
                     .sink(receiveCompletion: { _ in
                         promise(.success(()))
                     }, receiveValue: { _ in })
-                    .store(in: &Notifly.cancellables)
+                guard let main = try? Notifly.main, task != nil else {
+                    return
+                }
+                main.storeCancellable(cancellable: task)
+
             } else {
                 promise(.success(()))
             }
@@ -128,17 +133,17 @@ class UserStateManager {
 
         let externalUserID = notifly.userManager.externalUserID
         let lockId = lock()
-        waitParentUnlockPub
+        let task = waitParentUnlockPub
             .sink(receiveCompletion: { _ in
                       self.fetchUserCampaignContext(projectId: projectId, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID, externalUserID: externalUserID, lockId: lockId, postProcessConfig: postProcessConfig)
                   },
                   receiveValue: { _ in })
-            .store(in: &Notifly.cancellables)
+        notifly.storeCancellable(cancellable: task)
     }
 
     private func fetchUserCampaignContext(projectId: String, notiflyUserID: String, notiflyDeviceID: String, externalUserID: String?, lockId: Int, postProcessConfig: PostProcessConfigForSyncState) {
         setTimeoutForLock(lockId: lockId)
-        return NotiflyAPI().requestSyncState(projectId: projectId, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID)
+        let task = NotiflyAPI().requestSyncState(projectId: projectId, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID)
             .sink(receiveCompletion: { completion in
                 if case let .failure(error) = completion {
                     Logger.error("Fail to sync user state: " + error.localizedDescription)
@@ -163,18 +168,22 @@ class UserStateManager {
                 }
 
                 let userDataAsEventParams = self?.userData.destruct()
-                try? Notifly.main.trackingManager.trackSyncStateCompletedInternalEvent(userID: notiflyUserID, externalUserID: externalUserID, properties: userDataAsEventParams)
                 Logger.info("Sync State Completed.")
                 self?.owner = notiflyUserID
+                try? Notifly.main.trackingManager.trackSyncStateCompletedInternalEvent(userID: notiflyUserID, externalUserID: externalUserID, properties: userDataAsEventParams)
 
                 self?.unlock(lockId: lockId)
             })
-            .store(in: &Notifly.cancellables)
+        guard let main = try? Notifly.main, task != nil else {
+            Logger.error("Fail to sync user state: Notifly is not initialized")
+            unlock(lockId: lockId, NotiflyError.notInitialized)
+            return
+        }
+        main.storeCancellable(cancellable: task)
     }
 
     /* post-process of sync state */
-    private func constructUserData(rawUserData: [String: Any], postProcessConfig: PostProcessConfigForSyncState)
-    {
+    private func constructUserData(rawUserData: [String: Any], postProcessConfig: PostProcessConfigForSyncState) {
         let newUserData = UserData(data: rawUserData)
         if postProcessConfig.merge, let previousUserData = userData as? UserData {
             userData = UserData.merge(p1: previousUserData, p2: newUserData)
@@ -203,7 +212,7 @@ class UserStateManager {
             guard let self = self else { return }
             let dt = NotiflyHelper.getCurrentDate()
             let eicID = EventIntermediateCount.generateId(eventName: eventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys, dt: dt)
-            DispatchQueue.main.async {
+            self.userStateAccessQueue.async {
                 if var eic = self.eventData.eventCounts[eicID] {
                     eic.addCount(count: 1)
                     self.eventData.eventCounts[eicID] = eic
