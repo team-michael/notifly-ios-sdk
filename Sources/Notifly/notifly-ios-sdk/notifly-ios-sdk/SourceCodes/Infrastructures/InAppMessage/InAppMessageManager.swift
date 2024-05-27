@@ -22,20 +22,21 @@ class InAppMessageManager {
         guard !Notifly.inAppMessageDisabled else {
             return
         }
-
-        Notifly.keepGoingPub.sink(
+        let updateTask = Notifly.keepGoingPub.sink(
             receiveCompletion: { _ in },
             receiveValue: { _ in
                 guard userID == self.userStateManager.owner else {
                     Logger.error("Fail to update client-side user state (user properties): owner mismatch")
                     return
                 }
-                self.userStateManager.userData.userProperties.merge(properties) { _, new in
-                    new
-                }
+                self.userStateManager.updateUserData(userID: userID, properties: properties)
             }
         )
-        .store(in: &Notifly.cancellables)
+        guard let main = try? Notifly.main, updateTask != nil else {
+            Logger.error("Fail to update client-side user state (user properties): Notifly is not initialized")
+            return
+        }
+        main.storeCancellable(cancellable: updateTask)
     }
 
     func updateEventData(userID: String?, eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) {
@@ -43,9 +44,11 @@ class InAppMessageManager {
             return
         }
 
-        guard userID == userStateManager.owner else {
-            Logger.error("Fail to update client-side user state (event): owner mismatch")
-            return
+        if let currentOwner = userStateManager.owner {
+            guard userID == currentOwner else {
+                Logger.error("Fail to update client-side user state (event): owner mismatch")
+                return
+            }
         }
 
         if var campaignsToTrigger = getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams) {
@@ -69,7 +72,7 @@ class InAppMessageManager {
             return
         }
 
-        Notifly.keepGoingPub.sink(
+        let updateTask = Notifly.keepGoingPub.sink(
             receiveCompletion: { _ in },
             receiveValue: { _ in
                 self.userStateManager.userData.campaignHiddenUntil.merge(hideUntilData) { _, new in
@@ -77,24 +80,28 @@ class InAppMessageManager {
                 }
             }
         )
-        .store(in: &Notifly.cancellables)
+        guard let main = try? Notifly.main, updateTask != nil else {
+            Logger.error("Fail to update client-side user state (user campaign hidden until): Notifly is not initialized")
+            return
+        }
+        main.storeCancellable(cancellable: updateTask)
     }
 
     /* method for showing in-app message */
     private func getCampaignsShouldBeTriggered(eventName: String, eventParams: [String: Any]?) -> [Campaign]? {
         let campaignsToTrigger = userStateManager.campaignData.inAppMessageCampaigns
-        .filter {
-            isCampaignActive(campaign: $0)
-        }
-        .filter {
-            matchTriggeringConditions(campaign: $0, eventName: eventName)
-        }
-        .filter {
-            matchTriggeringFilters(campaign: $0, eventName: eventName, eventParams: eventParams)
-        }
-        .filter {
-            SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: userStateManager.userData, eventData: userStateManager.eventData)
-        }
+            .filter {
+                isCampaignActive(campaign: $0)
+            }
+            .filter {
+                matchTriggeringConditions(campaign: $0, eventName: eventName)
+            }
+            .filter {
+                matchTriggeringFilters(campaign: $0, eventName: eventName, eventParams: eventParams)
+            }
+            .filter {
+                SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: userStateManager.userData, eventData: userStateManager.eventData)
+            }
         if campaignsToTrigger.count == 0 {
             return nil
         }
@@ -109,14 +116,15 @@ class InAppMessageManager {
         }
         return now >= startTimestamp
     }
-    
+
     private func matchTriggeringConditions(campaign: Campaign, eventName: String) -> Bool {
         return campaign.triggeringConditions.match(eventName: eventName)
     }
 
-    private func matchTriggeringFilters(campaign: Campaign, eventName: String, eventParams: [String: Any]?) -> Bool {
+    private func matchTriggeringFilters(campaign: Campaign, eventName _: String, eventParams: [String: Any]?) -> Bool {
         if let paramsFilterCondition = campaign.triggeringEventFilters,
-           !TriggeringEventFilter.matchFilterCondition(filters: paramsFilterCondition.filters, eventParams: eventParams) {
+           !TriggeringEventFilter.matchFilterCondition(filters: paramsFilterCondition.filters, eventParams: eventParams)
+        {
             return false
         }
 
@@ -215,6 +223,4 @@ class InAppMessageManager {
             }
         }
     }
-
 }
-

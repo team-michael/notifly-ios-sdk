@@ -52,3 +52,7 @@
 
 - Feature: Support advanced triggering conditions
 - Feature: Add custom headers to identify platform and SDK version / SDK wrapper version
+
+# 1.8.1
+
+- Fix: Defending against crashes due to concurrency issues in the process of storing cancellable events.

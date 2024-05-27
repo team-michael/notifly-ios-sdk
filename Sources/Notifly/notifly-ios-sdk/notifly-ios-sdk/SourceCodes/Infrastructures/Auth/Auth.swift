@@ -5,18 +5,20 @@ import Foundation
 class Auth {
     // MARK: - Properties
 
+    private let accessQueue = DispatchQueue(label: "com.notifly.tracking.access.queue")
     private var authorizationRequestCancellable = Set<AnyCancellable>()
+
     private var _authorizationPub: AnyPublisher<String, Error>?
     var authorizationPub: AnyPublisher<String, Error> {
         get {
             if let pub = _authorizationPub {
                 return pub
-                .catch { _ -> AnyPublisher<String, Error> in
-                    Logger.error("Failed to get authorization.")
-                    return Fail(outputType: String.self, failure: NotiflyError.notAuthorized)
-                        .eraseToAnyPublisher()
-                }
-                .eraseToAnyPublisher()
+                    .catch { _ -> AnyPublisher<String, Error> in
+                        Logger.error("Failed to get authorization.")
+                        return Fail(outputType: String.self, failure: NotiflyError.notAuthorized)
+                            .eraseToAnyPublisher()
+                    }
+                    .eraseToAnyPublisher()
             } else {
                 Logger.error("Failed to get authorization ")
                 return Fail(outputType: String.self, failure: NotiflyError.notAuthorized)
@@ -49,23 +51,32 @@ class Auth {
         setup()
     }
 
-    private func setup() {
-        NotiflyAPI().authorizeSession(credentials: loginCred)
-        .tryMap {
-            NotiflyCustomUserDefaults.authTokenInUserDefaults = $0
-            return $0
+    private func storeCancellable(cancellable: AnyCancellable) {
+        accessQueue.async {
+            cancellable.store(in: &self.authorizationRequestCancellable)
         }
-        .sink(receiveCompletion: { completion in
-            if case let .failure(error) = completion {
-                Logger.error("Authorization error: \(error)")
+    }
+
+    private func setup() {
+        let setupTask = NotiflyAPI().authorizeSession(credentials: loginCred)
+            .tryMap {
+                NotiflyCustomUserDefaults.authTokenInUserDefaults = $0
+                return $0
             }
-        }, receiveValue: { [weak self] authToken in
-            self?.authorizationPromise?(.success(authToken))
-            self?.authorizationPub = Just(authToken)
-                .setFailureType(to: Error.self)
-                .eraseToAnyPublisher()
-        })
-        .store(in: &authorizationRequestCancellable)
+            .sink(receiveCompletion: { completion in
+                if case let .failure(error) = completion {
+                    Logger.error("Authorization error: \(error)")
+                }
+            }, receiveValue: { [weak self] authToken in
+                guard let self = self else { return }
+                self.authorizationPromise?(.success(authToken))
+                self.authorizationPub = Just(authToken)
+                    .setFailureType(to: Error.self)
+                    .eraseToAnyPublisher()
+            })
+        if setupTask != nil {
+            storeCancellable(cancellable: setupTask)
+        }
     }
 
     func refreshAuth() -> AnyPublisher<String, Error> {
