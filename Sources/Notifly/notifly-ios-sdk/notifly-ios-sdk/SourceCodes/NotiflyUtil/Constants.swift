@@ -1,7 +1,7 @@
 import Foundation
 
 enum NotiflyConstant {
-    static let sdkVersion: String = "1.8.1"
+    static let sdkVersion: String = "1.9.0"
     static let iosPlatform: String = "ios"
     static let projectIdRegex: String = "^[0-9a-fA-F]{32}$"
     enum EndPoint {
@@ -73,7 +73,7 @@ struct NotiflyValue {
         guard let type = type else {
             return nil
         }
-        
+
         self.type = type
         self.value = value
     }
@@ -102,7 +102,7 @@ enum NotiflyStringOperator: String {
     case doesNotStartWith = "does_not_start_with"
     case endsWith = "ends_with"
     case doesNotEndWith = "does_not_end_with"
-    case contains = "contains"
+    case contains
     case doesNotContain = "does_not_contain"
     case matchesRegex = "matches_regex"
     case doesNotMatchRegex = "does_not_match_regex"
