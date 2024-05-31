@@ -80,10 +80,11 @@ class InAppMessageManager {
                 }
             }
         )
-        guard let main = try? Notifly.main, updateTask != nil else {
+        guard let main = try? Notifly.main else {
             Logger.error("Fail to update client-side user state (user campaign hidden until): Notifly is not initialized")
             return
         }
+
         main.storeCancellable(cancellable: updateTask)
     }
 
@@ -102,7 +103,7 @@ class InAppMessageManager {
             .filter {
                 SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: userStateManager.userData, eventData: userStateManager.eventData)
             }
-        if campaignsToTrigger.count == 0 {
+        if campaignsToTrigger.isEmpty {
             return nil
         }
         return campaignsToTrigger

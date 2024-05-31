@@ -147,7 +147,7 @@
 		673F0EA529EBC65000814217 /* SourceCodes */ = {
 			isa = PBXGroup;
 			children = (
-				F2E6697D2ADE600F00DF9CA0 /* Infrastrucutres */,
+				F2E6697D2ADE600F00DF9CA0 /* Infrastructures */,
 				F2E669782ADE5FED00DF9CA0 /* NotiflyExtension */,
 				F2E669752ADE5FD000DF9CA0 /* Notifly */,
 				F2E6696C2ADE5F7E00DF9CA0 /* NotiflyUtil */,
@@ -277,9 +277,11 @@
 			buildConfigurationList = 673F0E9429EBA7D200814217 /* Build configuration list for PBXNativeTarget "notifly-ios-sdk" */;
 			buildPhases = (
 				673F0E7B29EBA7D200814217 /* Headers */,
+				2B5762082C0A1922005DAD11 /* SwiftLint Script */,
 				673F0E7C29EBA7D200814217 /* Sources */,
 				673F0E7D29EBA7D200814217 /* Frameworks */,
 				673F0E7E29EBA7D200814217 /* Resources */,
+				2B5762092C0A1D46005DAD11 /* SwiftFormatter Script */,
 			);
 			buildRules = (
 			);
@@ -367,6 +369,45 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		2B5762082C0A1922005DAD11 /* SwiftLint Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "SwiftLint Script";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint >/dev/null; then\n    swiftlint\nelse \n    echo \"[warning] SwiftLint not installed, download using `brew install swiftlint`\"\nfi\n";
+		};
+		2B5762092C0A1D46005DAD11 /* SwiftFormatter Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "SwiftFormatter Script";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nexport PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftformat > /dev/null; then\n  swiftformat .\nelse\n  echo \"warning: SwiftFormat not installed, download from https://github.com/nicklockwood/SwiftFormat\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		673F0E7C29EBA7D200814217 /* Sources */ = {

@@ -83,9 +83,9 @@ class NotiflyExtensionAPI {
 
         guard let url = URL(string: NotiflyConstant.EndPoint.authorizationEndPoint),
               let request = try? ExtensionRequestBuilder()
-                  .set(url: url)
-                  .set(method: .POST)
-                  .set(body: ApiRequestBody(payload: .AuthCredentials(Credentials(userName: username, password: password))))
+              .set(url: url)
+              .set(method: .POST)
+              .set(body: ApiRequestBody(payload: .AuthCredentials(Credentials(userName: username, password: password))))
         else {
             Logger.error("ExtensionAPI: Fail to Authorize.")
             completion(.failure(APIError.invalidData))
@@ -154,7 +154,7 @@ class NotiflyExtensionAPI {
             var request = URLRequest(url: url)
             request.httpMethod = method.rawValue
 
-            headers.forEach { key, value in
+            for (key, value) in headers {
                 request.setValue(value, forHTTPHeaderField: key)
             }
 

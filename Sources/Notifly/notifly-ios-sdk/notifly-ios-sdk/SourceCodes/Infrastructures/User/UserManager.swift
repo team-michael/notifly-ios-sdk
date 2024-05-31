@@ -75,7 +75,7 @@ class UserManager {
 
         changeExternalUserId(newValue: nil)
         let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: nil)
-        
+
         if shouldRequestSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: nil) {
             notifly.inAppMessageManager.userStateManager.syncState(postProcessConfig: postProcessConfigForSyncState)
         } else {
@@ -94,7 +94,7 @@ class UserManager {
             userID: try? getNotiflyUserID(),
             properties: userProperties
         )
-        
+
         notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.setUserPropertiesEventName, eventParams: userProperties)
     }
 

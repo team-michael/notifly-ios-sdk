@@ -1,6 +1,7 @@
 import Foundation
 import Security
 import UIKit
+
 class AppHelper {
     static func getNotiflyDeviceID() -> String? {
         guard let deviceID = AppHelper.getDeviceID() else {
