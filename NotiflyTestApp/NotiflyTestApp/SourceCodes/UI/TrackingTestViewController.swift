@@ -3,7 +3,6 @@ import Combine
 import UIKit
 
 class TrackingTestViewController: UIViewController {
-
     // MARK: UI Components
 
     let stackView = UIStackView()
@@ -21,6 +20,9 @@ class TrackingTestViewController: UIViewController {
     private var cancellables = Set<AnyCancellable>()
     private var customEventParams: [String: String]?
 
+    let concurrentQueue = DispatchQueue(label: "com.notifly.concurrentQueue", attributes: .concurrent)
+    let dispatchGroup = DispatchGroup()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
@@ -34,24 +36,24 @@ class TrackingTestViewController: UIViewController {
         encoder.outputFormatting = .prettyPrinted
 
         try? Notifly.main.trackingManager.eventRequestPayloadPublisher
-        .encode(encoder: encoder)
-        .map {
-            String(data: $0, encoding: .utf8) ?? "Encoding Error"
-        }
-        .catch {
-            Just("Failed to encode Event payload with error: \($0)")
-        }
-        .receive(on: RunLoop.main)
-        .assign(to: \.text, on: requestPayloadTextView)
-        .store(in: &cancellables)
+            .encode(encoder: encoder)
+            .map {
+                String(data: $0, encoding: .utf8) ?? "Encoding Error"
+            }
+            .catch {
+                Just("Failed to encode Event payload with error: \($0)")
+            }
+            .receive(on: RunLoop.main)
+            .assign(to: \.text, on: requestPayloadTextView)
+            .store(in: &cancellables)
 
         // Inspect Response Payload.
         try? Notifly.main.trackingManager.eventRequestResponsePublisher
-        .receive(on: RunLoop.main)
-        .sink { [weak self] resultingString in
-            self?.responsePayloadTextView.text = resultingString
-        }
-        .store(in: &cancellables)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] resultingString in
+                self?.responsePayloadTextView.text = resultingString
+            }
+            .store(in: &cancellables)
     }
 
     private func setupUI() {
@@ -74,11 +76,11 @@ class TrackingTestViewController: UIViewController {
         view.addSubview(stackView)
         stackView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-                                        view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: stackView.topAnchor),
-                                        view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: stackView.bottomAnchor),
-                                        view.safeAreaLayoutGuide.leftAnchor.constraint(equalTo: stackView.leftAnchor, constant: -12),
-                                        view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: stackView.rightAnchor, constant: 12)
-                                    ])
+            view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: stackView.topAnchor),
+            view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: stackView.bottomAnchor),
+            view.safeAreaLayoutGuide.leftAnchor.constraint(equalTo: stackView.leftAnchor, constant: -12),
+            view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: stackView.rightAnchor, constant: 12),
+        ])
 
         // StackView Config
         stackView.axis = .vertical
@@ -117,6 +119,17 @@ class TrackingTestViewController: UIViewController {
         requestPayloadTextView.text = "Queued the tracking event. Queued tracking events are fired within \(try? Notifly.main.trackingManager.trackingFiringInterval) seconds of interval."
         responsePayloadTextView.text = "N/A"
 
+        // for i in 0 ..< 1000 {
+        //     dispatchGroup.enter()
+        //     concurrentQueue.async {
+        //         Notifly.trackEvent(eventName: eventName,
+        //                            eventParams: self.customEventParams,
+        //                            segmentationEventParamKeys: segmentationEventParamKeys)
+        //         self.dispatchGroup.leave()
+        //     }
+        // }
+        // dispatchGroup.wait()
+
         // Fire Tracking
         try? Notifly.trackEvent(eventName: eventName,
                                 eventParams: customEventParams,
@@ -124,12 +137,12 @@ class TrackingTestViewController: UIViewController {
     }
 
     @objc
-    private func customEventParmsBtnTapped(sender: UIButton) {
+    private func customEventParmsBtnTapped(sender _: UIButton) {
         presentCustomEventParamsVS()
     }
 
     @objc
-    private func submitBtnTapped(sender: UIButton) {
+    private func submitBtnTapped(sender _: UIButton) {
         submitTrackingEventWithCurrentInputs()
     }
 }
