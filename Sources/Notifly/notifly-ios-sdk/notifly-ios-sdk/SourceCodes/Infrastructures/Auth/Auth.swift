@@ -74,9 +74,8 @@ class Auth {
                     .setFailureType(to: Error.self)
                     .eraseToAnyPublisher()
             })
-        if setupTask != nil {
-            storeCancellable(cancellable: setupTask)
-        }
+
+        storeCancellable(cancellable: setupTask)
     }
 
     func refreshAuth() -> AnyPublisher<String, Error> {

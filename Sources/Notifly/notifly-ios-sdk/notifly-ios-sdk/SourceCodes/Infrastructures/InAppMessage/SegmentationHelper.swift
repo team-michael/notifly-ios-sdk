@@ -146,8 +146,6 @@ enum SegmentationHelper {
         default:
             return false
         }
-
-        return false
     }
 
     static func caculateEventCounts(eventName: String, startDate: String?, eventData: EventData) -> Int {

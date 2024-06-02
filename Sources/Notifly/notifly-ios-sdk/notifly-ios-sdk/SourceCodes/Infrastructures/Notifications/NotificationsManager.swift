@@ -12,7 +12,6 @@ class NotificationsManager: NSObject {
     private var _deviceTokenPub: AnyPublisher<String, Error>?
 
     private(set) var deviceTokenPub: AnyPublisher<String, Error>? {
-        // TODO: Remove this temp workaround once APNs token is available.
         get {
             if let pub = _deviceTokenPub {
                 return pub

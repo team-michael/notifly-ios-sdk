@@ -24,7 +24,7 @@ import UIKit
             return
         }
 
-        Notifly(
+        _ = Notifly(
             projectId: projectId,
             username: username,
             password: password
@@ -54,10 +54,10 @@ import UIKit
             if let token = token,
                error == nil
             {
-                try? main.notificationsManager.deviceTokenPromise?(.success(token))
+                main.notificationsManager.deviceTokenPromise?(.success(token))
                 main.notificationsManager.setDeviceTokenPub(token: token)
             }
-            try? main.trackingManager.trackSessionStartInternalEvent()
+            main.trackingManager.trackSessionStartInternalEvent()
             Logger.info("📡 Notifly SDK is successfully initialized.")
         }
     }
@@ -91,9 +91,7 @@ import UIKit
     static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                        didReceive response: UNNotificationResponse)
     {
-        if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]?,
-           let clickStatus = UIApplication.shared.applicationState == .active ? "foreground" : "background"
-        {
+        if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]? {
             guard let notiflyMessageType = pushData["notifly_message_type"] as? String,
                   notiflyMessageType == "push-notification"
             else {
@@ -136,10 +134,11 @@ import UIKit
             Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.trackEvent.")
             return
         }
-        try? main.trackingManager.track(eventName: eventName,
-                                        eventParams: eventParams,
-                                        isInternal: false,
-                                        segmentationEventParamKeys: segmentationEventParamKeys)
+
+        main.trackingManager.track(eventName: eventName,
+                                   eventParams: eventParams,
+                                   isInternal: false,
+                                   segmentationEventParamKeys: segmentationEventParamKeys)
     }
 
     static func setUserId(userId: String? = nil) {
@@ -151,7 +150,7 @@ import UIKit
             }
             return
         }
-        try? main.userManager.setExternalUserId(userId)
+        main.userManager.setExternalUserId(userId)
     }
 
     static func setUserProperties(userProperties: [String: Any]) {
@@ -159,7 +158,7 @@ import UIKit
             Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.setUserProperties.")
             return
         }
-        try? main.userManager.setUserProperties(userProperties)
+        main.userManager.setUserProperties(userProperties)
     }
 
     static func setSdkType(type: String) {
@@ -189,10 +188,10 @@ import UIKit
             Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.schedulePushNotification.")
             return
         }
-        try? main.notificationsManager.schedulePushNotification(title: title,
-                                                                body: body,
-                                                                url: url,
-                                                                delay: delay)
+        main.notificationsManager.schedulePushNotification(title: title,
+                                                           body: body,
+                                                           url: url,
+                                                           delay: delay)
     }
 
     static func registerFCMToken(token: String?) {
@@ -204,7 +203,8 @@ import UIKit
             Logger.error("Token must not be empty.")
             return
         }
-        try? main.notificationsManager.registerFCMToken(token: token)
+
+        main.notificationsManager.registerFCMToken(token: token)
         Logger.info("FCM token is successfully registered.")
     }
 }
