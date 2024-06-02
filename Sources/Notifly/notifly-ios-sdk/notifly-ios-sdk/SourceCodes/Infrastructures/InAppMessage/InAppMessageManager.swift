@@ -13,6 +13,7 @@ import UIKit
 @available(iOSApplicationExtension, unavailable)
 class InAppMessageManager {
     let userStateManager: UserStateManager
+    let inAppMessageAccessQueue = DispatchQueue(label: "com.notifly.inAppMessageAccessQueue")
 
     init(owner: String?) {
         userStateManager = UserStateManager(owner: owner)
@@ -50,12 +51,13 @@ class InAppMessageManager {
                 return
             }
         }
-
-        if var campaignsToTrigger = getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams) {
-            campaignsToTrigger.sort(by: { $0.updatedAt > $1.updatedAt })
-            for campaignToTrigger in campaignsToTrigger {
-                if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger) {
-                    showInAppMessage(userID: userID, notiflyInAppMessageData: notiflyInAppMessageData)
+        inAppMessageAccessQueue.async {
+            if var campaignsToTrigger = self.getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams) {
+                campaignsToTrigger.sort(by: { $0.updatedAt > $1.updatedAt })
+                for campaignToTrigger in campaignsToTrigger {
+                    if let notiflyInAppMessageData = self.prepareInAppMessageData(campaign: campaignToTrigger) {
+                        self.showInAppMessage(userID: userID, notiflyInAppMessageData: notiflyInAppMessageData)
+                    }
                 }
             }
         }

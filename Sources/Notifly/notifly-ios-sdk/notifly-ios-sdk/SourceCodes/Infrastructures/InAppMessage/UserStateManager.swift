@@ -228,17 +228,14 @@ class UserStateManager {
 
     /* update client state */
     func incrementEic(eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) {
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self = self else { return }
+        eventDataAccessQueue.async {
             let dt = NotiflyHelper.getCurrentDate()
             let eicID = EventIntermediateCount.generateId(eventName: eventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys, dt: dt)
-            self.eventDataAccessQueue.async {
-                if var eic = self.eventData.eventCounts[eicID] {
-                    eic.addCount(count: 1)
-                    self.eventData.eventCounts[eicID] = eic
-                } else {
-                    self.eventData.eventCounts[eicID] = EventIntermediateCount(name: eventName, dt: dt, count: 1, eventParams: eventParams ?? [:])
-                }
+            if var eic = self.eventData.eventCounts[eicID] {
+                eic.addCount(count: 1)
+                self.eventData.eventCounts[eicID] = eic
+            } else {
+                self.eventData.eventCounts[eicID] = EventIntermediateCount(name: eventName, dt: dt, count: 1, eventParams: eventParams ?? [:])
             }
         }
     }
