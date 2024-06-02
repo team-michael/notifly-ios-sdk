@@ -338,7 +338,10 @@ private extension UIViewController {
             return nav.visibleViewController?.topMostViewController ?? nav
         }
         if let tab = self as? UITabBarController {
-            return (tab.selectedViewController ?? self).topMostViewController
+            if let selected = tab.selectedViewController {
+                return selected.topMostViewController
+            }
+            return tab
         }
         return self
     }
