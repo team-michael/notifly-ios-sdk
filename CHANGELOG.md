@@ -56,3 +56,7 @@
 # 1.9.0
 
 - Fix: Defending against crashes due to concurrency issues in the process of storing cancellable events.
+
+# 1.9.1
+
+- Fix: Defending against crashes due to concurrency issues in the process of showing in-app messages.
