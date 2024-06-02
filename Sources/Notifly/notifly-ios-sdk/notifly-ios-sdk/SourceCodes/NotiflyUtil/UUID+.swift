@@ -2,12 +2,11 @@ import CommonCrypto
 import Foundation
 
 extension UUID {
-    
     /// UUID V5 Hashing Helper
     init(name: String, namespace: UUID) {
         // Get UUID bytes from name space:
         var spaceUID = UUID(uuidString: namespace.uuidString)!.uuid
-        var data = withUnsafePointer(to: &spaceUID) { [count =  MemoryLayout.size(ofValue: spaceUID)] in
+        var data = withUnsafePointer(to: &spaceUID) { [count = MemoryLayout.size(ofValue: spaceUID)] in
             Data(bytes: $0, count: count)
         }
 
@@ -15,8 +14,8 @@ extension UUID {
         data.append(contentsOf: name.utf8)
 
         // Compute digest (MD5 or SHA1, depending on the version):
-        var digest = [UInt8](repeating: 0, count:Int(CC_SHA1_DIGEST_LENGTH))
-        data.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> Void in
+        var digest = [UInt8](repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
+        data.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) in
             _ = CC_SHA1(ptr.baseAddress, CC_LONG(data.count), &digest)
         }
 
@@ -31,7 +30,6 @@ extension UUID {
         self = NSUUID(uuidBytes: digest) as UUID
     }
 
-    
     var notiflyStyleString: String {
         uuidString.replacingOccurrences(of: "-", with: "")
     }

@@ -36,7 +36,7 @@ struct Campaign {
         guard let id = from["id"] as? String,
               let channel = from["channel"] as? String,
               channel == InAppMessageConstant.inAppMessageChannel,
-              
+
               let triggeringConditions = try? TriggeringConditions(from: from["triggering_conditions"]),
 
               let rawStatusValue = from["status"] as? Int,
@@ -62,24 +62,24 @@ struct Campaign {
         self.id = id
 
         self.channel = channel
-        self.status = campaignStatus
+        status = campaignStatus
 
         self.triggeringConditions = triggeringConditions
-        self.triggeringEventFilters = try? TriggeringEventFilters(from: from["triggering_event_filters"])
+        triggeringEventFilters = try? TriggeringEventFilters(from: from["triggering_event_filters"])
 
         let campaignStarts: [Int] = (from["starts"] as? [Int]) ?? []
-        self.campaignStart = campaignStarts.count > 0 ? campaignStarts[0] : 0
-        self.campaignEnd = from["end"] as? Int
-        self.delay = (from["delay"] as? Int) ?? 0
-        self.reEligibleCondition = NotiflyReEligibleConditionEnum.ReEligibleCondition(from: from["re_eligible_condition"] as? [String: Any])
+        campaignStart = !campaignStarts.isEmpty ? campaignStarts[0] : 0
+        campaignEnd = from["end"] as? Int
+        delay = (from["delay"] as? Int) ?? 0
+        reEligibleCondition = NotiflyReEligibleConditionEnum.ReEligibleCondition(from: from["re_eligible_condition"] as? [String: Any])
 
         self.testing = testing
-        self.whitelist = testing ? from["whitelist"] as? [String] : []
+        whitelist = testing ? from["whitelist"] as? [String] : []
 
         self.segmentType = segmentType
-        self.segmentInfo = NotiflySegmentation.SegmentInfo(from: segmentInfoDict)
+        segmentInfo = NotiflySegmentation.SegmentInfo(from: segmentInfoDict)
 
-        self.message = Message(htmlURL: htmlURL, modalProperties: modalProperties)
+        message = Message(htmlURL: htmlURL, modalProperties: modalProperties)
 
         self.updatedAt = updatedAt
     }
@@ -155,7 +155,7 @@ struct TriggeringConditions {
 
     init(from: Any?) throws {
         guard let from = from as? [[[String: Any]]] else {
-        throw NotiflyError.invalidPayload
+            throw NotiflyError.invalidPayload
         }
 
         conditions = []
@@ -176,9 +176,9 @@ struct TriggeringConditions {
 
     func match(eventName: String) -> Bool {
         return conditions.contains {
-            $0.allSatisfy({
+            $0.allSatisfy {
                 NotiflyStringComparator.compare(reference: eventName, operator: $0.operator, rhs: $0.operand)
-            })
+            }
         }
     }
 }
@@ -194,10 +194,10 @@ struct TriggeringConditionUnit {
 
     init(from: [String: Any]) throws {
         guard let typeStr = from["type"] as? String,
-            let type = NotiflyTriggeringConditonType(rawValue: typeStr),
-            let operatorStr = from["operator"] as? String,
-            let `operator` = NotiflyStringOperator(rawValue: operatorStr),
-            let operand = from["operand"] as? String
+              let type = NotiflyTriggeringConditonType(rawValue: typeStr),
+              let operatorStr = from["operator"] as? String,
+              let `operator` = NotiflyStringOperator(rawValue: operatorStr),
+              let operand = from["operand"] as? String
         else {
             throw NotiflyError.invalidPayload
         }
@@ -268,7 +268,7 @@ enum TriggeringEventFilter {
     }
 
     static func matchFilterCondition(filters: TriggeringEventFilterArray, eventParams: [String: Any]?) -> Bool {
-        guard let params = eventParams, params.count > 0 else {
+        guard let params = eventParams, !params.isEmpty else {
             return false
         }
 

@@ -1,4 +1,5 @@
 import Foundation
+
 //
 //  InAppMessage.swift
 //  notifly-ios-sdk
@@ -37,7 +38,7 @@ struct UserData {
         sdkVersion = NotiflyHelper.getSdkVersion()
         sdkType = NotiflyHelper.getSdkType()
         randomBucketNumber = NotiflyHelper.parseRandomBucketNumber(num: data["random_bucket_number"])
-        
+
         if let createdAtStr = data["created_at"] as? String {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
@@ -89,7 +90,7 @@ struct UserData {
             "user_properties": mergedUserProperties,
             "campaign_hidden_until": mergedCampaignHiddenUntil,
         ]
-        
+
         data["platform"] = p1.platform
         data["os_version"] = p1.osVersion
         data["sdk_type"] = p1.sdkType
@@ -119,7 +120,7 @@ struct UserData {
             "user_properties": userProperties,
             "campaign_hidden_until": campaignHiddenUntil,
         ]
-        
+
         data["platform"] = platform
         data["os_version"] = osVersion
         data["sdk_type"] = sdkType
@@ -130,7 +131,7 @@ struct UserData {
         if let sdkVersion = sdkVersion {
             data["sdk_version"] = sdkVersion
         }
-        
+
         if let createdAt = createdAt {
             data["created_at"] = createdAt
         }
@@ -228,7 +229,7 @@ struct EventIntermediateCount {
     }
 
     mutating func addCount(count: Int) {
-        self.count = self.count + count
+        self.count += count
     }
 }
 
@@ -237,8 +238,8 @@ enum EicHelper {
     static func selectEventParamsWithKeys(eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) -> [String: String]? {
         if let segmentationEventParamKeys = segmentationEventParamKeys,
            let eventParams = eventParams,
-           segmentationEventParamKeys.count > 0,
-           eventParams.count > 0
+           !segmentationEventParamKeys.isEmpty,
+           !eventParams.isEmpty
         {
             let keyField = segmentationEventParamKeys[0]
             if let value = eventParams[keyField] as? String {

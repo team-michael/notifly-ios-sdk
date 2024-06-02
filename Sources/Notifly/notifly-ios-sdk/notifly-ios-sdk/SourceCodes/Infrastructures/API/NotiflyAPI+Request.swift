@@ -48,37 +48,36 @@ extension NotiflyAPI {
             do {
                 let request = try build()
                 return URLSession.shared.dataTaskPublisher(for: request)
-                .map(\.data)
-                .decode(type: Response<T>.self, decoder: JSONDecoder())
-                .receive(on: DispatchQueue.main)
-                .tryCompactMap {
-                    if let data = $0.data {
-                        return data
-                    } else {
-                        throw NotiflyError.unexpectedNil("Response has empty payload")
+                    .map(\.data)
+                    .decode(type: Response<T>.self, decoder: JSONDecoder())
+                    .receive(on: DispatchQueue.main)
+                    .tryCompactMap {
+                        if let data = $0.data {
+                            return data
+                        } else {
+                            throw NotiflyError.unexpectedNil("Response has empty payload")
+                        }
                     }
-                }
-                .eraseToAnyPublisher()
+                    .eraseToAnyPublisher()
             } catch {
                 return Fail(outputType: T.self, failure: error)
                     .eraseToAnyPublisher()
             }
         }
-        
 
         func buildAndFireWithRawJSONResponseType() -> AnyPublisher<String, Error> {
             do {
                 let request = try build()
                 return URLSession.shared.dataTaskPublisher(for: request)
-                .map(\.data)
-                .tryMap {
-                    if let response = String(data: $0, encoding: .utf8) {
-                        return response
-                    } else {
-                        throw NotiflyError.unexpectedNil("Response is corrupted.")
+                    .map(\.data)
+                    .tryMap {
+                        if let response = String(data: $0, encoding: .utf8) {
+                            return response
+                        } else {
+                            throw NotiflyError.unexpectedNil("Response is corrupted.")
+                        }
                     }
-                }
-                .eraseToAnyPublisher()
+                    .eraseToAnyPublisher()
             } catch {
                 return Fail(outputType: String.self, failure: error)
                     .eraseToAnyPublisher()
@@ -96,7 +95,7 @@ extension NotiflyAPI {
             var request = URLRequest(url: url)
             request.httpMethod = method.rawValue
 
-            headers.forEach { key, value in
+            for (key, value) in headers {
                 request.setValue(value, forHTTPHeaderField: key)
             }
 
@@ -106,11 +105,11 @@ extension NotiflyAPI {
 
             return request
         }
-        
+
         private static func getDefaultHeaders() -> [String: String] {
             var result = [
                 "Content-Type": "application/json",
-                "X-Notifly-SDK-Version": "notifly/ios/\(NotiflyHelper.getNativeSdkVersion())"
+                "X-Notifly-SDK-Version": "notifly/ios/\(NotiflyHelper.getNativeSdkVersion())",
             ]
             if let sdkWrapperVersion = NotiflyHelper.getSdkWrapperVersion(), let sdkWrapperType = NotiflyHelper.getSdkWrapperType() {
                 result["X-Notifly-SDK-Wrapper"] = "notifly/\(sdkWrapperType.lowercased())/\(sdkWrapperVersion)"

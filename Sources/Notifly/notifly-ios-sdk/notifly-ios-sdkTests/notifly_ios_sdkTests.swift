@@ -5,11 +5,10 @@
 //  Created by Juyong Kim on 4/15/23.
 //
 
-import XCTest
 @testable import notifly_ios_sdk
+import XCTest
 
-class notifly_ios_sdkTests: XCTestCase {
-
+class NotiflyIosSdkTests: XCTestCase {
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
@@ -28,9 +27,8 @@ class notifly_ios_sdkTests: XCTestCase {
 
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
-        self.measure {
+        measure {
             // Put the code you want to measure the time of here.
         }
     }
-
 }

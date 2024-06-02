@@ -32,7 +32,8 @@ import UserNotifications
 
         if let projectId = NotiflyCustomUserDefaults.projectIdInUserDefaults,
            NotiflyCustomUserDefaults.usernameInUserDefaults != nil,
-           NotiflyCustomUserDefaults.passwordInUserDefaults != nil {
+           NotiflyCustomUserDefaults.passwordInUserDefaults != nil
+        {
             let gcmMessageId = bestAttemptContent.userInfo["gcm.message_id"] as? String
             let notiflyUserId = bestAttemptContent.userInfo["notifly_user_id"] as? String
             let data = [
@@ -129,7 +130,8 @@ import UserNotifications
                                    sdk_version: "",
                                    sdk_type: "",
                                    event_params: AppHelper.makeJsonCodable(params)) as? TrackingData,
-           let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8) {
+           let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
+        {
             return TrackingRecord(partitionKey: userID, data: stringfiedData)
         } else {
             Logger.error("Failed to track event: " + eventName)

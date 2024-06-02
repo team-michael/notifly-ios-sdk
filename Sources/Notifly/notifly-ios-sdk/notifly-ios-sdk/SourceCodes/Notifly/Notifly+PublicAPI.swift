@@ -19,12 +19,12 @@ import UIKit
             return
         }
 
-        if (!NotiflyHelper.testRegex(projectId, regex: NotiflyConstant.projectIdRegex)) {
+        if !NotiflyHelper.testRegex(projectId, regex: NotiflyConstant.projectIdRegex) {
             Logger.error("Invalid Project ID. Please provide a valid Project ID.")
             return
         }
 
-        Notifly(
+        _ = Notifly(
             projectId: projectId,
             username: username,
             password: password
@@ -38,7 +38,8 @@ import UIKit
         if let pushData = Notifly.coldStartNotificationData {
             let clickStatus = "background"
             if let urlString = pushData["url"] as? String,
-               let url = URL(string: urlString) {
+               let url = URL(string: urlString)
+            {
                 UIApplication.shared.open(url, options: [:]) { _ in
                     main.notificationsManager.logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
                 }
@@ -48,20 +49,22 @@ import UIKit
             Notifly.coldStartNotificationData = nil
         }
         main.inAppMessageManager.userStateManager.syncState(postProcessConfig:
-                                                            PostProcessConfigForSyncState(merge: false, clear: false))
+            PostProcessConfigForSyncState(merge: false, clear: false))
         Messaging.messaging().token { token, error in
             if let token = token,
-               error == nil {
-                try? main.notificationsManager.deviceTokenPromise?(.success(token))
+               error == nil
+            {
+                main.notificationsManager.deviceTokenPromise?(.success(token))
                 main.notificationsManager.setDeviceTokenPub(token: token)
             }
-            try? main.trackingManager.trackSessionStartInternalEvent()
+            main.trackingManager.trackSessionStartInternalEvent()
             Logger.info("📡 Notifly SDK is successfully initialized.")
         }
     }
 
     static func application(_ application: UIApplication,
-                            didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+                            didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data)
+    {
         guard (try? main) != nil else {
             Messaging.messaging().apnsToken = deviceToken
             return
@@ -71,7 +74,8 @@ import UIKit
     }
 
     static func application(_ application: UIApplication,
-                            didFailToRegisterForRemoteNotificationsWithError error: Error) {
+                            didFailToRegisterForRemoteNotificationsWithError error: Error)
+    {
         guard (try? main) != nil else {
             Logger.error("Failed to Register for Remote Notifications: However, you can track events and set user properties without registering for remote notifications.")
             return
@@ -85,9 +89,9 @@ import UIKit
     }
 
     static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
-                                       didReceive response: UNNotificationResponse) {
-        if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]?,
-           let clickStatus = UIApplication.shared.applicationState == .active ? "foreground" : "background" {
+                                       didReceive response: UNNotificationResponse)
+    {
+        if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]? {
             guard let notiflyMessageType = pushData["notifly_message_type"] as? String,
                   notiflyMessageType == "push-notification"
             else {
@@ -105,10 +109,12 @@ import UIKit
 
     static func userNotificationCenter(_ notificationCenter: UNUserNotificationCenter,
                                        willPresent notification: UNNotification,
-                                       withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void) {
+                                       withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void)
+    {
         if let pushData = notification.request.content.userInfo as [AnyHashable: Any]?,
            let notiflyMessageType = pushData["notifly_message_type"] as? String,
-           notiflyMessageType == "push-notification" {
+           notiflyMessageType == "push-notification"
+        {
             guard (try? main) != nil else {
                 Logger.error("Fail to Show Notifly Foreground Message: Notifly is not initialized yet.")
                 return
@@ -122,15 +128,17 @@ import UIKit
 
     static func trackEvent(eventName: String,
                            eventParams: [String: Any]? = nil,
-                           segmentationEventParamKeys: [String]? = nil) {
+                           segmentationEventParamKeys: [String]? = nil)
+    {
         guard let main = try? main else {
             Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.trackEvent.")
             return
         }
-        try? main.trackingManager.track(eventName: eventName,
-                                        eventParams: eventParams,
-                                        isInternal: false,
-                                        segmentationEventParamKeys: segmentationEventParamKeys)
+
+        main.trackingManager.track(eventName: eventName,
+                                   eventParams: eventParams,
+                                   isInternal: false,
+                                   segmentationEventParamKeys: segmentationEventParamKeys)
     }
 
     static func setUserId(userId: String? = nil) {
@@ -142,7 +150,7 @@ import UIKit
             }
             return
         }
-        try? main.userManager.setExternalUserId(userId)
+        main.userManager.setExternalUserId(userId)
     }
 
     static func setUserProperties(userProperties: [String: Any]) {
@@ -150,7 +158,7 @@ import UIKit
             Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.setUserProperties.")
             return
         }
-        try? main.userManager.setUserProperties(userProperties)
+        main.userManager.setUserProperties(userProperties)
     }
 
     static func setSdkType(type: String) {
@@ -174,15 +182,16 @@ import UIKit
     static func schedulePushNotification(title: String?,
                                          body: String?,
                                          url: URL,
-                                         delay: TimeInterval) {
+                                         delay: TimeInterval)
+    {
         guard let main = try? main else {
             Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.schedulePushNotification.")
             return
         }
-        try? main.notificationsManager.schedulePushNotification(title: title,
-                                                                body: body,
-                                                                url: url,
-                                                                delay: delay)
+        main.notificationsManager.schedulePushNotification(title: title,
+                                                           body: body,
+                                                           url: url,
+                                                           delay: delay)
     }
 
     static func registerFCMToken(token: String?) {
@@ -194,7 +203,8 @@ import UIKit
             Logger.error("Token must not be empty.")
             return
         }
-        try? main.notificationsManager.registerFCMToken(token: token)
+
+        main.notificationsManager.registerFCMToken(token: token)
         Logger.info("FCM token is successfully registered.")
     }
 }

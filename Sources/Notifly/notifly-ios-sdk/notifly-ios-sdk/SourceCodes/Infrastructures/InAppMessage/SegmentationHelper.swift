@@ -50,7 +50,7 @@ enum SegmentationHelper {
         }
 
         let groupOp = segmentInfo.groupOperator
-        if groups.count == 0 || groupOp == nil {
+        if groups.isEmpty || groupOp == nil {
             return true
         }
         return false
@@ -58,7 +58,7 @@ enum SegmentationHelper {
 
     static func isEntityOfGroup(group: NotiflySegmentation.SegmentationGroup.Group, eventParams: [String: Any]?, userData: UserData, eventData: EventData) -> Bool {
         guard let conditions = group.conditions,
-              conditions.count > 0
+              !conditions.isEmpty
         else {
             return false
         }
@@ -146,8 +146,6 @@ enum SegmentationHelper {
         default:
             return false
         }
-
-        return false
     }
 
     static func caculateEventCounts(eventName: String, startDate: String?, eventData: EventData) -> Int {

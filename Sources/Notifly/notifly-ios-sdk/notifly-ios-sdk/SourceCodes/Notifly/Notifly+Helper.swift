@@ -12,11 +12,11 @@ enum NotiflyHelper {
     static func getEventName(event: String, isInternalEvent: Bool) -> String {
         return isInternalEvent ? "notifly__" + event : event
     }
-    
+
     static func getNativeSdkVersion() -> String {
         return Notifly.sdkVersion
     }
-    
+
     static func getSdkWrapperVersion() -> String? {
         return Notifly.sdkWrapperVersion
     }
@@ -24,7 +24,7 @@ enum NotiflyHelper {
     static func getSdkVersion() -> String {
         return getSdkWrapperVersion() ?? getNativeSdkVersion()
     }
-    
+
     static func getSdkWrapperType() -> String? {
         return Notifly.sdkWrapperType?.rawValue
     }
@@ -83,7 +83,7 @@ enum NotiflyHelper {
         }
         return nil
     }
-    
+
     static func testRegex(_ reference: String, regex: String) -> Bool {
         do {
             let regex = try NSRegularExpression(pattern: regex)
@@ -116,7 +116,8 @@ enum NotiflyValueComparator {
         default:
             if let type = type,
                let typedSourceValue = NotiflyValueComparator.castAnyToSpecifiedType(value: sourceValue, type: `operator` == .contains ? "ARRAY" : type),
-               let typedTargetValue = NotiflyValueComparator.castAnyToSpecifiedType(value: targetValue, type: type) {
+               let typedTargetValue = NotiflyValueComparator.castAnyToSpecifiedType(value: targetValue, type: type)
+            {
                 switch `operator` {
                 case .equal:
                     return NotiflyValueComparator.isEqual(value1: typedSourceValue, value2: typedTargetValue, type: type)

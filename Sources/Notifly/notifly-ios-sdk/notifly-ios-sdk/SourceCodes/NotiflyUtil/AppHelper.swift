@@ -1,6 +1,7 @@
 import Foundation
 import Security
 import UIKit
+
 class AppHelper {
     static func getNotiflyDeviceID() -> String? {
         guard let deviceID = AppHelper.getDeviceID() else {
@@ -13,7 +14,7 @@ class AppHelper {
     static func getDeviceID() -> String? {
         if let deviceID = NotiflyCustomUserDefaults.deviceIdInUserDefaults {
             return deviceID
-        } else if let deviceID = retrieveUniqueIdFromKeychain() as? String {
+        } else if let deviceID = retrieveUniqueIdFromKeychain() {
             NotiflyCustomUserDefaults.deviceIdInUserDefaults = deviceID
             return deviceID
         } else {
@@ -57,8 +58,10 @@ class AppHelper {
         return jsonData.mapValues { value in
             if let array = value as? [Any?] {
                 return AnyCodable(array.compactMap { element in AppHelper.toCodableValue(element) })
-            } else if let dictionary = value as? [String: Any] {
-                return AnyCodable(makeJsonCodable(dictionary))
+            } else if let dictionary = value as? [String: Any],
+                      let jsonData = makeJsonCodable(dictionary)
+            {
+                return AnyCodable(jsonData)
             }
             return AppHelper.toCodableValue(value)
         }

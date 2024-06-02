@@ -62,7 +62,7 @@ import UIKit
     }
 
     func storeCancellable(cancellable: AnyCancellable) {
-        self.accessQueue.async {
+        accessQueue.async {
             cancellable.store(in: &self.cancellables)
         }
     }
