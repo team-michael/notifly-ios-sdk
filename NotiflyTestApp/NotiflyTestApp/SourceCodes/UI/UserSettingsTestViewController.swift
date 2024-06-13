@@ -11,10 +11,23 @@ class UserSettingsTestViewController: UIViewController {
     // MARK: UI Components
 
     let stackView = UIStackView()
+    let scrollView = UIScrollView()
 
     let userIDTextField = UITextField()
     let submitUserIDButton = UIButton()
     let userIDTrackingResponseTextView = UITextView()
+    
+    let phoneNumberTextField = UITextField()
+    let submitPhoneNumberButton = UIButton()
+    let phoneNumberSubmitResponseTextView = UITextView()
+    
+    let emailTextField = UITextField()
+    let submitEmailButton = UIButton()
+    let emailSubmitResponseTextView = UITextView()
+    
+    let timezoneTextField = UITextField()
+    let submitTimezoneButton = UIButton()
+    let timezoneSubmitResponseTextView = UITextView()
 
     let userPropertiesButton = UIButton()
     let submitUserPropertiesButton = UIButton()
@@ -33,6 +46,37 @@ class UserSettingsTestViewController: UIViewController {
         let userID = userIDTextField.checkAndRetrieveValueText(changeBorderColorOnError: false)
         Notifly.setUserId(userId: userID)
         userIDTrackingResponseTextView.text = "User ID successfully set to: \(userID ?? "<null>")"
+    }
+    
+    func submitPhoneNumberWithCurrentInput() throws {
+        guard let phoneNumber = phoneNumberTextField.checkAndRetrieveValueText(changeBorderColorOnError: false) else {
+            phoneNumberSubmitResponseTextView.text = "Please input phone number"
+            return
+        }
+        Notifly.setPhoneNumber(phoneNumber)
+        phoneNumberSubmitResponseTextView.text = "Phone Number successfully set to: \(phoneNumber)"
+    }
+    
+    func submitEmailWithCurrentInput() throws {
+        guard let email = emailTextField.checkAndRetrieveValueText(changeBorderColorOnError: false) else {
+            emailSubmitResponseTextView.text = "Please input an email"
+            return
+        }
+        Notifly.setEmail(email)
+        emailSubmitResponseTextView.text = "Email successfully set to: \(email)"
+    }
+    
+    func submitTimezoneWithCurrentInput() throws {
+        guard let timezone = timezoneTextField.checkAndRetrieveValueText(changeBorderColorOnError: false) else {
+            timezoneSubmitResponseTextView.text = "Please input an email"
+            return
+        }
+        if !TimeZone.knownTimeZoneIdentifiers.contains(timezone) {
+            timezoneSubmitResponseTextView.text = "Invalid timezone ID \(timezone). Please check your input"
+            return
+        }
+        Notifly.setTimezone(timezone)
+        timezoneSubmitResponseTextView.text = "Timezone successfully set to: \(timezone)"
     }
 
     func presentUserPropertiesVS() {
@@ -66,22 +110,33 @@ class UserSettingsTestViewController: UIViewController {
 
         // Hook up CTAs.
         submitUserIDButton.addTarget(self, action: #selector(submitUserIDBtnTapped(sender:)), for: .touchUpInside)
+        submitPhoneNumberButton.addTarget(self, action: #selector(submitPhoneNumberBtnTapped(sender:)), for: .touchUpInside)
+        submitEmailButton.addTarget(self, action: #selector(submitEmailBtnTapped(sender:)), for: .touchUpInside)
+        submitTimezoneButton.addTarget(self, action: #selector(submitTimezoneBtnTapped(sender:)), for: .touchUpInside)
+        
         userPropertiesButton.addTarget(self, action: #selector(configureUserPropertiesBtnTapped(sender:)), for: .touchUpInside)
         submitUserPropertiesButton.addTarget(self, action: #selector(submitUserPropertiesBtnTapped(sender:)), for: .touchUpInside)
     }
 
     private func setupStackView() {
-        // Setup StackView UI
-        view.addSubview(stackView)
+        view.addSubview(scrollView)
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            view.safeAreaLayoutGuide.leftAnchor.constraint(equalTo: scrollView.leftAnchor),
+            view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: scrollView.rightAnchor),
+        ])
+
+        scrollView.addSubview(stackView)
         stackView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-                                        view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: stackView.topAnchor),
-                                        view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: stackView.bottomAnchor),
-                                        view.safeAreaLayoutGuide.leftAnchor.constraint(equalTo: stackView.leftAnchor, constant: -12),
-                                        view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: stackView.rightAnchor, constant: 12),
-                                    ])
-
-        // StackView Config
+            scrollView.topAnchor.constraint(equalTo: stackView.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: stackView.bottomAnchor),
+            scrollView.leftAnchor.constraint(equalTo: stackView.leftAnchor),
+            scrollView.rightAnchor.constraint(equalTo: stackView.rightAnchor),
+            scrollView.widthAnchor.constraint(equalTo: stackView.widthAnchor),
+        ])
         stackView.axis = .vertical
         stackView.alignment = .center
         stackView.spacing = 6
@@ -90,6 +145,18 @@ class UserSettingsTestViewController: UIViewController {
         stackView.addInputView(labelText: "User ID (Optional)", textfield: userIDTextField)
         stackView.addCTAView(labelText: "Submit User ID", button: submitUserIDButton, bgColor: .blue)
         stackView.addInfoView(labelText: "Response", textView: userIDTrackingResponseTextView)
+        
+        stackView.addInputView(labelText: "Phone Number", textfield: phoneNumberTextField)
+        stackView.addCTAView(labelText: "Submit Phone Number", button: submitPhoneNumberButton, bgColor: .blue)
+        stackView.addInfoView(labelText: "Response", textView: phoneNumberSubmitResponseTextView)
+        
+        stackView.addInputView(labelText: "Email", textfield: emailTextField)
+        stackView.addCTAView(labelText: "Submit Email", button: submitEmailButton, bgColor: .blue)
+        stackView.addInfoView(labelText: "Response", textView: emailSubmitResponseTextView)
+        
+        stackView.addInputView(labelText: "Timezone", textfield: timezoneTextField)
+        stackView.addCTAView(labelText: "Submit Timezone", button: submitTimezoneButton, bgColor: .blue)
+        stackView.addInfoView(labelText: "Response", textView: timezoneSubmitResponseTextView)
 
         stackView.addSeparator(height: 5, color: .darkGray)
 
@@ -103,6 +170,21 @@ class UserSettingsTestViewController: UIViewController {
     @objc
     private func submitUserIDBtnTapped(sender _: UIButton) {
         try? submitUserIDTrackingEventWithCurrentInput()
+    }
+    
+    @objc
+    private func submitPhoneNumberBtnTapped(sender _: UIButton) {
+        try? submitPhoneNumberWithCurrentInput()
+    }
+    
+    @objc
+    private func submitEmailBtnTapped(sender _: UIButton) {
+        try? submitEmailWithCurrentInput()
+    }
+    
+    @objc
+    private func submitTimezoneBtnTapped(sender _: UIButton) {
+        try? submitTimezoneWithCurrentInput()
     }
 
     @objc

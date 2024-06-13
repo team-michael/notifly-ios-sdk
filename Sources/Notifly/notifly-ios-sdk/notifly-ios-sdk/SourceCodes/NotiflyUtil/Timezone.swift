@@ -1,13 +1,13 @@
 //
-//  File.swift
-//  
+//  Timezone.swift
+//  notifly-ios-sdk
 //
-//  Created by 박준하 on 6/14/24.
+//  Created by Junha Park on 6/14/24.
 //
 
 import Foundation
 
-class TimezoneUtils {
+class TimezoneUtil {
     static func getCurrentTimezoneId() -> String {
         return TimeZone.current.identifier
     }
