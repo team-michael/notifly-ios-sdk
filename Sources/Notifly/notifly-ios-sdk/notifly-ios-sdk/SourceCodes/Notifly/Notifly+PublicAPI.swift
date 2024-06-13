@@ -150,7 +150,26 @@ import UIKit
             Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.setUserProperties.")
             return
         }
+
         try? main.userManager.setUserProperties(userProperties)
+    }
+    
+    static func setPhoneNumber(_ phoneNumber: String) {
+        try? setUserProperties([
+            TrackingConstant.InternalUserPropertyKey.phoneNumber: phoneNumber
+        ])
+    }
+    
+    static func setEmail(_ email: String) {
+        try? setUserProperties([
+            TrackingConstant.InternalUserPropertyKey.email: email
+        ])
+    }
+    
+    static func setTimezone(_ timezone: String) {
+        try? setUserProperties([
+            TrackingConstant.InternalUserPropertyKey.timezone: timezone
+        ])
     }
 
     static func setSdkType(type: String) {

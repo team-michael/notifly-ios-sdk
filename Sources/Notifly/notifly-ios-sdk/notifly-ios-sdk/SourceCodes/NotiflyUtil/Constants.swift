@@ -42,6 +42,12 @@ enum TrackingConstant {
         static let inAppMessageDontShowAgainButtonClicked = "hide_in_app_message_button_click"
         static let inAppMessageSurveySubmitButtonClicked = "survey_submit_button_click"
     }
+    
+    enum InternalUserPropertyKey {
+        static let phoneNumber = "$phone_number"
+        static let email = "$email"
+        static let timezone = "$timezone"
+    }
 }
 
 enum TimeConstant {
