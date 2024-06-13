@@ -56,3 +56,8 @@
 # 1.9.0
 
 - Fix: Defending against crashes due to concurrency issues in the process of storing cancellable events.
+
+# 1.9.1
+
+- Feature: Add `setTimezone`, `setPhoneNumber`, `setEmail` for convenience.
+- Feature: Now SDK automatically tracks the user's timezone for device property.
