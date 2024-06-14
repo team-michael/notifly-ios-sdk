@@ -1,7 +1,7 @@
 import Foundation
 
 enum NotiflyConstant {
-    static let sdkVersion: String = "1.9.1"
+    static let sdkVersion: String = "1.10.0"
     static let iosPlatform: String = "ios"
     static let projectIdRegex: String = "^[0-9a-fA-F]{32}$"
     enum EndPoint {
