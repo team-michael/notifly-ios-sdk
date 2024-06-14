@@ -150,7 +150,44 @@ import UIKit
             Logger.error("Notifly is not initialized. Please call Notifly.initialize before calling Notifly.setUserProperties.")
             return
         }
+        
+        if userProperties.count == 0 {
+            Logger.info("Empty dictionary provided for setting user properties. Ignoring this call.")
+            return
+        }
+
+        if let timezone = userProperties[TrackingConstant.InternalUserPropertyKey.timezone] as? String {
+            if !TimezoneUtil.isValidTimezoneId(timezone) {
+                Logger.info("Invalid timezone ID \(timezone). Please check your timezone ID. Omitting timezone property.")
+                var newUserProperties = userProperties
+                newUserProperties.removeValue(forKey: TrackingConstant.InternalUserPropertyKey.timezone)
+                return setUserProperties(userProperties: newUserProperties)
+            }
+        }
+
         try? main.userManager.setUserProperties(userProperties)
+    }
+    
+    static func setPhoneNumber(_ phoneNumber: String) {
+        setUserProperties(userProperties: [
+            TrackingConstant.InternalUserPropertyKey.phoneNumber: phoneNumber
+        ])
+    }
+    
+    static func setEmail(_ email: String) {
+        setUserProperties(userProperties: [
+            TrackingConstant.InternalUserPropertyKey.email: email
+        ])
+    }
+    
+    static func setTimezone(_ timezone: String) {
+        if !TimezoneUtil.isValidTimezoneId(timezone) {
+            Logger.info("Invalid timezone ID \(timezone). Please check your timezone ID.")
+            return
+        }
+        setUserProperties(userProperties: [
+            TrackingConstant.InternalUserPropertyKey.timezone: timezone
+        ])
     }
 
     static func setSdkType(type: String) {

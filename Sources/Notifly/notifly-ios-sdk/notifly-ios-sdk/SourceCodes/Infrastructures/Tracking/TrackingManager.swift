@@ -76,6 +76,7 @@ class TrackingManager {
                     "type": "session_start_type",
                     "notif_auth_status": authStatus,
                     "in_app_message_disabled": Notifly.inAppMessageDisabled,
+                    "timezone": TimezoneUtil.getCurrentTimezoneId()
                 ]
             )
         }

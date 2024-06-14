@@ -12,6 +12,7 @@
 		673F0E8B29EBA7D200814217 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */; };
 		673F0E9029EBA7D200814217 /* notifly_ios_sdkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F0E8F29EBA7D200814217 /* notifly_ios_sdkTests.swift */; };
 		673F0EBB29EC610400814217 /* Notifly+PublicAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F0EBA29EC610400814217 /* Notifly+PublicAPI.swift */; };
+		B0521E422C1B572100D4E357 /* Timezone.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0521E412C1B572100D4E357 /* Timezone.swift */; };
 		F2E6697B2ADE600000DF9CA0 /* NotiflyExtensionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669792ADE600000DF9CA0 /* NotiflyExtensionAPI.swift */; };
 		F2E6697C2ADE600000DF9CA0 /* NotificationServiceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E6697A2ADE600000DF9CA0 /* NotificationServiceExtension.swift */; };
 		F2E6698F2ADE602900DF9CA0 /* NotificationsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E6697F2ADE602900DF9CA0 /* NotificationsManager.swift */; };
@@ -58,6 +59,7 @@
 		673F0E8A29EBA7D200814217 /* notifly-ios-sdkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "notifly-ios-sdkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		673F0E8F29EBA7D200814217 /* notifly_ios_sdkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = notifly_ios_sdkTests.swift; sourceTree = "<group>"; };
 		673F0EBA29EC610400814217 /* Notifly+PublicAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notifly+PublicAPI.swift"; sourceTree = "<group>"; };
+		B0521E412C1B572100D4E357 /* Timezone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timezone.swift; sourceTree = "<group>"; };
 		F2E6696D2ADE5F7E00DF9CA0 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		F2E6696E2ADE5F7E00DF9CA0 /* NotiflyError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotiflyError.swift; sourceTree = "<group>"; };
 		F2E6696F2ADE5F7E00DF9CA0 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
@@ -147,7 +149,7 @@
 		673F0EA529EBC65000814217 /* SourceCodes */ = {
 			isa = PBXGroup;
 			children = (
-				F2E6697D2ADE600F00DF9CA0 /* Infrastrucutres */,
+				F2E6697D2ADE600F00DF9CA0 /* Infrastructures */,
 				F2E669782ADE5FED00DF9CA0 /* NotiflyExtension */,
 				F2E669752ADE5FD000DF9CA0 /* Notifly */,
 				F2E6696C2ADE5F7E00DF9CA0 /* NotiflyUtil */,
@@ -167,6 +169,7 @@
 				F2E669722ADE5F7E00DF9CA0 /* Credentials.swift */,
 				F2E669732ADE5F7E00DF9CA0 /* UUID+.swift */,
 				F2E669742ADE5F7E00DF9CA0 /* TrackingEvent.swift */,
+				B0521E412C1B572100D4E357 /* Timezone.swift */,
 			);
 			path = NotiflyUtil;
 			sourceTree = "<group>";
@@ -385,6 +388,7 @@
 				F2E669962ADE602900DF9CA0 /* NotiflyAPI+Request.swift in Sources */,
 				F2E6699B2ADE60AA00DF9CA0 /* Notifly.swift in Sources */,
 				F2E6697C2ADE600000DF9CA0 /* NotificationServiceExtension.swift in Sources */,
+				B0521E422C1B572100D4E357 /* Timezone.swift in Sources */,
 				F2E92DA72B50F68C00EAB6AB /* UserState+Constant.swift in Sources */,
 				F2E669A12ADE60B900DF9CA0 /* UUID+.swift in Sources */,
 				F2E669942ADE602900DF9CA0 /* Campaign.swift in Sources */,

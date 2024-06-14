@@ -1,7 +1,7 @@
 import Foundation
 
 enum NotiflyConstant {
-    static let sdkVersion: String = "1.9.0"
+    static let sdkVersion: String = "1.10.0"
     static let iosPlatform: String = "ios"
     static let projectIdRegex: String = "^[0-9a-fA-F]{32}$"
     enum EndPoint {
@@ -41,6 +41,12 @@ enum TrackingConstant {
         static let inAppMessageMainButtonClicked = "main_button_click"
         static let inAppMessageDontShowAgainButtonClicked = "hide_in_app_message_button_click"
         static let inAppMessageSurveySubmitButtonClicked = "survey_submit_button_click"
+    }
+    
+    enum InternalUserPropertyKey {
+        static let phoneNumber = "$phone_number"
+        static let email = "$email"
+        static let timezone = "$timezone"
     }
 }
 
