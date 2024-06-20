@@ -61,3 +61,7 @@
 
 - Feature: Add `setTimezone`, `setPhoneNumber`, `setEmail` for convenience.
 - Feature: Now SDK automatically tracks the user's timezone for device property.
+
+# 1.10.1
+
+- Fix: Fix main-thread checker warning

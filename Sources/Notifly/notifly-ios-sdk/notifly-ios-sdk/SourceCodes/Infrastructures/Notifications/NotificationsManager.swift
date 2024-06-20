@@ -129,9 +129,11 @@ class NotificationsManager: NSObject {
         }.eraseToAnyPublisher()
 
         // Register Remote Notification.
-        if !(UIApplication.shared.isRegisteredForRemoteNotifications && NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults == true) {
-            UIApplication.shared.registerForRemoteNotifications()
-            NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults = true
+        DispatchQueue.main.async {
+            if !(UIApplication.shared.isRegisteredForRemoteNotifications && NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults == true) {
+                UIApplication.shared.registerForRemoteNotifications()
+                NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults = true
+            }
         }
     }
 
