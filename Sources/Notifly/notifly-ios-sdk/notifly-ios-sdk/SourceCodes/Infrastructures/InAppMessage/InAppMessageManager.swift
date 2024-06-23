@@ -45,7 +45,7 @@ class InAppMessageManager {
         if candidateCampaigns.isEmpty {
             return []
         }
-        let campaignsToTrigger = userStateManager.campaignData.inAppMessageCampaigns
+        let campaignsToTrigger = candidateCampaigns
             .filter {
                 isCampaignActive(campaign: $0)
             }
