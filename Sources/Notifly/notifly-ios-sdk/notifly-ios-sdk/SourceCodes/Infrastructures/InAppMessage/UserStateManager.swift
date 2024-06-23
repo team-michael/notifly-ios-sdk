@@ -162,7 +162,7 @@ class UserStateManager {
 
     private func constructEventData(rawEventData: [[String: Any]], postProcessConfig: PostProcessConfigForSyncState) {
         let existing = postProcessConfig.merge ? eventData : EventData(from: [[:]])
-        let new = rawEventData.count > 0 && !postProcessConfig.clear ? EventData(from: rawEventData) : EventData(from: [[:]])
+        let new = !rawEventData.isEmpty && !postProcessConfig.clear ? EventData(from: rawEventData) : EventData(from: [[:]])
         eventData = EventData.merge(p1: existing, p2: new)
     }
 

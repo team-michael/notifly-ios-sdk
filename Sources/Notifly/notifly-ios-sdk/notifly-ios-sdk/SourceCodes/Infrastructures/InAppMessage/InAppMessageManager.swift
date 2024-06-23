@@ -61,7 +61,7 @@ class InAppMessageManager {
                 return SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: currentUserData, eventData: currentEventData)
             }
 
-        if campaignsToTrigger.count == 0 {
+        if campaignsToTrigger.isEmpty {
             return nil
         }
         return campaignsToTrigger

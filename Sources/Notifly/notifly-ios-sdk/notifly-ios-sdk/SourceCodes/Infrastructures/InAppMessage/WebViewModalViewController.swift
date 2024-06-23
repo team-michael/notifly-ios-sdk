@@ -4,7 +4,21 @@ import WebKit
 
 @available(iOSApplicationExtension, unavailable)
 class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate {
-    static var openedInAppMessageCount: Int = 0
+    private static let openedInAppMessageCountAccessQueue = DispatchQueue(label: "com.notifly.openedInAppMessageCountQueue")
+    private static var _openedInAppMessageCount: Int = 0
+    static var openedInAppMessageCount: Int {
+        get {
+            WebViewModalViewController.openedInAppMessageCountAccessQueue.sync {
+                WebViewModalViewController._openedInAppMessageCount
+            }
+        }
+        set {
+            WebViewModalViewController.openedInAppMessageCountAccessQueue.sync {
+                WebViewModalViewController._openedInAppMessageCount = newValue
+            }
+        }
+    }
+
     var webView = FullScreenWKWebView()
     var notiflyCampaignID: String?
     var notiflyMessageID: String?
@@ -76,6 +90,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                   !(self.isBeingDismissed),
                   self.presentingViewController == nil
             else {
+                WebViewModalViewController.openedInAppMessageCount = 0
                 Logger.error("Fail to present in app message.")
                 return
             }
@@ -339,7 +354,9 @@ private extension UIViewController {
             return nav.visibleViewController?.topMostViewController ?? nav
         }
         if let tab = self as? UITabBarController {
-            return (tab.selectedViewController ?? self).topMostViewController
+            if let selected = tab.selectedViewController {
+                return selected.topMostViewController
+            }
         }
         return self
     }

@@ -173,7 +173,7 @@ import UIKit
             return
         }
 
-        if userProperties.count == 0 {
+        if userProperties.isEmpty {
             Logger.info("Empty dictionary provided for setting user properties. Ignoring this call.")
             return
         }
