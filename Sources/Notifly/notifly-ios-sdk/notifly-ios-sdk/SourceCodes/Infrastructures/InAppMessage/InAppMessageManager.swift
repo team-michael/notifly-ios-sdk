@@ -75,9 +75,7 @@ class InAppMessageManager {
         let updateTask = Notifly.keepGoingPub.sink(
             receiveCompletion: { _ in },
             receiveValue: { _ in
-                self.userStateManager.userData.campaignHiddenUntil.merge(hideUntilData) { _, new in
-                    new
-                }
+                self.userStateManager.updateUserCampaignHiddenUntilData(userID: userID, hideUntilData: hideUntilData)
             }
         )
         guard let main = try? Notifly.main, updateTask != nil else {
@@ -89,6 +87,10 @@ class InAppMessageManager {
 
     /* method for showing in-app message */
     private func getCampaignsShouldBeTriggered(eventName: String, eventParams: [String: Any]?) -> [Campaign]? {
+        let candidateCampaigns = userStateManager.getInAppMessageCampaigns()
+        if candidateCampaigns.isEmpty {
+            return []
+        }
         let campaignsToTrigger = userStateManager.campaignData.inAppMessageCampaigns
             .filter {
                 isCampaignActive(campaign: $0)
@@ -100,8 +102,11 @@ class InAppMessageManager {
                 matchTriggeringFilters(campaign: $0, eventName: eventName, eventParams: eventParams)
             }
             .filter {
-                SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: userStateManager.userData, eventData: userStateManager.eventData)
+                let currentUserData: UserData = userStateManager.userData
+                let currentEventData: EventData = userStateManager.eventData
+                return SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: currentUserData, eventData: currentEventData)
             }
+        
         if campaignsToTrigger.count == 0 {
             return nil
         }
@@ -189,22 +194,18 @@ class InAppMessageManager {
                 return
             }
 
-            guard let currentStateOfUser = self.userStateManager.getUserData(userID: userID)
-            else {
-                Logger.error("Skip to present in app message schedule: current state owner is changed.")
-                return
-            }
-
+            
+            let currentUserData = self.userStateManager.userData
             if let reEligibleCondition = notiflyInAppMessageData.notiflyReEligibleCondition {
-                guard !self.isHiddenCampaign(campaignID: notiflyInAppMessageData.notiflyCampaignId, userData: currentStateOfUser) else {
+                guard !self.isHiddenCampaign(campaignID: notiflyInAppMessageData.notiflyCampaignId, userData: currentUserData ) else {
                     return
                 }
             }
 
-            guard !self.isBlacklistTemplate(templateName: notiflyInAppMessageData.modalProps.templateName, userData: currentStateOfUser) else {
+            guard !self.isBlacklistTemplate(templateName: notiflyInAppMessageData.modalProps.templateName, userData: currentUserData) else {
                 return
             }
-
+6
             guard WebViewModalViewController.openedInAppMessageCount == 0 else {
                 Logger.error("Already In App Message Opened. New In App Message Ignored.")
                 return
