@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2BA089BC2C28725000BEEE8F /* AsyncWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA089BB2C28725000BEEE8F /* AsyncWorker.swift */; };
 		672E7DF329EFA50400B3E9F2 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 672E7DF229EFA50400B3E9F2 /* FirebaseMessaging */; };
 		673F0E8529EBA7D200814217 /* notifly_ios_sdk.docc in Sources */ = {isa = PBXBuildFile; fileRef = 673F0E8429EBA7D200814217 /* notifly_ios_sdk.docc */; };
 		673F0E8B29EBA7D200814217 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */; };
@@ -54,6 +55,7 @@
 
 /* Begin PBXFileReference section */
 		2B91499B2BDA3C3A0066CDD0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		2BA089BB2C28725000BEEE8F /* AsyncWorker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncWorker.swift; sourceTree = "<group>"; };
 		673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = notifly_ios_sdk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		673F0E8429EBA7D200814217 /* notifly_ios_sdk.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = notifly_ios_sdk.docc; sourceTree = "<group>"; };
 		673F0E8A29EBA7D200814217 /* notifly-ios-sdkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "notifly-ios-sdkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -170,6 +172,7 @@
 				F2E669732ADE5F7E00DF9CA0 /* UUID+.swift */,
 				F2E669742ADE5F7E00DF9CA0 /* TrackingEvent.swift */,
 				B0521E412C1B572100D4E357 /* Timezone.swift */,
+				2BA089BB2C28725000BEEE8F /* AsyncWorker.swift */,
 			);
 			path = NotiflyUtil;
 			sourceTree = "<group>";
@@ -382,6 +385,7 @@
 				F2E6699D2ADE60AF00DF9CA0 /* NotiflyError.swift in Sources */,
 				F2E669A52ADE633400DF9CA0 /* Notifly+Helper.swift in Sources */,
 				673F0E8529EBA7D200814217 /* notifly_ios_sdk.docc in Sources */,
+				2BA089BC2C28725000BEEE8F /* AsyncWorker.swift in Sources */,
 				F2E6699F2ADE60B500DF9CA0 /* Logger.swift in Sources */,
 				F2E669982ADE602900DF9CA0 /* TrackingManager.swift in Sources */,
 				F2E669992ADE602900DF9CA0 /* UserManager.swift in Sources */,

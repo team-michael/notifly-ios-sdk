@@ -3,7 +3,6 @@ import Combine
 import UIKit
 
 class TrackingTestViewController: UIViewController {
-
     // MARK: UI Components
 
     let stackView = UIStackView()
@@ -34,24 +33,24 @@ class TrackingTestViewController: UIViewController {
         encoder.outputFormatting = .prettyPrinted
 
         try? Notifly.main.trackingManager.eventRequestPayloadPublisher
-        .encode(encoder: encoder)
-        .map {
-            String(data: $0, encoding: .utf8) ?? "Encoding Error"
-        }
-        .catch {
-            Just("Failed to encode Event payload with error: \($0)")
-        }
-        .receive(on: RunLoop.main)
-        .assign(to: \.text, on: requestPayloadTextView)
-        .store(in: &cancellables)
+            .encode(encoder: encoder)
+            .map {
+                String(data: $0, encoding: .utf8) ?? "Encoding Error"
+            }
+            .catch {
+                Just("Failed to encode Event payload with error: \($0)")
+            }
+            .receive(on: RunLoop.main)
+            .assign(to: \.text, on: requestPayloadTextView)
+            .store(in: &cancellables)
 
         // Inspect Response Payload.
         try? Notifly.main.trackingManager.eventRequestResponsePublisher
-        .receive(on: RunLoop.main)
-        .sink { [weak self] resultingString in
-            self?.responsePayloadTextView.text = resultingString
-        }
-        .store(in: &cancellables)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] resultingString in
+                self?.responsePayloadTextView.text = resultingString
+            }
+            .store(in: &cancellables)
     }
 
     private func setupUI() {
@@ -74,11 +73,11 @@ class TrackingTestViewController: UIViewController {
         view.addSubview(stackView)
         stackView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-                                        view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: stackView.topAnchor),
-                                        view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: stackView.bottomAnchor),
-                                        view.safeAreaLayoutGuide.leftAnchor.constraint(equalTo: stackView.leftAnchor, constant: -12),
-                                        view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: stackView.rightAnchor, constant: 12)
-                                    ])
+            view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: stackView.topAnchor),
+            view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: stackView.bottomAnchor),
+            view.safeAreaLayoutGuide.leftAnchor.constraint(equalTo: stackView.leftAnchor, constant: -12),
+            view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: stackView.rightAnchor, constant: 12),
+        ])
 
         // StackView Config
         stackView.axis = .vertical
@@ -114,22 +113,34 @@ class TrackingTestViewController: UIViewController {
             .split(separator: ",")
             .map(String.init)
 
-        requestPayloadTextView.text = "Queued the tracking event. Queued tracking events are fired within \(try? Notifly.main.trackingManager.trackingFiringInterval) seconds of interval."
         responsePayloadTextView.text = "N/A"
 
-        // Fire Tracking
+        // let wrongGroup = DispatchGroup()
+        // let wrongQueue = DispatchQueue(label: "WrongQueue")
+        // for i in 0 ..< 1000 {
+        //     wrongGroup.enter()
+        //     wrongQueue.async {
+        //         Notifly.setUserId(userId: nil)
+        //         Notifly.setUserId(userId: "WrongUserID\(i)")
+        //         Notifly.trackEvent(eventName: "WrongEvent\(i)")
+        //         Notifly.setUserId(userId: nil)
+        //         wrongGroup.leave()
+        //     }
+        // }
+        // wrongGroup.wait()
+
         try? Notifly.trackEvent(eventName: eventName,
                                 eventParams: customEventParams,
                                 segmentationEventParamKeys: segmentationEventParamKeys)
     }
 
     @objc
-    private func customEventParmsBtnTapped(sender: UIButton) {
+    private func customEventParmsBtnTapped(sender _: UIButton) {
         presentCustomEventParamsVS()
     }
 
     @objc
-    private func submitBtnTapped(sender: UIButton) {
+    private func submitBtnTapped(sender _: UIButton) {
         submitTrackingEventWithCurrentInputs()
     }
 }

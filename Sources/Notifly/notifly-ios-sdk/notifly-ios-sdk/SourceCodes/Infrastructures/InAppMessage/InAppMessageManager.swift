@@ -18,71 +18,25 @@ class InAppMessageManager {
         userStateManager = UserStateManager(owner: owner)
     }
 
-    func updateUserProperties(userID: String?, properties: [String: Any]) {
+    func mayTriggerInAppMessage(eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys _: [String]?) {
         guard !Notifly.inAppMessageDisabled else {
             return
-        }
-        let updateTask = Notifly.keepGoingPub.sink(
-            receiveCompletion: { _ in },
-            receiveValue: { _ in
-                guard userID == self.userStateManager.owner else {
-                    Logger.error("Fail to update client-side user state (user properties): owner mismatch")
-                    return
-                }
-                self.userStateManager.updateUserData(userID: userID, properties: properties)
-            }
-        )
-        guard let main = try? Notifly.main, updateTask != nil else {
-            Logger.error("Fail to update client-side user state (user properties): Notifly is not initialized")
-            return
-        }
-        main.storeCancellable(cancellable: updateTask)
-    }
-
-    func updateEventData(userID: String?, eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) {
-        guard !Notifly.inAppMessageDisabled else {
-            return
-        }
-
-        if let currentOwner = userStateManager.owner {
-            guard userID == currentOwner else {
-                Logger.error("Fail to update client-side user state (event): owner mismatch")
-                return
-            }
         }
 
         if var campaignsToTrigger = getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams) {
+            if campaignsToTrigger.isEmpty {
+                return
+            }
             campaignsToTrigger.sort(by: { $0.updatedAt > $1.updatedAt })
             for campaignToTrigger in campaignsToTrigger {
                 if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger) {
-                    showInAppMessage(userID: userID, notiflyInAppMessageData: notiflyInAppMessageData)
+                    showInAppMessage(
+                        userID: try? Notifly.main.userManager.getNotiflyUserID(),
+                        notiflyInAppMessageData: notiflyInAppMessageData
+                    )
                 }
             }
         }
-        userStateManager.incrementEic(eventName: eventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys)
-    }
-
-    func updateHideCampaignUntilData(userID: String?, hideUntilData: [String: Int]) {
-        guard !Notifly.inAppMessageDisabled else {
-            return
-        }
-
-        guard userID == userStateManager.owner else {
-            Logger.error("Fail to update client-side user state (user campaign hidden until): owner mismatch")
-            return
-        }
-
-        let updateTask = Notifly.keepGoingPub.sink(
-            receiveCompletion: { _ in },
-            receiveValue: { _ in
-                self.userStateManager.updateUserCampaignHiddenUntilData(userID: userID, hideUntilData: hideUntilData)
-            }
-        )
-        guard let main = try? Notifly.main, updateTask != nil else {
-            Logger.error("Fail to update client-side user state (user campaign hidden until): Notifly is not initialized")
-            return
-        }
-        main.storeCancellable(cancellable: updateTask)
     }
 
     /* method for showing in-app message */
@@ -106,7 +60,7 @@ class InAppMessageManager {
                 let currentEventData: EventData = userStateManager.eventData
                 return SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: currentUserData, eventData: currentEventData)
             }
-        
+
         if campaignsToTrigger.count == 0 {
             return nil
         }
@@ -184,7 +138,10 @@ class InAppMessageManager {
         return nil
     }
 
-    private func showInAppMessage(userID: String?, notiflyInAppMessageData: InAppMessageData) {
+    private func showInAppMessage(
+        userID: String?,
+        notiflyInAppMessageData: InAppMessageData
+    ) {
         guard let userID = userID else {
             return
         }
@@ -194,10 +151,9 @@ class InAppMessageManager {
                 return
             }
 
-            
             let currentUserData = self.userStateManager.userData
             if let reEligibleCondition = notiflyInAppMessageData.notiflyReEligibleCondition {
-                guard !self.isHiddenCampaign(campaignID: notiflyInAppMessageData.notiflyCampaignId, userData: currentUserData ) else {
+                guard !self.isHiddenCampaign(campaignID: notiflyInAppMessageData.notiflyCampaignId, userData: currentUserData) else {
                     return
                 }
             }
@@ -205,7 +161,7 @@ class InAppMessageManager {
             guard !self.isBlacklistTemplate(templateName: notiflyInAppMessageData.modalProps.templateName, userData: currentUserData) else {
                 return
             }
-6
+            6
             guard WebViewModalViewController.openedInAppMessageCount == 0 else {
                 Logger.error("Already In App Message Opened. New In App Message Ignored.")
                 return
