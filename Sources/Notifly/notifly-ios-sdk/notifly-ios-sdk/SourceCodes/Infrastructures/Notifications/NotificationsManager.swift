@@ -136,24 +136,6 @@ class NotificationsManager: NSObject {
             }
         }
     }
-
-    func logPushClickInternalEvent(pushData: [AnyHashable: Any], clickStatus: String) {
-        guard let notifly = try? Notifly.main else {
-            return
-        }
-        if let campaignID = pushData["campaign_id"] as? String {
-            let messageID = pushData["notifly_message_id"] ?? "" as String
-            if let pushClickEventParams = [
-                "type": "message_event",
-                "channel": "push-notification",
-                "campaign_id": campaignID,
-                "notifly_message_id": messageID,
-                "click_status": clickStatus,
-            ] as? [String: Any] {
-                notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.pushClickEventName, eventParams: pushClickEventParams, urgent: true)
-            }
-        }
-    }
 }
 
 @available(iOSApplicationExtension, unavailable)
@@ -170,18 +152,26 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
             else {
                 return
             }
-            guard (try? Notifly.main) != nil else {
+
+            guard let main = try? Notifly.main else {
                 Notifly.coldStartNotificationData = pushData
                 return
             }
+
             if let urlString = pushData["url"] as? String,
                let url = URL(string: urlString)
             {
                 UIApplication.shared.open(url, options: [:]) { _ in
-                    self.logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
+                    main.trackingManager.trackPushClickInternalEvent(
+                        pushData: pushData,
+                        clickStatus: clickStatus
+                    )
                 }
             } else {
-                logPushClickInternalEvent(pushData: pushData, clickStatus: clickStatus)
+                main.trackingManager.trackPushClickInternalEvent(
+                    pushData: pushData,
+                    clickStatus: clickStatus
+                )
             }
         }
     }

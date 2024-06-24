@@ -24,7 +24,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         FirebaseApp.configure()
+
         Notifly.initialize(projectId: TestConstant.projectID, username: TestConstant.username, password: TestConstant.password)
+        // for i in 0 ..< 100 {
+        //     Notifly.setUserId(userId: nil)
+        //     Notifly.trackEvent(eventName: "app_opened_unregistered")
+        //     Notifly.setUserId(userId: "kds\(i)")
+        //     Notifly.trackEvent(eventName: "app_opened")
+        //     print("\(i) / 100 completed.")
+        // }
 
         UNUserNotificationCenter.current().delegate = self
         return true

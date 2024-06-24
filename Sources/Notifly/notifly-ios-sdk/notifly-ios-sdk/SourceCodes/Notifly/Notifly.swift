@@ -4,6 +4,7 @@ import UIKit
 
 @available(iOSApplicationExtension, unavailable)
 @objc public class Notifly: NSObject {
+    private static var _main: Notifly?
     static var main: Notifly {
         get throws {
             guard let notifly = _main else {
@@ -13,24 +14,23 @@ import UIKit
         }
     }
 
-    static var keepGoingPub: AnyPublisher<Void, Error> {
-        return (try? Notifly.main.inAppMessageManager.userStateManager.waitSyncStateFinishedPub) ?? Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
+    private static var _asyncWorker = NotiflyAsyncWorker()
+    static var asyncWorker: NotiflyAsyncWorker {
+        get {
+            _asyncWorker
+        }
     }
-
-    static var _main: Notifly?
 
     static var sdkVersion: String = NotiflyConstant.sdkVersion // Native SDK version
     static var sdkWrapperVersion: String? = nil
     static var sdkWrapperType: SdkWrapperType? = nil
-
     static var coldStartNotificationData: [AnyHashable: Any]?
     static var inAppMessageDisabled: Bool = false
 
-    var cancellables = Set<AnyCancellable>()
-    let accessQueue = DispatchQueue(label: "com.notifly.manager.access.queue")
+    private let cancellablesAccessQueue = DispatchQueue(label: "com.notifly.manager.access.queue")
+    private var cancellables = Set<AnyCancellable>()
 
     let projectId: String
-
     let auth: Auth
     let notificationsManager: NotificationsManager
     let trackingManager: TrackingManager
@@ -58,12 +58,23 @@ import UIKit
         notificationsManager = NotificationsManager()
         inAppMessageManager = InAppMessageManager(owner: (try? userManager.getNotiflyUserID()))
         super.init()
-        Notifly._main = self
     }
 
     func storeCancellable(cancellable: AnyCancellable) {
-        self.accessQueue.async {
+        cancellablesAccessQueue.async {
             cancellable.store(in: &self.cancellables)
         }
+    }
+
+    static func setup(
+        projectId: String,
+        username: String,
+        password: String
+    ) {
+        _main = Notifly(
+            projectId: projectId,
+            username: username,
+            password: password
+        )
     }
 }

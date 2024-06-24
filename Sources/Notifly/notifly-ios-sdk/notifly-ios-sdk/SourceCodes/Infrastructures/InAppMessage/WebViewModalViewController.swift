@@ -4,7 +4,21 @@ import WebKit
 
 @available(iOSApplicationExtension, unavailable)
 class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate {
-    static var openedInAppMessageCount: Int = 0
+    private static let openedInAppMessageCountAccessQueue = DispatchQueue(label: "com.notifly.openedInAppMessageCountQueue")
+    private static var _openedInAppMessageCount: Int = 0
+    static var openedInAppMessageCount: Int {
+        get {
+            WebViewModalViewController.openedInAppMessageCountAccessQueue.sync {
+                WebViewModalViewController._openedInAppMessageCount
+            }
+        }
+        set {
+            WebViewModalViewController.openedInAppMessageCountAccessQueue.sync {
+                WebViewModalViewController._openedInAppMessageCount = newValue
+            }
+        }
+    }
+
     var webView = FullScreenWKWebView()
     var notiflyCampaignID: String?
     var notiflyMessageID: String?
@@ -76,6 +90,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                   !(self.isBeingDismissed),
                   self.presentingViewController == nil
             else {
+                WebViewModalViewController.openedInAppMessageCount = 0
                 Logger.error("Fail to present in app message.")
                 return
             }
@@ -106,15 +121,15 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
            let hideUntil = NotiflyHelper.calculateHideUntil(reEligibleCondition: reEligibleCondition)
         {
             hideUntilData = [campaignID: hideUntil]
-            if let main = try? Notifly.main, let manager = main.inAppMessageManager as? InAppMessageManager {
-                manager.updateHideCampaignUntilData(
+            if let main = try? Notifly.main, let userStateManager = main.inAppMessageManager.userStateManager as? UserStateManager {
+                userStateManager.updateUserCampaignHiddenUntilData(
                     userID: try? main.userManager.getNotiflyUserID(),
                     hideUntilData: [
                         campaignID: hideUntil,
                     ]
                 )
             } else {
-                Logger.error("InAppMessage manager is not exist.")
+                Logger.error("UserStateManager manager is not exist.")
             }
         }
 
@@ -198,7 +213,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                         hideUntil = -1
                     }
                     let newProperty = "hide_in_app_message_until_" + templateName
-                    try? Notifly.main.userManager.setUserProperties([newProperty: hideUntil])
+                    try? Notifly.main.userManager.setUserProperties(userProperties: [newProperty: hideUntil])
                 }
             case "survey_submit_button":
                 notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageSurveySubmitButtonClicked, eventParams: params)
@@ -339,7 +354,9 @@ private extension UIViewController {
             return nav.visibleViewController?.topMostViewController ?? nav
         }
         if let tab = self as? UITabBarController {
-            return (tab.selectedViewController ?? self).topMostViewController
+            if let selected = tab.selectedViewController {
+                return selected.topMostViewController
+            }
         }
         return self
     }

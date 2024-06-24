@@ -65,3 +65,8 @@
 # 1.10.1
 
 - Fix: Fix main-thread checker warning
+
+# 1.11.0
+
+- Chore: Change UserState Management Logic using access queue.
+- Chore: Replace user state lock with NotiflyAsyncWorker (Semaphore)
