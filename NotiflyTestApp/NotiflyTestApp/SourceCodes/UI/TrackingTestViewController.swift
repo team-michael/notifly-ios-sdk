@@ -115,19 +115,19 @@ class TrackingTestViewController: UIViewController {
 
         responsePayloadTextView.text = "N/A"
 
-        // let wrongGroup = DispatchGroup()
-        // let wrongQueue = DispatchQueue(label: "WrongQueue")
-        // for i in 0 ..< 1000 {
-        //     wrongGroup.enter()
-        //     wrongQueue.async {
-        //         Notifly.setUserId(userId: nil)
-        //         Notifly.setUserId(userId: "WrongUserID\(i)")
-        //         Notifly.trackEvent(eventName: "WrongEvent\(i)")
-        //         Notifly.setUserId(userId: nil)
-        //         wrongGroup.leave()
-        //     }
-        // }
-        // wrongGroup.wait()
+        let wrongGroup = DispatchGroup()
+        let wrongQueue = DispatchQueue(label: "WrongQueue")
+        for i in 0 ..< 30 {
+            wrongGroup.enter()
+            wrongQueue.async {
+                Notifly.setUserId(userId: nil)
+                Notifly.setUserId(userId: "WrongUserID\(i)")
+                Notifly.trackEvent(eventName: "WrongEvent\(i)")
+                Notifly.setUserId(userId: nil)
+                wrongGroup.leave()
+            }
+        }
+        wrongGroup.wait()
 
         try? Notifly.trackEvent(eventName: eventName,
                                 eventParams: customEventParams,

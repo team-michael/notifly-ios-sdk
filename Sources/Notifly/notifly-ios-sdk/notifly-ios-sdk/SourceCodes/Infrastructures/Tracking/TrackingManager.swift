@@ -70,7 +70,8 @@ class TrackingManager {
                     "notif_auth_status": authStatus,
                     "in_app_message_disabled": Notifly.inAppMessageDisabled,
                     "timezone": TimezoneUtil.getCurrentTimezoneId(),
-                ]
+                ],
+                lockAcquired: true
             )
         }
     }

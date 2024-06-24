@@ -63,10 +63,6 @@ class UserManager {
             Logger.error("Fail to Set User Id.")
             return
         }
-        guard externalUserID != newExternalUserID else {
-            Logger.info("External User Id is not changed because the new user id is same as the current user id.")
-            return
-        }
 
         if let data = [
             TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID,
@@ -78,6 +74,13 @@ class UserManager {
                     Notifly.asyncWorker.unlock()
                     return
                 }
+
+                guard externalUserID != newExternalUserID else {
+                    Logger.info("External User Id is not changed because the new user id is same as the current user id.")
+                    Notifly.asyncWorker.unlock()
+                    return
+                }
+
                 let previousExternalUserID = externalUserID
                 changeExternalUserId(newValue: newExternalUserID)
                 let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: newExternalUserID)

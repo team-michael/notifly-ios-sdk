@@ -63,15 +63,17 @@ import UIKit
             }
         }
 
-        Messaging.messaging().token { token, error in
-            if let token = token,
-               error == nil
-            {
-                try? main.notificationsManager.deviceTokenPromise?(.success(token))
-                main.notificationsManager.setDeviceTokenPub(token: token)
+        Notifly.asyncWorker.addTask {
+            Messaging.messaging().token { token, error in
+                if let token = token,
+                   error == nil
+                {
+                    try? main.notificationsManager.deviceTokenPromise?(.success(token))
+                    main.notificationsManager.setDeviceTokenPub(token: token)
+                }
+                try? main.trackingManager.trackSessionStartInternalEvent()
+                Logger.info("📡 Notifly SDK is successfully initialized.")
             }
-            try? main.trackingManager.trackSessionStartInternalEvent()
-            Logger.info("📡 Notifly SDK is successfully initialized.")
         }
     }
 
