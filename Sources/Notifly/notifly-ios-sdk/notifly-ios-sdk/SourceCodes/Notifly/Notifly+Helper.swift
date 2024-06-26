@@ -12,25 +12,25 @@ enum NotiflyHelper {
     static func getEventName(event: String, isInternalEvent: Bool) -> String {
         return isInternalEvent ? "notifly__" + event : event
     }
-    
+
     static func getNativeSdkVersion() -> String {
-        return Notifly.sdkVersion
+        return NotiflySdkConfig.sdkVersion
     }
-    
+
     static func getSdkWrapperVersion() -> String? {
-        return Notifly.sdkWrapperVersion
+        return NotiflySdkConfig.sdkWrapperVersion
     }
 
     static func getSdkVersion() -> String {
         return getSdkWrapperVersion() ?? getNativeSdkVersion()
     }
-    
+
     static func getSdkWrapperType() -> String? {
-        return Notifly.sdkWrapperType?.rawValue
+        return NotiflySdkConfig.sdkWrapperType?.rawValue
     }
 
     static func getSdkType() -> String {
-        return getSdkWrapperType() ?? "native"
+        return getSdkWrapperType() ?? NotiflySdkConfig.sdkType
     }
 
     static func getDateStringBeforeNDays(n: Int?) -> String? {
@@ -83,7 +83,7 @@ enum NotiflyHelper {
         }
         return nil
     }
-    
+
     static func testRegex(_ reference: String, regex: String) -> Bool {
         do {
             let regex = try NSRegularExpression(pattern: regex)
@@ -96,6 +96,7 @@ enum NotiflyHelper {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 enum NotiflyValueComparator {
     static func compare(type: String?, sourceValue: Any, operator: NotiflyOperator, targetValue: Any?) -> Bool {
         switch `operator` {
@@ -284,6 +285,7 @@ enum NotiflyValueComparator {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 enum NotiflyStringComparator {
     static func compare(reference: String, operator: NotiflyStringOperator, rhs: String) -> Bool {
         switch `operator` {

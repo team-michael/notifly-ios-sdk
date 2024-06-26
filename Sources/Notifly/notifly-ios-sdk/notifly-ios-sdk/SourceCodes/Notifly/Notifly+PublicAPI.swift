@@ -216,7 +216,7 @@ import UIKit
 
     static func setSdkType(type: String) {
         if let sdkType = SdkWrapperType(rawValue: type) {
-            Notifly.sdkWrapperType = sdkType
+            NotiflySdkConfig.sdkWrapperType = sdkType
             Logger.info("Notifly SDK type has been set to \(sdkType.rawValue).")
         } else {
             Logger.error("Notifly SDK type is invalid. Please set type to one of the following: 'react_native', 'flutter'")
@@ -224,7 +224,7 @@ import UIKit
     }
 
     static func setSdkVersion(version: String) {
-        Notifly.sdkWrapperVersion = version
+        NotiflySdkConfig.sdkWrapperVersion = version
     }
 
     static func disableInAppMessage() {
