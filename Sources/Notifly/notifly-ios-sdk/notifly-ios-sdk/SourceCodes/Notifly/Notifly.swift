@@ -21,9 +21,6 @@ import UIKit
         }
     }
 
-    static var sdkVersion: String = NotiflyConstant.sdkVersion // Native SDK version
-    static var sdkWrapperVersion: String? = nil
-    static var sdkWrapperType: SdkWrapperType? = nil
     static var coldStartNotificationData: [AnyHashable: Any]?
     static var inAppMessageDisabled: Bool = false
 

@@ -70,3 +70,7 @@
 
 - Chore: Change UserState Management Logic using access queue.
 - Chore: Replace user state lock with NotiflyAsyncWorker (Semaphore)
+
+# 1.12.0
+
+- Chore: Separate PushExtension Sdk from Notifly SDK (notifly_sdk_push_extension)

@@ -40,7 +40,7 @@ import UserNotifications
                 "channel": "push-notification",
                 "campaign_id": bestAttemptContent.userInfo["campaign_id"] ?? "",
                 "notifly_message_id": bestAttemptContent.userInfo["notifly_message_id"] ?? "",
-                "gcm_message_id": gcmMessageId ?? "",
+                "gcm_message_id": gcmMessageId ?? ""
             ] as [String: Any]
             ExtensionManager(projectId: projectId)
                 .track(eventName: TrackingConstant.Internal.pushNotificationMessageShown, params: data, notiflyUserId: notiflyUserId)
@@ -126,8 +126,8 @@ import UserNotifications
                                    platform: AppHelper.getDevicePlatform(),
                                    os_version: AppHelper.getiOSVersion(),
                                    app_version: appVersion,
-                                   sdk_version: "",
-                                   sdk_type: "",
+                                   sdk_version: NotiflySdkConfig.sdkVersion,
+                                   sdk_type: NotiflySdkConfig.sdkType,
                                    event_params: AppHelper.makeJsonCodable(params)) as? TrackingData,
            let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8) {
             return TrackingRecord(partitionKey: userID, data: stringfiedData)
