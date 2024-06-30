@@ -74,3 +74,7 @@
 # 1.12.0
 
 - Chore: Separate PushExtension Sdk from Notifly SDK (notifly_sdk_push_extension)
+
+# 1.12.1
+
+- Chore: change variable name
