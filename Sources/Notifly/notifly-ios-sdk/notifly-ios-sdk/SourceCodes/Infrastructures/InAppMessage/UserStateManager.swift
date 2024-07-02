@@ -148,11 +148,8 @@ class UserStateManager {
                 }
                 Logger.info("Sync State Completed.")
                 self?.owner = notiflyUserID
-                let fetchedUserData = self?.userData.destruct()
                 completion()
-                try? Notifly.main.trackingManager.trackSyncStateCompletedInternalEvent(
-                    userID: notiflyUserID, externalUserID: externalUserID,
-                    properties: fetchedUserData)
+
             })
 
         guard let main = try? Notifly.main, syncStateTask != nil else {

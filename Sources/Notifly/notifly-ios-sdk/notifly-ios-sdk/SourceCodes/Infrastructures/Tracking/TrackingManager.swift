@@ -85,14 +85,6 @@ class TrackingManager {
         )
     }
 
-    func trackSyncStateCompletedInternalEvent(
-        userID _: String, externalUserID _: String?, properties: [String: Any]?
-    ) {
-        trackInternalEvent(
-            eventName: TrackingConstant.Internal.syncStateCompletedEventName,
-            eventParams: properties, skipUpdatingState: true)
-    }
-
     func trackPushClickInternalEvent(pushData: [AnyHashable: Any], clickStatus: String) {
         if let campaignID = pushData["campaign_id"] as? String {
             let messageID = pushData["notifly_message_id"] ?? "" as String
@@ -111,7 +103,7 @@ class TrackingManager {
     }
 
     func trackInternalEvent(
-        eventName: String, eventParams: [String: Any]?, skipUpdatingState: Bool = false,
+        eventName: String, eventParams: [String: Any]?,
         lockAcquired: Bool = false
     ) {
         return track(
@@ -119,7 +111,6 @@ class TrackingManager {
             eventParams: eventParams,
             isInternal: true,
             segmentationEventParamKeys: nil,
-            skipUpdatingState: skipUpdatingState,
             lockAcquired: lockAcquired)
     }
 
@@ -128,7 +119,6 @@ class TrackingManager {
         eventParams: [String: Any]?,
         isInternal: Bool,
         segmentationEventParamKeys: [String]?,
-        skipUpdatingState: Bool = false,
         lockAcquired: Bool = false
     ) {
         Notifly.asyncWorker.addTask(lockAcquired: lockAcquired) { [weak self] in
@@ -147,8 +137,7 @@ class TrackingManager {
                 segmentationEventParamKeys: segmentationEventParamKeys,
                 currentTimestamp: currentTimestamp,
                 userID: userID,
-                externalUserID: externalUserID,
-                skipUpdatingState: skipUpdatingState
+                externalUserID: externalUserID
             ).sink(
                 receiveCompletion: { completion in
                     if case let .failure(error) = completion {
@@ -172,20 +161,20 @@ class TrackingManager {
     private func handleTrackEvent(
         eventName: String, eventParams: [String: Any]?, isInternal: Bool,
         segmentationEventParamKeys: [String]?, currentTimestamp: Int, userID: String,
-        externalUserID: String?, skipUpdatingState: Bool = false
+        externalUserID: String?
     ) -> AnyPublisher<TrackingRecord, Error> {
-        if !skipUpdatingState {
-            let trackingEventName = NotiflyHelper.getEventName(
-                event: eventName, isInternalEvent: isInternal)
-            try? Notifly.main.inAppMessageManager.userStateManager.incrementEic(
-                eventName: trackingEventName, eventParams: eventParams,
-                segmentationEventParamKeys: segmentationEventParamKeys
-            )
-            try? Notifly.main.inAppMessageManager.mayTriggerInAppMessage(
-                eventName: trackingEventName, eventParams: eventParams,
-                segmentationEventParamKeys: segmentationEventParamKeys
-            )
-        }
+
+        let trackingEventName = NotiflyHelper.getEventName(
+            event: eventName, isInternalEvent: isInternal)
+        try? Notifly.main.inAppMessageManager.userStateManager.incrementEic(
+            eventName: trackingEventName, eventParams: eventParams,
+            segmentationEventParamKeys: segmentationEventParamKeys
+        )
+        try? Notifly.main.inAppMessageManager.mayTriggerInAppMessage(
+            eventName: trackingEventName, eventParams: eventParams,
+            segmentationEventParamKeys: segmentationEventParamKeys
+        )
+
         return createTrackingRecord(
             eventName: eventName,
             eventParams: eventParams,
@@ -244,7 +233,8 @@ class TrackingManager {
                 sdk_version: NotiflyHelper.getSdkVersion(),
                 sdk_type: NotiflyHelper.getSdkType(),
                 event_params: AppHelper.makeJsonCodable(eventParams)) as? TrackingData,
-                let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8) {
+                let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
+            {
                 return TrackingRecord(partitionKey: userID, data: stringfiedData)
             } else {
                 Logger.error("Failed to track event: " + eventName)
