@@ -1,48 +1,43 @@
-
 import Foundation
+
 protocol NotiflyApiRequestProtocol: Encodable {}
 
 struct ApiRequestBody: NotiflyApiRequestProtocol {
     var payload: RequestPayload
-    
+
     enum CodingKeys: String, CodingKey {
         case userName
         case password
         case records
     }
-    
-    init(payload: RequestPayload) {
-        self.payload = payload
-    }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        
+
         switch payload {
         case .TrackingEvent(let trackingEvent):
             try container.encode(trackingEvent.records, forKey: .records)
-            
+
         case .AuthCredentials(let credentials):
             try container.encode(credentials.userName, forKey: .userName)
             try container.encode(credentials.password, forKey: .password)
         }
     }
-    
-   
+
 }
 
 enum RequestPayload: NotiflyApiRequestProtocol {
     case TrackingEvent(TrackingEvent)
     case AuthCredentials(Credentials)
-    
+
     enum CodingKeys: String, CodingKey {
         case trackingEvent
         case authCredentials
     }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        
+
         switch self {
         case .TrackingEvent(let trackingEvent):
             try container.encode(trackingEvent, forKey: .trackingEvent)
@@ -97,7 +92,7 @@ struct AnyCodable: Codable {
             try container.encodeNil()
         }
     }
-    
+
     func getValue() -> Any {
         return self.value
     }

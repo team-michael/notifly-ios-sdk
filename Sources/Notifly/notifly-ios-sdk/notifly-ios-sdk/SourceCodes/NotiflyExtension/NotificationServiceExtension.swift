@@ -16,44 +16,59 @@ import UserNotifications
         NotiflyCustomUserDefaults.register(projectId: projectId, org: username)
     }
 
-    override open func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
-        guard let bestAttemptContent = request.content.mutableCopy() as? UNMutableNotificationContent else {
+    override open func didReceive(
+        _ request: UNNotificationRequest,
+        withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void
+    ) {
+        guard
+            let bestAttemptContent = request.content.mutableCopy() as? UNMutableNotificationContent
+        else {
             return
         }
         self.bestAttemptContent = bestAttemptContent
         self.contentHandler = contentHandler
 
-        guard let notiflyMessageType = bestAttemptContent.userInfo["notifly_message_type"] as? String,
-              notiflyMessageType == "push-notification"
+        guard
+            let notiflyMessageType = bestAttemptContent.userInfo["notifly_message_type"] as? String,
+            notiflyMessageType == "push-notification"
         else {
             contentHandler(bestAttemptContent)
             return
         }
 
         if let projectId = NotiflyCustomUserDefaults.projectIdInUserDefaults,
-           NotiflyCustomUserDefaults.usernameInUserDefaults != nil,
-           NotiflyCustomUserDefaults.passwordInUserDefaults != nil {
+            NotiflyCustomUserDefaults.usernameInUserDefaults != nil,
+            NotiflyCustomUserDefaults.passwordInUserDefaults != nil
+        {
             let gcmMessageId = bestAttemptContent.userInfo["gcm.message_id"] as? String
             let notiflyUserId = bestAttemptContent.userInfo["notifly_user_id"] as? String
-            let data = [
-                "type": "message_event",
-                "channel": "push-notification",
-                "campaign_id": bestAttemptContent.userInfo["campaign_id"] ?? "",
-                "notifly_message_id": bestAttemptContent.userInfo["notifly_message_id"] ?? "",
-                "gcm_message_id": gcmMessageId ?? ""
-            ] as [String: Any]
+            let data =
+                [
+                    "type": "message_event",
+                    "channel": "push-notification",
+                    "campaign_id": bestAttemptContent.userInfo["campaign_id"] ?? "",
+                    "notifly_message_id": bestAttemptContent.userInfo["notifly_message_id"] ?? "",
+                    "gcm_message_id": gcmMessageId ?? "",
+                ] as [String: Any]
             ExtensionManager(projectId: projectId)
-                .track(eventName: TrackingConstant.Internal.pushNotificationMessageShown, params: data, notiflyUserId: notiflyUserId)
+                .track(
+                    eventName: TrackingConstant.Internal.pushNotificationMessageShown, params: data,
+                    notiflyUserId: notiflyUserId)
         } else {
-            Logger.error("Cannot Access to NotiflyCustomUserDefaults. Please confirm that the app group identifier is 'group.notifly.{username}.'")
+            Logger.error(
+                "Cannot Access to NotiflyCustomUserDefaults. Please confirm that the app group identifier is 'group.notifly.{username}.'"
+            )
         }
 
-        ExtensionManager.show(bestAttemptContent: bestAttemptContent, contentHandler: contentHandler)
+        ExtensionManager.show(
+            bestAttemptContent: bestAttemptContent, contentHandler: contentHandler)
     }
 
     override open func serviceExtensionTimeWillExpire() {
         Logger.info("Service Extension Expired")
-        if let contentHandler = contentHandler as? ((UNNotificationContent) -> Void), let bestAttemptContent = bestAttemptContent as? UNMutableNotificationContent {
+        if let contentHandler = contentHandler as? ((UNNotificationContent) -> Void),
+            let bestAttemptContent = bestAttemptContent as? UNMutableNotificationContent
+        {
             contentHandler(bestAttemptContent)
         }
     }
@@ -68,10 +83,17 @@ import UserNotifications
         self.projectId = projectId
     }
 
-    static func show(bestAttemptContent: UNMutableNotificationContent, contentHandler: @escaping ((UNNotificationContent) -> Void)) {
-        guard let rawAttachmentData = (bestAttemptContent.userInfo["notifly_attachment"] as? String)?.data(using: .utf8),
-              let attachmentData = (try? JSONSerialization.jsonObject(with: rawAttachmentData, options: [])) as? [String: Any],
-              let attachment = try? PushAttachment(attachment: attachmentData)
+    static func show(
+        bestAttemptContent: UNMutableNotificationContent,
+        contentHandler: @escaping ((UNNotificationContent) -> Void)
+    ) {
+        guard
+            let rawAttachmentData = (bestAttemptContent.userInfo["notifly_attachment"] as? String)?
+                .data(using: .utf8),
+            let attachmentData =
+                (try? JSONSerialization.jsonObject(with: rawAttachmentData, options: []))
+                as? [String: Any],
+            let attachment = try? PushAttachment(attachment: attachmentData)
         else {
             contentHandler(bestAttemptContent)
             return
@@ -83,7 +105,13 @@ import UserNotifications
                 return
             }
 
-            if let downloadedUrl = downloadedUrl, let attachment = try? UNNotificationAttachment(identifier: "notifly_push_notification_attachment", url: downloadedUrl, options: [UNNotificationAttachmentOptionsTypeHintKey: attachment.attachmentFileType]) {
+            if let downloadedUrl = downloadedUrl,
+                let attachment = try? UNNotificationAttachment(
+                    identifier: "notifly_push_notification_attachment", url: downloadedUrl,
+                    options: [
+                        UNNotificationAttachmentOptionsTypeHintKey: attachment.attachmentFileType
+                    ])
+            {
                 bestAttemptContent.attachments = [attachment]
             }
             contentHandler(bestAttemptContent)
@@ -92,7 +120,10 @@ import UserNotifications
     }
 
     func track(eventName: String, params: [String: Any]?, notiflyUserId: String?) {
-        guard let payload = preparePayload(eventName: eventName, params: params, notiflyUserId: notiflyUserId) else {
+        guard
+            let payload = preparePayload(
+                eventName: eventName, params: params, notiflyUserId: notiflyUserId)
+        else {
             Logger.error("Fail to track push_delivered event.")
             return
         }
@@ -107,29 +138,33 @@ import UserNotifications
         }
     }
 
-    private func preparePayload(eventName: String, params: [String: Any]?, notiflyUserId: String?) -> TrackingRecord? {
+    private func preparePayload(eventName: String, params: [String: Any]?, notiflyUserId: String?)
+        -> TrackingRecord?
+    {
         let userID = notiflyUserId ?? getUserId()
         if let notiflyDeviceID = AppHelper.getNotiflyDeviceID(),
-           let deviceID = AppHelper.getDeviceID(),
-           let appVersion = AppHelper.getAppVersion(),
-           let data = TrackingData(id: UUID().uuidString,
-                                   name: TrackingConstant.Internal.pushNotificationMessageShown,
-                                   notifly_user_id: userID,
-                                   external_user_id: NotiflyCustomUserDefaults.externalUserIdInUserDefaults,
-                                   time: AppHelper.getCurrentTimestamp(),
-                                   notifly_device_id: notiflyDeviceID,
-                                   external_device_id: deviceID,
-                                   device_token: "",
-                                   is_internal_event: true,
-                                   segmentation_event_param_keys: [],
-                                   project_id: projectId,
-                                   platform: AppHelper.getDevicePlatform(),
-                                   os_version: AppHelper.getiOSVersion(),
-                                   app_version: appVersion,
-                                   sdk_version: NotiflySdkConfig.sdkVersion,
-                                   sdk_type: NotiflySdkConfig.sdkType,
-                                   event_params: AppHelper.makeJsonCodable(params)) as? TrackingData,
-           let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8) {
+            let deviceID = AppHelper.getDeviceID(),
+            let appVersion = AppHelper.getAppVersion(),
+            let data = TrackingData(
+                id: UUID().uuidString,
+                name: TrackingConstant.Internal.pushNotificationMessageShown,
+                notifly_user_id: userID,
+                external_user_id: NotiflyCustomUserDefaults.externalUserIdInUserDefaults,
+                time: AppHelper.getCurrentTimestamp(),
+                notifly_device_id: notiflyDeviceID,
+                external_device_id: deviceID,
+                device_token: "",
+                is_internal_event: true,
+                segmentation_event_param_keys: [],
+                project_id: projectId,
+                platform: AppHelper.getDevicePlatform(),
+                os_version: AppHelper.getiOSVersion(),
+                app_version: appVersion,
+                sdk_version: NotiflySdkConfig.sdkVersion,
+                sdk_type: NotiflySdkConfig.sdkType,
+                event_params: AppHelper.makeJsonCodable(params)) as? TrackingData,
+            let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
+        {
             return TrackingRecord(partitionKey: userID, data: stringfiedData)
         } else {
             Logger.error("Failed to track event: " + eventName)

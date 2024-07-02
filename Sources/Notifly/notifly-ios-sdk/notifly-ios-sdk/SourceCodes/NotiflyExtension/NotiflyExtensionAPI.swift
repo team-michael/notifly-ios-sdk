@@ -28,12 +28,17 @@ class NotiflyExtensionAPI {
         NotiflyCustomUserDefaults.authTokenInUserDefaults = nil
     }
 
-    func track(payload: TrackingRecord, completion: @escaping (Result<[String: Any], Error>) -> Void) {
+    func track(
+        payload: TrackingRecord, completion: @escaping (Result<[String: Any], Error>) -> Void
+    ) {
         getAuth { result in
             switch result {
             case let .success(token):
-                guard let request = self.constructTrackingRequest(auth: token, payload: payload) else {
-                    completion(.failure(NotiflyError.unexpectedNil("Fail to contruct push_delivered event.")))
+                guard let request = self.constructTrackingRequest(auth: token, payload: payload)
+                else {
+                    completion(
+                        .failure(
+                            NotiflyError.unexpectedNil("Fail to contruct push_delivered event.")))
                     return
                 }
                 self.buildAndFireRequest(request: request, retry: true) { res in
@@ -74,7 +79,7 @@ class NotiflyExtensionAPI {
 
     private func authorize(completion: @escaping (Result<String, Error>) -> Void) {
         guard let username = NotiflyCustomUserDefaults.usernameInUserDefaults,
-              let password = NotiflyCustomUserDefaults.passwordInUserDefaults
+            let password = NotiflyCustomUserDefaults.passwordInUserDefaults
         else {
             Logger.error("ExtensionAPI: Fail to Authorize - username and password error")
             completion(.failure(NotiflyError.notAuthorized))
@@ -82,10 +87,13 @@ class NotiflyExtensionAPI {
         }
 
         guard let url = URL(string: NotiflyConstant.EndPoint.authorizationEndPoint),
-              let request = try? ExtensionRequestBuilder()
-                  .set(url: url)
-                  .set(method: .POST)
-                  .set(body: ApiRequestBody(payload: .AuthCredentials(Credentials(userName: username, password: password))))
+            let request = try? ExtensionRequestBuilder()
+                .set(url: url)
+                .set(method: .POST)
+                .set(
+                    body: ApiRequestBody(
+                        payload: .AuthCredentials(
+                            Credentials(userName: username, password: password))))
         else {
             Logger.error("ExtensionAPI: Fail to Authorize.")
             completion(.failure(APIError.invalidData))
@@ -130,7 +138,7 @@ class NotiflyExtensionAPI {
 
         func set(bearer: Bool) -> ExtensionRequestBuilder {
             guard let authorizationToken = headers["Authorization"],
-                  bearer
+                bearer
             else {
                 return self
             }
@@ -165,7 +173,8 @@ class NotiflyExtensionAPI {
         }
     }
 
-    func constructTrackingRequest(auth: String, payload: TrackingRecord) -> ExtensionRequestBuilder? {
+    func constructTrackingRequest(auth: String, payload: TrackingRecord) -> ExtensionRequestBuilder?
+    {
         guard let url = URL(string: NotiflyConstant.EndPoint.trackEventEndPoint) else {
             return nil
         }
@@ -176,7 +185,10 @@ class NotiflyExtensionAPI {
             .set(body: ApiRequestBody(payload: .TrackingEvent(TrackingEvent(records: [payload]))))
     }
 
-    func buildAndFireRequest(request: ExtensionRequestBuilder, retry: Bool, completion: @escaping (Result<[String: Any], APIError>) -> Void) {
+    func buildAndFireRequest(
+        request: ExtensionRequestBuilder, retry: Bool,
+        completion: @escaping (Result<[String: Any], APIError>) -> Void
+    ) {
         guard let apiRequest = try? request.build() else {
             completion(.failure(.requestFailed))
             return
@@ -194,7 +206,9 @@ class NotiflyExtensionAPI {
 
             if httpResponse.statusCode == 200 {
                 if let responseData = data {
-                    if let json = try? JSONSerialization.jsonObject(with: responseData, options: []) as? [String: Any] {
+                    if let json = try? JSONSerialization.jsonObject(with: responseData, options: [])
+                        as? [String: Any]
+                    {
                         completion(.success(json))
                     } else {
                         completion(.failure(.jsonParsingFailed))
@@ -212,12 +226,17 @@ class NotiflyExtensionAPI {
         .resume()
     }
 
-    func retryTrack(request: ExtensionRequestBuilder, completion: @escaping (Result<[String: Any], APIError>) -> Void) {
+    func retryTrack(
+        request: ExtensionRequestBuilder,
+        completion: @escaping (Result<[String: Any], APIError>) -> Void
+    ) {
         cleanAuth()
         getAuth { result in
             switch result {
             case let .success(newAuth):
-                self.buildAndFireRequest(request: request.set(authorizationToken: newAuth), retry: false, completion: completion)
+                self.buildAndFireRequest(
+                    request: request.set(authorizationToken: newAuth), retry: false,
+                    completion: completion)
                 return
             case .failure:
                 completion(.failure(.requestFailed))

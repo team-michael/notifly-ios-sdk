@@ -3,8 +3,11 @@ import UIKit
 import WebKit
 
 @available(iOSApplicationExtension, unavailable)
-class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate {
-    private static let openedInAppMessageCountAccessQueue = DispatchQueue(label: "com.notifly.openedInAppMessageCountQueue")
+class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler,
+    WKUIDelegate
+{
+    private static let openedInAppMessageCountAccessQueue = DispatchQueue(
+        label: "com.notifly.openedInAppMessageCountQueue")
     private static var _openedInAppMessageCount: Int = 0
     static var openedInAppMessageCount: Int {
         get {
@@ -36,7 +39,8 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         modalProps = notiflyInAppMessageData.modalProps
         guard UIApplication.shared.canOpenURL(notiflyInAppMessageData.url) else {
             Logger.error("Fail to load in app message: invalid url.")
-            throw NotiflyError.unexpectedNil("Fail to load in app message: invalid url or Network issue.")
+            throw NotiflyError.unexpectedNil(
+                "Fail to load in app message: invalid url or Network issue.")
         }
         DispatchQueue.main.async { [weak self] in
             self?.webView.load(URLRequest(url: notiflyInAppMessageData.url))
@@ -46,18 +50,21 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     override func viewDidLoad() {
         super.viewDidLoad()
         webView.navigationDelegate = self
-        webView.configuration.userContentController.add(self, name: "notiflyInAppMessageEventHandler")
+        webView.configuration.userContentController.add(
+            self, name: "notiflyInAppMessageEventHandler")
     }
 
     func setupUI() -> Bool {
-        guard let modalSize = getModalSize() as? CGSize, let webViewLayer = getWebViewLayer(modalSize: modalSize) as? CALayer? else {
+        guard let modalSize = getModalSize() as? CGSize,
+            let webViewLayer = getWebViewLayer(modalSize: modalSize) as? CALayer?
+        else {
             return false
         }
         let modalPositionConstraint = getModalPositionConstraint() as NSLayoutConstraint
 
         webView.translatesAutoresizingMaskIntoConstraints = false
         if let backgroundOpacity = modalProps?.backgroundOpacity as? CGFloat,
-           backgroundOpacity >= 0 && backgroundOpacity <= 1
+            backgroundOpacity >= 0 && backgroundOpacity <= 1
         {
             view.backgroundColor = UIColor.black.withAlphaComponent(CGFloat(backgroundOpacity))
         } else {
@@ -66,9 +73,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
         webView.layer.mask = webViewLayer
         if let shouldDismissCTATapped = modalProps?.dismissCTATapped,
-           shouldDismissCTATapped
+            shouldDismissCTATapped
         {
-            view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissCTATapped)))
+            view.addGestureRecognizer(
+                UITapGestureRecognizer(target: self, action: #selector(dismissCTATapped)))
         }
 
         view.addSubview(webView)
@@ -85,10 +93,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     func show(animated: Bool = false, completion _: (() -> Void)? = nil) -> Bool {
         DispatchQueue.main.async {
             guard let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
-                  let topVC = window.topMostViewController,
-                  !(self.isBeingPresented),
-                  !(self.isBeingDismissed),
-                  self.presentingViewController == nil
+                let topVC = window.topMostViewController,
+                !(self.isBeingPresented),
+                !(self.isBeingDismissed),
+                self.presentingViewController == nil
             else {
                 WebViewModalViewController.openedInAppMessageCount = 0
                 Logger.error("Fail to present in app message.")
@@ -117,15 +125,19 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         }
         var hideUntilData: [String: Int]?
         if let campaignID = notiflyCampaignID,
-           let reEligibleCondition = notiflyReEligibleCondition,
-           let hideUntil = NotiflyHelper.calculateHideUntil(reEligibleCondition: reEligibleCondition)
+            let reEligibleCondition = notiflyReEligibleCondition,
+            let hideUntil = NotiflyHelper.calculateHideUntil(
+                reEligibleCondition: reEligibleCondition)
         {
             hideUntilData = [campaignID: hideUntil]
-            if let main = try? Notifly.main, let userStateManager = main.inAppMessageManager.userStateManager as? UserStateManager {
+            if let main = try? Notifly.main,
+                let userStateManager = main.inAppMessageManager.userStateManager
+                    as? UserStateManager
+            {
                 userStateManager.updateUserCampaignHiddenUntilData(
                     userID: try? main.userManager.getNotiflyUserID(),
                     hideUntilData: [
-                        campaignID: hideUntil,
+                        campaignID: hideUntil
                     ]
                 )
             } else {
@@ -137,30 +149,33 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             Logger.error("Fail to Log In-App-Message Shown Event: Notifly is not initialized yet. ")
             return
         }
-        let params = [
-            "type": "message_event",
-            "channel": InAppMessageConstant.inAppMessageChannel,
-            "campaign_id": notiflyCampaignID,
-            "notifly_message_id": notiflyMessageID,
-            "hide_until_data": hideUntilData ?? nil,
-        ] as [String: Any]
-        notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
+        let params =
+            [
+                "type": "message_event",
+                "channel": InAppMessageConstant.inAppMessageChannel,
+                "campaign_id": notiflyCampaignID,
+                "notifly_message_id": notiflyMessageID,
+                "hide_until_data": hideUntilData ?? nil,
+            ] as [String: Any]
+        notifly.trackingManager.trackInternalEvent(
+            eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
     }
 
     func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
         if message.name == "notiflyInAppMessageEventHandler" {
             guard let notifly = try? Notifly.main else {
-                Logger.error("Fail to Log In-App-Message Click Event: Notifly is not initialized yet. ")
+                Logger.error(
+                    "Fail to Log In-App-Message Click Event: Notifly is not initialized yet. ")
                 return
             }
             guard let body = message.body as? String,
-                  let messageEventData = convertStringToJson(body) as [String: Any]?
+                let messageEventData = convertStringToJson(body) as [String: Any]?
             else {
                 return
             }
 
             guard let type = messageEventData["type"] as? String,
-                  let buttonName = messageEventData["button_name"] as? String
+                let buttonName = messageEventData["button_name"] as? String
             else {
                 return
             }
@@ -173,50 +188,64 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 notiflyExtraData = convertedExtraData
             }
 
-            let params = [
-                "type": "message_event",
-                "channel": InAppMessageConstant.inAppMessageChannel,
-                "button_name": buttonName,
-                "campaign_id": notiflyCampaignID,
-                "notifly_message_id": notiflyMessageID,
-                "notifly_extra_data": notiflyExtraData,
-            ] as [String: Any]
+            let params =
+                [
+                    "type": "message_event",
+                    "channel": InAppMessageConstant.inAppMessageChannel,
+                    "button_name": buttonName,
+                    "campaign_id": notiflyCampaignID,
+                    "notifly_message_id": notiflyMessageID,
+                    "notifly_extra_data": notiflyExtraData,
+                ] as [String: Any]
 
             switch type {
             case "close":
-                notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageCloseButtonClicked, eventParams: params)
+                notifly.trackingManager.trackInternalEvent(
+                    eventName: TrackingConstant.Internal.inAppMessageCloseButtonClicked,
+                    eventParams: params)
                 dismissCTATapped()
             case "main_button":
                 if let urlString = messageEventData["link"] as? String,
-                   let url = URL(string: urlString)
+                    let url = URL(string: urlString)
                 {
                     UIApplication.shared.open(url, options: [:]) { _ in
-                        notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked, eventParams: params)
+                        notifly.trackingManager.trackInternalEvent(
+                            eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
+                            eventParams: params)
                         self.dismissCTATapped()
                     }
                 } else {
-                    notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked, eventParams: params)
+                    notifly.trackingManager.trackInternalEvent(
+                        eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
+                        eventParams: params)
                     dismissCTATapped()
                 }
             case "hide_in_app_message":
-                notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked, eventParams: params)
+                notifly.trackingManager.trackInternalEvent(
+                    eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked,
+                    eventParams: params)
                 dismissCTATapped()
                 if let templateName = modalProps?.templateName {
                     let now = AppHelper.getCurrentTimestamp(unit: .second)
                     var hideUntil: Int
-                    if let hideUntilInDaysData = notiflyExtraData?["hide_until_in_days"] as? AnyCodable,
-                       let hideUntilInDays = hideUntilInDaysData.getValue() as? Int,
-                       hideUntilInDays > 0
+                    if let hideUntilInDaysData = notiflyExtraData?["hide_until_in_days"]
+                        as? AnyCodable,
+                        let hideUntilInDays = hideUntilInDaysData.getValue() as? Int,
+                        hideUntilInDays > 0
                     {
                         hideUntil = now + 24 * 3600 * hideUntilInDays
                     } else {
                         hideUntil = -1
                     }
                     let newProperty = "hide_in_app_message_until_" + templateName
-                    try? Notifly.main.userManager.setUserProperties(userProperties: [newProperty: hideUntil])
+                    try? Notifly.main.userManager.setUserProperties(userProperties: [
+                        newProperty: hideUntil
+                    ])
                 }
             case "survey_submit_button":
-                notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.inAppMessageSurveySubmitButtonClicked, eventParams: params)
+                notifly.trackingManager.trackInternalEvent(
+                    eventName: TrackingConstant.Internal.inAppMessageSurveySubmitButtonClicked,
+                    eventParams: params)
                 dismissCTATapped()
             default:
                 return
@@ -295,8 +324,8 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     private func getModalPositionConstraint() -> NSLayoutConstraint {
         if let modalProps = modalProps,
-           let position = modalProps.position as? String,
-           position == "bottom"
+            let position = modalProps.position as? String,
+            position == "bottom"
         {
             return view.bottomAnchor.constraint(equalTo: webView.bottomAnchor)
         }
@@ -306,10 +335,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     private func getWebViewLayer(modalSize: CGSize) -> CALayer? {
         guard let modalProps = modalProps,
-              let tlRadius = modalProps.borderTopLeftRadius,
-              let trRadius = modalProps.borderTopRightRadius,
-              let blRadius = modalProps.borderBottomLeftRadius,
-              let brRadius = modalProps.borderBottomRightRadius
+            let tlRadius = modalProps.borderTopLeftRadius,
+            let trRadius = modalProps.borderTopRightRadius,
+            let blRadius = modalProps.borderBottomLeftRadius,
+            let brRadius = modalProps.borderBottomRightRadius
         else {
             return nil
         }
@@ -317,13 +346,21 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         let path = UIBezierPath()
         path.move(to: CGPoint(x: tlRadius, y: 0))
         path.addLine(to: CGPoint(x: modalSize.width - trRadius, y: 0))
-        path.addArc(withCenter: CGPoint(x: modalSize.width - trRadius, y: trRadius), radius: trRadius, startAngle: -CGFloat.pi / 2, endAngle: 0, clockwise: true)
+        path.addArc(
+            withCenter: CGPoint(x: modalSize.width - trRadius, y: trRadius), radius: trRadius,
+            startAngle: -CGFloat.pi / 2, endAngle: 0, clockwise: true)
         path.addLine(to: CGPoint(x: modalSize.width, y: modalSize.height - brRadius))
-        path.addArc(withCenter: CGPoint(x: modalSize.width - brRadius, y: modalSize.height - brRadius), radius: brRadius, startAngle: 0, endAngle: CGFloat.pi / 2, clockwise: true)
+        path.addArc(
+            withCenter: CGPoint(x: modalSize.width - brRadius, y: modalSize.height - brRadius),
+            radius: brRadius, startAngle: 0, endAngle: CGFloat.pi / 2, clockwise: true)
         path.addLine(to: CGPoint(x: blRadius, y: modalSize.height))
-        path.addArc(withCenter: CGPoint(x: blRadius, y: modalSize.height - blRadius), radius: blRadius, startAngle: CGFloat.pi / 2, endAngle: CGFloat.pi, clockwise: true)
+        path.addArc(
+            withCenter: CGPoint(x: blRadius, y: modalSize.height - blRadius), radius: blRadius,
+            startAngle: CGFloat.pi / 2, endAngle: CGFloat.pi, clockwise: true)
         path.addLine(to: CGPoint(x: 0, y: tlRadius))
-        path.addArc(withCenter: CGPoint(x: tlRadius, y: tlRadius), radius: tlRadius, startAngle: CGFloat.pi, endAngle: -CGFloat.pi / 2, clockwise: true)
+        path.addArc(
+            withCenter: CGPoint(x: tlRadius, y: tlRadius), radius: tlRadius, startAngle: CGFloat.pi,
+            endAngle: -CGFloat.pi / 2, clockwise: true)
         path.close()
 
         let maskLayer = CAShapeLayer()

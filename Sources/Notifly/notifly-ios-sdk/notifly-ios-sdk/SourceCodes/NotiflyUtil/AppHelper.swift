@@ -6,8 +6,10 @@ class AppHelper {
         guard let deviceID = AppHelper.getDeviceID() else {
             return nil
         }
-        return UUID(name: deviceID,
-                    namespace: TrackingConstant.HashNamespace.deviceID).notiflyStyleString
+        return UUID(
+            name: deviceID,
+            namespace: TrackingConstant.HashNamespace.deviceID
+        ).notiflyStyleString
     }
 
     static func getDeviceID() -> String? {
@@ -33,7 +35,8 @@ class AppHelper {
     }
 
     static func getAppVersion() -> String? {
-        guard let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
+        guard let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+        else {
             Logger.error("Failed to get the App version.")
             return nil
         }
@@ -109,7 +112,9 @@ private func retrieveUniqueIdFromKeychain() -> String? {
         ]
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
-        if status == errSecSuccess, let data = result as? Data, let uniqueId = String(data: data, encoding: .utf8) {
+        if status == errSecSuccess, let data = result as? Data,
+            let uniqueId = String(data: data, encoding: .utf8)
+        {
             return uniqueId
         }
     }

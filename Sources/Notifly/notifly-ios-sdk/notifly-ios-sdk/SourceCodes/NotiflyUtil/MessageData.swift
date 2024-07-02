@@ -16,13 +16,13 @@ struct PushAttachment {
 
     init(attachment: [String: Any]) throws {
         guard let rawAttatchmentType = attachment["attachment_type"] as? String,
-              let fileExtension = attachment["file_extension"] as? String,
-              let rawUrl = attachment["url"] as? String
+            let fileExtension = attachment["file_extension"] as? String,
+            let rawUrl = attachment["url"] as? String
         else {
             throw NotiflyError.unexpectedNil("The payload of push attachmnet is not valid.")
         }
         guard let attachmentType = AttachmentType(rawValue: rawAttatchmentType),
-              let url = URL(string: rawUrl)
+            let url = URL(string: rawUrl)
         else {
             throw NotiflyError.unexpectedNil("The payload of push attachmnet is not valid.")
         }

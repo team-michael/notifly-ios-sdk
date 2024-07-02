@@ -29,9 +29,12 @@ class UserStateManager {
     private var _campaignData: CampaignData = .init(from: [])
     private var _userData: UserData = .init(data: [:])
     private var _eventData: EventData = .init(eventCounts: [:])
-    private var campaignDataAccessQueue = DispatchQueue(label: "com.yourapp.userStateManager.campaignDataAccessQueue")
-    private var userDataAccessQueue = DispatchQueue(label: "com.yourapp.userStateManager.userDataAccessQueue")
-    private var eventDataAccessQueue = DispatchQueue(label: "com.yourapp.userStateManager.eventDataAccessQueue")
+    private var campaignDataAccessQueue = DispatchQueue(
+        label: "com.yourapp.userStateManager.campaignDataAccessQueue")
+    private var userDataAccessQueue = DispatchQueue(
+        label: "com.yourapp.userStateManager.userDataAccessQueue")
+    private var eventDataAccessQueue = DispatchQueue(
+        label: "com.yourapp.userStateManager.eventDataAccessQueue")
 
     var campaignData: CampaignData {
         get {
@@ -89,9 +92,10 @@ class UserStateManager {
     }
 
     /* sync state from notifly server */
-    func syncState(postProcessConfig: PostProcessConfigForSyncState,
-                   completion: @escaping () -> Void)
-    {
+    func syncState(
+        postProcessConfig: PostProcessConfigForSyncState,
+        completion: @escaping () -> Void
+    ) {
         guard let notifly = (try? Notifly.main) else {
             completion()
             return
@@ -103,8 +107,8 @@ class UserStateManager {
         }
 
         guard let projectId = notifly.projectId as String?,
-              let notiflyUserID = (try? notifly.userManager.getNotiflyUserID()),
-              let notiflyDeviceID = AppHelper.getNotiflyDeviceID()
+            let notiflyUserID = (try? notifly.userManager.getNotiflyUserID()),
+            let notiflyDeviceID = AppHelper.getNotiflyDeviceID()
         else {
             Logger.error("Fail to sync user state because Notifly is not initalized yet.")
             completion()
@@ -112,21 +116,30 @@ class UserStateManager {
         }
 
         let externalUserID = notifly.userManager.externalUserID
-        let syncStateTask = NotiflyAPI().requestSyncState(projectId: projectId, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID)
-            .sink(receiveCompletion: { syncStateCompletion in
+        let syncStateTask = NotiflyAPI().requestSyncState(
+            projectId: projectId, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID
+        )
+        .sink(
+            receiveCompletion: { syncStateCompletion in
                 if case let .failure(error) = syncStateCompletion {
                     Logger.error("Fail to sync user state: " + error.localizedDescription)
                 }
-            }, receiveValue: { [weak self] jsonString in
+            },
+            receiveValue: { [weak self] jsonString in
                 if let jsonData = jsonString.data(using: .utf8),
-                   let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
+                    let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: [])
+                        as? [String: Any]
                 {
                     if let rawUserData = decodedData["userData"] as? [String: Any] {
-                        self?.constructUserData(rawUserData: rawUserData, postProcessConfig: postProcessConfig)
+                        self?.constructUserData(
+                            rawUserData: rawUserData, postProcessConfig: postProcessConfig)
                     }
 
-                    if let rawEventData = decodedData["eventIntermediateCountsData"] as? [[String: Any]] {
-                        self?.constructEventData(rawEventData: rawEventData, postProcessConfig: postProcessConfig)
+                    if let rawEventData = decodedData["eventIntermediateCountsData"]
+                        as? [[String: Any]]
+                    {
+                        self?.constructEventData(
+                            rawEventData: rawEventData, postProcessConfig: postProcessConfig)
                     }
 
                     if let rawCampaignData = decodedData["campaignData"] as? [[String: Any]] {
@@ -137,7 +150,9 @@ class UserStateManager {
                 self?.owner = notiflyUserID
                 let fetchedUserData = self?.userData.destruct()
                 completion()
-                try? Notifly.main.trackingManager.trackSyncStateCompletedInternalEvent(userID: notiflyUserID, externalUserID: externalUserID, properties: fetchedUserData)
+                try? Notifly.main.trackingManager.trackSyncStateCompletedInternalEvent(
+                    userID: notiflyUserID, externalUserID: externalUserID,
+                    properties: fetchedUserData)
             })
 
         guard let main = try? Notifly.main, syncStateTask != nil else {
@@ -149,7 +164,9 @@ class UserStateManager {
     }
 
     /* post-process of sync state */
-    private func constructUserData(rawUserData: [String: Any], postProcessConfig: PostProcessConfigForSyncState) {
+    private func constructUserData(
+        rawUserData: [String: Any], postProcessConfig: PostProcessConfigForSyncState
+    ) {
         var newUserData = UserData(data: rawUserData)
         if postProcessConfig.merge, let previousUserData = userData as? UserData {
             newUserData = UserData.merge(p1: previousUserData, p2: newUserData)
@@ -160,9 +177,13 @@ class UserStateManager {
         userData = newUserData
     }
 
-    private func constructEventData(rawEventData: [[String: Any]], postProcessConfig: PostProcessConfigForSyncState) {
+    private func constructEventData(
+        rawEventData: [[String: Any]], postProcessConfig: PostProcessConfigForSyncState
+    ) {
         let existing = postProcessConfig.merge ? eventData : EventData(from: [[:]])
-        let new = !rawEventData.isEmpty && !postProcessConfig.clear ? EventData(from: rawEventData) : EventData(from: [[:]])
+        let new =
+            !rawEventData.isEmpty && !postProcessConfig.clear
+            ? EventData(from: rawEventData) : EventData(from: [[:]])
         eventData = EventData.merge(p1: existing, p2: new)
     }
 
@@ -171,11 +192,16 @@ class UserStateManager {
     }
 
     /* update client state */
-    func incrementEic(eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) {
+    func incrementEic(
+        eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?
+    ) {
         let dt = NotiflyHelper.getCurrentDate()
-        let eicID = EventIntermediateCount.generateId(eventName: eventName, eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys, dt: dt)
+        let eicID = EventIntermediateCount.generateId(
+            eventName: eventName, eventParams: eventParams,
+            segmentationEventParamKeys: segmentationEventParamKeys, dt: dt)
         if eventData.eventCounts[eicID] == nil {
-            eventData.eventCounts[eicID] = EventIntermediateCount(name: eventName, dt: dt, count: 0, eventParams: eventParams ?? [:])
+            eventData.eventCounts[eicID] = EventIntermediateCount(
+                name: eventName, dt: dt, count: 0, eventParams: eventParams ?? [:])
         }
         eventData.eventCounts[eicID]?.addCount(count: 1)
     }
@@ -199,7 +225,9 @@ class UserStateManager {
         hideUntilData: [String: Int]
     ) {
         guard userID == owner else {
-            Logger.error("Fail to update client-side user state (user campaign hidden until): owner mismatch")
+            Logger.error(
+                "Fail to update client-side user state (user campaign hidden until): owner mismatch"
+            )
             return
         }
 
@@ -216,8 +244,8 @@ class UserStateManager {
     }
 }
 
-private extension Array {
-    subscript(safe index: Index) -> Element? {
+extension Array {
+    fileprivate subscript(safe index: Index) -> Element? {
         return indices.contains(index) ? self[index] : nil
     }
 }

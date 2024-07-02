@@ -4,7 +4,8 @@ import Foundation
 
 @available(iOSApplicationExtension, unavailable)
 class UserManager {
-    private let userIdAccessQueue = DispatchQueue(label: "com.notifly.userManager.changeExternalUserIdQueue")
+    private let userIdAccessQueue = DispatchQueue(
+        label: "com.notifly.userManager.changeExternalUserIdQueue")
 
     private var _notiflyUserIDCache: String?
     var notiflyUserIDCache: String? {
@@ -58,7 +59,7 @@ class UserManager {
         }
 
         guard let newExternalUserID = newExternalUserID,
-              !newExternalUserID.isEmpty
+            !newExternalUserID.isEmpty
         else {
             Logger.error("Fail to Set User Id.")
             return
@@ -76,16 +77,25 @@ class UserManager {
                 }
 
                 guard externalUserID != newExternalUserID else {
-                    Logger.info("External User Id is not changed because the new user id is same as the current user id.")
+                    Logger.info(
+                        "External User Id is not changed because the new user id is same as the current user id."
+                    )
                     Notifly.asyncWorker.unlock()
                     return
                 }
 
                 let previousExternalUserID = externalUserID
                 changeExternalUserId(newValue: newExternalUserID)
-                let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: newExternalUserID)
-                if shouldRequestSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: newExternalUserID) {
-                    notifly.inAppMessageManager.userStateManager.syncState(postProcessConfig: postProcessConfigForSyncState) {
+                let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(
+                    previousExternalUserID: previousExternalUserID,
+                    newExternalUserID: newExternalUserID)
+                if shouldRequestSyncState(
+                    previousExternalUserID: previousExternalUserID,
+                    newExternalUserID: newExternalUserID)
+                {
+                    notifly.inAppMessageManager.userStateManager.syncState(
+                        postProcessConfig: postProcessConfigForSyncState
+                    ) {
                         self.setUserProperties(userProperties: data, lockAcquired: true)
                     }
                 } else {
@@ -112,14 +122,23 @@ class UserManager {
             let previousExternalUserID = externalUserID
             self.changeExternalUserId(newValue: nil)
 
-            let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: nil)
-            if shouldRequestSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: nil) {
-                notifly.inAppMessageManager.userStateManager.syncState(postProcessConfig: postProcessConfigForSyncState) {
-                    notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.removeUserPropertiesEventName, eventParams: nil, lockAcquired: true)
+            let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(
+                previousExternalUserID: previousExternalUserID, newExternalUserID: nil)
+            if shouldRequestSyncState(
+                previousExternalUserID: previousExternalUserID, newExternalUserID: nil)
+            {
+                notifly.inAppMessageManager.userStateManager.syncState(
+                    postProcessConfig: postProcessConfigForSyncState
+                ) {
+                    notifly.trackingManager.trackInternalEvent(
+                        eventName: TrackingConstant.Internal.removeUserPropertiesEventName,
+                        eventParams: nil, lockAcquired: true)
                 }
             } else {
                 notifly.inAppMessageManager.userStateManager.clear()
-                notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.removeUserPropertiesEventName, eventParams: nil, lockAcquired: true)
+                notifly.trackingManager.trackInternalEvent(
+                    eventName: TrackingConstant.Internal.removeUserPropertiesEventName,
+                    eventParams: nil, lockAcquired: true)
             }
         }
     }
@@ -137,7 +156,9 @@ class UserManager {
             )
         }
 
-        notifly.trackingManager.trackInternalEvent(eventName: TrackingConstant.Internal.setUserPropertiesEventName, eventParams: userProperties, lockAcquired: lockAcquired)
+        notifly.trackingManager.trackInternalEvent(
+            eventName: TrackingConstant.Internal.setUserPropertiesEventName,
+            eventParams: userProperties, lockAcquired: lockAcquired)
     }
 
     func getNotiflyUserID() throws -> String {
@@ -167,11 +188,18 @@ class UserManager {
         return uuidV5.notiflyStyleString
     }
 
-    private func constructPostProcessConfigForSyncState(previousExternalUserID: String?, newExternalUserID: String?) -> PostProcessConfigForSyncState {
-        return PostProcessConfigForSyncState(merge: shouldMergeStateAfterSyncState(previousExternalUserID: previousExternalUserID, newExternalUserID: newExternalUserID), clear: shouldClearStateAfterSyncState(newExternalUserID: newExternalUserID))
+    private func constructPostProcessConfigForSyncState(
+        previousExternalUserID: String?, newExternalUserID: String?
+    ) -> PostProcessConfigForSyncState {
+        return PostProcessConfigForSyncState(
+            merge: shouldMergeStateAfterSyncState(
+                previousExternalUserID: previousExternalUserID, newExternalUserID: newExternalUserID
+            ), clear: shouldClearStateAfterSyncState(newExternalUserID: newExternalUserID))
     }
 
-    private func shouldMergeStateAfterSyncState(previousExternalUserID: String?, newExternalUserID _: String?) -> Bool {
+    private func shouldMergeStateAfterSyncState(
+        previousExternalUserID: String?, newExternalUserID _: String?
+    ) -> Bool {
         return externalUserID != nil && previousExternalUserID == nil
     }
 
@@ -179,7 +207,9 @@ class UserManager {
         return newExternalUserID == nil
     }
 
-    private func shouldRequestSyncState(previousExternalUserID: String?, newExternalUserID: String?) -> Bool {
+    private func shouldRequestSyncState(previousExternalUserID: String?, newExternalUserID: String?)
+        -> Bool
+    {
         return newExternalUserID != previousExternalUserID
     }
 }

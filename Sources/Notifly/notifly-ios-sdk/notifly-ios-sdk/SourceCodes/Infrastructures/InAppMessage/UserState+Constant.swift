@@ -37,7 +37,8 @@ struct UserData {
         appVersion = AppHelper.getAppVersion()
         sdkVersion = NotiflyHelper.getSdkVersion()
         sdkType = NotiflyHelper.getSdkType()
-        randomBucketNumber = NotiflyHelper.parseRandomBucketNumber(num: data["random_bucket_number"])
+        randomBucketNumber = NotiflyHelper.parseRandomBucketNumber(
+            num: data["random_bucket_number"])
 
         if let createdAtStr = data["created_at"] as? String {
             let dateFormatter = DateFormatter()
@@ -155,10 +156,15 @@ struct CampaignData {
 struct EventData {
     var eventCounts: [String: EventIntermediateCount]
     init(from: [[String: Any]]) {
-        eventCounts = from
+        eventCounts =
+            from
             .compactMap { EventIntermediateCount(from: $0) }
             .reduce(into: [String: EventIntermediateCount]()) { result, eventIntermediateCount in
-                let id = EventIntermediateCount.generateId(eventName: eventIntermediateCount.name, eventParams: eventIntermediateCount.eventParams, segmentationEventParamKeys: eventIntermediateCount.eventParams.keys.sorted(), dt: eventIntermediateCount.dt)
+                let id = EventIntermediateCount.generateId(
+                    eventName: eventIntermediateCount.name,
+                    eventParams: eventIntermediateCount.eventParams,
+                    segmentationEventParamKeys: eventIntermediateCount.eventParams.keys.sorted(),
+                    dt: eventIntermediateCount.dt)
                 if var existingEventIntermediateCount = result[id] {
                     existingEventIntermediateCount.addCount(count: eventIntermediateCount.count)
                 } else {
@@ -198,9 +204,9 @@ struct EventIntermediateCount {
 
     init?(from: [String: Any]) {
         guard let name = from["name"] as? String,
-              let dt = from["dt"] as? String,
-              let count = from["count"] as? Int,
-              let eventParams = from["event_params"] as? [String: Any]
+            let dt = from["dt"] as? String,
+            let count = from["count"] as? Int,
+            let eventParams = from["event_params"] as? [String: Any]
         else {
             return nil
         }
@@ -217,15 +223,21 @@ struct EventIntermediateCount {
         self.eventParams = eventParams
     }
 
-    static func generateId(eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?, dt: String) -> String {
+    static func generateId(
+        eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?,
+        dt: String
+    ) -> String {
         var eicID = eventName + InAppMessageConstant.eicIdSeparator + dt
-        guard let selectedEventParams = EicHelper.selectEventParamsWithKeys(eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys),
-              let (selectedKey, selectedValue) = selectedEventParams.first
+        guard
+            let selectedEventParams = EicHelper.selectEventParamsWithKeys(
+                eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys),
+            let (selectedKey, selectedValue) = selectedEventParams.first
         else {
             return eicID + String(repeating: InAppMessageConstant.eicIdSeparator, count: 2)
         }
 
-        return eicID + InAppMessageConstant.eicIdSeparator + selectedKey + InAppMessageConstant.eicIdSeparator + selectedValue
+        return eicID + InAppMessageConstant.eicIdSeparator + selectedKey
+            + InAppMessageConstant.eicIdSeparator + selectedValue
     }
 
     mutating func addCount(count: Int) {
@@ -235,11 +247,13 @@ struct EventIntermediateCount {
 
 @available(iOSApplicationExtension, unavailable)
 enum EicHelper {
-    static func selectEventParamsWithKeys(eventParams: [String: Any]?, segmentationEventParamKeys: [String]?) -> [String: String]? {
+    static func selectEventParamsWithKeys(
+        eventParams: [String: Any]?, segmentationEventParamKeys: [String]?
+    ) -> [String: String]? {
         if let segmentationEventParamKeys = segmentationEventParamKeys,
-           let eventParams = eventParams,
-           !segmentationEventParamKeys.isEmpty,
-           eventParams.count > 0
+            let eventParams = eventParams,
+            !segmentationEventParamKeys.isEmpty,
+            eventParams.count > 0
         {
             let keyField = segmentationEventParamKeys[0]
             if let value = eventParams[keyField] as? String {

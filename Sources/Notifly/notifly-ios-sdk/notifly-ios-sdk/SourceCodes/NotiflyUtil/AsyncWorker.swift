@@ -22,8 +22,7 @@ class NotiflyAsyncWorker {
                 return
             }
             if !self.pendingTasks.isEmpty,
-               let nextTask = self.pendingTasks.first
-            {
+                let nextTask = self.pendingTasks.first {
                 if self.semaphore.wait(timeout: .now()) == .success {
                     self.registerUnlockSchedule()
                     self.pendingTasks.removeFirst()
@@ -63,8 +62,7 @@ class NotiflyAsyncWorker {
                 return
             }
             if !self.unlockSchedules.isEmpty,
-               let unlockSchedule = self.unlockSchedules.first
-            {
+                let unlockSchedule = self.unlockSchedules.first {
                 unlockSchedule.cancel()
                 self.unlockSchedules.removeFirst()
                 semaphore.signal()
