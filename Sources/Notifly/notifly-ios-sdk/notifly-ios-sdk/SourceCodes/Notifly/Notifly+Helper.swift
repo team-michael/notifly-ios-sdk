@@ -57,7 +57,9 @@ enum NotiflyHelper {
         return dateFormatter.string(from: currentDate)
     }
 
-    static func calculateHideUntil(reEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition) -> Int? {
+    static func calculateHideUntil(
+        reEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition
+    ) -> Int? {
         let now = AppHelper.getCurrentTimestamp(unit: .second)
         switch NotiflyReEligibleConditionEnum.Unit(rawValue: reEligibleCondition.unit) {
         case .infinite:
@@ -87,7 +89,8 @@ enum NotiflyHelper {
     static func testRegex(_ reference: String, regex: String) -> Bool {
         do {
             let regex = try NSRegularExpression(pattern: regex)
-            let results = regex.firstMatch(in: reference, options: [], range: NSRange(reference.startIndex..., in: reference))
+            let results = regex.firstMatch(
+                in: reference, options: [], range: NSRange(reference.startIndex..., in: reference))
             return results != nil
         } catch {
             Logger.info("Invalid regex pattern \(regex)")
@@ -98,7 +101,9 @@ enum NotiflyHelper {
 
 @available(iOSApplicationExtension, unavailable)
 enum NotiflyValueComparator {
-    static func compare(type: String?, sourceValue: Any, operator: NotiflyOperator, targetValue: Any?) -> Bool {
+    static func compare(
+        type: String?, sourceValue: Any, operator: NotiflyOperator, targetValue: Any?
+    ) -> Bool {
         switch `operator` {
         case .isNull:
             switch sourceValue {
@@ -116,23 +121,33 @@ enum NotiflyValueComparator {
             }
         default:
             if let type = type,
-               let typedSourceValue = NotiflyValueComparator.castAnyToSpecifiedType(value: sourceValue, type: `operator` == .contains ? "ARRAY" : type),
-               let typedTargetValue = NotiflyValueComparator.castAnyToSpecifiedType(value: targetValue, type: type) {
+                let typedSourceValue = NotiflyValueComparator.castAnyToSpecifiedType(
+                    value: sourceValue, type: `operator` == .contains ? "ARRAY" : type),
+                let typedTargetValue = NotiflyValueComparator.castAnyToSpecifiedType(
+                    value: targetValue, type: type)
+            {
                 switch `operator` {
                 case .equal:
-                    return NotiflyValueComparator.isEqual(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                    return NotiflyValueComparator.isEqual(
+                        value1: typedSourceValue, value2: typedTargetValue, type: type)
                 case .notEqual:
-                    return NotiflyValueComparator.isNotEqual(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                    return NotiflyValueComparator.isNotEqual(
+                        value1: typedSourceValue, value2: typedTargetValue, type: type)
                 case .contains:
-                    return NotiflyValueComparator.doesContain(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                    return NotiflyValueComparator.doesContain(
+                        value1: typedSourceValue, value2: typedTargetValue, type: type)
                 case .greaterThan:
-                    return NotiflyValueComparator.isGreaterThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                    return NotiflyValueComparator.isGreaterThan(
+                        value1: typedSourceValue, value2: typedTargetValue, type: type)
                 case .greaterOrEqualThan:
-                    return NotiflyValueComparator.isGreaterOrEqualThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                    return NotiflyValueComparator.isGreaterOrEqualThan(
+                        value1: typedSourceValue, value2: typedTargetValue, type: type)
                 case .lessThan:
-                    return NotiflyValueComparator.isLessThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                    return NotiflyValueComparator.isLessThan(
+                        value1: typedSourceValue, value2: typedTargetValue, type: type)
                 case .lessOrEqualThan:
-                    return NotiflyValueComparator.isLessOrEqualThan(value1: typedSourceValue, value2: typedTargetValue, type: type)
+                    return NotiflyValueComparator.isLessOrEqualThan(
+                        value1: typedSourceValue, value2: typedTargetValue, type: type)
                 default:
                     return false
                 }

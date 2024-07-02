@@ -11,7 +11,7 @@ class TimezoneUtil {
     static func getCurrentTimezoneId() -> String {
         return TimeZone.current.identifier
     }
-    
+
     static func isValidTimezoneId(_ timezoneId: String) -> Bool {
         return TimeZone.knownTimeZoneIdentifiers.contains(timezoneId)
     }

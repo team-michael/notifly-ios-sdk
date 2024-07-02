@@ -1,0 +1,29 @@
+included:
+  - Sources
+  - NotiflyTestApp
+
+disabled_rules:
+  - trailing_whitespace
+  - line_length
+  - function_body_length
+  - type_name
+  - computed_accessors_order
+  - opening_brace
+  - function_parameter_count
+  - identifier_name
+
+line_length:
+  warning: 120
+  error: 150
+
+type_name:
+  min_length:
+    warning: 3
+    error: 2
+  max_length:
+    warning: 40
+    error: 50
+
+cyclomatic_complexity:
+  warning: 10
+  error: 20

@@ -47,8 +47,9 @@ import UIKit
         NotiflyCustomUserDefaults.usernameInUserDefaults = username
         NotiflyCustomUserDefaults.passwordInUserDefaults = password
 
-        auth = Auth(username: username,
-                    password: password)
+        auth = Auth(
+            username: username,
+            password: password)
         trackingManager = TrackingManager(projectId: projectId)
         userManager = UserManager()
 

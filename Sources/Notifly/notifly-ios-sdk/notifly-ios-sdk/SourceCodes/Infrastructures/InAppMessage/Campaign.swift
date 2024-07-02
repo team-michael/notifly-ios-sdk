@@ -34,27 +34,29 @@ struct Campaign {
 
     init?(from: [String: Any]) {
         guard let id = from["id"] as? String,
-              let channel = from["channel"] as? String,
-              channel == InAppMessageConstant.inAppMessageChannel,
+            let channel = from["channel"] as? String,
+            channel == InAppMessageConstant.inAppMessageChannel,
 
-              let triggeringConditions = try? TriggeringConditions(from: from["triggering_conditions"]),
+            let triggeringConditions = try? TriggeringConditions(
+                from: from["triggering_conditions"]),
 
-              let rawStatusValue = from["status"] as? Int,
-              let campaignStatus = CampaignStatus(rawValue: rawStatusValue),
-              campaignStatus == .active,
+            let rawStatusValue = from["status"] as? Int,
+            let campaignStatus = CampaignStatus(rawValue: rawStatusValue),
+            campaignStatus == .active,
 
-              let testing = from["testing"] as? Bool,
+            let testing = from["testing"] as? Bool,
 
-              let messageDict = from["message"] as? [String: Any],
-              let htmlURL = messageDict["html_url"] as? String,
-              let modalProperties = ModalProperties(properties: messageDict["modal_properties"] as? [String: Any]),
+            let messageDict = from["message"] as? [String: Any],
+            let htmlURL = messageDict["html_url"] as? String,
+            let modalProperties = ModalProperties(
+                properties: messageDict["modal_properties"] as? [String: Any]),
 
-              let rawSegmentType = from["segment_type"] as? String,
-              let segmentType = NotiflySegmentation.SegmentationType(rawValue: rawSegmentType),
-              segmentType == .conditionBased,
-              let segmentInfoDict = from["segment_info"] as? [String: Any],
+            let rawSegmentType = from["segment_type"] as? String,
+            let segmentType = NotiflySegmentation.SegmentationType(rawValue: rawSegmentType),
+            segmentType == .conditionBased,
+            let segmentInfoDict = from["segment_info"] as? [String: Any],
 
-              let updatedAt = from["updated_at"] as? String
+            let updatedAt = from["updated_at"] as? String
         else {
             return nil
         }
@@ -71,7 +73,8 @@ struct Campaign {
         campaignStart = !campaignStarts.isEmpty ? campaignStarts[0] : 0
         campaignEnd = from["end"] as? Int
         delay = (from["delay"] as? Int) ?? 0
-        reEligibleCondition = NotiflyReEligibleConditionEnum.ReEligibleCondition(from: from["re_eligible_condition"] as? [String: Any])
+        reEligibleCondition = NotiflyReEligibleConditionEnum.ReEligibleCondition(
+            from: from["re_eligible_condition"] as? [String: Any])
 
         self.testing = testing
         whitelist = testing ? from["whitelist"] as? [String] : []
@@ -177,7 +180,8 @@ struct TriggeringConditions {
     func match(eventName: String) -> Bool {
         return conditions.contains {
             $0.allSatisfy {
-                NotiflyStringComparator.compare(reference: eventName, operator: $0.operator, rhs: $0.operand)
+                NotiflyStringComparator.compare(
+                    reference: eventName, operator: $0.operator, rhs: $0.operand)
             }
         }
     }
@@ -194,10 +198,10 @@ struct TriggeringConditionUnit {
 
     init(from: [String: Any]) throws {
         guard let typeStr = from["type"] as? String,
-              let type = NotiflyTriggeringConditonType(rawValue: typeStr),
-              let operatorStr = from["operator"] as? String,
-              let `operator` = NotiflyStringOperator(rawValue: operatorStr),
-              let operand = from["operand"] as? String
+            let type = NotiflyTriggeringConditonType(rawValue: typeStr),
+            let operatorStr = from["operator"] as? String,
+            let `operator` = NotiflyStringOperator(rawValue: operatorStr),
+            let operand = from["operand"] as? String
         else {
             throw NotiflyError.invalidPayload
         }
@@ -243,8 +247,8 @@ enum TriggeringEventFilter {
 
         init?(from: [String: Any]) {
             guard let key = from["key"] as? String,
-                  let operatorStr = from["operator"] as? String,
-                  let `operator` = NotiflyOperator(rawValue: operatorStr)
+                let operatorStr = from["operator"] as? String,
+                let `operator` = NotiflyOperator(rawValue: operatorStr)
             else {
                 return nil
             }
@@ -267,7 +271,9 @@ enum TriggeringEventFilter {
         return filters
     }
 
-    static func matchFilterCondition(filters: TriggeringEventFilterArray, eventParams: [String: Any]?) -> Bool {
+    static func matchFilterCondition(
+        filters: TriggeringEventFilterArray, eventParams: [String: Any]?
+    ) -> Bool {
         guard let params = eventParams, !params.isEmpty else {
             return false
         }
@@ -279,7 +285,9 @@ enum TriggeringEventFilter {
                     return false
                 }
             }
-            return NotiflyValueComparator.compare(type: filterUnit.targetValue?.type, sourceValue: params[filterUnit.key], operator: filterUnit.operator, targetValue: filterUnit.targetValue?.value)
+            return NotiflyValueComparator.compare(
+                type: filterUnit.targetValue?.type, sourceValue: params[filterUnit.key],
+                operator: filterUnit.operator, targetValue: filterUnit.targetValue?.value)
         }
 
         func matchFilterCondition(filter: TriggeringEventFilterUnitArray) -> Bool {
@@ -306,31 +314,46 @@ enum NotiflySegmentation {
 
         init(from: [String: Any]) {
             let rawGroups = from["groups"] as? [[String: Any]] ?? []
-            groups = rawGroups.compactMap { groupDict -> NotiflySegmentation.SegmentationGroup.Group? in
+            groups = rawGroups.compactMap {
+                groupDict -> NotiflySegmentation.SegmentationGroup.Group? in
                 guard let conditionDictionaries = groupDict["conditions"] as? [[String: Any]] else {
                     return nil
                 }
-                let conditions = conditionDictionaries.compactMap { conditionDict -> SegmentationCondition.ConditionType? in
-                    guard let unit = conditionDict["unit"] as? String else {
-                        return nil
-                    }
-                    if unit == SegmentationCondition.ConditionUnit.event.rawValue {
-                        guard let condition = try? SegmentationCondition.Conditions.EventBased.Condition(condition: conditionDict) else {
+                let conditions =
+                    conditionDictionaries.compactMap {
+                        conditionDict -> SegmentationCondition.ConditionType? in
+                        guard let unit = conditionDict["unit"] as? String else {
                             return nil
                         }
-                        return SegmentationCondition.ConditionType.EventBasedType(condition)
-                    } else {
-                        guard let condition = try? SegmentationCondition.Conditions.UserBased.Condition(condition: conditionDict) else {
-                            return nil
+                        if unit == SegmentationCondition.ConditionUnit.event.rawValue {
+                            guard
+                                let condition = try? SegmentationCondition.Conditions.EventBased
+                                    .Condition(condition: conditionDict)
+                            else {
+                                return nil
+                            }
+                            return SegmentationCondition.ConditionType.EventBasedType(condition)
+                        } else {
+                            guard
+                                let condition = try? SegmentationCondition.Conditions.UserBased
+                                    .Condition(condition: conditionDict)
+                            else {
+                                return nil
+                            }
+                            return SegmentationCondition.ConditionType.UserBasedType(condition)
                         }
-                        return SegmentationCondition.ConditionType.UserBasedType(condition)
-                    }
-                } as? [SegmentationCondition.ConditionType]
+                    } as? [SegmentationCondition.ConditionType]
 
-                let conditionOperator = (groupDict["condition_operator"] as? String) ?? InAppMessageConstant.segmentInfoDefaultConditionOperator
-                return SegmentationGroup.Group(conditions: conditions ?? [], conditionOperator: conditionOperator)
+                let conditionOperator =
+                    (groupDict["condition_operator"] as? String)
+                    ?? InAppMessageConstant.segmentInfoDefaultConditionOperator
+                return SegmentationGroup.Group(
+                    conditions: conditions ?? [], conditionOperator: conditionOperator)
             }
-            groupOperator = SegmentationGroup.GroupOperator(rawValue: from["group_operator"] as? String ?? InAppMessageConstant.segmentInfoDefaultGroupOperator) ?? .or
+            groupOperator =
+                SegmentationGroup.GroupOperator(
+                    rawValue: from["group_operator"] as? String
+                        ?? InAppMessageConstant.segmentInfoDefaultGroupOperator) ?? .or
         }
     }
 
@@ -345,7 +368,8 @@ enum NotiflySegmentation {
 
             init(conditions: [SegmentationCondition.ConditionType], conditionOperator: String) {
                 self.conditions = conditions
-                self.conditionOperator = SegmentationCondition.ConditionOperator(rawValue: conditionOperator) ?? .and
+                self.conditionOperator =
+                    SegmentationCondition.ConditionOperator(rawValue: conditionOperator) ?? .and
             }
         }
     }
@@ -382,17 +406,18 @@ enum NotiflySegmentation {
                     let value: Any
 
                     init(condition: [String: Any]) throws {
-                        let useEventParamsAsConditionInDict = condition["useEventParamsAsConditionValue"] as? Bool
+                        let useEventParamsAsConditionInDict =
+                            condition["useEventParamsAsConditionValue"] as? Bool
                         guard useEventParamsAsConditionInDict != nil else {
                             throw NotiflyError.unexpectedNil("segment_info is not valid.")
                         }
                         guard let unitStr = condition["unit"] as? String,
-                              let unit = ConditionUnit(rawValue: unitStr),
-                              let attribute = condition["attribute"] as? String,
-                              let operatorStr = condition["operator"] as? String,
-                              let `operator` = NotiflyOperator(rawValue: operatorStr),
-                              let valueType = condition["valueType"] as? String,
-                              let value = condition["value"]
+                            let unit = ConditionUnit(rawValue: unitStr),
+                            let attribute = condition["attribute"] as? String,
+                            let operatorStr = condition["operator"] as? String,
+                            let `operator` = NotiflyOperator(rawValue: operatorStr),
+                            let valueType = condition["valueType"] as? String,
+                            let value = condition["value"]
                         else {
                             throw NotiflyError.unexpectedNil("segment_info is not valid.")
                         }
@@ -419,11 +444,13 @@ enum NotiflySegmentation {
 
                     init(condition: [String: Any]) throws {
                         guard let event = condition["event"] as? String,
-                              let eventConditionTypeStr = condition["event_condition_type"] as? String,
-                              let eventConditionType = EventBasedConditionType(rawValue: eventConditionTypeStr),
-                              let operatorStr = condition["operator"] as? String,
-                              let `operator` = NotiflyOperator(rawValue: operatorStr),
-                              let value = condition["value"] as? Int
+                            let eventConditionTypeStr = condition["event_condition_type"]
+                                as? String,
+                            let eventConditionType = EventBasedConditionType(
+                                rawValue: eventConditionTypeStr),
+                            let operatorStr = condition["operator"] as? String,
+                            let `operator` = NotiflyOperator(rawValue: operatorStr),
+                            let value = condition["value"] as? Int
                         else {
                             throw NotiflyError.unexpectedNil("segment_info is not valid.")
                         }
@@ -463,7 +490,7 @@ enum NotiflyReEligibleConditionEnum {
                 return nil
             }
             guard let unit = from["unit"] as? String,
-                  let value = from["value"] as? Int
+                let value = from["value"] as? Int
             else {
                 return nil
             }

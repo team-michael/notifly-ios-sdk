@@ -18,18 +18,24 @@ class InAppMessageManager {
         userStateManager = UserStateManager(owner: owner)
     }
 
-    func mayTriggerInAppMessage(eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys _: [String]?) {
+    func mayTriggerInAppMessage(
+        eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys _: [String]?
+    ) {
         guard !Notifly.inAppMessageDisabled else {
             return
         }
 
-        if var campaignsToTrigger = getCampaignsShouldBeTriggered(eventName: eventName, eventParams: eventParams) {
+        if var campaignsToTrigger = getCampaignsShouldBeTriggered(
+            eventName: eventName, eventParams: eventParams)
+        {
             if campaignsToTrigger.isEmpty {
                 return
             }
             campaignsToTrigger.sort(by: { $0.updatedAt > $1.updatedAt })
             for campaignToTrigger in campaignsToTrigger {
-                if let notiflyInAppMessageData = prepareInAppMessageData(campaign: campaignToTrigger) {
+                if let notiflyInAppMessageData = prepareInAppMessageData(
+                    campaign: campaignToTrigger)
+                {
                     showInAppMessage(
                         userID: try? Notifly.main.userManager.getNotiflyUserID(),
                         notiflyInAppMessageData: notiflyInAppMessageData
@@ -40,12 +46,15 @@ class InAppMessageManager {
     }
 
     /* method for showing in-app message */
-    private func getCampaignsShouldBeTriggered(eventName: String, eventParams: [String: Any]?) -> [Campaign]? {
+    private func getCampaignsShouldBeTriggered(eventName: String, eventParams: [String: Any]?)
+        -> [Campaign]?
+    {
         let candidateCampaigns = userStateManager.getInAppMessageCampaigns()
         if candidateCampaigns.isEmpty {
             return []
         }
-        let campaignsToTrigger = candidateCampaigns
+        let campaignsToTrigger =
+            candidateCampaigns
             .filter {
                 isCampaignActive(campaign: $0)
             }
@@ -58,7 +67,9 @@ class InAppMessageManager {
             .filter {
                 let currentUserData: UserData = userStateManager.userData
                 let currentEventData: EventData = userStateManager.eventData
-                return SegmentationHelper.isEntityOfSegment(campaign: $0, eventParams: eventParams, userData: currentUserData, eventData: currentEventData)
+                return SegmentationHelper.isEntityOfSegment(
+                    campaign: $0, eventParams: eventParams, userData: currentUserData,
+                    eventData: currentEventData)
             }
 
         if campaignsToTrigger.isEmpty {
@@ -80,9 +91,12 @@ class InAppMessageManager {
         return campaign.triggeringConditions.match(eventName: eventName)
     }
 
-    private func matchTriggeringFilters(campaign: Campaign, eventName _: String, eventParams: [String: Any]?) -> Bool {
+    private func matchTriggeringFilters(
+        campaign: Campaign, eventName _: String, eventParams: [String: Any]?
+    ) -> Bool {
         if let paramsFilterCondition = campaign.triggeringEventFilters,
-           !TriggeringEventFilter.matchFilterCondition(filters: paramsFilterCondition.filters, eventParams: eventParams)
+            !TriggeringEventFilter.matchFilterCondition(
+                filters: paramsFilterCondition.filters, eventParams: eventParams)
         {
             return false
         }
@@ -133,7 +147,10 @@ class InAppMessageManager {
         let deadline = DispatchTime.now() + delay
 
         if let url = URL(string: urlString) {
-            return InAppMessageData(notiflyMessageId: messageId, notiflyCampaignId: campaignId, modalProps: modalProperties, url: url, deadline: deadline, notiflyReEligibleCondition: campaign.reEligibleCondition)
+            return InAppMessageData(
+                notiflyMessageId: messageId, notiflyCampaignId: campaignId,
+                modalProps: modalProperties, url: url, deadline: deadline,
+                notiflyReEligibleCondition: campaign.reEligibleCondition)
         }
         return nil
     }
@@ -146,19 +163,29 @@ class InAppMessageManager {
             return
         }
         DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline) {
-            guard let currentUserID = try? Notifly.main.userManager.getNotiflyUserID(), userID == currentUserID else {
+            guard let currentUserID = try? Notifly.main.userManager.getNotiflyUserID(),
+                userID == currentUserID
+            else {
                 Logger.error("Skip to present in app message schedule: user id is changed.")
                 return
             }
 
             let currentUserData = self.userStateManager.userData
             if let reEligibleCondition = notiflyInAppMessageData.notiflyReEligibleCondition {
-                guard !self.isHiddenCampaign(campaignID: notiflyInAppMessageData.notiflyCampaignId, userData: currentUserData) else {
+                guard
+                    !self.isHiddenCampaign(
+                        campaignID: notiflyInAppMessageData.notiflyCampaignId,
+                        userData: currentUserData)
+                else {
                     return
                 }
             }
 
-            guard !self.isBlacklistTemplate(templateName: notiflyInAppMessageData.modalProps.templateName, userData: currentUserData) else {
+            guard
+                !self.isBlacklistTemplate(
+                    templateName: notiflyInAppMessageData.modalProps.templateName,
+                    userData: currentUserData)
+            else {
                 return
             }
             6
@@ -169,11 +196,15 @@ class InAppMessageManager {
 
             WebViewModalViewController.openedInAppMessageCount = 1
             guard UIApplication.shared.applicationState == .active else {
-                Logger.error("Due to being in a background state, in-app messages are being ignored.")
+                Logger.error(
+                    "Due to being in a background state, in-app messages are being ignored.")
                 WebViewModalViewController.openedInAppMessageCount = 0
                 return
             }
-            guard let vc = try? WebViewModalViewController(notiflyInAppMessageData: notiflyInAppMessageData) else {
+            guard
+                let vc = try? WebViewModalViewController(
+                    notiflyInAppMessageData: notiflyInAppMessageData)
+            else {
                 Logger.error("Error presenting in app message")
                 WebViewModalViewController.openedInAppMessageCount = 0
                 return

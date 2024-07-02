@@ -7,18 +7,20 @@
 
 @available(iOSApplicationExtension, unavailable)
 enum SegmentationHelper {
-    static func isEntityOfSegment(campaign: Campaign, eventParams: [String: Any]?, userData: UserData, eventData: EventData) -> Bool {
+    static func isEntityOfSegment(
+        campaign: Campaign, eventParams: [String: Any]?, userData: UserData, eventData: EventData
+    ) -> Bool {
         // now only support for the condition-based-segment type
         guard campaign.segmentType == .conditionBased,
-              let segmentInfo = campaign.segmentInfo
+            let segmentInfo = campaign.segmentInfo
         else {
             return false
         }
 
         if campaign.testing {
             guard let whitelist = campaign.whitelist,
-                  let externalUserId = try? Notifly.main.userManager.externalUserID,
-                  whitelist.contains(externalUserId)
+                let externalUserId = try? Notifly.main.userManager.externalUserID,
+                whitelist.contains(externalUserId)
             else {
                 return false
             }
@@ -29,18 +31,19 @@ enum SegmentationHelper {
         }
 
         if isTargetAll(segmentInfo: segmentInfo) {
-            return true // send to all
+            return true  // send to all
         }
 
         guard let groupOp = segmentInfo.groupOperator,
-              groupOp == .or
+            groupOp == .or
         else {
             // now only supported for OR operator as group operator
             return false
         }
 
         return groups.contains { group in
-            self.isEntityOfGroup(group: group, eventParams: eventParams, userData: userData, eventData: eventData)
+            self.isEntityOfGroup(
+                group: group, eventParams: eventParams, userData: userData, eventData: eventData)
         }
     }
 
@@ -56,41 +59,58 @@ enum SegmentationHelper {
         return false
     }
 
-    static func isEntityOfGroup(group: NotiflySegmentation.SegmentationGroup.Group, eventParams: [String: Any]?, userData: UserData, eventData: EventData) -> Bool {
+    static func isEntityOfGroup(
+        group: NotiflySegmentation.SegmentationGroup.Group, eventParams: [String: Any]?,
+        userData: UserData, eventData: EventData
+    ) -> Bool {
         guard let conditions = group.conditions,
-              !conditions.isEmpty
+            !conditions.isEmpty
         else {
             return false
         }
         guard let conditionOp = group.conditionOperator,
-              conditionOp == .and
+            conditionOp == .and
         else {
             // now only supported for AND operator as conditon operator
             return false
         }
 
         return conditions.allSatisfy { condition in
-            self.matchCondition(condition: condition, eventParams: eventParams, userData: userData, eventData: eventData)
+            self.matchCondition(
+                condition: condition, eventParams: eventParams, userData: userData,
+                eventData: eventData)
         }
     }
 
-    static func matchCondition(condition: NotiflySegmentation.SegmentationCondition.ConditionType, eventParams: [String: Any]?, userData: UserData, eventData: EventData) -> Bool {
+    static func matchCondition(
+        condition: NotiflySegmentation.SegmentationCondition.ConditionType,
+        eventParams: [String: Any]?, userData: UserData, eventData: EventData
+    ) -> Bool {
         switch condition {
         case let .UserBasedType(userCondition):
-            return matchUserBasedCondition(condition: userCondition, eventParams: eventParams, userData: userData)
+            return matchUserBasedCondition(
+                condition: userCondition, eventParams: eventParams, userData: userData)
         case let .EventBasedType(eventCondition):
             return matchEventBasedCondition(condition: eventCondition, eventData: eventData)
         }
     }
 
-    static func matchUserBasedCondition(condition: NotiflySegmentation.SegmentationCondition.Conditions.UserBased.Condition, eventParams: [String: Any]?, userData: UserData) -> Bool {
+    static func matchUserBasedCondition(
+        condition: NotiflySegmentation.SegmentationCondition.Conditions.UserBased.Condition,
+        eventParams: [String: Any]?, userData: UserData
+    ) -> Bool {
         let sourceValue = selectSourceValueFromUserData(condition: condition, userData: userData)
         let targetValue = selectTargetValue(condition: condition, eventParams: eventParams)
 
-        return NotiflyValueComparator.compare(type: condition.valueType, sourceValue: sourceValue, operator: condition.operator, targetValue: targetValue)
+        return NotiflyValueComparator.compare(
+            type: condition.valueType, sourceValue: sourceValue, operator: condition.operator,
+            targetValue: targetValue)
     }
 
-    static func selectSourceValueFromUserData(condition: NotiflySegmentation.SegmentationCondition.Conditions.UserBased.Condition, userData: UserData) -> Any? {
+    static func selectSourceValueFromUserData(
+        condition: NotiflySegmentation.SegmentationCondition.Conditions.UserBased.Condition,
+        userData: UserData
+    ) -> Any? {
         var userRawValue: Any?
         if condition.unit == .user {
             userRawValue = userData.userProperties[condition.attribute]
@@ -100,22 +120,28 @@ enum SegmentationHelper {
         return userRawValue
     }
 
-    static func selectTargetValue(condition: NotiflySegmentation.SegmentationCondition.Conditions.UserBased.Condition, eventParams: [String: Any]?) -> Any? {
+    static func selectTargetValue(
+        condition: NotiflySegmentation.SegmentationCondition.Conditions.UserBased.Condition,
+        eventParams: [String: Any]?
+    ) -> Any? {
         let useEventParamsAsCondition = condition.useEventParamsAsCondition
         if !useEventParamsAsCondition {
             return condition.value
         }
 
         guard let eventParams = eventParams,
-              let key = condition.comparisonParameter,
-              let value = eventParams[key]
+            let key = condition.comparisonParameter,
+            let value = eventParams[key]
         else {
             return nil
         }
         return value
     }
 
-    static func matchEventBasedCondition(condition: NotiflySegmentation.SegmentationCondition.Conditions.EventBased.Condition, eventData: EventData) -> Bool {
+    static func matchEventBasedCondition(
+        condition: NotiflySegmentation.SegmentationCondition.Conditions.EventBased.Condition,
+        eventData: EventData
+    ) -> Bool {
         guard condition.value >= 0 else {
             return false
         }
@@ -127,7 +153,8 @@ enum SegmentationHelper {
             }
         }
 
-        let userCounts = caculateEventCounts(eventName: condition.event, startDate: startDate, eventData: eventData)
+        let userCounts = caculateEventCounts(
+            eventName: condition.event, startDate: startDate, eventData: eventData)
         guard userCounts >= 0 else {
             return false
         }
@@ -150,8 +177,11 @@ enum SegmentationHelper {
         return false
     }
 
-    static func caculateEventCounts(eventName: String, startDate: String?, eventData: EventData) -> Int {
-        guard let eventCounts = Array(eventData.eventCounts.values) as? [EventIntermediateCount] else {
+    static func caculateEventCounts(eventName: String, startDate: String?, eventData: EventData)
+        -> Int
+    {
+        guard let eventCounts = Array(eventData.eventCounts.values) as? [EventIntermediateCount]
+        else {
             return -1
         }
 
