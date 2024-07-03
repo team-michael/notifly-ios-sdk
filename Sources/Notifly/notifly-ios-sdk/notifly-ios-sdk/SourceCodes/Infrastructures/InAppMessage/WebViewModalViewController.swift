@@ -84,7 +84,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             webView.widthAnchor.constraint(equalToConstant: modalSize.width),
             webView.heightAnchor.constraint(equalToConstant: modalSize.height),
             view.centerXAnchor.constraint(equalTo: webView.centerXAnchor),
-            modalPositionConstraint,
+            modalPositionConstraint
         ])
         let shown = show()
         return shown
@@ -155,7 +155,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 "channel": InAppMessageConstant.inAppMessageChannel,
                 "campaign_id": notiflyCampaignID,
                 "notifly_message_id": notiflyMessageID,
-                "hide_until_data": hideUntilData ?? nil,
+                "hide_until_data": hideUntilData ?? nil
             ] as [String: Any]
         notifly.trackingManager.trackInternalEvent(
             eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
@@ -182,7 +182,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
             if let extraData = messageEventData["extra_data"] as? [String: Any] {
                 var convertedExtraData: [String: AnyCodable] = [:]
-                AppHelper.makeJsonCodable(extraData)?.forEach {
+                AnyCodable.makeJsonCodable(extraData)?.forEach {
                     convertedExtraData[$0] = $1
                 }
                 notiflyExtraData = convertedExtraData
@@ -195,7 +195,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                     "button_name": buttonName,
                     "campaign_id": notiflyCampaignID,
                     "notifly_message_id": notiflyMessageID,
-                    "notifly_extra_data": notiflyExtraData,
+                    "notifly_extra_data": notiflyExtraData
                 ] as [String: Any]
 
             switch type {
@@ -376,14 +376,14 @@ class FullScreenWKWebView: WKWebView {
     }
 }
 
-private extension UIWindow {
-    var topMostViewController: UIViewController? {
+extension UIWindow {
+    fileprivate var topMostViewController: UIViewController? {
         return rootViewController?.topMostViewController
     }
 }
 
-private extension UIViewController {
-    var topMostViewController: UIViewController {
+extension UIViewController {
+    fileprivate var topMostViewController: UIViewController {
         if let presented = presentedViewController {
             return presented.topMostViewController
         }

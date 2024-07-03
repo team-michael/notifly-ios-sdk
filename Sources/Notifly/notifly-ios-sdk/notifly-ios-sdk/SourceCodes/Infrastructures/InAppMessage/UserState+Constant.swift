@@ -18,8 +18,8 @@ enum UserStateConstant {
 
 @available(iOSApplicationExtension, unavailable)
 struct UserData {
-    var userProperties: [String: Any]
-    var campaignHiddenUntil: [String: Int]
+    var userProperties: [String: Any] = [:]
+    var campaignHiddenUntil: [String: Int] = [:]
     var randomBucketNumber: Int?
     var platform: String
     var osVersion: String
@@ -39,7 +39,6 @@ struct UserData {
         sdkType = NotiflyHelper.getSdkType()
         randomBucketNumber = NotiflyHelper.parseRandomBucketNumber(
             num: data["random_bucket_number"])
-
         if let createdAtStr = data["created_at"] as? String {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
@@ -89,7 +88,7 @@ struct UserData {
         mergedCampaignHiddenUntil.merge(p1.campaignHiddenUntil) { _, new in new }
         var data: [String: Any] = [
             "user_properties": mergedUserProperties,
-            "campaign_hidden_until": mergedCampaignHiddenUntil,
+            "campaign_hidden_until": mergedCampaignHiddenUntil
         ]
 
         data["platform"] = p1.platform
@@ -119,7 +118,7 @@ struct UserData {
     func destruct() -> [String: Any] {
         var data: [String: Any] = [
             "user_properties": userProperties,
-            "campaign_hidden_until": campaignHiddenUntil,
+            "campaign_hidden_until": campaignHiddenUntil
         ]
 
         data["platform"] = platform

@@ -232,7 +232,7 @@ class TrackingManager {
                 app_version: appVersion,
                 sdk_version: NotiflyHelper.getSdkVersion(),
                 sdk_type: NotiflyHelper.getSdkType(),
-                event_params: AppHelper.makeJsonCodable(eventParams)) as? TrackingData,
+                event_params: AnyCodable.makeJsonCodable(eventParams)) as? TrackingData,
                 let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
             {
                 return TrackingRecord(partitionKey: userID, data: stringfiedData)

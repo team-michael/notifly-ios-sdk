@@ -126,25 +126,32 @@ class UserStateManager {
                 }
             },
             receiveValue: { [weak self] jsonString in
+                let decoder = JSONDecoder()
                 if let jsonData = jsonString.data(using: .utf8),
-                    let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: [])
-                        as? [String: Any]
+                    let decodedData = try? decoder.decode(
+                        AnyCodable.self, from: jsonData
+                    ),
+                    let userState = decodedData.getValue() as? [String: Any]
                 {
-                    if let rawUserData = decodedData["userData"] as? [String: Any] {
+                    if let rawUserData = userState["userData"] as? [String: Any] {
                         self?.constructUserData(
                             rawUserData: rawUserData, postProcessConfig: postProcessConfig)
                     }
 
-                    if let rawEventData = decodedData["eventIntermediateCountsData"]
-                        as? [[String: Any]]
-                    {
-                        self?.constructEventData(
-                            rawEventData: rawEventData, postProcessConfig: postProcessConfig)
-                    }
-
-                    if let rawCampaignData = decodedData["campaignData"] as? [[String: Any]] {
-                        self?.constructCampaignData(rawCampaignData: rawCampaignData)
-                    }
+                    //
+                    //                    if let rawEventData = decodedData["eventIntermediateCountsData"]
+                    //                        as? [[String: Any]]
+                    //                    {
+                    //                        self?.constructEventData(
+                    //                            rawEventData: rawEventData, postProcessConfig: postProcessConfig)
+                    //                    }
+                    //
+                    //                    if let rawCampaignData = decodedData["campaignData"] as? [[String: Any]] {
+                    //                        self?.constructCampaignData(rawCampaignData: rawCampaignData)
+                    //                    }
+                    // print("USER: ", self?.userData)
+                    // print("EVENT: ", self?.eventData)
+                    // print("CAMPAIGN: ", self?.campaignData)
                 }
                 Logger.info("Sync State Completed.")
                 self?.owner = notiflyUserID
