@@ -68,10 +68,9 @@ class UserManager {
         if let data = [
             TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID,
             TrackingConstant.Internal.previousExternalUserID: externalUserID,
-            TrackingConstant.Internal.previousNotiflyUserID: try? getNotiflyUserID()
+            TrackingConstant.Internal.previousNotiflyUserID: try? getNotiflyUserID(),
         ] as? [String: Any] {
             Notifly.asyncWorker.addTask { [weak self] in
-                print("EXTERNAL")
                 guard let self = self else {
                     Notifly.asyncWorker.unlock()
                     return
