@@ -131,25 +131,35 @@ struct ModalProperties {
         guard let name = properties["template_name"] as? String else {
             return nil
         }
+
         templateName = name
         position = properties["position"] as? String
-        width = properties["width"] as? CGFloat
-        min_width = properties["min_width"] as? CGFloat
-        max_width = properties["max_width"] as? CGFloat
-        width_vw = properties["width_vw"] as? CGFloat
-        width_vh = properties["width_vh"] as? CGFloat
-        height = properties["height"] as? CGFloat
-        min_height = properties["min_height"] as? CGFloat
-        max_height = properties["max_height"] as? CGFloat
-        height_vw = properties["height_vw"] as? CGFloat
-        height_vh = properties["height_vh"] as? CGFloat
-        borderBottomLeftRadius = (properties["borderBottomLeftRadius"] ?? 0.0) as? CGFloat
-        borderBottomRightRadius = (properties["borderBottomRightRadius"] ?? 0.0) as? CGFloat
-        borderTopLeftRadius = (properties["borderTopLeftRadius"] ?? 0.0) as? CGFloat
-        borderTopRightRadius = (properties["borderTopRightRadius"] ?? 0.0) as? CGFloat
-        backgroundOpacity = (properties["backgroundOpacity"] ?? 0.2) as? CGFloat
+
+        func castPropertyToCGFloat(value: Any?) -> CGFloat? {
+            return NotiflyValueComparator.castAnyToSpecifiedType(
+                value: value, type: NotiflyValueType.cgFloat.rawValue) as? CGFloat
+        }
+        
+        width = castPropertyToCGFloat(value: properties["width"])
+        min_width = castPropertyToCGFloat(value: properties["min_width"])
+        max_width = castPropertyToCGFloat(value: properties["max_width"])
+        width_vw = castPropertyToCGFloat(value: properties["width_vw"])
+        width_vh = castPropertyToCGFloat(value: properties["width_vh"])
+        height = castPropertyToCGFloat(value: properties["height"])
+        min_height = castPropertyToCGFloat(value: properties["min_height"])
+        max_height = castPropertyToCGFloat(value: properties["max_height"])
+        height_vw = castPropertyToCGFloat(value: properties["height_vw"])
+        height_vh = castPropertyToCGFloat(value: properties["height_vh"])
+        borderBottomLeftRadius = castPropertyToCGFloat(value: properties["borderBottomLeftRadius"])
+        borderBottomRightRadius = castPropertyToCGFloat(
+            value: properties["borderBottomRightRadius"])
+        borderTopLeftRadius = castPropertyToCGFloat(value: properties["borderTopLeftRadius"])
+        borderTopRightRadius = castPropertyToCGFloat(value: properties["borderTopRightRadius"])
+        backgroundOpacity = castPropertyToCGFloat(value: properties["backgroundOpacity"])
+
         dismissCTATapped = (properties["dismissCTATapped"] ?? false) as? Bool
     }
+  
 }
 
 @available(iOSApplicationExtension, unavailable)

@@ -68,9 +68,10 @@ class UserManager {
         if let data = [
             TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID,
             TrackingConstant.Internal.previousExternalUserID: externalUserID,
-            TrackingConstant.Internal.previousNotiflyUserID: try? getNotiflyUserID(),
+            TrackingConstant.Internal.previousNotiflyUserID: try? getNotiflyUserID()
         ] as? [String: Any] {
             Notifly.asyncWorker.addTask { [weak self] in
+                print("EXTERNAL")
                 guard let self = self else {
                     Notifly.asyncWorker.unlock()
                     return
@@ -150,10 +151,17 @@ class UserManager {
         }
 
         if !Notifly.inAppMessageDisabled {
-            notifly.inAppMessageManager.userStateManager.updateUserData(
-                userID: try? getNotiflyUserID(),
-                properties: userProperties
-            )
+            Notifly.asyncWorker.addTask { [weak self] in
+                guard let self = self else {
+                    Notifly.asyncWorker.unlock()
+                    return
+                }
+                notifly.inAppMessageManager.userStateManager.updateUserData(
+                    userID: try? getNotiflyUserID(),
+                    properties: userProperties
+                )
+                Notifly.asyncWorker.unlock()
+            }
         }
 
         notifly.trackingManager.trackInternalEvent(

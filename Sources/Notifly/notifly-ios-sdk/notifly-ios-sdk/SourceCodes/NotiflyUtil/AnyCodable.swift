@@ -19,12 +19,12 @@ public struct AnyCodable: Codable {
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        if let intValue = try? container.decode(Int.self) {
-            value = intValue
-        } else if let stringValue = try? container.decode(String.self) {
+        if let stringValue = try? container.decode(String.self) {
             value = stringValue
         } else if let boolValue = try? container.decode(Bool.self) {
             value = boolValue
+        } else if let intValue = try? container.decode(Int.self) {
+            value = intValue
         } else if let doubleValue = try? container.decode(Double.self) {
             value = doubleValue
         } else if let floatValue = try? container.decode(Float.self) {
@@ -58,14 +58,14 @@ public struct AnyCodable: Codable {
     static func toCodableValue(_ value: Any?) -> AnyCodable {
         if let str = value as? String {
             return AnyCodable(str)
+        } else if let bool = value as? Bool {
+            return AnyCodable(bool)
         } else if let int = value as? Int {
             return AnyCodable(int)
         } else if let double = value as? Double {
             return AnyCodable(double)
         } else if let float = value as? Float {
             return AnyCodable(float)
-        } else if let bool = value as? Bool {
-            return AnyCodable(bool)
         } else {
             return AnyCodable(value)
         }

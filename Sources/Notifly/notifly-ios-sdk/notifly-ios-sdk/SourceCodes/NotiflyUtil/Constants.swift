@@ -76,6 +76,7 @@ enum NotiflyValueType: String {
     case bool = "BOOL"
     case double = "DOUBLE"
     case array = "ARRAY"
+    case cgFloat = "CGFLOAT"
 }
 
 struct NotiflyValue {

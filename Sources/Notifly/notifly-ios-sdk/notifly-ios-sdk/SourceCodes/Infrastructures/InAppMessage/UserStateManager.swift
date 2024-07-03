@@ -138,20 +138,16 @@ class UserStateManager {
                             rawUserData: rawUserData, postProcessConfig: postProcessConfig)
                     }
 
-                    //
-                    //                    if let rawEventData = decodedData["eventIntermediateCountsData"]
-                    //                        as? [[String: Any]]
-                    //                    {
-                    //                        self?.constructEventData(
-                    //                            rawEventData: rawEventData, postProcessConfig: postProcessConfig)
-                    //                    }
-                    //
-                    //                    if let rawCampaignData = decodedData["campaignData"] as? [[String: Any]] {
-                    //                        self?.constructCampaignData(rawCampaignData: rawCampaignData)
-                    //                    }
-                    // print("USER: ", self?.userData)
-                    // print("EVENT: ", self?.eventData)
-                    // print("CAMPAIGN: ", self?.campaignData)
+                    if let rawEventData = userState["eventIntermediateCountsData"]
+                        as? [[String: Any]]
+                    {
+                        self?.constructEventData(
+                            rawEventData: rawEventData, postProcessConfig: postProcessConfig)
+                    }
+
+                    if let rawCampaignData = userState["campaignData"] as? [[String: Any]] {
+                        self?.constructCampaignData(rawCampaignData: rawCampaignData)
+                    }
                 }
                 Logger.info("Sync State Completed.")
                 self?.owner = notiflyUserID
