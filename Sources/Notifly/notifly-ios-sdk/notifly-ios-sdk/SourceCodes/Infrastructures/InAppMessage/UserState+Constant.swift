@@ -18,8 +18,8 @@ enum UserStateConstant {
 
 @available(iOSApplicationExtension, unavailable)
 struct UserData {
-    var userProperties: [String: Any] = [:]
-    var campaignHiddenUntil: [String: Int] = [:]
+    var userProperties: [String: Any]
+    var campaignHiddenUntil: [String: Int]
     var randomBucketNumber: Int?
     var platform: String
     var osVersion: String
