@@ -18,9 +18,9 @@ enum SegmentationHelper {
         }
 
         if campaign.testing {
-            guard let whitelist = campaign.whitelist,
+            guard let allowed = campaign.whitelist,
                 let externalUserId = try? Notifly.main.userManager.externalUserID,
-                whitelist.contains(externalUserId)
+                allowed.contains(externalUserId)
             else {
                 return false
             }

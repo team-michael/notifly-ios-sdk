@@ -1,6 +1,7 @@
 import Combine
-@testable import notifly_ios_sdk
 import UIKit
+
+@testable import notifly_ios_sdk
 
 class TrackingTestViewController: UIViewController {
     // MARK: UI Components
@@ -59,13 +60,16 @@ class TrackingTestViewController: UIViewController {
         setupStackView()
 
         eventNameTextField.placeholder = "Test Event Name"
-        segmentationEventParamsTextField.placeholder = "Comma (',') Separated. e.g. 'value1, value2'"
+        segmentationEventParamsTextField.placeholder =
+            "Comma (',') Separated. e.g. 'value1, value2'"
 
         requestPayloadTextView.text = "N/A"
         responsePayloadTextView.text = "N/A"
 
-        submitTrackingEventButton.addTarget(self, action: #selector(submitBtnTapped(sender:)), for: .touchUpInside)
-        customEventParamsButton.addTarget(self, action: #selector(customEventParmsBtnTapped(sender:)), for: .touchUpInside)
+        submitTrackingEventButton.addTarget(
+            self, action: #selector(submitBtnTapped(sender:)), for: .touchUpInside)
+        customEventParamsButton.addTarget(
+            self, action: #selector(customEventParmsBtnTapped(sender:)), for: .touchUpInside)
     }
 
     private func setupStackView() {
@@ -75,8 +79,10 @@ class TrackingTestViewController: UIViewController {
         NSLayoutConstraint.activate([
             view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: stackView.topAnchor),
             view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: stackView.bottomAnchor),
-            view.safeAreaLayoutGuide.leftAnchor.constraint(equalTo: stackView.leftAnchor, constant: -12),
-            view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: stackView.rightAnchor, constant: 12),
+            view.safeAreaLayoutGuide.leftAnchor.constraint(
+                equalTo: stackView.leftAnchor, constant: -12),
+            view.safeAreaLayoutGuide.rightAnchor.constraint(
+                equalTo: stackView.rightAnchor, constant: 12)
         ])
 
         // StackView Config
@@ -86,11 +92,15 @@ class TrackingTestViewController: UIViewController {
 
         // StackView SubViews
         stackView.addInputView(labelText: "Event Name", textfield: eventNameTextField)
-        stackView.addInputView(labelText: "Segmentation Events (Optional)", textfield: segmentationEventParamsTextField)
+        stackView.addInputView(
+            labelText: "Segmentation Events (Optional)", textfield: segmentationEventParamsTextField
+        )
         stackView.addSwitchView(labelText: "Is Internal Event", switchView: isInternalEventSwitch)
 
-        stackView.addCTAView(labelText: "Custom Event Params", button: customEventParamsButton, bgColor: .darkText)
-        stackView.addCTAView(labelText: "Queue Tracking Event", button: submitTrackingEventButton, bgColor: .blue)
+        stackView.addCTAView(
+            labelText: "Custom Event Params", button: customEventParamsButton, bgColor: .darkText)
+        stackView.addCTAView(
+            labelText: "Queue Tracking Event", button: submitTrackingEventButton, bgColor: .blue)
 
         stackView.addInfoView(labelText: "Request Payload", textView: requestPayloadTextView)
         stackView.addInfoView(labelText: "Response Payload", textView: responsePayloadTextView)
@@ -99,7 +109,8 @@ class TrackingTestViewController: UIViewController {
     }
 
     func presentCustomEventParamsVS() {
-        let keyValuePairsInputVC = KeyValueDataInputViewController(initialKeyValuePairs: customEventParams)
+        let keyValuePairsInputVC = KeyValueDataInputViewController(
+            initialKeyValuePairs: customEventParams)
         keyValuePairsInputVC.delegate = self
         present(keyValuePairsInputVC, animated: true)
     }
@@ -129,9 +140,10 @@ class TrackingTestViewController: UIViewController {
         // }
         // wrongGroup.wait()
 
-        try? Notifly.trackEvent(eventName: eventName,
-                                eventParams: customEventParams,
-                                segmentationEventParamKeys: segmentationEventParamKeys)
+        try? Notifly.trackEvent(
+            eventName: eventName,
+            eventParams: customEventParams,
+            segmentationEventParamKeys: segmentationEventParamKeys)
     }
 
     @objc

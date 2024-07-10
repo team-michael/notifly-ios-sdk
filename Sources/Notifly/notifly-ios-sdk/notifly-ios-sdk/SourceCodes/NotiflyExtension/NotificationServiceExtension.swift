@@ -48,7 +48,7 @@ import UserNotifications
                     "channel": "push-notification",
                     "campaign_id": bestAttemptContent.userInfo["campaign_id"] ?? "",
                     "notifly_message_id": bestAttemptContent.userInfo["notifly_message_id"] ?? "",
-                    "gcm_message_id": gcmMessageId ?? "",
+                    "gcm_message_id": gcmMessageId ?? ""
                 ] as [String: Any]
             ExtensionManager(projectId: projectId)
                 .track(
@@ -162,7 +162,8 @@ import UserNotifications
                 app_version: appVersion,
                 sdk_version: NotiflySdkConfig.sdkVersion,
                 sdk_type: NotiflySdkConfig.sdkType,
-                event_params: AppHelper.makeJsonCodable(params)) as? TrackingData,
+                event_params: try? NotiflyAnyCodable(params)
+            ) as? TrackingData,
             let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
         {
             return TrackingRecord(partitionKey: userID, data: stringfiedData)
@@ -170,6 +171,7 @@ import UserNotifications
             Logger.error("Failed to track event: " + eventName)
             return nil
         }
+        
     }
 
     private func getUserId() -> String {

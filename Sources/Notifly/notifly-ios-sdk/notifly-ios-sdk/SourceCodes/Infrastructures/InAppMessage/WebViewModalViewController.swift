@@ -25,7 +25,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     var webView = FullScreenWKWebView()
     var notiflyCampaignID: String?
     var notiflyMessageID: String?
-    var notiflyExtraData: [String: AnyCodable]?
+    var notiflyExtraData: [String: Any]?
     var notiflyReEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
     var modalProps: ModalProperties?
 
@@ -84,7 +84,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             webView.widthAnchor.constraint(equalToConstant: modalSize.width),
             webView.heightAnchor.constraint(equalToConstant: modalSize.height),
             view.centerXAnchor.constraint(equalTo: webView.centerXAnchor),
-            modalPositionConstraint,
+            modalPositionConstraint
         ])
         let shown = show()
         return shown
@@ -155,7 +155,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 "channel": InAppMessageConstant.inAppMessageChannel,
                 "campaign_id": notiflyCampaignID,
                 "notifly_message_id": notiflyMessageID,
-                "hide_until_data": hideUntilData ?? nil,
+                "hide_until_data": hideUntilData ?? nil
             ] as [String: Any]
         notifly.trackingManager.trackInternalEvent(
             eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
@@ -168,8 +168,9 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                     "Fail to Log In-App-Message Click Event: Notifly is not initialized yet. ")
                 return
             }
+
             guard let body = message.body as? String,
-                let messageEventData = convertStringToJson(body) as [String: Any]?
+                let messageEventData = NotiflyAnyCodable.parseJsonString(body) as [String: Any]?
             else {
                 return
             }
@@ -181,11 +182,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             }
 
             if let extraData = messageEventData["extra_data"] as? [String: Any] {
-                var convertedExtraData: [String: AnyCodable] = [:]
-                AppHelper.makeJsonCodable(extraData)?.forEach {
-                    convertedExtraData[$0] = $1
-                }
-                notiflyExtraData = convertedExtraData
+                notiflyExtraData = extraData
             }
 
             let params =
@@ -195,7 +192,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                     "button_name": buttonName,
                     "campaign_id": notiflyCampaignID,
                     "notifly_message_id": notiflyMessageID,
-                    "notifly_extra_data": notiflyExtraData,
+                    "notifly_extra_data": notiflyExtraData
                 ] as [String: Any]
 
             switch type {
@@ -228,9 +225,8 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 if let templateName = modalProps?.templateName {
                     let now = AppHelper.getCurrentTimestamp(unit: .second)
                     var hideUntil: Int
-                    if let hideUntilInDaysData = notiflyExtraData?["hide_until_in_days"]
-                        as? AnyCodable,
-                        let hideUntilInDays = hideUntilInDaysData.getValue() as? Int,
+                    if let message = notiflyExtraData,
+                        let hideUntilInDays = message["hide_until_in_days"] as? Int,
                         hideUntilInDays > 0
                     {
                         hideUntil = now + 24 * 3600 * hideUntilInDays
@@ -251,20 +247,6 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 return
             }
         }
-    }
-
-    private func convertStringToJson(_ jsonString: String) -> [String: Any]? {
-        if let jsonData = jsonString.data(using: .utf8) {
-            do {
-                let jsonObject = try JSONSerialization.jsonObject(with: jsonData, options: [])
-                if let jsonDict = jsonObject as? [String: Any] {
-                    return jsonDict
-                }
-            } catch {
-                return nil
-            }
-        }
-        return nil
     }
 
     private func getModalSize() -> CGSize? {
@@ -376,14 +358,14 @@ class FullScreenWKWebView: WKWebView {
     }
 }
 
-private extension UIWindow {
-    var topMostViewController: UIViewController? {
+extension UIWindow {
+    fileprivate var topMostViewController: UIViewController? {
         return rootViewController?.topMostViewController
     }
 }
 
-private extension UIViewController {
-    var topMostViewController: UIViewController {
+extension UIViewController {
+    fileprivate var topMostViewController: UIViewController {
         if let presented = presentedViewController {
             return presented.topMostViewController
         }

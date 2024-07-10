@@ -79,18 +79,6 @@ class UserStateManager {
         _owner = owner
     }
 
-    /* change owner of current state */
-    func changeOwner(userID: String?) {
-        guard !Notifly.inAppMessageDisabled else {
-            return
-        }
-
-        guard let userID = userID else {
-            return
-        }
-        owner = userID
-    }
-
     /* sync state from notifly server */
     func syncState(
         postProcessConfig: PostProcessConfigForSyncState,
@@ -126,23 +114,20 @@ class UserStateManager {
                 }
             },
             receiveValue: { [weak self] jsonString in
-                if let jsonData = jsonString.data(using: .utf8),
-                    let decodedData = try? JSONSerialization.jsonObject(with: jsonData, options: [])
-                        as? [String: Any]
-                {
-                    if let rawUserData = decodedData["userData"] as? [String: Any] {
+                if let userState = NotiflyAnyCodable.parseJsonString(jsonString) {
+                    if let rawUserData = userState["userData"] as? [String: Any] {
                         self?.constructUserData(
                             rawUserData: rawUserData, postProcessConfig: postProcessConfig)
                     }
 
-                    if let rawEventData = decodedData["eventIntermediateCountsData"]
+                    if let rawEventData = userState["eventIntermediateCountsData"]
                         as? [[String: Any]]
                     {
                         self?.constructEventData(
                             rawEventData: rawEventData, postProcessConfig: postProcessConfig)
                     }
 
-                    if let rawCampaignData = decodedData["campaignData"] as? [[String: Any]] {
+                    if let rawCampaignData = userState["campaignData"] as? [[String: Any]] {
                         self?.constructCampaignData(rawCampaignData: rawCampaignData)
                     }
                 }

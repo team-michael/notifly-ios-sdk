@@ -104,13 +104,14 @@ class InAppMessageManager {
         return true
     }
 
-    private func isBlacklistTemplate(templateName: String, userData: UserData) -> Bool {
-        let outdatedPropertyKeyForBlacklist = "hide_in_app_message_" + templateName
-        let propertyKeyForBlacklist = "hide_in_app_message_until_" + templateName
-        if let hide = userData.userProperties[outdatedPropertyKeyForBlacklist] as? Bool {
+    private func isHiddenTemplate(templateName: String, userData: UserData) -> Bool {
+        let outdatedKey = "hide_in_app_message_" + templateName
+        let key = "hide_in_app_message_until_" + templateName
+
+        if let hide = userData.userProperties[outdatedKey] as? Bool {
             return hide
         }
-        guard let hideUntil = userData.userProperties[propertyKeyForBlacklist] as? Int else {
+        guard let hideUntil = userData.userProperties[key] as? Int else {
             return false
         }
 
@@ -182,7 +183,7 @@ class InAppMessageManager {
             }
 
             guard
-                !self.isBlacklistTemplate(
+                !self.isHiddenTemplate(
                     templateName: notiflyInAppMessageData.modalProps.templateName,
                     userData: currentUserData)
             else {

@@ -150,10 +150,17 @@ class UserManager {
         }
 
         if !Notifly.inAppMessageDisabled {
-            notifly.inAppMessageManager.userStateManager.updateUserData(
-                userID: try? getNotiflyUserID(),
-                properties: userProperties
-            )
+            Notifly.asyncWorker.addTask { [weak self] in
+                guard let self = self else {
+                    Notifly.asyncWorker.unlock()
+                    return
+                }
+                notifly.inAppMessageManager.userStateManager.updateUserData(
+                    userID: try? getNotiflyUserID(),
+                    properties: userProperties
+                )
+                Notifly.asyncWorker.unlock()
+            }
         }
 
         notifly.trackingManager.trackInternalEvent(

@@ -39,7 +39,6 @@ struct UserData {
         sdkType = NotiflyHelper.getSdkType()
         randomBucketNumber = NotiflyHelper.parseRandomBucketNumber(
             num: data["random_bucket_number"])
-
         if let createdAtStr = data["created_at"] as? String {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
@@ -89,7 +88,7 @@ struct UserData {
         mergedCampaignHiddenUntil.merge(p1.campaignHiddenUntil) { _, new in new }
         var data: [String: Any] = [
             "user_properties": mergedUserProperties,
-            "campaign_hidden_until": mergedCampaignHiddenUntil,
+            "campaign_hidden_until": mergedCampaignHiddenUntil
         ]
 
         data["platform"] = p1.platform
@@ -119,7 +118,7 @@ struct UserData {
     func destruct() -> [String: Any] {
         var data: [String: Any] = [
             "user_properties": userProperties,
-            "campaign_hidden_until": campaignHiddenUntil,
+            "campaign_hidden_until": campaignHiddenUntil
         ]
 
         data["platform"] = platform
@@ -166,7 +165,7 @@ struct EventData {
                     segmentationEventParamKeys: eventIntermediateCount.eventParams.keys.sorted(),
                     dt: eventIntermediateCount.dt)
                 if var existingEventIntermediateCount = result[id] {
-                    existingEventIntermediateCount.addCount(count: eventIntermediateCount.count)
+                    result[id]?.addCount(count: eventIntermediateCount.count)
                 } else {
                     result[id] = eventIntermediateCount
                 }
@@ -181,8 +180,7 @@ struct EventData {
         var mergedEventCounts: [String: EventIntermediateCount] = p1.eventCounts
         for (id, eventIntermediateCount) in p2.eventCounts {
             if var existingEventIntermediateCount = mergedEventCounts[id] {
-                existingEventIntermediateCount.addCount(count: eventIntermediateCount.count)
-                mergedEventCounts[id] = existingEventIntermediateCount
+                mergedEventCounts[id]?.addCount(count: eventIntermediateCount.count)
             } else {
                 mergedEventCounts[id] = eventIntermediateCount
             }
@@ -227,17 +225,17 @@ struct EventIntermediateCount {
         eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?,
         dt: String
     ) -> String {
-        var eicID = eventName + InAppMessageConstant.eicIdSeparator + dt
-        guard
+        let eicID = eventName + InAppMessageConstant.eicIdSeparator + dt
+        if let eventParams = eventParams,
             let selectedEventParams = EicHelper.selectEventParamsWithKeys(
                 eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys),
             let (selectedKey, selectedValue) = selectedEventParams.first
-        else {
-            return eicID + String(repeating: InAppMessageConstant.eicIdSeparator, count: 2)
+        {
+            return eicID + InAppMessageConstant.eicIdSeparator + selectedKey
+                + InAppMessageConstant.eicIdSeparator + String(describing: selectedValue)
         }
 
-        return eicID + InAppMessageConstant.eicIdSeparator + selectedKey
-            + InAppMessageConstant.eicIdSeparator + selectedValue
+        return eicID + String(repeating: InAppMessageConstant.eicIdSeparator, count: 2)
     }
 
     mutating func addCount(count: Int) {
@@ -249,16 +247,14 @@ struct EventIntermediateCount {
 enum EicHelper {
     static func selectEventParamsWithKeys(
         eventParams: [String: Any]?, segmentationEventParamKeys: [String]?
-    ) -> [String: String]? {
+    ) -> [String: Any?]? {
         if let segmentationEventParamKeys = segmentationEventParamKeys,
             let eventParams = eventParams,
             !segmentationEventParamKeys.isEmpty,
             eventParams.count > 0
         {
             let keyField = segmentationEventParamKeys[0]
-            if let value = eventParams[keyField] as? String {
-                return [keyField: value]
-            }
+            return [keyField: eventParams[keyField]]
         }
         return nil
     }

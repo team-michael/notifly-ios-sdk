@@ -294,6 +294,17 @@ enum NotiflyValueComparator {
             return Bool(value)
         case let (value as [Any], .array):
             return value
+        case let (value as Any, .cgFloat):
+            switch value {
+            case let value as Int:
+                return CGFloat(value)
+            case let value as Double:
+                return CGFloat(value)
+            case let value as Float:
+                return CGFloat(value)
+            default:
+                return nil
+            }
         case (_, _):
             return nil
         }
