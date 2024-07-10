@@ -83,3 +83,7 @@
 
 - Chore: change tracking event endpoint
 - Fix: fix bug for any codable (boolean)
+
+# 1.13.1
+
+- Chore: Open NotiflyAnyCodable to public
