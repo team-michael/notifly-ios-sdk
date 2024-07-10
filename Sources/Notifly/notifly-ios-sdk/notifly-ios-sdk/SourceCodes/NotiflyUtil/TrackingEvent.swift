@@ -73,7 +73,7 @@ struct TrackingData: Codable {
     let app_version: String
     let sdk_version: String
     let sdk_type: String
-    let event_params: [String: AnyCodable]?
+    let event_params: NotiflyAnyCodable?
 }
 
 public enum SdkWrapperType: String {

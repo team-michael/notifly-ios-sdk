@@ -162,7 +162,8 @@ import UserNotifications
                 app_version: appVersion,
                 sdk_version: NotiflySdkConfig.sdkVersion,
                 sdk_type: NotiflySdkConfig.sdkType,
-                event_params: AnyCodable.makeJsonCodable(params)) as? TrackingData,
+                event_params: try? NotiflyAnyCodable(params)
+            ) as? TrackingData,
             let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
         {
             return TrackingRecord(partitionKey: userID, data: stringfiedData)
@@ -170,6 +171,7 @@ import UserNotifications
             Logger.error("Failed to track event: " + eventName)
             return nil
         }
+        
     }
 
     private func getUserId() -> String {

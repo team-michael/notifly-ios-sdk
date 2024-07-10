@@ -64,7 +64,7 @@ private func saveUniqueIdToKeychain(deviceID: String) -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: uniqueIdKey,
-            kSecValueData as String: deviceID.data(using: .utf8)!
+            kSecValueData as String: deviceID.data(using: .utf8)!,
         ]
 
         let status = SecItemAdd(query as CFDictionary, nil)
@@ -82,7 +82,7 @@ private func retrieveUniqueIdFromKeychain() -> String? {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: uniqueIdKey,
             kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne
+            kSecMatchLimit as String: kSecMatchLimitOne,
         ]
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)

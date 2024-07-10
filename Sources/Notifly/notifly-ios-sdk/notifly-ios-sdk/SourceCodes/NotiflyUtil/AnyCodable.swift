@@ -1,93 +1,72 @@
 import Foundation
 
-public struct AnyCodable: Codable {
-    private let value: Any?
-
-    init(_ value: Any) {
+struct NotiflyAnyCodable: Codable {
+    private var value: Any?
+    init(_ value: Any?) {
         self.value = value
     }
 
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-
-        if let encodable = value as? Encodable {
-            try encodable.encode(to: encoder)
-        } else {
-            try container.encodeNil()
-        }
-    }
-
-    public init(from decoder: Decoder) throws {
+    init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        if let stringValue = try? container.decode(String.self) {
-            value = stringValue
+        if container.decodeNil() {
+            value = nil
         } else if let boolValue = try? container.decode(Bool.self) {
             value = boolValue
         } else if let intValue = try? container.decode(Int.self) {
             value = intValue
         } else if let doubleValue = try? container.decode(Double.self) {
             value = doubleValue
-        } else if let floatValue = try? container.decode(Float.self) {
-            value = floatValue
-        } else if let arrayValue = try? container.decode([AnyCodable].self) {
-            value = arrayValue
-        } else if let dictionaryValue = try? container.decode([String: AnyCodable].self) {
-            value = dictionaryValue
-        } else if container.decodeNil() {
-            value = nil
+        } else if let stringValue = try? container.decode(String.self) {
+            value = stringValue
+        } else if let arrayValue = try? container.decode([NotiflyAnyCodable].self) {
+            value = arrayValue.map { $0.value }
+        } else if let dictionaryValue = try? container.decode([String: NotiflyAnyCodable].self) {
+            value = dictionaryValue.mapValues { $0.value }
         } else {
             throw DecodingError.dataCorruptedError(
-                in: container,
-                debugDescription: "Unsupported type"
-            )
+                in: container, debugDescription: "Unsupported type")
         }
     }
 
-    static func makeJsonCodable(_ jsonData: [String: Any]?) -> [String: AnyCodable]? {
-        guard let jsonData = jsonData else { return nil }
-        return jsonData.mapValues { value in
-            if let array = value as? [Any?] {
-                return AnyCodable(array.compactMap { element in self.toCodableValue(element) })
-            } else if let dictionary = value as? [String: Any] {
-                return AnyCodable(makeJsonCodable(dictionary))
-            }
-            return self.toCodableValue(value)
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        guard let value = value else {
+            try container.encodeNil()
+            return
         }
-    }
-
-    static func toCodableValue(_ value: Any?) -> AnyCodable {
-        if let str = value as? String {
-            return AnyCodable(str)
-        } else if let bool = value as? Bool {
-            return AnyCodable(bool)
-        } else if let int = value as? Int {
-            return AnyCodable(int)
-        } else if let double = value as? Double {
-            return AnyCodable(double)
-        } else if let float = value as? Float {
-            return AnyCodable(float)
+        if let boolValue = value as? Bool {
+            try container.encode(boolValue)
+        } else if let intValue = value as? Int {
+            try container.encode(intValue)
+        } else if let doubleValue = value as? Double {
+            try container.encode(doubleValue)
+        } else if let stringValue = value as? String {
+            try container.encode(stringValue)
+        } else if let arrayValue = value as? [Any?] {
+            let encodableArray = arrayValue.map { NotiflyAnyCodable($0) }
+            try container.encode(encodableArray)
+        } else if let dictionaryValue = value as? [String: Any?] {
+            let encodableDictionary = dictionaryValue.mapValues { NotiflyAnyCodable($0) }
+            try container.encode(encodableDictionary)
         } else {
-            return AnyCodable(value)
+            throw EncodingError.invalidValue(
+                value,
+                EncodingError.Context(
+                    codingPath: container.codingPath, debugDescription: "Unsupported type"))
         }
     }
 
-    func getValue() -> Any {
-        if let str = self.value as? String {
-            return str
-        } else if let int = self.value as? Int {
-            return int
-        } else if let double = self.value as? Double {
-            return double
-        } else if let float = self.value as? Float {
-            return float
-        } else if let bool = self.value as? Bool {
-            return bool
-        } else if let array = self.value as? [AnyCodable] {
-            return array.map { element in element.getValue() }
-        } else if let dictionary = self.value as? [String: AnyCodable] {
-            return dictionary.mapValues { element in element.getValue() }
-        } else {
-            return self.value
+    static func parseJsonString(_ jsonString: String) -> [String: Any]? {
+        let decoder = JSONDecoder()
+        if let jsonData = jsonString.data(using: .utf8),
+            let decodedData = try? decoder.decode(
+                NotiflyAnyCodable.self, from: jsonData
+            ),
+            let value = decodedData.value as? [String: Any]
+        {
+            return value
         }
+        return nil
     }
+
 }

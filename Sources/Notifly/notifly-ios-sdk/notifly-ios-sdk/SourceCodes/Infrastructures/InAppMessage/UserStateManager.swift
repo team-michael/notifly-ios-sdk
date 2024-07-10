@@ -79,18 +79,6 @@ class UserStateManager {
         _owner = owner
     }
 
-    /* change owner of current state */
-    func changeOwner(userID: String?) {
-        guard !Notifly.inAppMessageDisabled else {
-            return
-        }
-
-        guard let userID = userID else {
-            return
-        }
-        owner = userID
-    }
-
     /* sync state from notifly server */
     func syncState(
         postProcessConfig: PostProcessConfigForSyncState,
@@ -126,13 +114,7 @@ class UserStateManager {
                 }
             },
             receiveValue: { [weak self] jsonString in
-                let decoder = JSONDecoder()
-                if let jsonData = jsonString.data(using: .utf8),
-                    let decodedData = try? decoder.decode(
-                        AnyCodable.self, from: jsonData
-                    ),
-                    let userState = decodedData.getValue() as? [String: Any]
-                {
+                if let userState = NotiflyAnyCodable.parseJsonString(jsonString) {
                     if let rawUserData = userState["userData"] as? [String: Any] {
                         self?.constructUserData(
                             rawUserData: rawUserData, postProcessConfig: postProcessConfig)

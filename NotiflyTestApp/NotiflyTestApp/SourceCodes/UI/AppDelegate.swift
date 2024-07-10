@@ -30,9 +30,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Notifly.initialize(
             projectId: TestConstant.projectID, username: TestConstant.username,
             password: TestConstant.password)
-        Notifly.setUserId(userId: "kds")
-        Notifly.setUserProperties(userProperties: ["membership": "VIP", "push_notification": true])
-        Notifly.trackEvent(eventName: "View_Home")
+        // Notifly.setUserId(userId: "kds")
+        Notifly.setUserProperties(userProperties: [
+            "sk": nil,
+            "abc": true,
+            "sdf": "a",
+            "b": ["b": 1, "c": false],
+            "kkk": [true, "ssss", 0, [123, "abc"]]
+        ])
+        Notifly.trackEvent(
+            eventName: "View_Home",
+            eventParams: [
+                "sk": nil,
+                "abc": true,
+                "sdf": "a",
+                "b": ["b": 1, "c": false],
+                "kkk": [true, "ssss", 0, [123, "abc"]]
+            ],
+            segmentationEventParamKeys: ["sk"])
 
         UNUserNotificationCenter.current().delegate = self
         return true
