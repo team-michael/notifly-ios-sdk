@@ -12,7 +12,7 @@ enum NotiflyConstant {
     static let projectIdRegex: String = "^[0-9a-fA-F]{32}$"
     enum EndPoint {
         static let trackEventEndPoint =
-            "https://12lnng07q2.execute-api.ap-northeast-2.amazonaws.com/prod/records"
+            "https://e.notifly.tech/records"
         static let syncStateEndPoint = "https://api.notifly.tech/user-state"
         static let authorizationEndPoint = "https://api.notifly.tech/authorize"
     }
