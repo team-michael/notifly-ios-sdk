@@ -31,7 +31,6 @@ enum TrackingConstant {
 
         static let sessionStartEventName = "session_start"
         static let setDevicePropertiesEventName = "set_device_properties"
-        static let syncStateCompletedEventName = "sync_state_completed"
 
         static let setUserPropertiesEventName = "set_user_properties"
         static let removeUserPropertiesEventName = "remove_external_user_id"
