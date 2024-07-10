@@ -1,12 +1,12 @@
 import Foundation
 
-struct NotiflyAnyCodable: Codable {
+public struct NotiflyAnyCodable: Codable {
     private var value: Any?
-    init(_ value: Any?) {
+    public init(_ value: Any?) {
         self.value = value
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if container.decodeNil() {
             value = nil
@@ -28,7 +28,7 @@ struct NotiflyAnyCodable: Codable {
         }
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         guard let value = value else {
             try container.encodeNil()
@@ -56,7 +56,7 @@ struct NotiflyAnyCodable: Codable {
         }
     }
 
-    static func parseJsonString(_ jsonString: String) -> [String: Any]? {
+    public static func parseJsonString(_ jsonString: String) -> [String: Any]? {
         let decoder = JSONDecoder()
         if let jsonData = jsonString.data(using: .utf8),
             let decodedData = try? decoder.decode(
