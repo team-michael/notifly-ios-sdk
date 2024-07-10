@@ -78,3 +78,8 @@
 # 1.12.1
 
 - Chore: change variable name
+
+# 1.13.0
+
+- Chore: change tracking event endpoint
+- Fix: fix bug for any codable (boolean)
