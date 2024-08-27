@@ -425,18 +425,26 @@ enum NotiflySegmentation {
                             let unit = ConditionUnit(rawValue: unitStr),
                             let attribute = condition["attribute"] as? String,
                             let operatorStr = condition["operator"] as? String,
-                            let `operator` = NotiflyOperator(rawValue: operatorStr),
-                            let valueType = condition["valueType"] as? String,
-                            let value = condition["value"]
+                            let `operator` = NotiflyOperator(rawValue: operatorStr)
+                            
                         else {
                             throw NotiflyError.unexpectedNil("segment_info is not valid.")
                         }
+                        
+                        let valueNullableOperators = [NotiflyOperator.isNotNull, NotiflyOperator.isNull]
+                        if !valueNullableOperators.contains(`operator`) {
+                            guard let vt = condition["valueType"] as? String,
+                            let v = condition["value"] else {
+                                throw NotiflyError.unexpectedNil("segment_info is not valid.")
+                            }
+                        } 
+                        
                         self.unit = unit
                         self.attribute = attribute
                         self.operator = `operator`
                         useEventParamsAsCondition = Bool(useEventParamsAsConditionInDict ?? false)
-                        self.valueType = valueType
-                        self.value = value
+                        self.valueType = condition["valueType"] as? String ?? "TEXT"
+                        self.value = condition["value"] as Any
                         comparisonEvent = condition["comparison_event"] as? String
                         comparisonParameter = condition["comparison_parameter"] as? String
                     }

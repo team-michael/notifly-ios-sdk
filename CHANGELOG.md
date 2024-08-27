@@ -87,3 +87,7 @@
 # 1.13.1
 
 - Chore: Open NotiflyAnyCodable to public
+
+# 1.14.0
+
+- Feat: Support User medata condition (user_id, random_bucket_number) for in-app-message campaign
