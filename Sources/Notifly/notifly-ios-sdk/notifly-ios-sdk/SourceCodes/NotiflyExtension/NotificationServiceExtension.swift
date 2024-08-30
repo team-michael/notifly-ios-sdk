@@ -166,7 +166,7 @@ import UserNotifications
             ) as? TrackingData,
             let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
         {
-            return TrackingRecord(partitionKey: userID, data: stringfiedData)
+            return TrackingRecord(partitionKey: notiflyDeviceID, data: stringfiedData)
         } else {
             Logger.error("Failed to track event: " + eventName)
             return nil

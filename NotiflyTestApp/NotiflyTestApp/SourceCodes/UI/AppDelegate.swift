@@ -30,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Notifly.initialize(
             projectId: TestConstant.projectID, username: TestConstant.username,
             password: TestConstant.password)
-        // Notifly.setUserId(userId: "kds")
+        Notifly.setUserId(userId: "test_ios_user_id")
         Notifly.setUserProperties(userProperties: [
             "sk": nil,
             "abc": true,

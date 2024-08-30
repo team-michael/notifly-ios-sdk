@@ -91,3 +91,7 @@
 # 1.14.0
 
 - Feat: Support User medata condition (user_id, random_bucket_number) for in-app-message campaign
+
+# 1.14.1
+
+- Chore: change event tracking partition key as notifly_device_id
