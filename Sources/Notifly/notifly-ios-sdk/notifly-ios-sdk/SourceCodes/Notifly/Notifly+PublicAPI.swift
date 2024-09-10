@@ -298,4 +298,18 @@ import UIKit
         try? main.notificationsManager.registerFCMToken(token: token)
         Logger.info("FCM token is successfully registered.")
     }
+
+    
+    public static func addNotificationClickListener(
+        _ listener: @escaping (NotiflyPushNotification) -> Void
+    ) {
+        guard let main = try? main else {
+            Logger.error(
+                "Notifly is not initialized. Please call Notifly.initialize before calling Notifly.addClickListener."
+            )
+            return
+        }
+        
+        main.notificationsManager.addNotificationClickListener(listener)
+    }
 }

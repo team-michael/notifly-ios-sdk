@@ -5,11 +5,50 @@ import SafariServices
 import UIKit
 import UserNotifications
 
+
+@objc public class NotiflyPushNotification: NSObject {
+    @objc public let messageId: String
+    @objc public let campaignId: String
+    @objc public let title: String
+    @objc public let body: String
+    @objc public let url: String?
+    @objc public let sentTime: NSNumber?
+    @objc public let imageUrl: String?
+    @objc public let payload: NSDictionary
+
+
+    public init(messageId: String, campaignId: String, title: String, body: String, url: String?, sentTime: Int?, imageUrl: String?, payload: [String: Any]) {
+        self.messageId = messageId
+        self.campaignId = campaignId
+        self.title = title
+        self.body = body
+        self.url = url
+        self.sentTime = sentTime as NSNumber?
+        self.imageUrl = imageUrl
+        self.payload = payload as NSDictionary
+    }
+}
+
 @available(iOSApplicationExtension, unavailable)
 class NotificationsManager: NSObject {
-    // MARK: Properties
 
     private var _deviceTokenPub: AnyPublisher<String, Error>?
+    private var _clickListeners: [ (NotiflyPushNotification) -> Void] = [] // Now, it's only one listener.
+    private let clickListenerAccessQueue = DispatchQueue(
+label: "com.notifly.notificationsManager.clickListenerAccessQueue")
+    var clickListeners: [ (NotiflyPushNotification) -> Void] {
+        get {
+            clickListenerAccessQueue.sync {
+                _clickListeners
+            }
+        }
+        set {
+            clickListenerAccessQueue.sync {
+                _clickListeners = newValue
+            }
+        }
+    }
+    
 
     private(set) var deviceTokenPub: AnyPublisher<String, Error>? {
         // TODO: Remove this temp workaround once APNs token is available.
@@ -151,6 +190,20 @@ class NotificationsManager: NSObject {
             }
         }
     }
+
+    func addNotificationClickListener(_ listener: @escaping (
+        NotiflyPushNotification
+    ) -> Void) {
+        guard self.clickListeners.isEmpty else {
+            Logger.error("Notification Click Listener is already registered.")
+            return
+        }
+
+        self.clickListeners.append { notification in
+            listener(notification)
+        }
+
+    }
 }
 
 @available(iOSApplicationExtension, unavailable)
@@ -160,7 +213,7 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
         _: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) {
-        if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]?,
+        if let pushData = response.notification.request.content.userInfo as? [String: Any?],
             let clickStatus = UIApplication.shared.applicationState == .active
                 ? "foreground" : "background"
         {
@@ -175,9 +228,10 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
                 return
             }
 
-            if let urlString = pushData["url"] as? String,
-                let url = URL(string: urlString)
-            {
+            // Tracking & Open URL
+            if self.clickListeners.isEmpty,
+               let urlString = pushData["url"] as? String,
+               let url = URL(string: urlString) {
                 UIApplication.shared.open(url, options: [:]) { _ in
                     main.trackingManager.trackPushClickInternalEvent(
                         pushData: pushData,
@@ -189,6 +243,36 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
                     pushData: pushData,
                     clickStatus: clickStatus
                 )
+            }
+
+            // Custom Listener
+            if !self.clickListeners.isEmpty {
+                guard let title = response.notification.request.content.title as? String,
+                      let body = response.notification.request.content.body as? String
+                else {
+                    return
+                }
+                
+                self.clickListeners.forEach { listener in
+                    var imageUrl: String? = nil
+                    if let notiflyAttachment = pushData["notifly_attachment"] as? [String: Any?],
+                       let url = notiflyAttachment["url"] as? String {
+                        imageUrl = url
+                    }
+                    
+                    listener(
+                        NotiflyPushNotification(
+                            messageId: title,
+                            campaignId: body,
+                            title: pushData["notifly_message_id"] as? String ?? "",
+                            body: pushData["campaign_id"] as? String ?? "",
+                            url: pushData["url"] as? String,
+                            sentTime: pushData["sent_time"] as? Int,
+                            imageUrl: imageUrl,
+                            payload: (pushData as? [String : Any] ?? [:])
+                        )
+                    )
+                }
             }
         }
     }
