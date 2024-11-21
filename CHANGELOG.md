@@ -95,3 +95,7 @@
 # 1.14.1
 
 - Chore: change event tracking partition key as notifly_device_id
+
+# 1.14.2
+
+- Chore: update Firebase dependency version to 20.0.0
