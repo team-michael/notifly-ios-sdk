@@ -41,3 +41,4 @@ DerivedData
 .swiftpm/config/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
+.idea

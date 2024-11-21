@@ -1,100 +1,165 @@
-# 1.0.0
+# Changelog
+
+All notable changes to this project will be documented in this file.  
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),  
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.14.2] - 2024-11-21
+
+### Changed
+
+- Update Firebase dependency version to 20.0.0.
+
+## [1.14.1] - 2024-08-27
+
+### Changed
+
+- Change event tracking partition key to `notifly_device_id`.
+
+## [1.14.0] - 2024-08-27
+
+### Added
+
+- Support for user metadata conditions (`user_id`, `random_bucket_number`) in in-app message campaigns.
+
+## [1.13.1] - 2024-07-10
+
+### Changed
+
+- Open `NotiflyAnyCodable` to public.
+
+## [1.13.0] - 2024-07-10
+
+### Changed
+
+- Change tracking event endpoint.
+
+### Fixed
+
+- Bug fixes for `AnyCodable` (Boolean).
+
+## [1.12.1] - 2024-07-01
+
+### Changed
+
+- Change variable names for improved clarity.
+
+## [1.12.0] - 2024-06-30
+
+### Added
+
+- Separate `PushExtension` SDK from `Notifly SDK` (`notifly_sdk_push_extension`).
+
+## [1.11.0] - 2024-06-24
+
+### Changed
+
+- Update user state management logic using access queues.
+- Replace user state locks with `NotiflyAsyncWorker` (Semaphore).
+
+## [1.10.1] - 2024-06-20
+
+### Fixed
+
+- Fix main-thread checker warning.
+
+## [1.10.0] - 2024-06-14
+
+### Added
+
+- Add `setTimezone`, `setPhoneNumber`, `setEmail` for convenience.
+- Automatic tracking of the user's timezone for device properties.
+
+## [1.9.0] - 2024-05-27
+
+### Fixed
+
+- Defend against crashes caused by concurrency issues during cancellable event storage.
+
+## [1.8.0] - 2024-05-17
+
+### Added
+
+- Support advanced triggering conditions.
+- Add custom headers to identify platform, SDK version, and SDK wrapper version.
+
+## [1.7.1] - 2024-05-08
+
+### Fixed
+
+- Address crashes caused by concurrency issues while updating user event data.
+
+## [1.7.0] - 2024-04-25
+
+### Added
+
+- Add privacy manifest.
+
+## [1.6.1] - 2024-04-01
+
+### Added
+
+- Add `.list` option to default foreground push notification presentation options.
+
+## [1.6.0] - 2024-03-13
+
+### Fixed
+
+- Perform additional validation before presenting in-app popups.
+
+## [1.5.0] - 2024-03-06
+
+### Added
+
+- Track GCM message ID in Push Extension.
+- Add urgent tracking events.
+
+## [1.4.1] - 2024-03-06
+
+### Removed
+
+- Remove version dependency on `FirebaseMessaging`.
+
+## [1.4.0] - 2024-01-18
+
+### Added
+
+- Support user segmentation with random bucket numbers and external user IDs.
+- Support `IS_NULL` and `IS_NOT_NULL` operators in user segmentation.
+- Add `TriggeringEventFilters` with event parameters.
+
+### Fixed
+
+- Make sync state tasks asynchronous.
+
+## [1.3.0] - 2023-10-20
+
+### Added
+
+- Implement Push Extension as a SubSpec module.
+- Add re-eligibility condition for campaigns.
+
+### Fixed
+
+- Various bug fixes.
+
+## [1.2.1] - 2023-10-11
+
+### Added
+
+- Extend push notification capabilities.
+
+## [1.2.0] - 2023-10-06
+
+### Added
+
+- Support re-eligibility conditions for in-app campaigns.
+
+## [1.0.0] - 2023-05-26
+
+### Added
 
 - Initial release.
-
-# 1.2.0
-
-- Feature: Re-Eligible Condition
-
-# 1.2.1
-
-- Feature: Push Extension
-
-# 1.3.0
-
-- Feature: Make Push Extension Module As SubSpec
-- Feature:
-- Fix: fix some bugs
-
-# 1.4.0
-
-- Feature: Support User Segmentation With Random Bucket Number And External User Id
-- Feature: Support IS_NULL, IS_NOT_NULL operator As User Segmentation Operator
-- Feature: Support TriggeringEventFilters With Event Params
-- Fix: Make Sync State Tasks Asynchronous
-
-# 1.4.1
-
-- Chore: Remove version dependency on `FirebaseMessaging`
-
-# 1.5.0
-
-- Chore: Track GCM Message Id In Push Extension
-- Feature: Urgent tracking event
-
-# 1.6.0
-
-- Fix: Additional Validation Before In App Popup Presented
-
-# 1.6.1
-
-- Chore: Add .list option to the default foreground push notification presentation options
-
-# 1.7.0
-
-- Chore: Add Privacy Manifest
-
-# 1.7.1
-
-- Fix: Defending against crashes due to concurrency issues in the process of updating the user's event data.
-
-# 1.8.0
-
-- Feature: Support advanced triggering conditions
-- Feature: Add custom headers to identify platform and SDK version / SDK wrapper version
-
-# 1.9.0
-
-- Fix: Defending against crashes due to concurrency issues in the process of storing cancellable events.
-
-# 1.10.0
-
-- Feature: Add `setTimezone`, `setPhoneNumber`, `setEmail` for convenience.
-- Feature: Now SDK automatically tracks the user's timezone for device property.
-
-# 1.10.1
-
-- Fix: Fix main-thread checker warning
-
-# 1.11.0
-
-- Chore: Change UserState Management Logic using access queue.
-- Chore: Replace user state lock with NotiflyAsyncWorker (Semaphore)
-
-# 1.12.0
-
-- Chore: Separate PushExtension Sdk from Notifly SDK (notifly_sdk_push_extension)
-
-# 1.12.1
-
-- Chore: change variable name
-
-# 1.13.0
-
-- Chore: change tracking event endpoint
-- Fix: fix bug for any codable (boolean)
-
-# 1.13.1
-
-- Chore: Open NotiflyAnyCodable to public
-
-# 1.14.0
-
-- Feat: Support User medata condition (user_id, random_bucket_number) for in-app-message campaign
-
-# 1.14.1
-
-- Chore: change event tracking partition key as notifly_device_id
 
 # 1.14.2
 
