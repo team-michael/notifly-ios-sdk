@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
     s.name             = 'notifly_sdk_push_extension'
-    s.version          = '1.14.1'
+    s.version          = '1.14.2'
     s.summary          = 'Notifly iOS SDK.'
   
     s.description      = <<-DESC
-    NOTIFLY iOS Push Extension SDK : 1.14.1
+    NOTIFLY iOS Push Extension SDK : 1.14.2
     DESC
   
     s.homepage         = 'https://github.com/team-michael/notifly-ios-sdk'
