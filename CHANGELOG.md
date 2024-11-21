@@ -98,4 +98,4 @@
 
 # 1.14.2
 
-- Chore: update Firebase dependency version to 12.0.0
+- Chore: update Firebase dependency version to 20.0.0
