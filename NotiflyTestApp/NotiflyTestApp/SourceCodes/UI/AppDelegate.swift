@@ -31,7 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             projectId: TestConstant.projectID, username: TestConstant.username,
             password: TestConstant.password)
 
-        NotiflySdkConfig        UNUserNotificationCenter.current().delegate = self
+        UNUserNotificationCenter.current().delegate = self
         return true
     }
 
