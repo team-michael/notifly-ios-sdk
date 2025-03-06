@@ -64,7 +64,6 @@ extension NotiflyAPI {
                     .eraseToAnyPublisher()
             }
         }
-        
 
         func buildAndFireWithRawJSONResponseType() -> AnyPublisher<String, Error> {
             do {
