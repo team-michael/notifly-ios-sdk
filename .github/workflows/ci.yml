@@ -20,38 +20,25 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/Library/Caches/CocoaPods
-            ./NotiflyTestApp/NotiflyTestApp/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('NotiflyTestApp/NotiflyTestApp/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
+      - name: Install SwiftLint
+        run: brew install swiftlint
 
-      - name: Install CocoaPods
-        run: sudo gem install cocoapods
+      - name: Run SwiftLint
+        run: swiftlint --strict
 
-      - name: Pod install
-        run: pod install --project-directory=./NotiflyTestApp/NotiflyTestApp
-
-      - name: Build and test iOS project
+      - name: Build and test Sources with xcodebuild
         run: |
           xcodebuild clean test \
-          -project ./NotiflyTestApp/NotiflyTestApp.xcodeproj \
-          -scheme NotiflyTestApp \
-          -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.2' \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO
-
-      - name: Run Swift Package Manager tests
-        run: swift test
+            -project ./Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk.xcodeproj \
+            -scheme notifly-ios-sdkTests \
+            -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=latest' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO
 
       - name: Code Review GPT
         uses: mattzcarey/code-review-gpt@v0.7.0
         with:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
-          MODEL: "gpt-4o"
-          REVIEW_LANGUAGE: "Korean"
+          MODEL: 'gpt-4o'
+          REVIEW_LANGUAGE: 'Korean'
