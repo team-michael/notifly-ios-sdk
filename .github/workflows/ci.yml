@@ -1,0 +1,57 @@
+name: iOS CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "README.md"
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - "README.md"
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/CocoaPods
+            ./NotiflyTestApp/NotiflyTestApp/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('NotiflyTestApp/NotiflyTestApp/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Install CocoaPods
+        run: sudo gem install cocoapods
+
+      - name: Pod install
+        run: pod install --project-directory=./NotiflyTestApp/NotiflyTestApp
+
+      - name: Build and test iOS project
+        run: |
+          xcodebuild clean test \
+          -project ./NotiflyTestApp/NotiflyTestApp.xcodeproj \
+          -scheme NotiflyTestApp \
+          -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.2' \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO
+
+      - name: Run Swift Package Manager tests
+        run: swift test
+
+      - name: Code Review GPT
+        uses: mattzcarey/code-review-gpt@v0.7.0
+        with:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+          MODEL: "gpt-4o"
+          REVIEW_LANGUAGE: "Korean"
