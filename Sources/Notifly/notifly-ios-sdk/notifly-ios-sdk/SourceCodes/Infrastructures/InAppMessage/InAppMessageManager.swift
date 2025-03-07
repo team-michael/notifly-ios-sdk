@@ -213,23 +213,19 @@ class InAppMessageManager {
         }
     }
 
-    func addEventListener(listener: InAppMessageEventListener) {
+    func addEventListener(_ listener: @escaping InAppMessageEventListener) {
         eventListeners.append(listener)
     }
 
-    func removeEventListener(listener: InAppMessageEventListener) {
-        if let index = eventListeners.firstIndex(where: { $0 === listener }) {
-            eventListeners.remove(at: index)
-        }
+    func removeAllEventListeners() {
+        eventListeners.removeAll()
     }
 
     func dispatchInAppMessageEvent(eventName: String, eventParams: [String: Any]?) {
         for listener in eventListeners {
-            listener.handleEvent(eventName: eventName, eventParams: eventParams)
+            listener(eventName, eventParams)
         }
     }
 }
 
-@objc public protocol InAppMessageEventListener {
-    func handleEvent(eventName: String, eventParams: [String: Any]?)
-}
+public typealias InAppMessageEventListener = (String, [String: Any]?) -> Void

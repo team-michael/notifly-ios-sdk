@@ -31,6 +31,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             projectId: TestConstant.projectID, username: TestConstant.username,
             password: TestConstant.password)
 
+        Notifly.addInAppMessageEventListener { eventName, eventParams in
+            print("In App Message Event: \(eventName)")
+            if let params = eventParams {
+                print("In App Message Event Params: \(params)")
+            }
+        }
+
         UNUserNotificationCenter.current().delegate = self
         return true
     }
