@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-14
 
     steps:
       - name: Checkout code
@@ -32,7 +32,7 @@ jobs:
           xcodebuild clean test \
             -project ./Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk.xcodeproj \
             -scheme notifly-ios-sdkTests \
-            -destination 'platform=iOS Simulator' \
+            -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=iOS 17.5' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO
 
