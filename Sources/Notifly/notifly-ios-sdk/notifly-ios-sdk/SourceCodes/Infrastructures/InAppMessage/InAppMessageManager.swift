@@ -13,6 +13,7 @@ import UIKit
 @available(iOSApplicationExtension, unavailable)
 class InAppMessageManager {
     let userStateManager: UserStateManager
+    private var eventListeners: [InAppMessageEventListener] = []
 
     init(owner: String?) {
         userStateManager = UserStateManager(owner: owner)
@@ -38,8 +39,7 @@ class InAppMessageManager {
                 {
                     showInAppMessage(
                         userID: try? Notifly.main.userManager.getNotiflyUserID(),
-                        notiflyInAppMessageData: notiflyInAppMessageData
-                    )
+                        notiflyInAppMessageData: notiflyInAppMessageData)
                 }
             }
         }
@@ -55,22 +55,22 @@ class InAppMessageManager {
         }
         let campaignsToTrigger =
             candidateCampaigns
-            .filter {
-                isCampaignActive(campaign: $0)
-            }
-            .filter {
-                matchTriggeringConditions(campaign: $0, eventName: eventName)
-            }
-            .filter {
-                matchTriggeringFilters(campaign: $0, eventName: eventName, eventParams: eventParams)
-            }
-            .filter {
-                let currentUserData: UserData = userStateManager.userData
-                let currentEventData: EventData = userStateManager.eventData
-                return SegmentationHelper.isEntityOfSegment(
-                    campaign: $0, eventParams: eventParams, userData: currentUserData,
-                    eventData: currentEventData)
-            }
+                .filter {
+                    isCampaignActive(campaign: $0)
+                }
+                .filter {
+                    matchTriggeringConditions(campaign: $0, eventName: eventName)
+                }
+                .filter {
+                    matchTriggeringFilters(campaign: $0, eventName: eventName, eventParams: eventParams)
+                }
+                .filter {
+                    let currentUserData: UserData = userStateManager.userData
+                    let currentEventData: EventData = userStateManager.eventData
+                    return SegmentationHelper.isEntityOfSegment(
+                        campaign: $0, eventParams: eventParams, userData: currentUserData,
+                        eventData: currentEventData)
+                }
 
         if campaignsToTrigger.isEmpty {
             return nil
@@ -95,8 +95,8 @@ class InAppMessageManager {
         campaign: Campaign, eventName _: String, eventParams: [String: Any]?
     ) -> Bool {
         if let paramsFilterCondition = campaign.triggeringEventFilters,
-            !TriggeringEventFilter.matchFilterCondition(
-                filters: paramsFilterCondition.filters, eventParams: eventParams)
+           !TriggeringEventFilter.matchFilterCondition(
+               filters: paramsFilterCondition.filters, eventParams: eventParams)
         {
             return false
         }
@@ -165,7 +165,7 @@ class InAppMessageManager {
         }
         DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline) {
             guard let currentUserID = try? Notifly.main.userManager.getNotiflyUserID(),
-                userID == currentUserID
+                  userID == currentUserID
             else {
                 Logger.error("Skip to present in app message schedule: user id is changed.")
                 return
@@ -212,4 +212,20 @@ class InAppMessageManager {
             }
         }
     }
+
+    func addEventListener(_ listener: @escaping InAppMessageEventListener) {
+        eventListeners.append(listener)
+    }
+
+    func removeAllEventListeners() {
+        eventListeners.removeAll()
+    }
+
+    func dispatchInAppMessageEvent(eventName: String, eventParams: [String: Any]?) {
+        for listener in eventListeners {
+            listener(eventName, eventParams)
+        }
+    }
 }
+
+public typealias InAppMessageEventListener = (String, [String: Any]?) -> Void
