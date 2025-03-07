@@ -157,19 +157,19 @@ struct EventData {
     init(from: [[String: Any]]) {
         eventCounts =
             from
-            .compactMap { EventIntermediateCount(from: $0) }
-            .reduce(into: [String: EventIntermediateCount]()) { result, eventIntermediateCount in
-                let id = EventIntermediateCount.generateId(
-                    eventName: eventIntermediateCount.name,
-                    eventParams: eventIntermediateCount.eventParams,
-                    segmentationEventParamKeys: eventIntermediateCount.eventParams.keys.sorted(),
-                    dt: eventIntermediateCount.dt)
-                if var existingEventIntermediateCount = result[id] {
-                    result[id]?.addCount(count: eventIntermediateCount.count)
-                } else {
-                    result[id] = eventIntermediateCount
+                .compactMap { EventIntermediateCount(from: $0) }
+                .reduce(into: [String: EventIntermediateCount]()) { result, eventIntermediateCount in
+                    let id = EventIntermediateCount.generateId(
+                        eventName: eventIntermediateCount.name,
+                        eventParams: eventIntermediateCount.eventParams,
+                        segmentationEventParamKeys: eventIntermediateCount.eventParams.keys.sorted(),
+                        dt: eventIntermediateCount.dt)
+                    if var existingEventIntermediateCount = result[id] {
+                        result[id]?.addCount(count: eventIntermediateCount.count)
+                    } else {
+                        result[id] = eventIntermediateCount
+                    }
                 }
-            }
     }
 
     init(eventCounts: [String: EventIntermediateCount]) {
@@ -202,9 +202,9 @@ struct EventIntermediateCount {
 
     init?(from: [String: Any]) {
         guard let name = from["name"] as? String,
-            let dt = from["dt"] as? String,
-            let count = from["count"] as? Int,
-            let eventParams = from["event_params"] as? [String: Any]
+              let dt = from["dt"] as? String,
+              let count = from["count"] as? Int,
+              let eventParams = from["event_params"] as? [String: Any]
         else {
             return nil
         }
@@ -227,9 +227,9 @@ struct EventIntermediateCount {
     ) -> String {
         let eicID = eventName + InAppMessageConstant.eicIdSeparator + dt
         if let eventParams = eventParams,
-            let selectedEventParams = EicHelper.selectEventParamsWithKeys(
-                eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys),
-            let (selectedKey, selectedValue) = selectedEventParams.first
+           let selectedEventParams = EicHelper.selectEventParamsWithKeys(
+               eventParams: eventParams, segmentationEventParamKeys: segmentationEventParamKeys),
+           let (selectedKey, selectedValue) = selectedEventParams.first
         {
             return eicID + InAppMessageConstant.eicIdSeparator + selectedKey
                 + InAppMessageConstant.eicIdSeparator + String(describing: selectedValue)
@@ -239,7 +239,7 @@ struct EventIntermediateCount {
     }
 
     mutating func addCount(count: Int) {
-        self.count = self.count + count
+        self.count += count
     }
 }
 
@@ -249,9 +249,9 @@ enum EicHelper {
         eventParams: [String: Any]?, segmentationEventParamKeys: [String]?
     ) -> [String: Any?]? {
         if let segmentationEventParamKeys = segmentationEventParamKeys,
-            let eventParams = eventParams,
-            !segmentationEventParamKeys.isEmpty,
-            eventParams.count > 0
+           let eventParams = eventParams,
+           !segmentationEventParamKeys.isEmpty,
+           eventParams.count > 0
         {
             let keyField = segmentationEventParamKeys[0]
             return [keyField: eventParams[keyField]]

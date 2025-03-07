@@ -8,7 +8,6 @@
 import UserNotifications
 import notifly_ios_sdk
 
-
 class NotificationService: NotiflyNotificationServiceExtension {
     override init() {
         super.init()

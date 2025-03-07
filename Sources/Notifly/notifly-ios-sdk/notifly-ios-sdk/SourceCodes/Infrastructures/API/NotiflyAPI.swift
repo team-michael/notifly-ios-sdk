@@ -28,7 +28,7 @@ class NotiflyAPI {
             if let data = response.data(using: .utf8) as Data?,
                let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                let response = json["message"] {
-                if response as! String == "The incoming token has expired",
+                if response as? String == "The incoming token has expired",
                    let authorization = try? Notifly.main.auth {
                     return authorization.refreshAuth()
                     .flatMap { _ in
