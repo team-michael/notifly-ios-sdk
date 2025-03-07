@@ -26,6 +26,9 @@ jobs:
       - name: Run SwiftLint
         run: swiftlint
 
+      - name: List Runtimes
+        run: xcrun simctl list runtimes
+
       # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md
       - name: Build and test Sources with xcodebuild
         run: |
