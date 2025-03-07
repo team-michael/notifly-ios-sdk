@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [1.16.0] - 2025-03-10
+
+- Added `addInAppMessageEventListener` to provide a interface to listen events from InAppMessage WebView.
+
+
 ## [1.15.0] - 2025-01-16
 
 - Add `getNotiflyUserId()` method to get Notifly user ID.
