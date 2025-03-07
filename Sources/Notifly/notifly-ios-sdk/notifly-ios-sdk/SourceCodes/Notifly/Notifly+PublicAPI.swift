@@ -314,4 +314,12 @@ import UIKit
         try? main.notificationsManager.registerFCMToken(token: token)
         Logger.info("FCM token is successfully registered.")
     }
+
+    static func addInAppMessageEventListener(listener: InAppMessageEventListener) {
+        try? main.inAppMessageManager.addEventListener(listener: listener)
+    }
+
+    static func removeInAppMessageEventListener(listener: InAppMessageEventListener) {
+        try? main.inAppMessageManager.removeEventListener(listener: listener)
+    }
 }
