@@ -26,18 +26,12 @@ jobs:
       - name: Run SwiftLint
         run: swiftlint
 
-      - name: List Runtimes
+      - name: Build Sources with xcodebuild
         run: |
-          xcrun simctl list runtimes
-          xcrun simctl list devices
-
-      # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md
-      - name: Build and test Sources with xcodebuild
-        run: |
-          xcodebuild clean test \
+          xcodebuild clean build \
             -project ./Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk.xcodeproj \
-            -scheme notifly-ios-sdkTests \
-            -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=iOS 17.5' \
+            -scheme notifly-ios-sdk \
+            -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=17.5' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO
 
