@@ -32,7 +32,7 @@ jobs:
           xcodebuild clean test \
             -project ./Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk.xcodeproj \
             -scheme notifly-ios-sdkTests \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=iOS 18.2' \
+            -destination 'platform=iOS Simulator' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO
 
