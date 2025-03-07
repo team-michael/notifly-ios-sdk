@@ -31,3 +31,10 @@ jobs:
           body: ${{ steps.read_changelog.outputs.changes }}
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
+      # https://fuller.li/posts/automated-cocoapods-releases-with-ci/
+      - name: Release to CocoaPods
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+        run: |
+          pod trunk push --allow-warnings notifly_sdk.podspec
+          pod trunk push --allow-warnings notifly_sdk_push_extension.podspec
