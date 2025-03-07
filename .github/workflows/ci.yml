@@ -42,7 +42,9 @@ jobs:
             CODE_SIGNING_REQUIRED=NO
 
       - name: Code Review GPT
-        uses: mattzcarey/code-review-gpt@v0.7.0
+        uses: mattzcarey/code-review-gpt@v0.8.0
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         with:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
