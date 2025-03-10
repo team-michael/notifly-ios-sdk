@@ -9,7 +9,7 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: macos-14
 
     steps:
       - name: Checkout code
@@ -32,11 +32,10 @@ jobs:
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Cocoapods
-        run: |
-          sudo gem update --system
-          sudo gem install cocoapods
-          sudo gem install -n /usr/local/bin cocoapods
+      - name: Setup Cocoapods
+        uses: maxim-lobanov/setup-cocoapods@v1
+        with:
+          version: latest
 
       # https://fuller.li/posts/automated-cocoapods-releases-with-ci/
       - name: Release to CocoaPods
