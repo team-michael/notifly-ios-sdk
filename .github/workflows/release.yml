@@ -32,10 +32,11 @@ jobs:
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Cocoapods
-        uses: maxim-lobanov/setup-cocoapods@v1
-        with:
-          version: 1.16.2
+      - name: Install Cocoapods
+        run: |
+          sudo gem update --system
+          sudo gem install cocoapods
+          sudo gem install -n /usr/local/bin cocoapods
 
       # https://fuller.li/posts/automated-cocoapods-releases-with-ci/
       - name: Release to CocoaPods
