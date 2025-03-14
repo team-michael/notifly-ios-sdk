@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [1.16.1] - 2025-03-14
+
+- Pass `link` event param to main_button_click event callback.
+
 ## [1.16.0] - 2025-03-10
 
 - Added `addInAppMessageEventListener` to provide a interface to listen events from InAppMessage WebView.
