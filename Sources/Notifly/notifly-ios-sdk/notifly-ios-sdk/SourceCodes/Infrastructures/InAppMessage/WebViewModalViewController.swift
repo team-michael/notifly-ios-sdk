@@ -210,9 +210,14 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                    let url = URL(string: urlString)
                 {
                     UIApplication.shared.open(url, options: [:]) { _ in
+                        var paramsWithLink = params
+                        paramsWithLink["link"] = urlString
                         notifly.trackingManager.trackInternalEvent(
                             eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
-                            eventParams: params)
+                            eventParams: paramsWithLink)
+                        notifly.inAppMessageManager.dispatchInAppMessageEvent(
+                            eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
+                            eventParams: paramsWithLink)
                         self.dismissCTATapped()
                     }
                 } else {
