@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
   s.name             = 'notifly_sdk'
-  s.version          = '1.16.1'
+  s.version          = '1.16.2'
   s.summary          = 'Notifly iOS SDK.'
 
   s.description      = <<-DESC
-  NOTIFLY iOS SDK : 1.16.1
+  NOTIFLY iOS SDK : 1.16.2
   DESC
 
   s.homepage         = 'https://github.com/team-michael/notifly-ios-sdk'
@@ -14,6 +14,7 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '13.0'
   s.swift_versions = '5.0'
+  s.pod_target_xcconfig = { 'IPHONEOS_DEPLOYMENT_TARGET' => '13.0' }
 
   s.subspec 'Full' do |full|
     full.source_files = 'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/**/*'
@@ -22,7 +23,8 @@ Pod::Spec.new do |s|
   end
 
   s.subspec 'Extension' do |e|
-    e.source_files = ['Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyExtension/**/*.swift', 'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/**/*.swift', 'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/PrivacyInfo.xcprivacy']
+    e.source_files = ['Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyExtension/**/*.swift', 'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/**/*.swift']
+    e.resources = ["Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/PrivacyInfo.xcprivacy"]
   end
 
 end
