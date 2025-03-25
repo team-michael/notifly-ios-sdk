@@ -6,6 +6,10 @@ on:
       version:
         description: "Version to be released"
         required: true
+      skip_cocoapods:
+        description: "Skip CocoaPods release step"
+        type: boolean
+        default: false
 
 jobs:
   release:
@@ -34,6 +38,7 @@ jobs:
 
       # https://fuller.li/posts/automated-cocoapods-releases-with-ci/
       - name: Release to CocoaPods
+        if: ${{ github.event.inputs.skip_cocoapods == false }}
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         run: |

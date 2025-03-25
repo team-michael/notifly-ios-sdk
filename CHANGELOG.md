@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [1.16.2] - 2025-03-25
+
+- Fix Cocoapods minimum deployment target mismatch issue.
+
 ## [1.16.1] - 2025-03-14
 
 - Pass `link` event param to main_button_click event callback.
