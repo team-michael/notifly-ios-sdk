@@ -38,7 +38,7 @@ jobs:
 
       # https://fuller.li/posts/automated-cocoapods-releases-with-ci/
       - name: Release to CocoaPods
-        if: ${{ github.event.inputs.skip_cocoapods == false }}
+        if: ${{ github.event.inputs.skip_cocoapods != true }}
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         run: |
