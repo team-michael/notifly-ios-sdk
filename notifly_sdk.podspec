@@ -17,8 +17,8 @@ Pod::Spec.new do |s|
   s.pod_target_xcconfig = { 'IPHONEOS_DEPLOYMENT_TARGET' => '13.0' }
 
   s.subspec 'Full' do |full|
-    full.source_files = ['Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/**/*.{h,m,swift}']
-    full.resources = ['Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/**/*.{xcprivacy}']
+    full.source_files = ['Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/**/*.{h,swift}']
+    full.resource_bundles = {'notifly_sdk' => ['Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/PrivacyInfo.xcprivacy']}
     full.dependency 'Firebase/Core'
     full.dependency 'FirebaseMessaging'
   end
