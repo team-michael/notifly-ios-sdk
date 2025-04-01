@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [1.16.3] - 2025-04-01
+
+- Change deployment targets to 13.0.
+
 ## [1.16.2] - 2025-03-25
 
 - Fix Cocoapods minimum deployment target mismatch issue.
