@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [1.17.0] - 2025-04-16
+- Support in-app message template with transparent background.
+
 ## [1.16.3] - 2025-04-01
 
 - Change deployment targets to 13.0.
@@ -21,7 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.16.0] - 2025-03-10
 
 - Added `addInAppMessageEventListener` to provide a interface to listen events from InAppMessage WebView.
-
 
 ## [1.15.0] - 2025-01-16
 
