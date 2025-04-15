@@ -123,6 +123,7 @@ struct ModalProperties {
     let borderTopRightRadius: CGFloat?
     let backgroundOpacity: CGFloat?
     let dismissCTATapped: Bool?
+    let backgroundColor: String?
 
     init?(properties: [String: Any]?) {
         guard let properties = properties else {
@@ -158,6 +159,7 @@ struct ModalProperties {
         backgroundOpacity = castPropertyToCGFloat(value: properties["backgroundOpacity"])
 
         dismissCTATapped = (properties["dismissCTATapped"] ?? false) as? Bool
+        backgroundColor = properties["background_color"] as? String
     }
   
 }
