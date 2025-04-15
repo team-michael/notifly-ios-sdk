@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [1.16.3] - 2025-04-01
+
+- Change deployment targets to 13.0.
+
+## [1.16.2] - 2025-03-25
+
+- Fix Cocoapods minimum deployment target mismatch issue.
+
+## [1.16.1] - 2025-03-14
+
+- Pass `link` event param to main_button_click event callback.
+
+## [1.16.0] - 2025-03-10
+
+- Added `addInAppMessageEventListener` to provide a interface to listen events from InAppMessage WebView.
+
+
 ## [1.15.0] - 2025-01-16
 
 - Add `getNotiflyUserId()` method to get Notifly user ID.

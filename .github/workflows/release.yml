@@ -6,18 +6,22 @@ on:
       version:
         description: "Version to be released"
         required: true
+      skip_cocoapods:
+        description: "Skip CocoaPods release step"
+        type: boolean
+        default: false
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: macos-14
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Read Changelog
         id: read_changelog
-        if: "!endsWith(github.event.inputs.version, 'SNAPSHOT')"
+        if: ${{ !endsWith(github.event.inputs.version, 'SNAPSHOT') }}
         uses: mindsers/changelog-reader-action@v2
         with:
           version: ${{ github.event.inputs.version }}
@@ -31,3 +35,12 @@ jobs:
           body: ${{ steps.read_changelog.outputs.changes }}
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      # https://fuller.li/posts/automated-cocoapods-releases-with-ci/
+      - name: Release to CocoaPods
+        if: ${{ github.event.inputs.skip_cocoapods != true }}
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+        run: |
+          pod trunk push --allow-warnings notifly_sdk.podspec
+          pod trunk push --allow-warnings notifly_sdk_push_extension.podspec

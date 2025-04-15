@@ -56,7 +56,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     func setupUI() -> Bool {
         guard let modalSize = getModalSize() as? CGSize,
-            let webViewLayer = getWebViewLayer(modalSize: modalSize) as? CALayer?
+              let webViewLayer = getWebViewLayer(modalSize: modalSize) as? CALayer?
         else {
             return false
         }
@@ -64,7 +64,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
         webView.translatesAutoresizingMaskIntoConstraints = false
         if let backgroundOpacity = modalProps?.backgroundOpacity as? CGFloat,
-            backgroundOpacity >= 0 && backgroundOpacity <= 1
+           backgroundOpacity >= 0 && backgroundOpacity <= 1
         {
             view.backgroundColor = UIColor.black.withAlphaComponent(CGFloat(backgroundOpacity))
         } else {
@@ -81,7 +81,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         }
 
         if let shouldDismissCTATapped = modalProps?.dismissCTATapped,
-            shouldDismissCTATapped
+           shouldDismissCTATapped
         {
             view.addGestureRecognizer(
                 UITapGestureRecognizer(target: self, action: #selector(dismissCTATapped)))
@@ -101,10 +101,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     func show(animated: Bool = false, completion _: (() -> Void)? = nil) -> Bool {
         DispatchQueue.main.async {
             guard let window = UIApplication.shared.windows.first(where: \.isKeyWindow),
-                let topVC = window.topMostViewController,
-                !(self.isBeingPresented),
-                !(self.isBeingDismissed),
-                self.presentingViewController == nil
+                  let topVC = window.topMostViewController,
+                  !(self.isBeingPresented),
+                  !(self.isBeingDismissed),
+                  self.presentingViewController == nil
             else {
                 WebViewModalViewController.openedInAppMessageCount = 0
                 Logger.error("Fail to present in app message.")
@@ -133,21 +133,20 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         }
         var hideUntilData: [String: Int]?
         if let campaignID = notiflyCampaignID,
-            let reEligibleCondition = notiflyReEligibleCondition,
-            let hideUntil = NotiflyHelper.calculateHideUntil(
-                reEligibleCondition: reEligibleCondition)
+           let reEligibleCondition = notiflyReEligibleCondition,
+           let hideUntil = NotiflyHelper.calculateHideUntil(
+               reEligibleCondition: reEligibleCondition)
         {
             hideUntilData = [campaignID: hideUntil]
             if let main = try? Notifly.main,
-                let userStateManager = main.inAppMessageManager.userStateManager
-                    as? UserStateManager
+               let userStateManager = main.inAppMessageManager.userStateManager
+               as? UserStateManager
             {
                 userStateManager.updateUserCampaignHiddenUntilData(
                     userID: try? main.userManager.getNotiflyUserID(),
                     hideUntilData: [
                         campaignID: hideUntil
-                    ]
-                )
+                    ])
             } else {
                 Logger.error("UserStateManager manager is not exist.")
             }
@@ -167,6 +166,8 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             ] as [String: Any]
         notifly.trackingManager.trackInternalEvent(
             eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
+        notifly.inAppMessageManager.dispatchInAppMessageEvent(
+            eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
     }
 
     func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -178,13 +179,13 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             }
 
             guard let body = message.body as? String,
-                let messageEventData = NotiflyAnyCodable.parseJsonString(body) as [String: Any]?
+                  let messageEventData = NotiflyAnyCodable.parseJsonString(body) as [String: Any]?
             else {
                 return
             }
 
             guard let type = messageEventData["type"] as? String,
-                let buttonName = messageEventData["button_name"] as? String
+                  let buttonName = messageEventData["button_name"] as? String
             else {
                 return
             }
@@ -208,19 +209,30 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 notifly.trackingManager.trackInternalEvent(
                     eventName: TrackingConstant.Internal.inAppMessageCloseButtonClicked,
                     eventParams: params)
+                notifly.inAppMessageManager.dispatchInAppMessageEvent(
+                    eventName: TrackingConstant.Internal.inAppMessageCloseButtonClicked,
+                    eventParams: params)
                 dismissCTATapped()
             case "main_button":
                 if let urlString = messageEventData["link"] as? String,
-                    let url = URL(string: urlString)
+                   let url = URL(string: urlString)
                 {
                     UIApplication.shared.open(url, options: [:]) { _ in
+                        var paramsWithLink = params
+                        paramsWithLink["link"] = urlString
                         notifly.trackingManager.trackInternalEvent(
                             eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
-                            eventParams: params)
+                            eventParams: paramsWithLink)
+                        notifly.inAppMessageManager.dispatchInAppMessageEvent(
+                            eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
+                            eventParams: paramsWithLink)
                         self.dismissCTATapped()
                     }
                 } else {
                     notifly.trackingManager.trackInternalEvent(
+                        eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
+                        eventParams: params)
+                    notifly.inAppMessageManager.dispatchInAppMessageEvent(
                         eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
                         eventParams: params)
                     dismissCTATapped()
@@ -229,13 +241,16 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 notifly.trackingManager.trackInternalEvent(
                     eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked,
                     eventParams: params)
+                notifly.inAppMessageManager.dispatchInAppMessageEvent(
+                    eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked,
+                    eventParams: params)
                 dismissCTATapped()
                 if let templateName = modalProps?.templateName {
                     let now = AppHelper.getCurrentTimestamp(unit: .second)
                     var hideUntil: Int
                     if let message = notiflyExtraData,
-                        let hideUntilInDays = message["hide_until_in_days"] as? Int,
-                        hideUntilInDays > 0
+                       let hideUntilInDays = message["hide_until_in_days"] as? Int,
+                       hideUntilInDays > 0
                     {
                         hideUntil = now + 24 * 3600 * hideUntilInDays
                     } else {
@@ -248,6 +263,9 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 }
             case "survey_submit_button":
                 notifly.trackingManager.trackInternalEvent(
+                    eventName: TrackingConstant.Internal.inAppMessageSurveySubmitButtonClicked,
+                    eventParams: params)
+                notifly.inAppMessageManager.dispatchInAppMessageEvent(
                     eventName: TrackingConstant.Internal.inAppMessageSurveySubmitButtonClicked,
                     eventParams: params)
                 dismissCTATapped()
@@ -314,8 +332,8 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     private func getModalPositionConstraint() -> NSLayoutConstraint {
         if let modalProps = modalProps,
-            let position = modalProps.position as? String,
-            position == "bottom"
+           let position = modalProps.position as? String,
+           position == "bottom"
         {
             return view.bottomAnchor.constraint(equalTo: webView.bottomAnchor)
         }
@@ -325,10 +343,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     private func getWebViewLayer(modalSize: CGSize) -> CALayer? {
         guard let modalProps = modalProps,
-            let tlRadius = modalProps.borderTopLeftRadius,
-            let trRadius = modalProps.borderTopRightRadius,
-            let blRadius = modalProps.borderBottomLeftRadius,
-            let brRadius = modalProps.borderBottomRightRadius
+              let tlRadius = modalProps.borderTopLeftRadius,
+              let trRadius = modalProps.borderTopRightRadius,
+              let blRadius = modalProps.borderBottomLeftRadius,
+              let brRadius = modalProps.borderBottomRightRadius
         else {
             return nil
         }
@@ -366,14 +384,14 @@ class FullScreenWKWebView: WKWebView {
     }
 }
 
-extension UIWindow {
-    fileprivate var topMostViewController: UIViewController? {
+private extension UIWindow {
+    var topMostViewController: UIViewController? {
         return rootViewController?.topMostViewController
     }
 }
 
-extension UIViewController {
-    fileprivate var topMostViewController: UIViewController {
+private extension UIViewController {
+    var topMostViewController: UIViewController {
         if let presented = presentedViewController {
             return presented.topMostViewController
         }

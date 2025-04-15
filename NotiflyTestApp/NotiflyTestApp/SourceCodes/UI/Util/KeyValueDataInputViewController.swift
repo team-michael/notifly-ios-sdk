@@ -94,7 +94,7 @@ class KeyValueDataInputViewController: UIViewController {
                                         view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: scrollView.topAnchor),
                                         view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
                                         view.safeAreaLayoutGuide.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: -rightLeftPadding),
-                                        view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: rightLeftPadding),
+                                        view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: rightLeftPadding)
                                     ])
     }
 

@@ -125,7 +125,7 @@ class UserSettingsTestViewController: UIViewController {
             view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: scrollView.topAnchor),
             view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             view.safeAreaLayoutGuide.leftAnchor.constraint(equalTo: scrollView.leftAnchor),
-            view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: scrollView.rightAnchor),
+            view.safeAreaLayoutGuide.rightAnchor.constraint(equalTo: scrollView.rightAnchor)
         ])
 
         scrollView.addSubview(stackView)
@@ -135,7 +135,7 @@ class UserSettingsTestViewController: UIViewController {
             scrollView.bottomAnchor.constraint(equalTo: stackView.bottomAnchor),
             scrollView.leftAnchor.constraint(equalTo: stackView.leftAnchor),
             scrollView.rightAnchor.constraint(equalTo: stackView.rightAnchor),
-            scrollView.widthAnchor.constraint(equalTo: stackView.widthAnchor),
+            scrollView.widthAnchor.constraint(equalTo: stackView.widthAnchor)
         ])
         stackView.axis = .vertical
         stackView.alignment = .center
