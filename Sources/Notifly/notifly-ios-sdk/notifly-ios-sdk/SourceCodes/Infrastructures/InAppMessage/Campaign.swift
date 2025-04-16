@@ -159,7 +159,7 @@ struct ModalProperties {
         backgroundOpacity = castPropertyToCGFloat(value: properties["backgroundOpacity"])
 
         dismissCTATapped = (properties["dismissCTATapped"] ?? false) as? Bool
-        backgroundColor = properties["background_color"] as? String
+        backgroundColor = properties["backgroundColor"] as? String
     }
   
 }
