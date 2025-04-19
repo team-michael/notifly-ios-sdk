@@ -69,8 +69,11 @@ import UIKit
                 if let token = token,
                    error == nil
                 {
+                    Logger.info("FCM token retrieved during initialization: \(token)")
                     try? main.notificationsManager.deviceTokenPromise?(.success(token))
                     main.notificationsManager.setDeviceTokenPub(token: token)
+                } else {
+                    Logger.error("Failed to get FCM token during initialization: \(error?.localizedDescription ?? "Unknown error")")
                 }
                 try? main.trackingManager.trackSessionStartInternalEvent()
                 Logger.info("📡 Notifly SDK is successfully initialized.")

@@ -50,9 +50,11 @@ class NotificationsManager: NSObject {
         _: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
+        Logger.info("APNs device token received: \(deviceToken.hexString)")
         Messaging.messaging().apnsToken = deviceToken
         Messaging.messaging().token { token, error in
             if let token = token, error == nil {
+                Logger.info("FCM registration token received: \(token)")
                 self.registerFCMToken(token: token)
             } else {
                 Logger.error("Error fetching FCM registration token: \(error)")
@@ -64,6 +66,7 @@ class NotificationsManager: NSObject {
     }
 
     func registerFCMToken(token: String) {
+        Logger.info("Registering FCM token: \(token)")
         deviceTokenPromise?(.success(token))
         deviceTokenPub = Just(token).setFailureType(to: Error.self).eraseToAnyPublisher()
         if let notifly = try? Notifly.main {
@@ -160,13 +163,17 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
         _: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) {
+        Logger.info("Received notification response")
         if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]?,
             let clickStatus = UIApplication.shared.applicationState == .active
                 ? "foreground" : "background"
         {
+            Logger.info("Push data: \(pushData)")
+            Logger.info("Click status: \(clickStatus)")
             guard let notiflyMessageType = pushData["notifly_message_type"] as? String,
                 notiflyMessageType == "push-notification"
             else {
+                Logger.warning("Invalid notifly_message_type in push data")
                 return
             }
 
@@ -199,6 +206,7 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
         willPresent _: UNNotification,
         withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void
     ) {
+        Logger.info("Will present notification in foreground")
         if #available(iOS 14.0, *) {
             completion([.banner, .badge, .sound, .list])
         } else {

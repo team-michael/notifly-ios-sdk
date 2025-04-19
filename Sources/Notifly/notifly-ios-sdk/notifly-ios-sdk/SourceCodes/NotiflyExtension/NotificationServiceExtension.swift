@@ -20,11 +20,18 @@ import UserNotifications
         _ request: UNNotificationRequest,
         withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void
     ) {
+        Logger.info("Notification service extension received request")
+        Logger.info("Request identifier: \(request.identifier)")
+        
         guard
             let bestAttemptContent = request.content.mutableCopy() as? UNMutableNotificationContent
         else {
+            Logger.error("Failed to create mutable notification content")
             return
         }
+        
+        Logger.info("Notification content: \(bestAttemptContent.userInfo)")
+        
         self.bestAttemptContent = bestAttemptContent
         self.contentHandler = contentHandler
 
@@ -32,6 +39,7 @@ import UserNotifications
             let notiflyMessageType = bestAttemptContent.userInfo["notifly_message_type"] as? String,
             notiflyMessageType == "push-notification"
         else {
+            Logger.warning("Invalid or missing notifly_message_type in notification")
             contentHandler(bestAttemptContent)
             return
         }
@@ -40,6 +48,7 @@ import UserNotifications
             NotiflyCustomUserDefaults.usernameInUserDefaults != nil,
             NotiflyCustomUserDefaults.passwordInUserDefaults != nil
         {
+            Logger.info("Tracking push notification delivery")
             let gcmMessageId = bestAttemptContent.userInfo["gcm.message_id"] as? String
             let notiflyUserId = bestAttemptContent.userInfo["notifly_user_id"] as? String
             let data =
