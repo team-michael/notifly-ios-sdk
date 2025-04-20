@@ -15,6 +15,6 @@ class NotificationService: NotiflyNotificationServiceExtension {
     }
 
     func setup() {
-        self.register(projectId: "minyong", username: "000000")
+        self.register(projectId: "b80c3f0e2fbd5eb986df4f1d32ea2871", username: "minyong")
     }
 }
