@@ -73,7 +73,12 @@ import UIKit
                     try? main.notificationsManager.deviceTokenPromise?(.success(token))
                     main.notificationsManager.setDeviceTokenPub(token: token)
                 } else {
-                    Logger.error("Failed to get FCM token during initialization: \(error?.localizedDescription ?? "Unknown error")")
+                    let apnsToken =
+                        Messaging.messaging().apnsToken?.map { String(format: "%02x", $0) }.joined()
+                            ?? "No APNS token"
+                    Logger.error(
+                        "Failed to get FCM token during initialization: \(error?.localizedDescription ?? "Unknown error"). APNS token: \(apnsToken)"
+                    )
                 }
                 try? main.trackingManager.trackSessionStartInternalEvent()
                 Logger.info("📡 Notifly SDK is successfully initialized.")
