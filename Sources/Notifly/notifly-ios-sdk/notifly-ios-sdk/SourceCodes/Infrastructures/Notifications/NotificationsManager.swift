@@ -17,13 +17,13 @@ class NotificationsManager: NSObject {
             if let pub = _deviceTokenPub {
                 return
                     pub
-                        .catch { _ -> AnyPublisher<String, Error> in
-                            Logger.error(
-                                "Failed to get APNs Token with error: You don't register APNs token to notifly yet."
-                            )
-                            return Just("").setFailureType(to: Error.self).eraseToAnyPublisher()
-                        }
-                        .eraseToAnyPublisher()
+                    .catch { _ -> AnyPublisher<String, Error> in
+                        Logger.error(
+                            "Failed to get APNs Token with error: You don't register APNs token to notifly yet."
+                        )
+                        return Just("").setFailureType(to: Error.self).eraseToAnyPublisher()
+                    }
+                    .eraseToAnyPublisher()
             } else {
                 Logger.error("Failed to get APNs Token with error")
                 return Just("").setFailureType(to: Error.self).eraseToAnyPublisher()
@@ -51,13 +51,18 @@ class NotificationsManager: NSObject {
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
         Logger.info("APNs device token received: \(deviceToken)")
+        Logger.info(
+            "Current notification authorization status: \(UNUserNotificationCenter.current().notificationSettings)"
+        )
         Messaging.messaging().apnsToken = deviceToken
         Messaging.messaging().token { token, error in
             if let token = token, error == nil {
                 Logger.info("FCM registration token received: \(token)")
+                Logger.info("FCM auto init enabled: \(Messaging.messaging().isAutoInitEnabled)")
                 self.registerFCMToken(token: token)
             } else {
                 Logger.error("Error fetching FCM registration token: \(error)")
+                Logger.info("FCM error details: \(String(describing: error))")
                 self.deviceTokenPromise?(.failure(NotiflyError.deviceTokenError))
                 self.deviceTokenPub = Fail(error: NotiflyError.deviceTokenError)
                     .eraseToAnyPublisher()
@@ -133,6 +138,11 @@ class NotificationsManager: NSObject {
     // MARK: Private Methods
 
     private func setup() {
+        Logger.info("Setting up NotificationsManager")
+        Logger.info(
+            "Current notification settings: \(UNUserNotificationCenter.current().notificationSettings)"
+        )
+
         // Setup observer to listen for APN Device tokens.
         deviceTokenPub = Future { [weak self] promise in
             self?.deviceTokenPromise = promise
@@ -140,6 +150,9 @@ class NotificationsManager: NSObject {
                 deadline: .now() + (self?.deviceTokenPromiseTimeoutInterval ?? 0.0)
             ) {
                 if let promise = self?.deviceTokenPromise {
+                    Logger.info(
+                        "Device token promise timed out after \(self?.deviceTokenPromiseTimeoutInterval ?? 0.0) seconds"
+                    )
                     promise(.failure(NotiflyError.promiseTimeout))
                 }
             }
@@ -147,9 +160,18 @@ class NotificationsManager: NSObject {
 
         // Register Remote Notification.
         DispatchQueue.main.async {
+            Logger.info("Checking remote notification registration status")
+            Logger.info(
+                "isRegisteredForRemoteNotifications: \(UIApplication.shared.isRegisteredForRemoteNotifications)"
+            )
+            Logger.info(
+                "isRegisteredAPNsInUserDefaults: \(NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults)"
+            )
+
             if !(UIApplication.shared.isRegisteredForRemoteNotifications
                 && NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults == true)
             {
+                Logger.info("Attempting to register for remote notifications")
                 UIApplication.shared.registerForRemoteNotifications()
                 NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults = true
             }
@@ -165,14 +187,21 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse
     ) {
         Logger.info("Received notification response")
+        Logger.info("Notification content: \(response.notification.request.content)")
+        Logger.info("Notification userInfo: \(response.notification.request.content.userInfo)")
+        Logger.info("App state: \(UIApplication.shared.applicationState)")
+
         if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]?,
-           let clickStatus = UIApplication.shared.applicationState == .active
-           ? "foreground" : "background"
+            let clickStatus = UIApplication.shared.applicationState == .active
+                ? "foreground" : "background"
         {
             Logger.info("Push data: \(pushData)")
             Logger.info("Click status: \(clickStatus)")
+            Logger.info(
+                "Push notification type: \(pushData["notifly_message_type"] as? String ?? "unknown")"
+            )
             guard let notiflyMessageType = pushData["notifly_message_type"] as? String,
-                  notiflyMessageType == "push-notification"
+                notiflyMessageType == "push-notification"
             else {
                 Logger.error("Invalid notifly_message_type in push data")
                 return
@@ -184,7 +213,7 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
             }
 
             if let urlString = pushData["url"] as? String,
-               let url = URL(string: urlString)
+                let url = URL(string: urlString)
             {
                 UIApplication.shared.open(url, options: [:]) { _ in
                     main.trackingManager.trackPushClickInternalEvent(
