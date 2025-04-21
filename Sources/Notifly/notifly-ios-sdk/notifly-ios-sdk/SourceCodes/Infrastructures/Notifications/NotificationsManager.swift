@@ -17,13 +17,13 @@ class NotificationsManager: NSObject {
             if let pub = _deviceTokenPub {
                 return
                     pub
-                    .catch { _ -> AnyPublisher<String, Error> in
-                        Logger.error(
-                            "Failed to get APNs Token with error: You don't register APNs token to notifly yet."
-                        )
-                        return Just("").setFailureType(to: Error.self).eraseToAnyPublisher()
-                    }
-                    .eraseToAnyPublisher()
+                        .catch { _ -> AnyPublisher<String, Error> in
+                            Logger.error(
+                                "Failed to get APNs Token with error: You don't register APNs token to notifly yet."
+                            )
+                            return Just("").setFailureType(to: Error.self).eraseToAnyPublisher()
+                        }
+                        .eraseToAnyPublisher()
             } else {
                 Logger.error("Failed to get APNs Token with error")
                 return Just("").setFailureType(to: Error.self).eraseToAnyPublisher()
@@ -50,7 +50,7 @@ class NotificationsManager: NSObject {
         _: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
-        Logger.info("APNs device token received: \(deviceToken.hexString)")
+        Logger.info("APNs device token received: \(deviceToken)")
         Messaging.messaging().apnsToken = deviceToken
         Messaging.messaging().token { token, error in
             if let token = token, error == nil {
@@ -116,7 +116,8 @@ class NotificationsManager: NSObject {
 
             // Create a request for the notification
             let request = UNNotificationRequest(
-                identifier: UUID().uuidString, content: content, trigger: trigger)
+                identifier: UUID().uuidString, content: content, trigger: trigger
+            )
 
             // Schedule the notification
             UNUserNotificationCenter.current().add(request) { error in
@@ -165,15 +166,15 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
     ) {
         Logger.info("Received notification response")
         if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]?,
-            let clickStatus = UIApplication.shared.applicationState == .active
-                ? "foreground" : "background"
+           let clickStatus = UIApplication.shared.applicationState == .active
+           ? "foreground" : "background"
         {
             Logger.info("Push data: \(pushData)")
             Logger.info("Click status: \(clickStatus)")
             guard let notiflyMessageType = pushData["notifly_message_type"] as? String,
-                notiflyMessageType == "push-notification"
+                  notiflyMessageType == "push-notification"
             else {
-                Logger.warning("Invalid notifly_message_type in push data")
+                Logger.error("Invalid notifly_message_type in push data")
                 return
             }
 
@@ -183,7 +184,7 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
             }
 
             if let urlString = pushData["url"] as? String,
-                let url = URL(string: urlString)
+               let url = URL(string: urlString)
             {
                 UIApplication.shared.open(url, options: [:]) { _ in
                     main.trackingManager.trackPushClickInternalEvent(
