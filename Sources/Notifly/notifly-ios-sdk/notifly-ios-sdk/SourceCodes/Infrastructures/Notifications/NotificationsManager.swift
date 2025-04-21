@@ -10,6 +10,7 @@ class NotificationsManager: NSObject {
     // MARK: Properties
 
     private var _deviceTokenPub: AnyPublisher<String, Error>?
+    private var hasReceivedAPNsToken = false
 
     private(set) var deviceTokenPub: AnyPublisher<String, Error>? {
         // TODO: Remove this temp workaround once APNs token is available.
@@ -52,6 +53,7 @@ class NotificationsManager: NSObject {
     ) {
         let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
         Logger.info("APNs device token received: \(tokenString)")
+        hasReceivedAPNsToken = true
 
         Task {
             let settings = await UNUserNotificationCenter.current().notificationSettings()
@@ -63,19 +65,22 @@ class NotificationsManager: NSObject {
         Messaging.messaging().apnsToken = deviceToken
         Logger.info("APNs token set to FCM: \(tokenString)")
 
-        Messaging.messaging().token { token, error in
-            if let token = token, error == nil {
-                Logger.info("FCM registration token received: \(token)")
-                Logger.info("FCM auto init enabled: \(Messaging.messaging().isAutoInitEnabled)")
-                Logger.info(
-                    "FCM APNs token matches: \(Messaging.messaging().apnsToken == deviceToken)")
-                self.registerFCMToken(token: token)
-            } else {
-                Logger.error("Error fetching FCM registration token: \(error)")
-                Logger.info("FCM error details: \(String(describing: error))")
-                self.deviceTokenPromise?(.failure(NotiflyError.deviceTokenError))
-                self.deviceTokenPub = Fail(error: NotiflyError.deviceTokenError)
-                    .eraseToAnyPublisher()
+        // APNs 토큰이 수신된 후에만 FCM 토큰을 요청
+        if hasReceivedAPNsToken {
+            Messaging.messaging().token { token, error in
+                if let token = token, error == nil {
+                    Logger.info("FCM registration token received: \(token)")
+                    Logger.info("FCM auto init enabled: \(Messaging.messaging().isAutoInitEnabled)")
+                    Logger.info(
+                        "FCM APNs token matches: \(Messaging.messaging().apnsToken == deviceToken)")
+                    self.registerFCMToken(token: token)
+                } else {
+                    Logger.error("Error fetching FCM registration token: \(error)")
+                    Logger.info("FCM error details: \(String(describing: error))")
+                    self.deviceTokenPromise?(.failure(NotiflyError.deviceTokenError))
+                    self.deviceTokenPub = Fail(error: NotiflyError.deviceTokenError)
+                        .eraseToAnyPublisher()
+                }
             }
         }
     }
@@ -164,8 +169,9 @@ class NotificationsManager: NSObject {
             )
             self?.deviceTokenPromise = promise
 
-            // Check if we already have a token
-            if let currentToken = Messaging.messaging().fcmToken {
+            // Check if we already have a token and APNs token
+            if let currentToken = Messaging.messaging().fcmToken, self?.hasReceivedAPNsToken == true
+            {
                 Logger.info("Found existing FCM token: \(currentToken)")
                 promise(.success(currentToken))
                 return
