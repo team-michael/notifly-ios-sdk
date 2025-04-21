@@ -72,6 +72,14 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         }
 
         webView.layer.mask = webViewLayer
+        
+        if let backgroundColorString = modalProps?.backgroundColor as? String,
+           let backgroundColor = UIColor(hex: backgroundColorString)
+        {
+            webView.isOpaque = false
+            webView.backgroundColor = backgroundColor
+        }
+
         if let shouldDismissCTATapped = modalProps?.dismissCTATapped,
            shouldDismissCTATapped
         {
@@ -396,5 +404,44 @@ private extension UIViewController {
             }
         }
         return self
+    }
+}
+
+private extension UIColor {
+    convenience init?(hex: String) {
+        let r, g, b, a: CGFloat
+        
+        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+        
+        var rgba: UInt64 = 0
+        Scanner(string: hexSanitized).scanHexInt64(&rgba)
+
+        switch hexSanitized.count {
+        case 3:
+            r = CGFloat((rgba >> 8) & 0xF) / 15.0
+            g = CGFloat((rgba >> 4) & 0xF) / 15.0
+            b = CGFloat(rgba & 0xF) / 15.0
+            a = 1.0
+        case 4:
+            r = CGFloat((rgba >> 8) & 0xF) / 15.0
+            g = CGFloat((rgba >> 4) & 0xF) / 15.0
+            b = CGFloat(rgba & 0xF) / 15.0
+            a = CGFloat((rgba >> 12) & 0xF) / 15.0
+        case 6:
+            r = CGFloat((rgba >> 16) & 0xFF) / 255.0
+            g = CGFloat((rgba >> 8) & 0xFF) / 255.0
+            b = CGFloat(rgba & 0xFF) / 255.0
+            a = 1.0
+        case 8:
+            r = CGFloat((rgba >> 16) & 0xFF) / 255.0
+            g = CGFloat((rgba >> 8) & 0xFF) / 255.0
+            b = CGFloat(rgba & 0xFF) / 255.0
+            a = CGFloat((rgba >> 24) & 0xFF) / 255.0
+        default:
+            return nil
+        }
+        
+        self.init(red: r, green: g, blue: b, alpha: a)
     }
 }
