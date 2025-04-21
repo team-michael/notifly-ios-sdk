@@ -50,7 +50,8 @@ class NotificationsManager: NSObject {
         _: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
-        Logger.info("APNs device token received: \(deviceToken)")
+        let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        Logger.info("APNs device token received: \(tokenString)")
 
         Task {
             let settings = await UNUserNotificationCenter.current().notificationSettings()
