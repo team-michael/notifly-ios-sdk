@@ -51,14 +51,23 @@ class NotificationsManager: NSObject {
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
         Logger.info("APNs device token received: \(deviceToken)")
-        Logger.info(
-            "Current notification authorization status: \(UNUserNotificationCenter.current().notificationSettings)"
-        )
+
+        Task {
+            let settings = await UNUserNotificationCenter.current().notificationSettings()
+            Logger.info(
+                "Notification authorization status: authorized=\(settings.authorizationStatus == .authorized), alert=\(settings.alertSetting == .enabled), sound=\(settings.soundSetting == .enabled), badge=\(settings.badgeSetting == .enabled)"
+            )
+        }
+
         Messaging.messaging().apnsToken = deviceToken
+        Logger.info("APNs token set to FCM: \(tokenString)")
+
         Messaging.messaging().token { token, error in
             if let token = token, error == nil {
                 Logger.info("FCM registration token received: \(token)")
                 Logger.info("FCM auto init enabled: \(Messaging.messaging().isAutoInitEnabled)")
+                Logger.info(
+                    "FCM APNs token matches: \(Messaging.messaging().apnsToken == deviceToken)")
                 self.registerFCMToken(token: token)
             } else {
                 Logger.error("Error fetching FCM registration token: \(error)")
@@ -139,9 +148,13 @@ class NotificationsManager: NSObject {
 
     private func setup() {
         Logger.info("Setting up NotificationsManager")
-        Logger.info(
-            "Current notification settings: \(UNUserNotificationCenter.current().notificationSettings)"
-        )
+
+        Task {
+            let settings = await UNUserNotificationCenter.current().notificationSettings()
+            Logger.info(
+                "Initial notification settings: authorized=\(settings.authorizationStatus == .authorized), alert=\(settings.alertSetting == .enabled), sound=\(settings.soundSetting == .enabled), badge=\(settings.badgeSetting == .enabled)"
+            )
+        }
 
         // Setup observer to listen for APN Device tokens.
         deviceTokenPub = Future { [weak self] promise in
@@ -160,20 +173,21 @@ class NotificationsManager: NSObject {
 
         // Register Remote Notification.
         DispatchQueue.main.async {
-            Logger.info("Checking remote notification registration status")
+            let isRegistered = UIApplication.shared.isRegisteredForRemoteNotifications
+            let isRegisteredInDefaults =
+                NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults == true
+
             Logger.info(
-                "isRegisteredForRemoteNotifications: \(UIApplication.shared.isRegisteredForRemoteNotifications)"
-            )
-            Logger.info(
-                "isRegisteredAPNsInUserDefaults: \(NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults)"
+                "Remote notification registration status: isRegistered=\(isRegistered), isRegisteredInDefaults=\(isRegisteredInDefaults)"
             )
 
-            if !(UIApplication.shared.isRegisteredForRemoteNotifications
-                && NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults == true)
-            {
+            if !(isRegistered && isRegisteredInDefaults) {
                 Logger.info("Attempting to register for remote notifications")
                 UIApplication.shared.registerForRemoteNotifications()
                 NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults = true
+                Logger.info("Remote notification registration initiated")
+            } else {
+                Logger.info("Remote notifications already registered")
             }
         }
     }
