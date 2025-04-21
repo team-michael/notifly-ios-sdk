@@ -159,13 +159,29 @@ class NotificationsManager: NSObject {
 
         // Setup observer to listen for APN Device tokens.
         deviceTokenPub = Future { [weak self] promise in
+            Logger.info(
+                "Starting device token promise with timeout: \(self?.deviceTokenPromiseTimeoutInterval ?? 0.0) seconds"
+            )
             self?.deviceTokenPromise = promise
+
+            // Check if we already have a token
+            if let currentToken = Messaging.messaging().fcmToken {
+                Logger.info("Found existing FCM token: \(currentToken)")
+                promise(.success(currentToken))
+                return
+            }
+
             DispatchQueue.main.asyncAfter(
                 deadline: .now() + (self?.deviceTokenPromiseTimeoutInterval ?? 0.0)
             ) {
                 if let promise = self?.deviceTokenPromise {
                     Logger.info(
                         "Device token promise timed out after \(self?.deviceTokenPromiseTimeoutInterval ?? 0.0) seconds"
+                    )
+                    Logger.info(
+                        "Current FCM token status: \(Messaging.messaging().fcmToken ?? "nil")")
+                    Logger.info(
+                        "APNs registration status: \(UIApplication.shared.isRegisteredForRemoteNotifications)"
                     )
                     promise(.failure(NotiflyError.promiseTimeout))
                 }
