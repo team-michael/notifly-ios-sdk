@@ -1,10 +1,12 @@
 {
   "editor.formatOnSave": true,
   "editor.renderWhitespace": "all",
-  "files.autoSave": "afterDelay",
   "editor.quickSuggestions": {
     "comments": "off",
     "strings": "off",
     "other": "off"
-  }
+  },
+  "files.autoSave": "afterDelay",
+  "files.insertFinalNewline": true,
+  "swift.SDK": "arm64-apple-ios"
 }
