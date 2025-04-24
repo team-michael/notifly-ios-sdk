@@ -43,3 +43,5 @@ DerivedData
 .netrc
 .idea
 .index-build
+
+GoogleService-Info.plist
