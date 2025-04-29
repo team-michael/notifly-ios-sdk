@@ -1,6 +1,18 @@
 {
+  "version": 1,
   "indentation": {
     "spaces": 4
   },
-  "lineLength": 100
+  "lineLength": 100,
+  "lineBreakBeforeEachArgument": true,
+  "rules": {
+    "AlwaysUseLiteralForEmptyCollectionInit": true,
+    "BeginDocumentationCommentWithOneLineSummary": true,
+    "NeverUseForceTry": true,
+    "NeverUseImplicitlyUnwrappedOptionals": true,
+    "NoLeadingUnderscores": true,
+    "UseEarlyExits": true,
+    "UseWhereClausesInForLoops": true,
+    "ValidateDocumentationComments": true
+  }
 }

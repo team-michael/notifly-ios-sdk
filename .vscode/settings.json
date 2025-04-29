@@ -7,6 +7,5 @@
     "other": "off"
   },
   "files.autoSave": "afterDelay",
-  "files.insertFinalNewline": true,
-  "swift.SDK": "arm64-apple-ios"
+  "files.insertFinalNewline": true
 }
