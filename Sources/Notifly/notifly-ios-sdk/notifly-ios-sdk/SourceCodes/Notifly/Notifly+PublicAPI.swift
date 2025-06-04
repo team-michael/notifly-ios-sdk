@@ -38,7 +38,7 @@ import UIKit
         Notifly.asyncWorker.addTask {
             main.inAppMessageManager.userStateManager.syncState(
                 postProcessConfig:
-                PostProcessConfigForSyncState(merge: false, clear: false)
+                    PostProcessConfigForSyncState(merge: false, clear: false)
             ) {
                 Notifly.asyncWorker.unlock()
             }
@@ -47,7 +47,7 @@ import UIKit
         if let pushData = Notifly.coldStartNotificationData {
             let clickStatus = "background"
             if let urlString = pushData["url"] as? String,
-               let url = URL(string: urlString)
+                let url = URL(string: urlString)
             {
                 UIApplication.shared.open(url, options: [:]) { _ in
                     main.trackingManager.trackPushClickInternalEvent(
@@ -64,17 +64,10 @@ import UIKit
             Notifly.coldStartNotificationData = nil
         }
 
+        // NotificationsManager now handles all token acquisition logic
         Notifly.asyncWorker.addTask {
-            Messaging.messaging().token { token, error in
-                if let token = token,
-                   error == nil
-                {
-                    try? main.notificationsManager.deviceTokenPromise?(.success(token))
-                    main.notificationsManager.setDeviceTokenPub(token: token)
-                }
-                try? main.trackingManager.trackSessionStartInternalEvent()
-                Logger.info("📡 Notifly SDK is successfully initialized.")
-            }
+            try? main.trackingManager.trackSessionStartInternalEvent()
+            Logger.info("📡 Notifly SDK is successfully initialized.")
         }
     }
 
@@ -109,7 +102,8 @@ import UIKit
     }
 
     static func application(
-        _: UIApplication, didReceiveRemoteNotification _: [AnyHashable: Any]
+        _: UIApplication,
+        didReceiveRemoteNotification _: [AnyHashable: Any]
     ) {
         Logger.error("Deprecated Method.")
     }
@@ -119,11 +113,11 @@ import UIKit
         didReceive response: UNNotificationResponse
     ) {
         if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]?,
-           let clickStatus = UIApplication.shared.applicationState == .active
-           ? "foreground" : "background"
+            let clickStatus = UIApplication.shared.applicationState == .active
+                ? "foreground" : "background"
         {
             guard let notiflyMessageType = pushData["notifly_message_type"] as? String,
-                  notiflyMessageType == "push-notification"
+                notiflyMessageType == "push-notification"
             else {
                 return
             }
@@ -145,12 +139,13 @@ import UIKit
         withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void
     ) {
         if let pushData = notification.request.content.userInfo as [AnyHashable: Any]?,
-           let notiflyMessageType = pushData["notifly_message_type"] as? String,
-           notiflyMessageType == "push-notification"
+            let notiflyMessageType = pushData["notifly_message_type"] as? String,
+            notiflyMessageType == "push-notification"
         {
             guard (try? main) != nil else {
                 Logger.error(
-                    "Fail to Show Notifly Foreground Message: Notifly is not initialized yet.")
+                    "Fail to Show Notifly Foreground Message: Notifly is not initialized yet."
+                )
                 return
             }
 
@@ -217,7 +212,8 @@ import UIKit
 
         if userProperties.isEmpty {
             Logger.info(
-                "Empty dictionary provided for setting user properties. Ignoring this call.")
+                "Empty dictionary provided for setting user properties. Ignoring this call."
+            )
             return
         }
 
@@ -230,7 +226,8 @@ import UIKit
                 )
                 var newUserProperties = userProperties
                 newUserProperties.removeValue(
-                    forKey: TrackingConstant.InternalUserPropertyKey.timezone)
+                    forKey: TrackingConstant.InternalUserPropertyKey.timezone
+                )
                 return setUserProperties(userProperties: newUserProperties)
             }
         }
