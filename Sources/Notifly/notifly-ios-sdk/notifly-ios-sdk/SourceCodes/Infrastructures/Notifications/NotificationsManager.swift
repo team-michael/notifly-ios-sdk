@@ -309,7 +309,8 @@ class NotificationsManager: NSObject {
         delay: TimeInterval
     ) {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) {
-            _, error in
+            _,
+            error in
             if let error = error {
                 Logger.error(
                     "Error requesting authorization for notifications: \(error.localizedDescription)"
@@ -330,7 +331,10 @@ class NotificationsManager: NSObject {
 
             // Create a request for the notification
             let request = UNNotificationRequest(
-                identifier: UUID().uuidString, content: content, trigger: trigger)
+                identifier: UUID().uuidString,
+                content: content,
+                trigger: trigger
+            )
 
             // Schedule the notification
             UNUserNotificationCenter.current().add(request) { error in

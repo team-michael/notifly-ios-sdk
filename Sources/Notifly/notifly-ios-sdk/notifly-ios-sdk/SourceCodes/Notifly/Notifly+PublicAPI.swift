@@ -66,7 +66,7 @@ import UIKit
 
         // NotificationsManager now handles all token acquisition logic
         Notifly.asyncWorker.addTask {
-            try? main.trackingManager.trackSessionStartInternalEvent()
+            main.trackingManager.trackSessionStartInternalEvent()
             Logger.info("📡 Notifly SDK is successfully initialized.")
         }
     }
@@ -75,11 +75,11 @@ import UIKit
         _ application: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
-        guard (try? main) != nil else {
+        guard let main = try? main else {
             Messaging.messaging().apnsToken = deviceToken
             return
         }
-        try? main.notificationsManager.application(
+        main.notificationsManager.application(
             application,
             didRegisterForRemoteNotificationsWithDeviceToken: deviceToken
         )
@@ -89,13 +89,13 @@ import UIKit
         _ application: UIApplication,
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
-        guard (try? main) != nil else {
+        guard let main = try? main else {
             Logger.error(
                 "Failed to Register for Remote Notifications: However, you can track events and set user properties without registering for remote notifications."
             )
             return
         }
-        try? main.notificationsManager.application(
+        main.notificationsManager.application(
             application,
             didFailToRegisterForRemoteNotificationsWithError: error
         )
@@ -121,12 +121,12 @@ import UIKit
             else {
                 return
             }
-            guard (try? main) != nil else {
+            guard let main = try? main else {
                 Notifly.coldStartNotificationData = pushData
                 return
             }
 
-            try? main.notificationsManager.userNotificationCenter(
+            main.notificationsManager.userNotificationCenter(
                 notificationCenter,
                 didReceive: response
             )
@@ -142,14 +142,14 @@ import UIKit
             let notiflyMessageType = pushData["notifly_message_type"] as? String,
             notiflyMessageType == "push-notification"
         {
-            guard (try? main) != nil else {
+            guard let main = try? main else {
                 Logger.error(
                     "Fail to Show Notifly Foreground Message: Notifly is not initialized yet."
                 )
                 return
             }
 
-            try? main.notificationsManager.userNotificationCenter(
+            main.notificationsManager.userNotificationCenter(
                 notificationCenter,
                 willPresent: notification,
                 withCompletionHandler: completion
@@ -168,7 +168,7 @@ import UIKit
             )
             return
         }
-        try? main.trackingManager.track(
+        main.trackingManager.track(
             eventName: eventName,
             eventParams: eventParams,
             isInternal: false,
@@ -189,7 +189,7 @@ import UIKit
             }
             return
         }
-        try? main.userManager.setExternalUserId(userId)
+        main.userManager.setExternalUserId(userId)
     }
 
     static func getNotiflyUserId() -> String? {
@@ -232,7 +232,7 @@ import UIKit
             }
         }
 
-        try? main.userManager.setUserProperties(userProperties: userProperties)
+        main.userManager.setUserProperties(userProperties: userProperties)
     }
 
     static func setPhoneNumber(_ phoneNumber: String) {
@@ -289,7 +289,7 @@ import UIKit
             )
             return
         }
-        try? main.notificationsManager.schedulePushNotification(
+        main.notificationsManager.schedulePushNotification(
             title: title,
             body: body,
             url: url,
@@ -308,15 +308,17 @@ import UIKit
             Logger.error("Token must not be empty.")
             return
         }
-        try? main.notificationsManager.registerFCMToken(token: token)
+        main.notificationsManager.registerFCMToken(token: token)
         Logger.info("FCM token is successfully registered.")
     }
 
     static func addInAppMessageEventListener(listener: @escaping InAppMessageEventListener) {
-        try? main.inAppMessageManager.addEventListener(listener)
+        guard let main = try? main else { return }
+        main.inAppMessageManager.addEventListener(listener)
     }
 
     static func removeAllInAppMessageEventListener() {
-        try? main.inAppMessageManager.removeAllEventListeners()
+        guard let main = try? main else { return }
+        main.inAppMessageManager.removeAllEventListeners()
     }
 }
