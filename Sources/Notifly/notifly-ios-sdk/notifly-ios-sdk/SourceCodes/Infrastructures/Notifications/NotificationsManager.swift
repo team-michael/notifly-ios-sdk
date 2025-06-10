@@ -89,6 +89,16 @@ class NotificationsManager: NSObject {
         apnsTokenState = .success
         // Don't reset retry counter here - let it be reset only when FCM token succeeds
 
+        // Convert APNs token to string for tracking
+        let apnsTokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+
+        // Track APNs token for debugging purposes
+        if let notifly = try? Notifly.main {
+            notifly.trackingManager.trackSetDevicePropertiesInternalEvent(properties: [
+                "apns_token": apnsTokenString
+            ])
+        }
+
         // Set APNs token to Firebase
         Messaging.messaging().apnsToken = deviceToken
 
