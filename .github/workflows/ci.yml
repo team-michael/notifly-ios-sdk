@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-15
 
     steps:
       - name: Checkout code
@@ -42,5 +42,5 @@ jobs:
         with:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
-          MODEL: 'gpt-4o'
-          REVIEW_LANGUAGE: 'Korean'
+          MODEL: "gpt-4o"
+          REVIEW_LANGUAGE: "Korean"
