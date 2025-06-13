@@ -19,8 +19,8 @@ Pod::Spec.new do |s|
   s.subspec 'Full' do |full|
     full.source_files = ['Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/**/*.{h,swift}']
     full.resource_bundles = {'notifly_sdk_resources' => ['Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/PrivacyInfo.xcprivacy']}
-    full.dependency 'Firebase/Core'
-    full.dependency 'FirebaseMessaging'
+    full.dependency 'FirebaseCore', '>= 10.0.0', '< 20.0.0'
+    full.dependency 'FirebaseMessaging', '>= 10.0.0', '< 20.0.0'
   end
 
   s.subspec 'Extension' do |e|
