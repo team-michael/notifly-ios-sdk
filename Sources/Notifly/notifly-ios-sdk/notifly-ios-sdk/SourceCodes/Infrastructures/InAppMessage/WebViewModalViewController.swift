@@ -51,8 +51,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         super.viewDidLoad()
         webView.navigationDelegate = self
         webView.configuration.userContentController.add(
-            self, name: "notiflyInAppMessageEventHandler"
-        )
+            self, name: "notiflyInAppMessageEventHandler")
     }
 
     func setupUI() -> Bool {
@@ -73,7 +72,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         }
 
         webView.layer.mask = webViewLayer
-
+        
         if let backgroundColorString = modalProps?.backgroundColor as? String,
            let backgroundColor = UIColor(hex: backgroundColorString)
         {
@@ -147,8 +146,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                     userID: try? main.userManager.getNotiflyUserID(),
                     hideUntilData: [
                         campaignID: hideUntil
-                    ]
-                )
+                    ])
             } else {
                 Logger.error("UserStateManager manager is not exist.")
             }
@@ -168,11 +166,9 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 "template_name": modalProps?.templateName ?? ""
             ] as [String: Any]
         notifly.trackingManager.trackInternalEvent(
-            eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params
-        )
+            eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
         notifly.inAppMessageManager.dispatchInAppMessageEvent(
-            eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params
-        )
+            eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
     }
 
     func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -213,12 +209,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             case "close":
                 notifly.trackingManager.trackInternalEvent(
                     eventName: TrackingConstant.Internal.inAppMessageCloseButtonClicked,
-                    eventParams: params
-                )
+                    eventParams: params)
                 notifly.inAppMessageManager.dispatchInAppMessageEvent(
                     eventName: TrackingConstant.Internal.inAppMessageCloseButtonClicked,
-                    eventParams: params
-                )
+                    eventParams: params)
                 dismissCTATapped()
             case "main_button":
                 if let urlString = messageEventData["link"] as? String,
@@ -229,34 +223,28 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                         paramsWithLink["link"] = urlString
                         notifly.trackingManager.trackInternalEvent(
                             eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
-                            eventParams: paramsWithLink
-                        )
+                            eventParams: paramsWithLink)
                         notifly.inAppMessageManager.dispatchInAppMessageEvent(
                             eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
-                            eventParams: paramsWithLink
-                        )
+                            eventParams: paramsWithLink)
                         self.dismissCTATapped()
                     }
                 } else {
                     notifly.trackingManager.trackInternalEvent(
                         eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
-                        eventParams: params
-                    )
+                        eventParams: params)
                     notifly.inAppMessageManager.dispatchInAppMessageEvent(
                         eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
-                        eventParams: params
-                    )
+                        eventParams: params)
                     dismissCTATapped()
                 }
             case "hide_in_app_message":
                 notifly.trackingManager.trackInternalEvent(
                     eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked,
-                    eventParams: params
-                )
+                    eventParams: params)
                 notifly.inAppMessageManager.dispatchInAppMessageEvent(
                     eventName: TrackingConstant.Internal.inAppMessageDontShowAgainButtonClicked,
-                    eventParams: params
-                )
+                    eventParams: params)
                 dismissCTATapped()
                 if let templateName = modalProps?.templateName {
                     let now = AppHelper.getCurrentTimestamp(unit: .second)
@@ -277,12 +265,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             case "survey_submit_button":
                 notifly.trackingManager.trackInternalEvent(
                     eventName: TrackingConstant.Internal.inAppMessageSurveySubmitButtonClicked,
-                    eventParams: params
-                )
+                    eventParams: params)
                 notifly.inAppMessageManager.dispatchInAppMessageEvent(
                     eventName: TrackingConstant.Internal.inAppMessageSurveySubmitButtonClicked,
-                    eventParams: params
-                )
+                    eventParams: params)
                 dismissCTATapped()
             default:
                 return
@@ -371,23 +357,19 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         path.addLine(to: CGPoint(x: modalSize.width - trRadius, y: 0))
         path.addArc(
             withCenter: CGPoint(x: modalSize.width - trRadius, y: trRadius), radius: trRadius,
-            startAngle: -CGFloat.pi / 2, endAngle: 0, clockwise: true
-        )
+            startAngle: -CGFloat.pi / 2, endAngle: 0, clockwise: true)
         path.addLine(to: CGPoint(x: modalSize.width, y: modalSize.height - brRadius))
         path.addArc(
             withCenter: CGPoint(x: modalSize.width - brRadius, y: modalSize.height - brRadius),
-            radius: brRadius, startAngle: 0, endAngle: CGFloat.pi / 2, clockwise: true
-        )
+            radius: brRadius, startAngle: 0, endAngle: CGFloat.pi / 2, clockwise: true)
         path.addLine(to: CGPoint(x: blRadius, y: modalSize.height))
         path.addArc(
             withCenter: CGPoint(x: blRadius, y: modalSize.height - blRadius), radius: blRadius,
-            startAngle: CGFloat.pi / 2, endAngle: CGFloat.pi, clockwise: true
-        )
+            startAngle: CGFloat.pi / 2, endAngle: CGFloat.pi, clockwise: true)
         path.addLine(to: CGPoint(x: 0, y: tlRadius))
         path.addArc(
             withCenter: CGPoint(x: tlRadius, y: tlRadius), radius: tlRadius, startAngle: CGFloat.pi,
-            endAngle: -CGFloat.pi / 2, clockwise: true
-        )
+            endAngle: -CGFloat.pi / 2, clockwise: true)
         path.close()
 
         let maskLayer = CAShapeLayer()
@@ -429,10 +411,10 @@ private extension UIViewController {
 private extension UIColor {
     convenience init?(hex: String) {
         let r, g, b, a: CGFloat
-
+        
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
-
+        
         var rgba: UInt64 = 0
         Scanner(string: hexSanitized).scanHexInt64(&rgba)
 
@@ -460,7 +442,7 @@ private extension UIColor {
         default:
             return nil
         }
-
+        
         self.init(red: r, green: g, blue: b, alpha: a)
     }
 }
