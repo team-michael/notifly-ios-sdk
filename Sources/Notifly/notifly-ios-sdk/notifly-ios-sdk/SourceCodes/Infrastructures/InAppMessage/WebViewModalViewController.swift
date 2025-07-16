@@ -162,7 +162,8 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 "channel": InAppMessageConstant.inAppMessageChannel,
                 "campaign_id": notiflyCampaignID,
                 "notifly_message_id": notiflyMessageID,
-                "hide_until_data": hideUntilData ?? nil
+                "hide_until_data": hideUntilData ?? nil,
+                "template_name": modalProps?.templateName ?? ""
             ] as [String: Any]
         notifly.trackingManager.trackInternalEvent(
             eventName: TrackingConstant.Internal.inAppMessageShown, eventParams: params)
