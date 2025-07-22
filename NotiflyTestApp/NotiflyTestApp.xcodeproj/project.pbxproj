@@ -11,7 +11,6 @@
 		2BC9CB7F2C3E741F0047F006 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC9CB7E2C3E741F0047F006 /* NotificationService.swift */; };
 		2BC9CB832C3E741F0047F006 /* NotiflyNotificationExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2BC9CB7C2C3E741F0047F006 /* NotiflyNotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2BC9CB872C3E743A0047F006 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F260C4202AB17A9300394B5B /* notifly_ios_sdk.framework */; };
-		2BC9CB882C3E743A0047F006 /* notifly_ios_sdk.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F260C4202AB17A9300394B5B /* notifly_ios_sdk.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		2BC9CB8B2C3E74710047F006 /* TestConstant.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F3CE7A2A13A2DD009FEAF0 /* TestConstant.swift */; };
 		672E7B7529EDF1C400B3E9F2 /* TrackingTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7429EDF1C400B3E9F2 /* TrackingTestViewController.swift */; };
 		672E7B7A29EDF22F00B3E9F2 /* UIStackView+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672E7B7929EDF22F00B3E9F2 /* UIStackView+.swift */; };
@@ -69,17 +68,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		2BC9CB892C3E743A0047F006 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				2BC9CB882C3E743A0047F006 /* notifly_ios_sdk.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		F21322F32A02448A00C3EE43 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -263,7 +251,6 @@
 				2BC9CB782C3E741F0047F006 /* Sources */,
 				2BC9CB792C3E741F0047F006 /* Frameworks */,
 				2BC9CB7A2C3E741F0047F006 /* Resources */,
-				2BC9CB892C3E743A0047F006 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -610,6 +597,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
