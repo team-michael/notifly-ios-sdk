@@ -119,24 +119,19 @@ class UserStateManager {
                 }
             },
             receiveValue: { [weak self] jsonString in
-                guard let notifly = try? Notifly.main else {
-                    completion()
-                    return
-                }
-
                 var deviceExternalUserID: String? = nil
 
                 if let userState = NotiflyAnyCodable.parseJsonString(jsonString) {
                     if let rawUserData = userState["userData"] as? [String: Any] {
-                        deviceExternalUserID = rawUserData["device_external_user_id"] as? String
-                        if let id = deviceExternalUserID, id.isEmpty {
-                            deviceExternalUserID = nil
-                        }
-
                         self?.constructUserData(
                             rawUserData: rawUserData,
                             postProcessConfig: postProcessConfig
                         )
+
+                        deviceExternalUserID = rawUserData["device_external_user_id"] as? String
+                        if let id = deviceExternalUserID, id.isEmpty {
+                            deviceExternalUserID = nil
+                        }
                     }
 
                     if let rawEventData = userState["eventIntermediateCountsData"]
@@ -156,6 +151,11 @@ class UserStateManager {
                 // DB의 디바이스-유저 매핑 정보와 SDK에 저장된 유저 정보가 다른 경우
                 // DB를 Source of Truth로 하여 SDK의 external_user_id를 DB 값으로 변경
                 if handleExternalUserIdMismatch {
+                    guard let notifly = try? Notifly.main else {
+                        completion()
+                        return
+                    }
+
                     let sdkExternalUserID = notifly.userManager.externalUserID
 
                     // 두 값이 모두 존재하고 서로 다른 경우에만 처리
