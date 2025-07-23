@@ -38,7 +38,8 @@ import UIKit
         Notifly.asyncWorker.addTask {
             main.inAppMessageManager.userStateManager.syncState(
                 postProcessConfig:
-                    PostProcessConfigForSyncState(merge: false, clear: false)
+                    PostProcessConfigForSyncState(merge: false, clear: false),
+                handleExternalUserIdMismatch: true
             ) {
                 Notifly.asyncWorker.unlock()
             }
