@@ -150,20 +150,13 @@ class UserStateManager {
 
                 // DB의 디바이스-유저 매핑 정보와 SDK에 저장된 유저 정보가 다른 경우
                 // DB를 Source of Truth로 하여 SDK의 external_user_id를 DB 값으로 변경
-                if handleExternalUserIdMismatch {
-                    guard let notifly = try? Notifly.main else {
-                        completion()
-                        return
-                    }
-
+                if handleExternalUserIdMismatch, let notifly = try? Notifly.main {
                     let sdkExternalUserID = notifly.userManager.externalUserID
 
-                    // 두 값이 모두 존재하고 서로 다른 경우에만 처리
-                    // DB가 null인 경우는 다양한 원인(쿼리 에러, 디바이스 미저장 등)으로 인해 실제 값이 null이 아닐 가능성이 있어 핸들링하지 않음
-                    // SDK가 null인 경우는 앱 재설치 등으로 허용되는 상황이므로 핸들링하지 않음
-                    if sdkExternalUserID != nil, deviceExternalUserID != nil,
-                        sdkExternalUserID != deviceExternalUserID
-                    {
+                    if self?.shouldHandleExternalUserIdMismatch(
+                        sdkExternalUserID: sdkExternalUserID,
+                        deviceExternalUserID: deviceExternalUserID
+                    ) == true {
                         // SDK의 external_user_id를 DB 값으로 변경
                         notifly.userManager.changeExternalUserId(newValue: deviceExternalUserID)
 
@@ -245,6 +238,25 @@ class UserStateManager {
             )
         }
         eventData.eventCounts[eicID]?.addCount(count: 1)
+    }
+
+    private func shouldHandleExternalUserIdMismatch(
+        sdkExternalUserID: String?,
+        deviceExternalUserID: String?
+    ) -> Bool {
+        // SDK가 null인 경우는 앱 재설치 등으로 허용되는 상황이므로 핸들링하지 않음
+        if sdkExternalUserID == nil {
+            return false
+        }
+        // DB가 null인 경우는 다양한 원인(쿼리 에러, 디바이스 미저장 등)으로 인해 실제 값이 null이 아닐 가능성이 있어 핸들링하지 않음
+        if deviceExternalUserID == nil {
+            return false
+        }
+        // 두 값이 같은 경우는 정상적인 상황
+        if sdkExternalUserID == deviceExternalUserID {
+            return false
+        }
+        return true
     }
 
     func getUserData(userID: String) -> UserData? {
