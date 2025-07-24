@@ -30,11 +30,14 @@ class UserStateManager {
     private var _userData: UserData = .init(data: [:])
     private var _eventData: EventData = .init(eventCounts: [:])
     private var campaignDataAccessQueue = DispatchQueue(
-        label: "com.yourapp.userStateManager.campaignDataAccessQueue")
+        label: "com.yourapp.userStateManager.campaignDataAccessQueue"
+    )
     private var userDataAccessQueue = DispatchQueue(
-        label: "com.yourapp.userStateManager.userDataAccessQueue")
+        label: "com.yourapp.userStateManager.userDataAccessQueue"
+    )
     private var eventDataAccessQueue = DispatchQueue(
-        label: "com.yourapp.userStateManager.eventDataAccessQueue")
+        label: "com.yourapp.userStateManager.eventDataAccessQueue"
+    )
 
     var campaignData: CampaignData {
         get {
@@ -82,6 +85,7 @@ class UserStateManager {
     /* sync state from notifly server */
     func syncState(
         postProcessConfig: PostProcessConfigForSyncState,
+        handleExternalUserIdMismatch: Bool = false,
         completion: @escaping () -> Void
     ) {
         guard let notifly = (try? Notifly.main) else {
@@ -103,9 +107,10 @@ class UserStateManager {
             return
         }
 
-        let externalUserID = notifly.userManager.externalUserID
         let syncStateTask = NotiflyAPI().requestSyncState(
-            projectId: projectId, notiflyUserID: notiflyUserID, notiflyDeviceID: notiflyDeviceID
+            projectId: projectId,
+            notiflyUserID: notiflyUserID,
+            notiflyDeviceID: notiflyDeviceID
         )
         .sink(
             receiveCompletion: { syncStateCompletion in
@@ -114,28 +119,64 @@ class UserStateManager {
                 }
             },
             receiveValue: { [weak self] jsonString in
+                var deviceExternalUserID: String? = nil
+
                 if let userState = NotiflyAnyCodable.parseJsonString(jsonString) {
                     if let rawUserData = userState["userData"] as? [String: Any] {
                         self?.constructUserData(
-                            rawUserData: rawUserData, postProcessConfig: postProcessConfig)
+                            rawUserData: rawUserData,
+                            postProcessConfig: postProcessConfig
+                        )
+
+                        deviceExternalUserID = rawUserData["device_external_user_id"] as? String
+                        if let id = deviceExternalUserID, id.isEmpty {
+                            deviceExternalUserID = nil
+                        }
                     }
 
                     if let rawEventData = userState["eventIntermediateCountsData"]
                         as? [[String: Any]]
                     {
                         self?.constructEventData(
-                            rawEventData: rawEventData, postProcessConfig: postProcessConfig)
+                            rawEventData: rawEventData,
+                            postProcessConfig: postProcessConfig
+                        )
                     }
 
                     if let rawCampaignData = userState["campaignData"] as? [[String: Any]] {
                         self?.constructCampaignData(rawCampaignData: rawCampaignData)
                     }
                 }
+
+                // DB의 디바이스-유저 매핑 정보와 SDK에 저장된 유저 정보가 다른 경우
+                // DB를 Source of Truth로 하여 SDK의 external_user_id를 DB 값으로 변경
+                if handleExternalUserIdMismatch, let notifly = try? Notifly.main {
+                    let sdkExternalUserID = notifly.userManager.externalUserID
+
+                    if self?.shouldHandleExternalUserIdMismatch(
+                        sdkExternalUserID: sdkExternalUserID,
+                        deviceExternalUserID: deviceExternalUserID
+                    ) == true {
+                        // SDK의 external_user_id를 DB 값으로 변경
+                        notifly.userManager.changeExternalUserId(newValue: deviceExternalUserID)
+
+                        notifly.inAppMessageManager.userStateManager.syncState(
+                            postProcessConfig: PostProcessConfigForSyncState(
+                                merge: false,
+                                clear: false
+                            )
+                        ) {
+                            completion()
+                        }
+                        return
+                    }
+                }
+
                 Logger.info("Sync State Completed.")
                 self?.owner = notiflyUserID
                 completion()
-
-            })
+            }
+        )
 
         guard let main = try? Notifly.main, syncStateTask != nil else {
             Logger.error("Fail to sync user state: Notifly is not initialized")
@@ -147,7 +188,8 @@ class UserStateManager {
 
     /* post-process of sync state */
     private func constructUserData(
-        rawUserData: [String: Any], postProcessConfig: PostProcessConfigForSyncState
+        rawUserData: [String: Any],
+        postProcessConfig: PostProcessConfigForSyncState
     ) {
         var newUserData = UserData(data: rawUserData)
         if postProcessConfig.merge, let previousUserData = userData as? UserData {
@@ -160,7 +202,8 @@ class UserStateManager {
     }
 
     private func constructEventData(
-        rawEventData: [[String: Any]], postProcessConfig: PostProcessConfigForSyncState
+        rawEventData: [[String: Any]],
+        postProcessConfig: PostProcessConfigForSyncState
     ) {
         let existing = postProcessConfig.merge ? eventData : EventData(from: [[:]])
         let new =
@@ -175,17 +218,45 @@ class UserStateManager {
 
     /* update client state */
     func incrementEic(
-        eventName: String, eventParams: [String: Any]?, segmentationEventParamKeys: [String]?
+        eventName: String,
+        eventParams: [String: Any]?,
+        segmentationEventParamKeys: [String]?
     ) {
         let dt = NotiflyHelper.getCurrentDate()
         let eicID = EventIntermediateCount.generateId(
-            eventName: eventName, eventParams: eventParams,
-            segmentationEventParamKeys: segmentationEventParamKeys, dt: dt)
+            eventName: eventName,
+            eventParams: eventParams,
+            segmentationEventParamKeys: segmentationEventParamKeys,
+            dt: dt
+        )
         if eventData.eventCounts[eicID] == nil {
             eventData.eventCounts[eicID] = EventIntermediateCount(
-                name: eventName, dt: dt, count: 0, eventParams: eventParams ?? [:])
+                name: eventName,
+                dt: dt,
+                count: 0,
+                eventParams: eventParams ?? [:]
+            )
         }
         eventData.eventCounts[eicID]?.addCount(count: 1)
+    }
+
+    private func shouldHandleExternalUserIdMismatch(
+        sdkExternalUserID: String?,
+        deviceExternalUserID: String?
+    ) -> Bool {
+        // SDK가 null인 경우는 앱 재설치 등으로 허용되는 상황이므로 핸들링하지 않음
+        if sdkExternalUserID == nil {
+            return false
+        }
+        // DB가 null인 경우는 다양한 원인(쿼리 에러, 디바이스 미저장 등)으로 인해 실제 값이 null이 아닐 가능성이 있어 핸들링하지 않음
+        if deviceExternalUserID == nil {
+            return false
+        }
+        // 두 값이 같은 경우는 정상적인 상황
+        if sdkExternalUserID == deviceExternalUserID {
+            return false
+        }
+        return true
     }
 
     func getUserData(userID: String) -> UserData? {
