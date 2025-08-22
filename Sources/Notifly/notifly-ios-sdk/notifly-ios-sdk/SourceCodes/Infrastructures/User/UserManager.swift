@@ -71,9 +71,9 @@ class UserManager {
             TrackingConstant.Internal.previousExternalUserID: externalUserID,
             TrackingConstant.Internal.previousNotiflyUserID: try? getNotiflyUserID(),
         ] as? [String: Any] {
-            Notifly.asyncWorker.addTask { [weak self] in
+            Notifly.asyncWorker.addTask { [weak self] finishTask in
                 guard let self = self else {
-                    Notifly.asyncWorker.unlock()
+                    finishTask()
                     return
                 }
 
@@ -81,7 +81,7 @@ class UserManager {
                     Logger.info(
                         "External User Id is not changed because the new user id is same as the current user id."
                     )
-                    Notifly.asyncWorker.unlock()
+                    finishTask()
                     return
                 }
 
@@ -99,9 +99,11 @@ class UserManager {
                         postProcessConfig: postProcessConfigForSyncState
                     ) {
                         self.setUserProperties(userProperties: data, lockAcquired: true)
+                        finishTask()
                     }
                 } else {
                     self.setUserProperties(userProperties: data, lockAcquired: true)
+                    finishTask()
                 }
             }
 
@@ -116,9 +118,9 @@ class UserManager {
             return
         }
 
-        Notifly.asyncWorker.addTask { [weak self] in
+        Notifly.asyncWorker.addTask { [weak self] finishTask in
             guard let self = self else {
-                Notifly.asyncWorker.unlock()
+                finishTask()
                 return
             }
             let previousExternalUserID = externalUserID
@@ -140,6 +142,7 @@ class UserManager {
                         eventParams: nil,
                         lockAcquired: true
                     )
+                    finishTask()
                 }
             } else {
                 notifly.inAppMessageManager.userStateManager.clear()
@@ -148,6 +151,7 @@ class UserManager {
                     eventParams: nil,
                     lockAcquired: true
                 )
+                finishTask()
             }
         }
     }
@@ -159,16 +163,16 @@ class UserManager {
         }
 
         if !Notifly.inAppMessageDisabled {
-            Notifly.asyncWorker.addTask { [weak self] in
+            Notifly.asyncWorker.addTask { [weak self] finishTask in
                 guard let self = self else {
-                    Notifly.asyncWorker.unlock()
+                    finishTask()
                     return
                 }
                 notifly.inAppMessageManager.userStateManager.updateUserData(
                     userID: try? getNotiflyUserID(),
                     properties: userProperties
                 )
-                Notifly.asyncWorker.unlock()
+                finishTask()
             }
         }
 

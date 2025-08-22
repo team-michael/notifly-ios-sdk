@@ -35,13 +35,13 @@ import UIKit
             return
         }
 
-        Notifly.asyncWorker.addTask {
+        Notifly.asyncWorker.addTask { finishTask in
             main.inAppMessageManager.userStateManager.syncState(
                 postProcessConfig:
                     PostProcessConfigForSyncState(merge: false, clear: false),
                 handleExternalUserIdMismatch: true
             ) {
-                Notifly.asyncWorker.unlock()
+                finishTask()
             }
         }
 
@@ -66,9 +66,10 @@ import UIKit
         }
 
         // NotificationsManager now handles all token acquisition logic
-        Notifly.asyncWorker.addTask {
+        Notifly.asyncWorker.addTask { finishTask in
             main.trackingManager.trackSessionStartInternalEvent()
             Logger.info("📡 Notifly SDK is successfully initialized.")
+            finishTask()
         }
     }
 
