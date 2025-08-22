@@ -121,10 +121,10 @@ class TrackingManager {
         segmentationEventParamKeys: [String]?,
         lockAcquired: Bool = false
     ) {
-        Notifly.asyncWorker.addTask(lockAcquired: lockAcquired) { [weak self] in
+        Notifly.asyncWorker.addTask(lockAcquired: lockAcquired) { [weak self] finishTask in
             guard let notifly = try? Notifly.main else {
-                Notifly.asyncWorker.unlock()
                 Logger.error("Fail to track Event. \(eventName)")
+                finishTask()
                 return
             }
             let userID = (try? notifly.userManager.getNotiflyUserID()) ?? ""
@@ -142,6 +142,7 @@ class TrackingManager {
                 receiveCompletion: { completion in
                     if case let .failure(error) = completion {
                         Logger.error("Failed to Track Event \(eventName). Error: \(error)")
+                        finishTask()
                     }
                 },
                 receiveValue: { [weak self] record in
@@ -150,7 +151,7 @@ class TrackingManager {
                     } else {
                         self?.eventPublisher.send(record)
                     }
-                    Notifly.asyncWorker.unlock()
+                    finishTask()
                 })
             if let task = trackingTask {
                 self?.storeCanellables(cancellable: task)
