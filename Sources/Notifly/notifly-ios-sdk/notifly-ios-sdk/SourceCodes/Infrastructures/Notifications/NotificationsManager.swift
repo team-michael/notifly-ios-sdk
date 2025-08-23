@@ -23,6 +23,7 @@ class NotificationsManager: NSObject {
     private var apnsTokenState: TokenState = .pending
     private var fcmTokenState: TokenState = .pending
     private var currentDeviceToken: Data?
+    private var lastFCMToken: String?
 
     // Retry configuration
     private let maxRetryAttempts: Int = 4
@@ -107,6 +108,16 @@ class NotificationsManager: NSObject {
     }
 
     func registerFCMToken(token: String) {
+        // 중복/재진입 가드: 동일 토큰으로 이미 성공 처리된 경우 조기 종료
+        if token == lastFCMToken, fcmTokenState == .success {
+            if let promise = deviceTokenPromise {
+                // 비정상적으로 promise가 남아있다면 한 번만 완료 후 정리
+                promise(.success(token))
+                deviceTokenPromise = nil
+            }
+            return
+        }
+
         Logger.info("🔥 FCM token registered successfully")
         fcmTokenState = .success
         fcmRetryAttempt = 0  // Reset retry counter on success
@@ -116,10 +127,19 @@ class NotificationsManager: NSObject {
         timeoutWorkItem?.cancel()
         timeoutWorkItem = nil
 
-        deviceTokenPromise?(.success(token))
+        let shouldTrackDeviceTokenEvent = (lastFCMToken != token)
+        lastFCMToken = token
+
+        // deviceTokenPromise 단일 완료 보장 및 즉시 nil 처리
+        if let promise = deviceTokenPromise {
+            promise(.success(token))
+            deviceTokenPromise = nil
+        }
+
         deviceTokenPub = Just(token).setFailureType(to: Error.self).eraseToAnyPublisher()
 
-        if let notifly = try? Notifly.main {
+        // 세션 내 동일 토큰 기반 중복 내부 이벤트 전송/중복 등록 방지
+        if shouldTrackDeviceTokenEvent, let notifly = try? Notifly.main {
             notifly.trackingManager.trackSetDevicePropertiesInternalEvent(properties: [
                 "device_token": token
             ])
@@ -210,7 +230,14 @@ class NotificationsManager: NSObject {
         guard apnsRetryAttempt < maxRetryAttempts else {
             Logger.error("❌ APNs registration failed after \(maxRetryAttempts) attempts")
             apnsTokenState = .failed
-            deviceTokenPromise?(.failure(NotiflyError.deviceTokenError))
+            // 안정성 가드: promise를 한 번만 실패로 종료하고 즉시 정리
+            if let promise = deviceTokenPromise {
+                promise(.failure(NotiflyError.deviceTokenError))
+                deviceTokenPromise = nil
+            }
+            // 지연 타임아웃이 남아있다면 해제하여 중복 완료/충돌 방지
+            timeoutWorkItem?.cancel()
+            timeoutWorkItem = nil
             return
         }
 
@@ -252,8 +279,6 @@ class NotificationsManager: NSObject {
         guard fcmRetryAttempt < maxRetryAttempts else {
             Logger.error("❌ FCM token request failed after \(maxRetryAttempts) attempts")
             fcmTokenState = .failed
-            deviceTokenPromise?(.failure(NotiflyError.deviceTokenError))
-            deviceTokenPub = Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
             return
         }
 
