@@ -57,22 +57,18 @@ class NotiflyAsyncWorker {
     }
 
     private func registerUnlockSchedule(token: UInt64) {
-        var timeoutItem: DispatchWorkItem?
-
-        timeoutItem = DispatchWorkItem { [weak self, weak timeoutItem] in
-            guard let self = self, let item = timeoutItem, !item.isCancelled else { return }
+        let timeoutItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
             // 제한 시간 경과 시에도 언락 보장. timeout 경로는 finishToken=nil로 활성 스케줄 해제.
             self.queue.async { [weak self] in
-                self?.unlockOnQueue(finishToken: nil)
+                guard let self = self else { return }
+                self.unlockOnQueue(finishToken: nil)
             }
         }
-
-        queue.async { [weak self] in
-            guard let self = self, let item = timeoutItem else { return }
-            self.activeToken = token
-            self.activeUnlockItem = item
-            self.queue.asyncAfter(deadline: .now() + self.timeoutSeconds, execute: item)
-        }
+        
+        activeToken = token
+        activeUnlockItem = timeoutItem
+        queue.asyncAfter(deadline: .now() + timeoutSeconds, execute: timeoutItem)
     }
 
     // unlock 외부 접근 금지: 세마포어 제어는 AsyncWorker 내부에서만 허용
