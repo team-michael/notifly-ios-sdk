@@ -4,339 +4,338 @@
 //
 //  Created by 서노리 on 8/22/25.
 //
-//  목적: NotiflyAsyncWorker의 핵심 보장(동시성 1, FIFO, timeout/late-finish 무시, idempotent,  nested no-deadlock, stress)을
-//  외부 의존 없이(토큰/네트워크 X) 순수 로직으로 검증한다. (실제 통신을 통한 테스트가 가장 정확)
+// 목적
+// - NotiflyAsyncWorker의 핵심 보장 검증:
+//   1) 활성 동시성 항상 1(오버랩 없음)
+//   2) 선입선출(FIFO) 시작 순서(연속 add 시)
+//   3) First-wins 규칙: (A) finish 미호출 → timeout이 승자, (B) finish 조기 호출 → finish가 승자
+//   4) finish 이중 호출 idempotent
+//   5) lockAcquired=true 중첩 호출 시 데드락 없음(no-op)
+//   6) 랜덤 지연 스트레스에서도 위 성질 유지
 
 import XCTest
 @testable import notifly_ios_sdk
 
-// 타임라인 수집 도우미(사람이 읽기 쉬운 로그 + 테스트 첨부)
-private final class Timeline {
-    // 이벤트 병렬 접근 보호용 직렬 큐
-    private let q = DispatchQueue(label: "timeline.queue")
-    // 누적 이벤트 문자열
-    private var events: [String] = []
-    // 기준 시각(상대 시간 로그용)
+// 직관적 케이스 로거
+private final class CaseLog {
     private let t0 = CFAbsoluteTimeGetCurrent()
+    private let caseName: String
+    init(_ caseName: String) { self.caseName = caseName }
 
-    // 타임라인 로그 남기기(케이스이름, 스텝/메시지)
-    func log(_ caseName: String, _ step: String) {
-        // 상대 시간 계산
-        let dt = CFAbsoluteTimeGetCurrent() - t0
-        // 보기 좋은 형식으로 한 줄 생성
-        let line = String(format: "[%6.3fs] %-32s | %@", dt, ("[" + caseName + "]") as NSString, step)
-        // 내부 큐에서 배열에 추가(스레드 안전)
-        q.async { self.events.append(line) }
-        // 콘솔에도 바로 출력
-        print(line)
+    private func ts() -> String {
+        String(format: "t=%6.3fs", CFAbsoluteTimeGetCurrent() - t0)
     }
 
-    // 현재까지의 타임라인을 테스트 첨부물로 추가
-    func attach(to testCase: XCTestCase, name: String) {
-        var snap: [String] = []
-        // 스냅샷 안전하게 가져오기
-        q.sync { snap = events }
-        // 줄바꿈으로 합치기
-        let text = snap.joined(separator: "\n")
-        // Xcode 테스트 첨부물로 추가(Reports > Attachments에서 확인 가능)
-        let attachment = XCTAttachment(string: text)
-        attachment.name = name
-        attachment.lifetime = .keepAlways
-        testCase.add(attachment)
+    func caseStart(objective: String, expectations: [String]) {
+        print("\n=== [\(caseName)] CASE START ===")
+        print("[\(ts())] 목적: \(objective)")
+        expectations.forEach { print("[\(ts())] 기대: \($0)") }
     }
+
+    func step(_ msg: String)    { print("[\(ts())] 단계: \(msg)") }
+    func observe(_ msg: String) { print("[\(ts())] 관찰: \(msg)") }
+    func verify(_ msg: String)  { print("[\(ts())] 검증: \(msg)") }
+    func caseEnd()              { print("[\(ts())] 결과: \(caseName) 완료\n") }
+    func now() -> CFAbsoluteTime { CFAbsoluteTimeGetCurrent() }
 }
 
-final class AsyncWorkerEndToEndTests: XCTestCase {
+final class AsyncWorkerVerboseSmokeTests: XCTestCase {
 
-    // MARK: - 01) 활성 동시성 1 보장 (오버랩 없음)
-    // 설명: 동시에 여러 태스크를 넣어도 실제 실행(inflight)은 항상 1개여야 한다.
-    // 방법: inflight 카운터(max 기록)로 동시 실행 여부 확인.
-    func test_01_NoOverlap() {
-        // 케이스 식별자(로그용)
-        let C = "NoOverlap"
-        // 타임라인 인스턴스
-        let tl = Timeline()
-        // 테스트 대상 워커
+    // 01) 활성 동시성 1 보장(오버랩 없음)
+    // - 테스트: 동시에 여러 태스크를 넣어도 실제 실행(inflight)은 항상 1이어야 함
+    // - 검증: inflight 최대값이 1인지 기록/검증
+    func test_NoOverlap() {
+        let L = CaseLog("01_NoOverlap")
+        L.caseStart(
+            objective: "여러 태스크 동시 제출 시에도 실행 동시성은 항상 1",
+            expectations: [
+                "inflight 최대값은 1이어야 한다",
+                "모든 태스크는 순차적으로 시작/종료한다"
+            ])
+
         let worker = NotiflyAsyncWorker()
-        // inflight/최대값 접근용 락
-        let lock = NSLock()
-
-        // 현재 실행 중 태스크 수
-        var inflight = 0
-        // 실행 중 최대 동시 수(항상 1이어야 함)
-        var maxInflight = 0
-        // 전체 완료 대기(10개)
         let done = expectation(description: "done")
         done.expectedFulfillmentCount = 10
 
-        // 10개의 태스크 스케줄
-        for i in 0..<10 {
-            tl.log(C, "schedule T\(i)")
-            worker.addTask { finishTask in
-                // 시작 시 inflight 증가
-                tl.log(C, "start    T\(i)")
-                lock.lock(); inflight += 1; maxInflight = max(maxInflight, inflight); lock.unlock()
+        var inflight = 0
+        var maxInflight = 0
+        let lock = NSLock()
 
-                // 약간의 지연 후 finishTask 호출(정상 완료)
+        for i in 0..<10 {
+            L.step("T\(i) 스케줄")
+            worker.addTask { finish in
+                L.step("T\(i) 시작")
+                lock.lock(); inflight += 1; maxInflight = max(maxInflight, inflight); lock.unlock()
                 DispatchQueue.global().asyncAfter(deadline: .now() + 0.02) {
-                    tl.log(C, "finish   T\(i) (success)")
+                    L.step("T\(i) 종료")
                     lock.lock(); inflight -= 1; lock.unlock()
-                    finishTask()
+                    finish()
                     done.fulfill()
                 }
             }
         }
 
-        // 전부 완료될 때까지 대기
         wait(for: [done], timeout: 5)
-        // 동시성 1 검증
+        L.verify("inflight 최대값=\(maxInflight)")
         XCTAssertEqual(maxInflight, 1, "활성 동시성은 항상 1이어야 함")
-        // 타임라인 첨부
-        tl.attach(to: self, name: C)
+        L.caseEnd()
     }
 
-    // MARK: - 02) 선입선출(FIFO) 시작 순서(연속 add 시)
-    // 설명: 연속적으로 addTask 호출 시 시작 순서는 FIFO가 되어야 한다(공정성 강화 구현 검증).
-    // 방법: 0,1,2 순서로 스케줄/시작 로그 확인.
-    func test_02_FIFOStartOrder_ForSequentialAdds() {
-        let C = "FIFOStartOrder"
-        let tl = Timeline()
+    // 02) 선입선출(FIFO) 시작 순서(연속 add 시)
+    // - 테스트: 0,1,2 순서로 add하면 시작도 0,1,2 순서여야 함
+    // - 검증: startOrder == [0,1,2]
+    func test_FIFOStartOrder_SequentialAdds() {
+        let L = CaseLog("02_FIFO_Start")
+        L.caseStart(
+            objective: "연속 제출된 태스크는 제출 순서대로 시작(FIFO)",
+            expectations: [
+                "시작 순서는 [0,1,2] 를 만족해야 한다",
+                "종료 순서는 지연에 따라 달라도 무방하다"
+            ])
+
         let worker = NotiflyAsyncWorker()
-        // 3개 완료 대기
         let done = expectation(description: "done")
         done.expectedFulfillmentCount = 3
 
-        // 0,1,2 순서로 스케줄
+        var startOrder: [Int] = []
+
         for i in 0..<3 {
-            tl.log(C, "schedule T\(i)")
-            worker.addTask { finishTask in
-                // 시작 순서 확인용 로그
-                tl.log(C, "start    T\(i)")
-                // i에 따라 다른 지연 후 완료(완료 순서는 달라도 허용)
+            L.step("T\(i) 스케줄")
+            worker.addTask { finish in
+                L.step("T\(i) 시작")
+                startOrder.append(i)
                 DispatchQueue.global().asyncAfter(deadline: .now() + Double(i) * 0.01) {
-                    tl.log(C, "finish   T\(i) (success)")
-                    finishTask()
+                    L.step("T\(i) 종료")
+                    finish()
                     done.fulfill()
                 }
             }
         }
 
-        // 완료 대기
         wait(for: [done], timeout: 3)
-        // 타임라인 첨부(FIFO 시작 순서 확인은 로그 시각적으로 점검)
-        tl.attach(to: self, name: C)
+        L.verify("시작 순서 = \(startOrder)")
+        XCTAssertEqual(startOrder, [0,1,2], "연속 add의 시작 순서는 FIFO여야 함")
+        L.caseEnd()
     }
 
-    // MARK: - 03) 타임아웃 후 늦은 finishTask는 무시(토큰 가드)
-    // 설명: timeout으로 이미 다음 작업이 진행된 후, 이전 작업의 늦은 finish가 와도 무시되어야 한다.
-    // 방법: T0는 finishTask 미호출 → timeout 유도, 이후 T1/T2 정상 흐름, 마지막에 T0의 늦은 finish 호출(no-op).
-    func test_03_TimeoutThenLateFinish_Ignored() {
-        let C = "TimeoutThenLateFinish"
-        let tl = Timeline()
-        let worker = NotiflyAsyncWorker()
-
-        // 테스트 기준 상수(프로덕션 워커의 기본 timeout과 동일)
+    // 03-A) First-wins: finish 미호출 → timeout 승자
+    // - 테스트: T0에서 finish를 부르지 않으면 timeout이 먼저 와서 T0 해제. T1은 대략 10초 뒤 시작
+    // - 검증: T1 시작 시점이 T0 시작 시점 + ~10s 보다 크거나 같다
+    func test_FirstWins_TimeoutScenario() {
         let TIMEOUT: TimeInterval = 10.0
-        // 타임스탬프 기록용
+        let L = CaseLog("03A_FirstWins_Timeout")
+        L.caseStart(
+            objective: "finish 미호출 시 timeout이 먼저 와서 해제",
+            expectations: [
+                "T1은 T0 시작 후 ~10초 경과 뒤에 시작해야 한다",
+                "T0의 늦은 finish는 무시되어야 한다"
+            ])
+
+        let worker = NotiflyAsyncWorker()
+        var t0Start: CFAbsoluteTime?
+        var t1Start: CFAbsoluteTime?
+        var lateFinish: (() -> Void)?
+
+        L.step("T0 스케줄 (finish 호출 안 함)")
+        worker.addTask { finish in
+            t0Start = L.now()
+            L.step("T0 시작")
+            lateFinish = finish // 호출 안 함 → timeout 경로
+        }
+
+        let expT1 = expectation(description: "T1")
+        L.step("T1 스케줄 (T0 해제 이후 시작 기대)")
+        worker.addTask { finish in
+            t1Start = L.now()
+            L.step("T1 시작 (T0 timeout 이후)")
+            finish()
+            L.step("T1 종료")
+            expT1.fulfill()
+        }
+
+        // 안내 로그(근사): timeout 예상 시점
+        if let s0 = t0Start {
+            let delay = max(0, s0 + TIMEOUT - L.now())
+            DispatchQueue.global().asyncAfter(deadline: .now() + delay) {
+                L.observe("T0 timeout 발생(약 ~10초)")
+            }
+        }
+
+        wait(for: [expT1], timeout: TIMEOUT + 2)
+        guard let s0 = t0Start, let s1 = t1Start else {
+            XCTFail("타임스탬프 누락(T0/T1)"); return
+        }
+        let diff = s1 - s0
+        L.verify(#"T1 시작 간격 = \#(String(format: "%.3f", diff))s (기대: ≥ ~10s)"#)
+        XCTAssertGreaterThanOrEqual(diff, TIMEOUT - 0.5, "T1 must start after ~10s timeout (diff=\(diff)s)")
+
+        L.step("T0 늦은 finish 호출(무시 기대)")
+        lateFinish?()
+
+        let expS = expectation(description: "sentinel")
+        L.step("sentinel 스케줄(파이프라인 정상 상태 확인)")
+        worker.addTask { finish in
+            L.step("sentinel 시작")
+            finish()
+            L.step("sentinel 종료")
+            expS.fulfill()
+        }
+        wait(for: [expS], timeout: 3)
+        L.caseEnd()
+    }
+
+    // 03-B) First-wins: finish 조기 호출 → finish 승자
+    // - 무엇: T0에서 finish를 빨리 부르면 finish가 timeout보다 먼저 와서 해제. T1은 즉시(짧은 지연 내) 시작
+    // - 검증: T1 시작 시점이 T0 시작 + 10s 보다 훨씬 작음
+    func test_FirstWins_FinishScenario() {
+        let TIMEOUT: TimeInterval = 10.0
+        let L = CaseLog("03B_FirstWins_Finish")
+        L.caseStart(
+            objective: "finish 조기 호출 시 finish가 먼저 와서 해제",
+            expectations: [
+                "T1은 timeout을 기다리지 않고 곧바로 시작해야 한다",
+                "T0의 timeout은 취소되어야 한다"
+            ])
+
+        let worker = NotiflyAsyncWorker()
         var t0Start: CFAbsoluteTime?
         var t1Start: CFAbsoluteTime?
 
-        // 늦은 finish 호출 저장
-        var lateFinish: (() -> Void)?
-
-        // [스텝] T0 예약 (finishTask 미호출로 timeout 유도)
-        tl.log(C, "schedule T0 (will timeout)")
-        worker.addTask { finishTask in
-            t0Start = CFAbsoluteTimeGetCurrent()
-            tl.log(C, "start    T0")
-            // finishTask() 호출하지 않음 → TIMEOUT 후 워커 내부 timeout으로 해제
-            lateFinish = finishTask
-        }
-
-        // [스텝] T1 예약 (T0 timeout 이후에 시작해야 함)
-        let t1 = expectation(description: "T1")
-        tl.log(C, "schedule T1")
-        worker.addTask { finishTask in
-            t1Start = CFAbsoluteTimeGetCurrent()
-            tl.log(C, "start    T1")
-            // 정상 완료
-            finishTask()
-            tl.log(C, "finish   T1 (success)")
-            t1.fulfill()
-        }
-
-        // [정보 로그] T0 timeout 예상 시각에 맞춰 타임라인에 표시(내부 timeout과 거의 일치)
-        if let t0Start = t0Start {
-            let dt = t0Start + TIMEOUT - CFAbsoluteTimeGetCurrent()
-            if dt > 0 {
-                DispatchQueue.global().asyncAfter(deadline: .now() + dt) {
-                    tl.log(C, "timeout  T0 fired (expected ~\(Int(TIMEOUT))s)")
-                }
-            }
-        } else {
-            // T0 start 로그 직후에 등록될 수 있도록 아주 짧게 지연하여 표시
-            DispatchQueue.global().asyncAfter(deadline: .now() + TIMEOUT) {
-                tl.log(C, "timeout  T0 fired (expected ~\(Int(TIMEOUT))s)")
+        L.step("T0 스케줄 (finish를 곧바로 호출할 예정)")
+        worker.addTask { finish in
+            t0Start = L.now()
+            L.step("T0 시작")
+            DispatchQueue.global().asyncAfter(deadline: .now() + 0.05) {
+                L.step("T0 finish 호출 (finish 승자 기대)")
+                finish()
             }
         }
 
-        // [검증] T1이 TIMEOUT 이후에 시작했는지(여유 0.5s) 확인
-        wait(for: [t1], timeout: TIMEOUT + 2.0)
-        if let t0 = t0Start, let t1s = t1Start {
-            let diff = t1s - t0
-            XCTAssertGreaterThanOrEqual(diff, TIMEOUT - 0.5,
-                                        "T1 must start after T0 timeout (diff=\(diff)s)")
-        } else {
-            XCTFail("Missing start timestamps for T0/T1")
+        let expT1 = expectation(description: "T1")
+        L.step("T1 스케줄 (T0 finish 직후 시작 기대)")
+        worker.addTask { finish in
+            t1Start = L.now()
+            L.step("T1 시작 (T0 finish로 해제됨)")
+            finish()
+            L.step("T1 종료")
+            expT1.fulfill()
         }
 
-        // [스텝] T2 예약 (T0 timeout 이후 파이프라인 정상 동작 확인)
-        let t2 = expectation(description: "T2")
-        tl.log(C, "schedule T2")
-        worker.addTask { finishTask in
-            tl.log(C, "start    T2 (should run after T0 timeout)")
-            finishTask()
-            tl.log(C, "finish   T2 (success)")
-            t2.fulfill()
+        wait(for: [expT1], timeout: 2.0)
+        guard let s0 = t0Start, let s1 = t1Start else {
+            XCTFail("타임스탬프 누락(T0/T1)"); return
         }
-        wait(for: [t2], timeout: 3.0)
-
-        // [스텝] T0의 늦은 finish 호출 → 토큰 불일치로 무시되어야 함(no-op)
-        tl.log(C, "call     T0 late finishTask() (should be ignored)")
-        lateFinish?()
-
-        // [스텝] sentinel 예약: 비정상 추가 실행 없이 정상 진행 가능한지 확인
-        let s = expectation(description: "sentinel")
-        tl.log(C, "schedule sentinel")
-        worker.addTask { finishTask in
-            tl.log(C, "start    sentinel")
-            finishTask()
-            tl.log(C, "finish   sentinel (success)")
-            s.fulfill()
-        }
-        wait(for: [s], timeout: 3.0)
-
-        // 타임라인 첨부(콘솔 출력과 함께 리포트에도 저장)
-        tl.attach(to: self, name: C)
+        let diff = s1 - s0
+        L.verify(#"T1 시작 간격 = \#(String(format: "%.3f", diff))s (기대: ≥ ~10s)"#)
+        XCTAssertLessThan(diff, TIMEOUT / 5, "T1 should start well before timeout (diff=\(diff)s)")
+        L.caseEnd()
     }
 
-    // MARK: - 04) finishTask 이중 호출은 idempotent
-    // 설명: 같은 태스크에서 finishTask를 두 번 이상 호출해도 실제 해제는 한 번만 수행되어야 한다.
-    // 방법: A에서 finish 2회 호출, B가 정확히 1번만 실행되는지 확인.
-    func test_04_DoubleFinish_Idempotent() {
-        let C = "DoubleFinish"
-        let tl = Timeline()
+    // 04) finish 이중 호출은 idempotent
+    // - 무엇: 같은 태스크에서 finish를 2번 이상 호출해도 실제 해제는 1회만
+    // - 검증: B는 정확히 1회만 실행
+    func test_DoubleFinish_Idempotent() {
+        let L = CaseLog("04_DoubleFinish")
+        L.caseStart(
+            objective: "finish 이중 호출은 한 번만 유효",
+            expectations: [
+                "A의 두 번째 finish는 무시된다",
+                "B는 정확히 1회만 실행된다"
+            ])
+
         let worker = NotiflyAsyncWorker()
 
-        // A 스케줄
-        tl.log(C, "schedule A")
-        worker.addTask { finishTask in
-            // A 시작
-            tl.log(C, "start    A")
-            // 첫 번째 finish(유효)
-            finishTask()
-            tl.log(C, "finish   A (finish#1)")
-            // 두 번째 finish(무시되어야 함)
-            finishTask()
-            tl.log(C, "finish   A (finish#2 - ignored)")
+        L.step("A 스케줄")
+        worker.addTask { finish in
+            L.step("A 시작")
+            finish()
+            L.step("A finish(1차)")
+            finish() // 무시
+            L.step("A finish(2차, 무시)")
         }
 
-        // B: 정확히 한 번만 실행되어야 함
-        let tB = expectation(description: "B")
+        let expB = expectation(description: "B")
         var ranB = 0
 
-        // B 스케줄
-        tl.log(C, "schedule B")
-        worker.addTask { finishTask in
-            // B 시작
-            tl.log(C, "start    B")
-            // B 실행 횟수 카운트(1이어야 함)
+        L.step("B 스케줄")
+        worker.addTask { finish in
+            L.step("B 시작")
             ranB += 1
-            // B 정상 완료
-            finishTask()
-            tl.log(C, "finish   B (success)")
-            tB.fulfill()
+            finish()
+            L.step("B 종료")
+            expB.fulfill()
         }
 
-        // B 완료 대기
-        wait(for: [tB], timeout: 3)
-        // B가 딱 한 번만 실행되었는지 검증
+        wait(for: [expB], timeout: 3)
+        L.verify("B 실행 횟수 = \(ranB) (기대: 1)")
         XCTAssertEqual(ranB, 1)
-        // 타임라인 첨부
-        tl.attach(to: self, name: C)
+        L.caseEnd()
     }
 
-    // MARK: - 05) lockAcquired=true 중첩 호출(no-op) 데드락 없음
-    // 설명: 부모 태스크(lockAcquired=false) 안에서 자식 태스크(lockAcquired=true)를 실행해도
-    //       자식의 finishTask는 no-op 계약이며, 데드락 없이 정상 종료되어야 한다.
-    // 방법: Outer(락 보유) → Inner(락 미획득/no-op) → Outer 정상 finish.
-    func test_05_Nested_LockAcquiredTrue_NoDeadlock() {
-        let C = "NestedLockAcquired"
-        let tl = Timeline()
+    // 05) lockAcquired=true 중첩 호출(no-op) 데드락 없음
+    // - 무엇: 부모 태스크(lockAcquired=false) 안에서 자식 태스크(lockAcquired=true)를 호출해도 데드락 없이 정상 종료
+    // - 검증: Inner는 no-op, Outer만 해제되어 전체 흐름 정상
+    func test_Nested_LockAcquiredTrue_NoDeadlock() {
+        let L = CaseLog("05_Nested_NoDeadlock")
+        L.caseStart(
+            objective: "중첩 호출에서도 데드락 없이 정상 종료",
+            expectations: [
+                "Inner(lockAcquired=true)는 no-op",
+                "Outer(lockAcquired=false)만 해제되어 전체 흐름 정상"
+            ])
+
         let worker = NotiflyAsyncWorker()
-        // 전체 완료 대기
         let done = expectation(description: "done")
 
-        // Outer: lockAcquired=false(세마포어 획득)
-        tl.log(C, "schedule Outer(lockAcquired=false)")
+        L.step("Outer 스케줄 (lockAcquired=false)")
         worker.addTask(lockAcquired: false) { outerFinish in
-            tl.log(C, "start    Outer")
-            // Inner: lockAcquired=true(세마포어 미획득, finishTask는 no-op)
-            tl.log(C, "schedule Inner(lockAcquired=true)")
+            L.step("Outer 시작")
+            L.step("Inner 스케줄 (lockAcquired=true)")
             worker.addTask(lockAcquired: true) { innerFinish in
-                tl.log(C, "start    Inner")
-                // no-op 호출(부모의 언락에 의존)
+                L.step("Inner 시작")
                 innerFinish()
-                tl.log(C, "finish   Inner (no-op)")
+                L.step("Inner 종료(no-op)")
             }
-            // 부모 락 정상 해제
             outerFinish()
-            tl.log(C, "finish   Outer (success)")
-            // 케이스 종료
+            L.step("Outer 종료")
             done.fulfill()
         }
 
-        // 완료 대기
         wait(for: [done], timeout: 3)
-        // 타임라인 첨부
-        tl.attach(to: self, name: C)
+        L.caseEnd()
     }
 
-    // MARK: - 06) 스트레스(랜덤 지연, 다량 태스크)
-    // 설명: 다량(50개) 태스크를 랜덤 지연으로 실행해도 동시성 1/FIFO/정상 완료 흐름이 유지되어야 한다.
-    // 방법: 랜덤 딜레이로 finishTask 호출, 전부 완료할 때까지 대기 + 타임라인 확인.
-    func test_06_Stress_RandomDurations() {
-        let C = "Stress"
-        let tl = Timeline()
+    // 06) 스트레스(랜덤 지연, 다량 태스크)
+    // - 무엇: 다량 태스크/랜덤 지연에서도 동시성 1/FIFO/정상 완료 흐름 유지
+    // - 검증: 모두 정상 종료
+    func test_Stress_RandomDurations() {
+        let L = CaseLog("06_Stress")
+        L.caseStart(
+            objective: "다량 태스크/랜덤 지연에서도 일관된 직렬 처리",
+            expectations: [
+                "활성 동시성은 항상 1",
+                "모든 태스크 정상 종료"
+            ])
+
         let worker = NotiflyAsyncWorker()
-        // 태스크 수
         let N = 50
-        // N개 완료 대기
         let done = expectation(description: "done")
         done.expectedFulfillmentCount = N
 
-        // 0..<(N) 반복
         for i in 0..<N {
-            // 스케줄 로그
-            tl.log(C, "schedule T\(i)")
-            // 랜덤 지연(0~20ms)
+            L.step("T\(i) 스케줄")
             let delay = Double.random(in: 0...0.02)
-            // 태스크 추가
-            worker.addTask { finishTask in
-                // 시작 로그
-                tl.log(C, "start    T\(i)")
-                // 랜덤 지연 후 finishTask 호출
+            worker.addTask { finish in
+                L.step("T\(i) 시작")
                 DispatchQueue.global().asyncAfter(deadline: .now() + delay) {
-                    tl.log(C, "finish   T\(i) (success)")
-                    finishTask()
+                    L.step("T\(i) 종료")
+                    finish()
                     done.fulfill()
                 }
             }
         }
 
-        // 전체 완료 대기(타임아웃 10초)
         wait(for: [done], timeout: 10)
-        // 타임라인 첨부
-        tl.attach(to: self, name: C)
+        L.caseEnd()
     }
 }
