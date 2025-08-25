@@ -444,3 +444,27 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
         }
     }
 }
+
+#if DEBUG
+// MARK: - Test Hooks (DEBUG only)
+extension NotificationsManager {
+    /// FCM 최대 재시도 초과 상황을 강제하여 현재 사이클 상태를 검사하기 위한 테스트 훅
+    func test_simulateFCMMaxRetryExceeded() {
+        fcmRetryAttempt = maxRetryAttempts
+        retryFCMTokenRequest()
+    }
+
+    /// APNs 최대 재시도 초과 상황을 강제하여 정리 로직을 검사하기 위한 테스트 훅
+    func test_simulateAPNsMaxRetryExceeded() {
+        apnsRetryAttempt = maxRetryAttempts
+        retryAPNsRegistration()
+    }
+
+    /// 테스트에서 내부 상태/리소스 정리 여부를 확인하기 위한 헬퍼들
+    func test_isDeviceTokenPromiseNil() -> Bool { deviceTokenPromise == nil }
+    func test_isTimeoutWorkItemNil() -> Bool { timeoutWorkItem == nil }
+    func test_getLastFCMToken() -> String? { lastFCMToken }
+    func test_getFCMState() -> TokenState { fcmTokenState }
+    func test_getAPNsState() -> TokenState { apnsTokenState }
+}
+#endif
