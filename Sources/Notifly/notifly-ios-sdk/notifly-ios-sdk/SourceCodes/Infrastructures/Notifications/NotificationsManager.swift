@@ -53,7 +53,6 @@ class NotificationsManager: NSObject {
                 pub
                 .catch { [weak self] error -> AnyPublisher<String, Error> in
                     Logger.error("Failed to get APNs Token with error: \(error)")
-
                     // Instead of returning empty string, attempt retry
                     guard let self = self, case .failed = self.apnsTokenState else {
                         // If retry is not possible, fail properly instead of empty string
@@ -419,3 +418,45 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
         }
     }
 }
+
+#if DEBUG
+// MARK: - Test Hooks (DEBUG only)
+extension NotificationsManager {
+    /// FCM 최대 재시도 초과 상황을 강제하여 현재 사이클 상태를 검사하기 위한 테스트 훅
+    func test_simulateFCMMaxRetryExceeded() {
+        fcmRetryAttempt = maxRetryAttempts
+        retryFCMTokenRequest()
+    }
+
+    /// APNs 최대 재시도 초과 상황을 강제하여 정리 로직을 검사하기 위한 테스트 훅
+    func test_simulateAPNsMaxRetryExceeded() {
+        apnsRetryAttempt = maxRetryAttempts
+        retryAPNsRegistration()
+    }
+
+    /// 테스트에서 내부 상태/리소스 정리 여부를 확인하기 위한 헬퍼들
+    func test_isDeviceTokenPromiseNil() -> Bool { deviceTokenPromise == nil }
+    func test_isTimeoutWorkItemNil() -> Bool { timeoutWorkItem == nil }
+    func test_getFCMState() -> TokenState { fcmTokenState }
+    func test_getAPNsState() -> TokenState { apnsTokenState }
+
+    /// 테스트용: Firebase 경로 없이 APNs 토큰 게이팅/내부 이벤트만 수행
+    /// - 수행 내용: currentDeviceToken 설정, apnsTokenState = .success, apns_token 내부 이벤트(값 변경 시 1회)
+    /// - 호출하지 않는 것: Messaging.apnsToken, FCM 토큰 요청/재시도
+    func test_handleAPNsTokenForGatingOnly(_ deviceToken: Data) {
+        Logger.info("📱 APNs device token received (TEST GATING ONLY)")
+        currentDeviceToken = deviceToken
+        apnsTokenState = .success
+
+        // 값 변경 시에만 내부 이벤트 전송
+        let apnsTokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        // 테스트 편의: deviceTokenPub을 즉시 성공 퍼블리셔로 강제 주입(내부 이벤트 파이프라인 생성 보장)
+        setDeviceTokenPub(token: "test_device_token")
+        if let notifly = try? Notifly.main {
+            notifly.trackingManager.trackSetDevicePropertiesInternalEvent(properties: [
+                "apns_token": apnsTokenString
+            ])
+        }
+    }
+}
+#endif
