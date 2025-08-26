@@ -24,11 +24,8 @@ class NotificationsManager: NSObject {
     private var fcmTokenState: TokenState = .pending
     private var currentDeviceToken: Data?
     private var lastFCMToken: String?
-
-#if DEBUG
-    // DEBUG 전용: 핫픽스 이전(레거시) 동작을 재현하기 위한 스위치
-    static var debugLegacyModeEnabled: Bool = false
-#endif
+    private var lastAPNsToken: String?
+    private var isFCMRequestInFlight: Bool = false
 
     // Retry configuration
     private let maxRetryAttempts: Int = 4
@@ -47,26 +44,44 @@ class NotificationsManager: NSObject {
             guard let pub = _deviceTokenPub else {
                 Logger.error("Failed to get APNs Token - no publisher available")
 
-                // Check if we can start token acquisition
-                if apnsTokenState == .pending || apnsTokenState == .failed {
-                    startTokenAcquisition()
+                // 1) 마지막 성공 FCM 토큰이 있다면 즉시 재생산하여 초기 구독 실패를 완화
+                if let cached = lastFCMToken, !cached.isEmpty {
+                    return Just(cached).setFailureType(to: Error.self).eraseToAnyPublisher()
                 }
 
-                return Fail(error: NotiflyError.deviceTokenError)
-                    .eraseToAnyPublisher()
+                // 2) 상태에 따라 사이클 재기동
+                switch apnsTokenState {
+                case .pending:
+                    startTokenAcquisition()
+                    return _deviceTokenPub ?? Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
+                case .failed:
+                    Logger.info("🔄 Creating retry publisher for token acquisition")
+                    apnsRetryAttempt = 0
+                    startTokenAcquisition()
+                    return _deviceTokenPub ?? Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
+                default:
+                    return Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
+                }
             }
             return
                 pub
                 .catch { [weak self] error -> AnyPublisher<String, Error> in
                     Logger.error("Failed to get APNs Token with error: \(error)")
 
-                    // Instead of returning empty string, attempt retry
-                    guard let self = self, case .failed = self.apnsTokenState else {
-                        // If retry is not possible, fail properly instead of empty string
-                        return Fail(error: NotiflyError.deviceTokenError)
-                            .eraseToAnyPublisher()
+                    guard let self = self else {
+                        return Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
                     }
-                    return self.createRetryPublisher()
+
+                    // 실패 상태에서의 복구는 createRetryPublisher 대신 사이클 일원화로 처리
+                    if case .failed = self.apnsTokenState {
+                        Logger.info("🔄 Creating retry publisher for token acquisition")
+                        self.apnsRetryAttempt = 0
+                        self.startTokenAcquisition()
+                        return self._deviceTokenPub ?? Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
+                    }
+
+                    // 그 외의 오류는 기존 실패로 전파
+                    return Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
                 }
                 .eraseToAnyPublisher()
         }
@@ -98,11 +113,12 @@ class NotificationsManager: NSObject {
         // Convert APNs token to string for tracking
         let apnsTokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
 
-        // Track APNs token for debugging purposes
-        if let notifly = try? Notifly.main {
+        // 변경 배경: 동일 apns_token의 중복 내부 이벤트 전송 억제로 JSON 인코딩 스파이크 완화
+        if lastAPNsToken != apnsTokenString, let notifly = try? Notifly.main {
             notifly.trackingManager.trackSetDevicePropertiesInternalEvent(properties: [
                 "apns_token": apnsTokenString
             ])
+            lastAPNsToken = apnsTokenString
         }
 
         // Set APNs token to Firebase
@@ -113,31 +129,7 @@ class NotificationsManager: NSObject {
     }
 
     func registerFCMToken(token: String) {
-#if DEBUG
-        if Self.debugLegacyModeEnabled == true {
-            // 레거시: 중복 가드 비활성화, 매 호출마다 내부 이벤트 전송 가능
-            Logger.info("🔥 FCM token registered (LEGACY mode)")
-            fcmTokenState = .success
-            fcmRetryAttempt = 0     // Reset retry counter on success
-            apnsRetryAttempt = 0    // Reset APNs retry counter on FCM success
-
-            // Cancel the timeout timer since we successfully got the token
-            timeoutWorkItem?.cancel()
-            timeoutWorkItem = nil
-
-            deviceTokenPromise?(.success(token))
-            deviceTokenPub = Just(token).setFailureType(to: Error.self).eraseToAnyPublisher()
-
-            if let notifly = try? Notifly.main {
-                notifly.trackingManager.trackSetDevicePropertiesInternalEvent(properties: [
-                    "device_token": token
-                ])
-            }
-            return
-        }
-#endif
-
-        // 핫픽스: 중복/재진입 가드 (동일 토큰으로 이미 성공 처리된 경우 조기 종료)
+        // 핫픽스: 중복/재진입 가드 (동일 토큰으로 이미 성공 처리된 경우 조기 종료 --> 아이템포턴시/크래시 방지)
         if token == lastFCMToken, fcmTokenState == .success {
             if let promise = deviceTokenPromise {
                 // 비정상적으로 promise가 남아있다면 한 번만 완료 후 정리
@@ -219,6 +211,8 @@ class NotificationsManager: NSObject {
                     Logger.error("⏰ Device token promise timeout reached")
                     self.apnsTokenState = .failed
                     promise(.failure(NotiflyError.promiseTimeout))
+                    // 안정성 보강: 타임아웃 경로에서도 promise를 즉시 정리하여 이중 완료/레이스 제거
+                    self.deviceTokenPromise = nil
 
                     // Clear the work item since it's executed
                     self.timeoutWorkItem = nil
@@ -256,16 +250,6 @@ class NotificationsManager: NSObject {
     // MARK: - APNs Retry Logic
 
     private func retryAPNsRegistration() {
-#if DEBUG
-        if Self.debugLegacyModeEnabled == true {
-                guard apnsRetryAttempt < maxRetryAttempts else {
-                Logger.error("❌ APNs registration failed after \(maxRetryAttempts) attempts")
-                apnsTokenState = .failed
-                deviceTokenPromise?(.failure(NotiflyError.deviceTokenError))
-                return
-            }
-        }
-#endif
         guard apnsRetryAttempt < maxRetryAttempts else {
             Logger.error("❌ APNs registration failed after \(maxRetryAttempts) attempts")
             apnsTokenState = .failed
@@ -297,11 +281,14 @@ class NotificationsManager: NSObject {
     // MARK: - FCM Retry Logic
 
     private func requestFCMTokenWithRetry() {
+        // 핫픽스: 중복/재진입 가드 (이미 요청중이면 재진입 차단 --> 불필요한 네트워크 요청 방지)
+        guard isFCMRequestInFlight == false else { return }
+        isFCMRequestInFlight = true
         fcmTokenState = .pending
 
         Messaging.messaging().token { [weak self] token, error in
             guard let self = self else { return }
-
+            self.isFCMRequestInFlight = false
             if let token = token, error == nil {
                 self.registerFCMToken(token: token)
             } else {
@@ -318,13 +305,6 @@ class NotificationsManager: NSObject {
         guard fcmRetryAttempt < maxRetryAttempts else {
             Logger.error("❌ FCM token request failed after \(maxRetryAttempts) attempts")
             fcmTokenState = .failed
-            // 레거시 재현: 퍼블리셔 poison 및 즉시 실패 전파
-#if DEBUG
-            if Self.debugLegacyModeEnabled == true {
-                deviceTokenPromise?(.failure(NotiflyError.deviceTokenError))
-                deviceTokenPub = Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
-            }
-#endif
             return
         }
 
@@ -357,28 +337,6 @@ class NotificationsManager: NSObject {
             // Request FCM token again
             self.requestFCMTokenWithRetry()
         }
-    }
-
-    // MARK: - Fallback Publisher for Retry
-
-    private func createRetryPublisher() -> AnyPublisher<String, Error> {
-        return Future { [weak self] promise in
-            guard let self = self else {
-                promise(.failure(NotiflyError.deviceTokenError))
-                return
-            }
-
-            Logger.info("🔄 Creating retry publisher for token acquisition")
-
-            // Store the promise for later resolution
-            self.deviceTokenPromise = promise
-
-            // Start the retry process
-            if self.apnsTokenState == .failed {
-                self.apnsRetryAttempt = 0  // Reset for new attempt
-                self.retryAPNsRegistration()
-            }
-        }.eraseToAnyPublisher()
     }
 
     // MARK: - Original Methods (unchanged)
@@ -512,5 +470,25 @@ extension NotificationsManager {
     func test_getLastFCMToken() -> String? { lastFCMToken }
     func test_getFCMState() -> TokenState { fcmTokenState }
     func test_getAPNsState() -> TokenState { apnsTokenState }
+
+    /// 테스트용: Firebase 경로 없이 APNs 토큰 게이팅/내부 이벤트만 수행
+    /// - 수행 내용: currentDeviceToken 설정, apnsTokenState = .success, apns_token 내부 이벤트(값 변경 시 1회)
+    /// - 호출하지 않는 것: Messaging.apnsToken, FCM 토큰 요청/재시도
+    func test_handleAPNsTokenForGatingOnly(_ deviceToken: Data) {
+        Logger.info("📱 APNs device token received (TEST GATING ONLY)")
+        currentDeviceToken = deviceToken
+        apnsTokenState = .success
+
+        // 값 변경 시에만 내부 이벤트 전송
+        let apnsTokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        // 테스트 편의: deviceTokenPub을 즉시 성공 퍼블리셔로 강제 주입(내부 이벤트 파이프라인 생성 보장)
+        setDeviceTokenPub(token: "test_device_token")
+        if lastAPNsToken != apnsTokenString, let notifly = try? Notifly.main {
+            notifly.trackingManager.trackSetDevicePropertiesInternalEvent(properties: [
+                "apns_token": apnsTokenString
+            ])
+            lastAPNsToken = apnsTokenString
+        }
+    }
 }
 #endif
