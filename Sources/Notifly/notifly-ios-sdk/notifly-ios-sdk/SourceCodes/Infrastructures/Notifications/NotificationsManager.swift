@@ -55,7 +55,7 @@ class NotificationsManager: NSObject {
                     startTokenAcquisition()
                     return _deviceTokenPub ?? Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
                 case .failed:
-                    Logger.info("🔄 Creating retry publisher for token acquisition")
+                    Logger.info("🔄 Restarting token acquisition")
                     apnsRetryAttempt = 0
                     startTokenAcquisition()
                     return _deviceTokenPub ?? Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
@@ -74,7 +74,7 @@ class NotificationsManager: NSObject {
 
                     // 실패 상태에서의 복구는 createRetryPublisher 대신 사이클 일원화로 처리
                     if case .failed = self.apnsTokenState {
-                        Logger.info("🔄 Creating retry publisher for token acquisition")
+                        Logger.info("🔄 Restarting token acquisition")
                         self.apnsRetryAttempt = 0
                         self.startTokenAcquisition()
                         return self._deviceTokenPub ?? Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
