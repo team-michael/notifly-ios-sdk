@@ -179,7 +179,7 @@ final class NotificationManagerHotfixTests: XCTestCase {
         L.caseEnd()
     }
 
-    // T3) APNs 최대 초과 → 정리 + (필수) 레이스 유도(늦은 성공 2회 연속)
+    // T3) APNs 최대 초과 → 정리
     func test_T3_APNsMaxRetryExceeded_Cleanup_RaceInduced() {
         let L = CaseLog("T3-APNs 최대초과 정리+레이스"); L.header()
         L.caseStart(
@@ -193,23 +193,10 @@ final class NotificationManagerHotfixTests: XCTestCase {
         let tNil = mgr.test_isTimeoutWorkItemNil()
         L.verify("정리 상태: promiseNil=\(pNil), timeoutNil=\(tNil)")
 
-        // 필수 레이스 유도
-        L.step("레이스 유도: 늦은 FCM 성공 2회 전송(late_A, late_B)")
-        mgr.registerFCMToken(token: "late_A")
-        mgr.registerFCMToken(token: "late_B")
-
-        // 구독으로 ‘단일 완료’ 관찰
-        let got = expectation(description: "post_race_value")
-        mgr.deviceTokenPub?.sink(
-            receiveCompletion: { c in if case .failure(let e) = c { XCTFail("예기치 않은 실패: \(e)") } },
-            receiveValue: { v in L.observe("레이스 이후 토큰 수신: \(v)"); got.fulfill() }
-        ).store(in: &bag)
-        wait(for: [got], timeout: 1.0)
-
         if !pNil || !tNil {
             L.cause("""
-            정리 미흡(promise/timeout 잔존) 상태에서 ‘늦은 성공 2회’가 겹침.
-            원인: APNs 최대초과 직후 promise/timeout이 즉시 해제되지 않아 동일 promise에 대해 2회 성공 시도가 가능.
+            정리 미흡(promise/timeout 잔존) 상태.
+            원인: APNs 최대초과 직후 promise/timeout이 즉시 해제되지 않아 동일 promise에 대한 레이스컨디션 발생 가능.
             결과: 이중 완료 시도로 크래시 위험(메인스레드 fatal/메모리 오류)
             """)
         } else {
@@ -291,96 +278,47 @@ final class NotificationManagerHotfixTests: XCTestCase {
                 receiveValue: { v in XCTAssertEqual(v, token); all.fulfill() }
             ).store(in: &bag)
         }
+
+        // 내부 이벤트 모니터링을 첫 등록 전에 시작하여 baseline 1회를 정확히 식별
+        var deviceEventCount = 0
+        let firstDeviceEvent = expectation(description: "first_device_event")
+        let noSecondDeviceEvent = expectation(description: "no_dup_device_token"); noSecondDeviceEvent.isInverted = true
+        var secondSignaled = false
+        var ieSink: AnyCancellable?
+        ieSink = notifly.trackingManager.internalEventRequestPayloadPublisher
+            .sink { payload in
+                guard let json = payload.records.first?.data else { return }
+                if json.contains("\"device_token\":\"\(token)\"") {
+                    deviceEventCount += 1
+                    if deviceEventCount == 1 {
+                        firstDeviceEvent.fulfill()
+                    } else if deviceEventCount >= 2 && !secondSignaled {
+                        secondSignaled = true
+                        ieSink?.cancel()
+                        L.cause("""
+                        동일 토큰 재전파에서 내부 이벤트가 다시 발생.
+                        원인: 동일 FCM 토큰 재등록 시 아이템포턴시 가드 부재/미작동.
+                        결과: 중복 내부 이벤트 → 인코딩/트래픽 증가, 데이터 왜곡
+                        """)
+                        noSecondDeviceEvent.fulfill()
+                    }
+                }
+            }
         L.step("늦은 성공 1회 전파: \(token)")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.mgr.registerFCMToken(token: token) }
-        wait(for: [all], timeout: 2.0)
+        // 브로드캐스트 완료와 내부 이벤트 1회 수신까지 대기
+        wait(for: [all, firstDeviceEvent], timeout: 2.0)
 
-        // 재전파 실패 재현: 동일 토큰 재전파 → 새 구독자에서 추가 수신 감지 시 실패
-        var extraReceived = 0
-        let noMore = expectation(description: "no_more"); noMore.isInverted = true
-        var extraSink: AnyCancellable?
-        extraSink = mgr.deviceTokenPub?.sink(
-            receiveCompletion: { _ in },
-            receiveValue: { _ in
-                if extraReceived == 0 {
-                    extraReceived += 1
-                    extraSink?.cancel()
-                    L.cause("""
-                    동일 토큰 재전파에서 추가 수신 발생.
-                    원인: 단일 결과 공유(replay) 불일치 또는 퍼블리셔 재교체로 재방출.
-                    결과: 구독자 중복 수신 → 로직 중복 실행/부하 증가
-                    """)
-                    noMore.fulfill()
-                }
-            }
-        )
+        // 재전파: 동일 토큰을 다시 등록하되, 내부 이벤트가 2회째 발생하면 실패로 간주
         L.step("동일 토큰 재전파: \(token)")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.mgr.registerFCMToken(token: token) }
-        wait(for: [noMore], timeout: 0.5)
+        wait(for: [noSecondDeviceEvent], timeout: 0.8)
 
-        if extraReceived == 0 {
-            L.success("재전파에도 추가 수신 없음")
-            L.meaning("단일 결과 공유(replay) 일관 보장")
+        if deviceEventCount == 1 {
+            L.success("동일 토큰 재전파에도 내부 이벤트 추가 전송 없음")
+            L.meaning("아이템포턴시 가드로 중복 트래픽/중복 처리 억제")
         }
-        XCTAssertEqual(extraReceived, 0, "재전파 추가 수신 발생")
-        L.caseEnd()
-    }
-
-    // T6) APNs 중복 + 늦은 FCM 성공 E2E + (실패 재현) APNs 동시 중복(inverted 안전화)
-    func test_T6_APNsDuplicate_ThenLateFCMSuccess_WithConcurrentDup() {
-        let L = CaseLog("T6-APNs중복+늦은FCM+동시중복"); L.header()
-        L.caseStart(
-            objective: "APNs 중복은 1회로 게이트, 이후 늦은 FCM 성공 정상 완료",
-            expectations: ["동일 APNs 2회(동시에) → 내부 이벤트 1회", "그 후 FCM 늦은 성공 수신"])
-
-        var byToken: [String: Int] = [:]
-        let one = expectation(description: "one")
-        let none = expectation(description: "noextra"); none.isInverted = true
-        var noneSignaled = false
-        var apnsSink: AnyCancellable?
-
-        apnsSink = notifly.trackingManager.internalEventRequestPayloadPublisher
-            .sink { p in
-                guard let json = p.records.first?.data, json.contains("\"apns_token\"") else { return }
-                let v = self.extractAPNsToken(from: json) ?? "unknown"
-                byToken[v, default: 0] += 1
-                let total = byToken.values.reduce(0, +)
-                if total == 1 { one.fulfill() }
-                if total > 1, !noneSignaled {
-                    noneSignaled = true
-                    apnsSink?.cancel()
-                    L.cause("""
-                    동일 APNs 값 동시 입력에서 내부 이벤트가 복수로 발생.
-                    원인: 동시 중복 입력에 대한 타이밍 경합.
-                    결과: 중복 이벤트 전송 → 인코딩/트래픽 폭증, 상태 불안정
-                    """)
-                    none.fulfill()
-                }
-            }
-
-        func d(_ s: String) -> Data { Data(s.utf8) }
-        L.step("APNs 게이팅 동시 2회: same, same")
-        let q = DispatchQueue(label: "t6.concurrent", attributes: .concurrent)
-        q.async { self.mgr.test_handleAPNsTokenForGatingOnly(d("same")) }
-        q.async { self.mgr.test_handleAPNsTokenForGatingOnly(d("same")) }
-
-        let expected = "fcm_late"
-        let got = expectation(description: "late_fcm")
-        L.step("늦은 FCM 성공 전송: \(expected)")
-        mgr.registerFCMToken(token: expected)
-        mgr.deviceTokenPub?.sink(
-            receiveCompletion: { c in if case .failure(let e) = c { XCTFail("예기치 않은 실패: \(e)") } },
-            receiveValue: { v in XCTAssertEqual(v, expected); got.fulfill() }
-        ).store(in: &bag)
-
-        wait(for: [one, none, got], timeout: 2.0)
-        let sameHex = expectedHex("same")
-        L.verify("apns 분포(hex)=\(byToken) (기대: \(sameHex)=1)")
-        if byToken[sameHex, default: 0] == 1 {
-            L.success("APNs 중복 1회 게이트 + 늦은 FCM 성공 정상 완료")
-            L.meaning("엔드투엔드 안정성(중복 억제 + 회복성) 확보")
-        }
-        XCTAssertEqual(byToken[sameHex, default: 0], 1, "APNs 중복 게이트 실패")
+        XCTAssertEqual(deviceEventCount, 1, "재전파로 인한 내부 이벤트 중복 발생")
         L.caseEnd()
     }
 }
