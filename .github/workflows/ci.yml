@@ -28,12 +28,16 @@ jobs:
       - name: Run SwiftLint
         run: swiftlint
 
+      - name: List available simulators
+        run: xcrun simctl list devices available
+
       - name: Build Sources with xcodebuild
         run: |
           xcodebuild clean build \
             -project ./Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk.xcodeproj \
             -scheme notifly-ios-sdk \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.0' \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO
 
