@@ -134,7 +134,7 @@ class NotificationsManager: NSObject {
             if let promise = deviceTokenPromise {
                 // 비정상적으로 promise가 남아있다면 한 번만 완료 후 정리
                 promise(.success(token))
-                deviceTokenPromise = nil
+                resetPromiseState()
             }
             return
         }
@@ -144,18 +144,12 @@ class NotificationsManager: NSObject {
         fcmRetryAttempt = 0  // Reset retry counter on success
         apnsRetryAttempt = 0  // Reset APNs retry counter on FCM success
 
-        // Cancel the timeout timer since we successfully got the token
-        timeoutWorkItem?.cancel()
-        timeoutWorkItem = nil
-
         let shouldTrackDeviceTokenEvent = (lastFCMToken != token)
         lastFCMToken = token
 
-        // deviceTokenPromise 단일 완료 보장 및 즉시 nil 처리
-        if let promise = deviceTokenPromise {
-            promise(.success(token))
-            deviceTokenPromise = nil
-        }
+        // promise/timer 즉시 정리 (안정성 보강)
+        deviceTokenPromise?(.success(token))
+        resetPromiseState()
 
         deviceTokenPub = Just(token).setFailureType(to: Error.self).eraseToAnyPublisher()
 
@@ -178,9 +172,8 @@ class NotificationsManager: NSObject {
         Logger.error("Failed to receive the push notification deviceToken with error: \(error)")
         apnsTokenState = .failed
 
-        // Cancel the timeout timer since we got a definitive result
-        timeoutWorkItem?.cancel()
-        timeoutWorkItem = nil
+        // promise/timer 즉시 정리 (안정성 보강)
+        resetPromiseState()
 
         // Start APNs retry logic
         retryAPNsRegistration()
@@ -211,11 +204,8 @@ class NotificationsManager: NSObject {
                     Logger.error("⏰ Device token promise timeout reached")
                     self.apnsTokenState = .failed
                     promise(.failure(NotiflyError.promiseTimeout))
-                    // 안정성 보강: 타임아웃 경로에서도 promise를 즉시 정리하여 이중 완료/레이스 제거
-                    self.deviceTokenPromise = nil
-
-                    // Clear the work item since it's executed
-                    self.timeoutWorkItem = nil
+                    // 안정성 보강: 타임아웃 경로에서도 promise/timer를 즉시 정리하여 이중 완료/레이스 제거
+                    self.resetPromiseState()
 
                     // Start retry process
                     self.retryAPNsRegistration()
@@ -253,14 +243,9 @@ class NotificationsManager: NSObject {
         guard apnsRetryAttempt < maxRetryAttempts else {
             Logger.error("❌ APNs registration failed after \(maxRetryAttempts) attempts")
             apnsTokenState = .failed
-            // 안정성 가드: promise를 한 번만 실패로 종료하고 즉시 정리
-            if let promise = deviceTokenPromise {
-                promise(.failure(NotiflyError.deviceTokenError))
-                deviceTokenPromise = nil
-            }
-            // 지연 타임아웃이 남아있다면 해제하여 중복 완료/충돌 방지
-            timeoutWorkItem?.cancel()
-            timeoutWorkItem = nil
+            // promise/timer 즉시 정리 (안정성 보강)
+            deviceTokenPromise?(.failure(NotiflyError.deviceTokenError))
+            resetPromiseState()
             return
         }
 
@@ -337,6 +322,12 @@ class NotificationsManager: NSObject {
             // Request FCM token again
             self.requestFCMTokenWithRetry()
         }
+    }
+
+    private func resetPromiseState() {
+        deviceTokenPromise = nil
+        timeoutWorkItem?.cancel()
+        timeoutWorkItem = nil
     }
 
     // MARK: - Original Methods (unchanged)
