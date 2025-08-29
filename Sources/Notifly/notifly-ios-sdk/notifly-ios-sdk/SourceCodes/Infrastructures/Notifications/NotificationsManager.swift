@@ -144,10 +144,6 @@ class NotificationsManager: NSObject {
         }
     }
 
-    func setDeviceTokenPub(token: String) {
-        deviceTokenPub = Just(token).setFailureType(to: Error.self).eraseToAnyPublisher()
-    }
-
     func application(
         _: UIApplication,
         didFailToRegisterForRemoteNotificationsWithError error: Error
@@ -231,7 +227,8 @@ class NotificationsManager: NSObject {
         guard apnsRetryAttempt < maxRetryAttempts else {
             Logger.error("❌ APNs registration failed after \(maxRetryAttempts) attempts")
             apnsTokenState = .failed
-            deviceTokenPromise?(.failure(NotiflyError.deviceTokenError))
+            deviceTokenPromise?(.failure(NotiflyError.apnsTokenError))
+            deviceTokenPub = Fail(error: NotiflyError.apnsTokenError).eraseToAnyPublisher()
             // promise/timer 즉시 정리 (안정성 보강)
             resetPromiseState()
             return
@@ -278,8 +275,8 @@ class NotificationsManager: NSObject {
         guard fcmRetryAttempt < maxRetryAttempts else {
             Logger.error("❌ FCM token request failed after \(maxRetryAttempts) attempts")
             fcmTokenState = .failed
-            deviceTokenPromise?(.failure(NotiflyError.deviceTokenError))
-            deviceTokenPub = Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
+            deviceTokenPromise?(.failure(NotiflyError.fcmTokenError))
+            deviceTokenPub = Fail(error: NotiflyError.fcmTokenError).eraseToAnyPublisher()
             // promise/timer 즉시 정리 (안정성 보강)
             resetPromiseState()
             return
@@ -465,8 +462,6 @@ extension NotificationsManager {
 
         // 값 변경 시에만 내부 이벤트 전송
         let apnsTokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
-        // 테스트 편의: deviceTokenPub을 즉시 성공 퍼블리셔로 강제 주입(내부 이벤트 파이프라인 생성 보장)
-        setDeviceTokenPub(token: "test_device_token")
         if lastAPNsToken != apnsTokenString, let notifly = try? Notifly.main {
             notifly.trackingManager.trackSetDevicePropertiesInternalEvent(properties: [
                 "apns_token": apnsTokenString
