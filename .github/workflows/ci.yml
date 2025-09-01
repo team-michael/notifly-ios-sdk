@@ -28,13 +28,25 @@ jobs:
       - name: Run SwiftLint
         run: swiftlint
 
+      - name: Find Available iOS Simulator
+        id: find_simulator
+        run: |
+          # Find the first available iPhone simulator
+          SIMULATOR_ID=$(xcrun simctl list devices available iPhone | grep -E 'iPhone.*\(' | head -1 | sed -E 's/.*\(([^)]+)\).*/\1/')
+          if [ -z "$SIMULATOR_ID" ]; then
+            # Fallback to any iOS simulator if iPhone not found
+            SIMULATOR_ID=$(xcrun simctl list devices available | grep -E 'iOS.*\(' | head -1 | sed -E 's/.*\(([^)]+)\).*/\1/')
+          fi
+          echo "simulator_id=$SIMULATOR_ID" >> $GITHUB_OUTPUT
+          echo "Using simulator ID: $SIMULATOR_ID"
+
       - name: Build Sources with xcodebuild
         run: |
           xcodebuild clean build \
             -project ./Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk.xcodeproj \
             -scheme notifly-ios-sdk \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=Any iOS Simulator Device' \
+            -destination 'platform=iOS Simulator,id=${{ steps.find_simulator.outputs.simulator_id }}' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO
 
