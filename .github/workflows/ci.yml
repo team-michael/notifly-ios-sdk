@@ -28,13 +28,25 @@ jobs:
       - name: Run SwiftLint
         run: swiftlint
 
+      - name: Find Available iOS Simulator
+        id: find_simulator
+        run: |
+          # Get available iOS simulators and find the latest iPhone
+          DESTINATION=$(xcrun simctl list devices available | grep -E "iPhone [0-9]+ (Pro|Plus)?.*iOS [0-9]+\.[0-9]+" | tail -1 | sed -E 's/.*iPhone ([^(]+) \(([^)]+)\) \(([^)]+)\) \(iOS ([0-9]+\.[0-9]+).*\).*/platform=iOS Simulator,name=iPhone \1,OS=\4/' | sed 's/  / /g' | sed 's/ $//')
+          if [ -z "$DESTINATION" ]; then
+            # Fallback to any iOS Simulator device
+            DESTINATION="platform=iOS Simulator,name=Any iOS Simulator Device"
+          fi
+          echo "destination=$DESTINATION" >> $GITHUB_OUTPUT
+          echo "Using destination: $DESTINATION"
+
       - name: Build Sources with xcodebuild
         run: |
           xcodebuild clean build \
             -project ./Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk.xcodeproj \
             -scheme notifly-ios-sdk \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.0' \
+            -destination '${{ steps.find_simulator.outputs.destination }}' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO
 
