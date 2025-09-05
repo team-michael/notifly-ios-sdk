@@ -5,6 +5,8 @@ enum NotiflyError: Error {
     case notAuthorized
     case notInitialized
     case promiseTimeout
+    case apnsTokenError
+    case fcmTokenError
     case deviceTokenError
     case invalidPayload
     case nilValueReceived
