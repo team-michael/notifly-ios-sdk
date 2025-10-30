@@ -42,6 +42,7 @@ class NotificationsManager: NSObject {
 
     // Timer management (stateQueue protected)
     private var timeoutWorkItem: DispatchWorkItem?
+    private var timeoutToken: UUID?
 
     private(set) var deviceTokenPub: AnyPublisher<String, Error>? {
         get {
@@ -77,16 +78,21 @@ class NotificationsManager: NSObject {
                     var recovered: AnyPublisher<String, Error>?
                     var restart = false
                     self.stateQueue.sync {
-                        recovered = self._deviceTokenPub
                         if case .failed = self.apnsTokenState {
+                            // 즉시 회복: 상태 재설정 + 새 Future 준비 --> 퍼블리셔를 반환
+                            Logger.info("🚀 Restarting token acquisition process")
+                            self.apnsTokenState = .pending
+                            self.fcmTokenState = .pending
+                            self.setupDeviceTokenPublisher()
+                            recovered = self._deviceTokenPub
                             restart = true
+                        } else {
+                            recovered = self._deviceTokenPub
                         }
                     }
 
                     if restart {
-                        DispatchQueue.main.async {
-                            self.startTokenAcquisition()
-                        }
+                        self.registerForRemoteNotifications()
                     }
 
                     return recovered ?? Fail(error: NotiflyError.deviceTokenError).eraseToAnyPublisher()
@@ -225,6 +231,9 @@ class NotificationsManager: NSObject {
                 self.deviceTokenPromise = promise
 
                 // Create new timeout work item
+                let token = UUID()
+                self.timeoutToken = token
+
                 let workItem = DispatchWorkItem { [weak self] in
                     guard let self = self else { return }
 
@@ -232,9 +241,13 @@ class NotificationsManager: NSObject {
                     var shouldRetry = false
 
                     self.stateQueue.sync {
+                        guard self.timeoutToken == token,
+                            let promise = self.deviceTokenPromise else {
+                            return
+                        }
                         Logger.error("⏰ Device token promise timeout reached")
                         self.apnsTokenState = .failed
-                        promiseToFail = self.deviceTokenPromise
+                        promiseToFail = promise
                         self.resetPromiseState()
                         shouldRetry = true
                     }
@@ -416,6 +429,7 @@ class NotificationsManager: NSObject {
         deviceTokenPromise = nil
         timeoutWorkItem?.cancel()
         timeoutWorkItem = nil
+        timeoutToken = nil
     }
 
     // MARK: - Original Methods (unchanged)
