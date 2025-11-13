@@ -103,8 +103,8 @@ jobs:
 
           # Determine per-language compare ranges (mirror local tested flow)
           if [[ "${LLM_MODE}" == "all" ]]; then
-            EN_CMD='./scripts/generate_en_llms.ssh --llm-all'
-            KR_CMD='./scripts/generate_kr_llms.ssh --llm-all'
+            EN_CMD='./scripts/generate_en_llms.ssh --llm-all --slug "team-michael/notifly-ios-sdk" --branch main'
+            KR_CMD='./scripts/generate_kr_llms.ssh --llm-all --slug "team-michael/notifly-ios-sdk" --branch main'
           else
             # HEAD ref: inputs.head or default to origin/<default_branch>
             if [[ -n "${{ inputs.head }}" ]]; then
@@ -126,8 +126,8 @@ jobs:
               EN_COMPARE="${BASE_EN}...${HEAD_REF}"
               KR_COMPARE="${BASE_KR}...${HEAD_REF}"
             fi
-            EN_CMD='./scripts/generate_en_llms.ssh --compare "'"${EN_COMPARE}"'" --llm'
-            KR_CMD='./scripts/generate_kr_llms.ssh --compare "'"${KR_COMPARE}"'" --llm'
+            EN_CMD='./scripts/generate_en_llms.ssh --compare "'"${EN_COMPARE}"'" --llm --slug "team-michael/notifly-ios-sdk" --branch main'
+            KR_CMD='./scripts/generate_kr_llms.ssh --compare "'"${KR_COMPARE}"'" --llm --slug "team-michael/notifly-ios-sdk" --branch main'
           fi
 
           case "${LANGUAGES}" in
