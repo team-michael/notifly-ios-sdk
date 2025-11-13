@@ -136,10 +136,15 @@ if [[ -z "$REPO_SLUG" ]]; then
   fi
 fi
 
-# Resolve branch (current branch, or default to main)
+# Resolve branch (prefer remote default branch to avoid CI temp branches)
 DEFAULT_BRANCH="${DEFAULT_BRANCH:-}"
 if [[ -z "$DEFAULT_BRANCH" ]]; then
-  DEFAULT_BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo main)"
+  if origin_head="$(git symbolic-ref --quiet refs/remotes/origin/HEAD 2>/dev/null)"; then
+    DEFAULT_BRANCH="${origin_head##*/}"
+  else
+    DEFAULT_BRANCH="$(git remote show origin 2>/dev/null | awk '/HEAD branch/ {print $NF}' | head -n1)"
+    [[ -z "$DEFAULT_BRANCH" ]] && DEFAULT_BRANCH="main"
+  fi
 fi
 
 RAW_BASE="https://raw.githubusercontent.com/${REPO_SLUG}/${DEFAULT_BRANCH}"
@@ -450,6 +455,12 @@ if [[ -f "$EXISTING_LLMS_PATH" && -s "$CHANGED_SET" ]]; then
     abs_file="${REPO_ROOT}/${rel}"
     raw_url="$(rel_to_url "$rel")"
     dir_rel="$(dirname "$rel")"; dir_rel="${dir_rel:-.}"
+    # 기존 라인이 있고 LLM을 사용하지 않으면 원본을 그대로 유지
+    if grep -F -q "](${raw_url}):" "$OUTFILE" >/dev/null 2>&1; then
+      if [[ "$USE_LLM" != "true" ]]; then
+        continue
+      fi
+    fi
     if [[ -f "$abs_file" ]]; then
       title="$(titleize "$(basename "$abs_file")")"
       existing_line="$(awk -F '\t' -v u="$raw_url" '$1==u{print $0; exit}' "$EXISTING_MAP" 2>/dev/null || true)"
@@ -469,6 +480,20 @@ if [[ -f "$EXISTING_LLMS_PATH" && -s "$CHANGED_SET" ]]; then
       remove_line_by_url "$raw_url"
     fi
   done < "$CHANGED_SET"
+  update_header_in_place "$HEAD_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  if [[ -n "${OUTPUT_PATH}" && -n "${OUTPUT_SINK:-}" ]]; then
+    mv "$OUTFILE" "$OUTPUT_PATH"
+    echo "Wrote ${OUTPUT_PATH}" >&2
+  else
+    cat "$OUTFILE"
+  fi
+  exit 0
+fi
+
+# 비교 범위가 있으나 변경 사항이 없으면 헤더만 갱신하고 종료
+if [[ -f "$EXISTING_LLMS_PATH" && -n "${COMPARE_RANGE:-${BASE_REF:-}${HEAD_REF:-}}" && ! -s "$CHANGED_SET" ]]; then
+  OUTFILE="$STAGING_PATH"
+  cp "$EXISTING_LLMS_PATH" "$OUTFILE" 2>/dev/null || : > "$OUTFILE"
   update_header_in_place "$HEAD_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   if [[ -n "${OUTPUT_PATH}" && -n "${OUTPUT_SINK:-}" ]]; then
     mv "$OUTFILE" "$OUTPUT_PATH"
@@ -562,11 +587,8 @@ for dir in $INCLUDE_DIRS; do
       fi
     fi
 
-    if [[ "$need_llm" != "true" && -n "$existing_full_line" ]]; then
-      line="$existing_full_line"
-    else
-      line="- [${title}](${raw_url}): ${desc}"
-    fi
+    # 항상 출력 라인을 구성합니다 (set -u 환경에서 미정의 변수 참조 회피)
+    line="- [${title}](${raw_url}): ${desc}"
     dir_rel="$(dirname "$rel")"
     dir_rel="${dir_rel:-.}"
     append_to_dir "$dir_rel" "$line"
