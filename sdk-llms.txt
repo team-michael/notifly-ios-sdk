@@ -1,0 +1,86 @@
+<!-- repo: team-michael/notifly-ios-sdk -->
+<!-- ref: main -->
+<!-- commit: d30fbaffdd2b0a111fc7de875566ae78cd742fde -->
+<!-- generated_at: 2025-11-13T08:48:58Z -->
+# Platform: iOS
+
+## NotiflyIOSSample/NotiflyIOSSample
+- [Notiflyiossampleapp](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyIOSSample/NotiflyIOSSample/NotiflyIOSSampleApp.swift): NotiflyIOSSampleApp.swift
+- [Appdelegate](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyIOSSample/NotiflyIOSSample/AppDelegate.swift): AppDelegate.swift
+- [Deeplinkmanager](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyIOSSample/NotiflyIOSSample/DeepLinkManager.swift): Source file for Deeplinkmanager
+- [Deeplinkview](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyIOSSample/NotiflyIOSSample/DeepLinkView.swift): Source file for Deeplinkview
+- [Contentview](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyIOSSample/NotiflyIOSSample/ContentView.swift): ContentView.swift
+
+## NotiflyIOSSample/NotiflyNotificationExtension
+- [Notificationservice](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyIOSSample/NotiflyNotificationExtension/NotificationService.swift): NotificationService.swift
+
+## NotiflyTestApp/NotiflyNotificationExtension
+- [Notificationservice](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyTestApp/NotiflyNotificationExtension/NotificationService.swift): NotificationService.swift
+
+## NotiflyTestApp/NotiflyTestApp/SourceCodes
+- [Testconstant](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyTestApp/NotiflyTestApp/SourceCodes/TestConstant.swift): Source file for Testconstant
+
+## NotiflyTestApp/NotiflyTestApp/SourceCodes/UI
+- [Trackingtestviewcontroller](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyTestApp/NotiflyTestApp/SourceCodes/UI/TrackingTestViewController.swift): MARK: UI Components
+- [Mainviewcontroller](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyTestApp/NotiflyTestApp/SourceCodes/UI/MainViewController.swift): @testable import notifly_ios_sdk
+- [Pushnotificationtestviewcontroller](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyTestApp/NotiflyTestApp/SourceCodes/UI/PushNotificationTestViewController.swift): MARK: UI Components
+- [Appdelegate](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyTestApp/NotiflyTestApp/SourceCodes/UI/AppDelegate.swift): Source file for Appdelegate
+- [Usersettingstestviewcontroller](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyTestApp/NotiflyTestApp/SourceCodes/UI/UserSettingsTestViewController.swift): MARK: Properties
+- [Scenedelegate](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyTestApp/NotiflyTestApp/SourceCodes/UI/SceneDelegate.swift): SceneDelegate.swift
+
+## NotiflyTestApp/NotiflyTestApp/SourceCodes/UI/Util
+- [Uistackview+](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyTestApp/NotiflyTestApp/SourceCodes/UI/Util/UIStackView+.swift): Source file for Uistackview+
+- [Keyvaluedatainputviewcontroller](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyTestApp/NotiflyTestApp/SourceCodes/UI/Util/KeyValueDataInputViewController.swift): MARK: - Constants
+- [Uitextfield+](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/NotiflyTestApp/NotiflyTestApp/SourceCodes/UI/Util/UITextField+.swift): Source file for Uitextfield+
+
+## Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/API
+- [Notiflyapi+request](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/API/NotiflyAPI+Request.swift): Source file for Notiflyapi+request
+- [Notiflyapi](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/API/NotiflyAPI.swift): MARK: Public Methods
+
+## Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/Auth
+- [Auth](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/Auth/Auth.swift): MARK: - Properties
+
+## Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage
+- [Userstate+constant](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/UserState+Constant.swift): InAppMessage.swift
+- [Inappmessage+constant](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/InAppMessage+Constant.swift): InAppMessage+Constant.swift
+- [Userstatemanager](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/UserStateManager.swift): UserStateManager.swift
+- [Inappmessagemanager](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/InAppMessageManager.swift): InAppMessageManager.swift
+- [Segmentationhelper](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/SegmentationHelper.swift): SegmentationHelper.swift
+- [Campaign](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/Campaign.swift): Campaign.swift
+- [Webviewmodalviewcontroller](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/WebViewModalViewController.swift): WebViewModalViewController exposes init(notiflyInAppMessageData:) and show(), presents a fullscreen WKWebView modal, injects JS, handles 'notiflyInAppMessageEventHandler' messages to track/dispatch Notifly events, update hide‑until state, and open links.
+
+## Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/Notifications
+- [Notificationsmanager](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/Notifications/NotificationsManager.swift): MARK: - Token State Management
+
+## Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/Tracking
+- [Trackingmanager](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/Tracking/TrackingManager.swift): var trackingFiringInterval: TimeInterval = 5
+
+## Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/User
+- [Usermanager](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/User/UserManager.swift): Source file for Usermanager
+
+## Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Notifly
+- [Notifly+helper](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Notifly/Notifly+Helper.swift): Notifly+Helper.swift
+- [Notifly+publicapi](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Notifly/Notifly+PublicAPI.swift): Contains all available Notifly SDK Public APIs.
+- [Notifly](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Notifly/Notifly.swift): MARK: Lifecycle
+
+## Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyExtension
+- [Notiflyextensionapi](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyExtension/NotiflyExtensionAPI.swift): NotiflyExtensionAPI.swift
+- [Notificationserviceextension](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyExtension/NotificationServiceExtension.swift): NotificationServiceExtension.swift
+
+## Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil
+- [Constants](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/Constants.swift): Provides SDK-wide static configuration and constants: endpoints, event names, UUID hash namespaces for hashing, time units, value/operator/string enums, and the NotiflyValue struct initializer.
+- [Notiflyerror](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/NotiflyError.swift): Source file for Notiflyerror
+- [Apphelper](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/AppHelper.swift): Source file for Apphelper
+- [Logger](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/Logger.swift): Logger.swift
+- [Notiflycustomuserdefaults](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/NotiflyCustomUserDefaults.swift): NotiflyCustomUserDefaults.swift
+- [Timezone](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/Timezone.swift): Timezone.swift
+- [Messagedata](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/MessageData.swift): MessageData.swift
+- [Asyncworker](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/AsyncWorker.swift): 유일한 외부 접근 경로: 비동기 완료 콜백 기반. 호출부는 작업 완료 시점마다 finishTask()를 정확히 1회 호출.
+- [Uuid+](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/UUID+.swift): UUID V5 Hashing Helper
+- [Trackingevent](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/TrackingEvent.swift): Source file for Trackingevent
+- [Credentials](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/Credentials.swift): Source file for Credentials
+- [Anycodable](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/AnyCodable.swift): Source file for Anycodable
+
+## Sources/Notifly/notifly-ios-sdk/notifly-ios-sdkTests
+- [Notifly Ios Sdktests](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdkTests/notifly_ios_sdkTests.swift): notifly_ios_sdkTests.swift
+- [Asyncworkerverbosesmoketests](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdkTests/AsyncWorkerVerboseSmokeTests.swift): AsyncWorkerVerboseSmokeTests.swift
