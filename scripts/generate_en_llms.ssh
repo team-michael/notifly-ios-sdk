@@ -172,6 +172,62 @@ write_line() {
 require_cmd() {
   command -v "$1" >/dev/null 2>&1
 }
+
+# URL builder and text-mode helpers
+url_encode_spaces() { printf "%s" "$1" | sed 's/ /%20/g'; }
+rel_to_url() { printf "%s/%s" "$RAW_BASE" "$(url_encode_spaces "$1")"; }
+
+path_is_target() {
+  local rel="$1"
+  # Check extension
+  local ext="${rel##*.}"
+  local match_ext=0
+  for e in "${exts[@]}"; do
+    e="${e// /}"
+    [[ -z "$e" ]] && continue
+    if [[ "$ext" == "$e" ]]; then match_ext=1; break; fi
+  done
+  [[ $match_ext -eq 1 ]] || return 1
+  # Check included dirs
+  for d in $INCLUDE_DIRS; do
+    case "$rel" in
+      "$d"/*|"$d") return 0 ;;
+    esac
+  done
+  # If INCLUDE_DIRS is ".", allow all
+  if [[ "$INCLUDE_DIRS" == "." ]]; then return 0; fi
+  return 1
+}
+
+replace_or_append_line() {
+  local rel="$1" raw_url="$2" newline="$3" dir_rel="$4"
+  if grep -F "](${raw_url}):" "$OUTFILE" >/dev/null 2>&1; then
+    awk -v url="$raw_url" -v nl="$newline" 'index($0, "]("url"):") {print nl; next} {print}' "$OUTFILE" > "$OUTFILE.tmp" && mv "$OUTFILE.tmp" "$OUTFILE"
+  else
+    # Ensure section header exists
+    if ! grep -xq "## ${dir_rel}" "$OUTFILE" >/dev/null 2>&1; then
+      printf "\n## %s\n" "$dir_rel" >> "$OUTFILE"
+    fi
+    awk -v hdr="## ${dir_rel}" -v nl="$newline" 'ins==0 && $0==hdr {print; print nl; ins=1; next} {print}' "$OUTFILE" > "$OUTFILE.tmp" && mv "$OUTFILE.tmp" "$OUTFILE"
+  fi
+}
+
+remove_line_by_url() {
+  local raw_url="$1"
+  awk -v url="$raw_url" 'index($0, "]("url"):")==0' "$OUTFILE" > "$OUTFILE.tmp" && mv "$OUTFILE.tmp" "$OUTFILE"
+}
+
+update_header_in_place() {
+  local commit="$1" ts="$2"
+  awk -v c="$commit" -v t="$ts" '
+    NR==1{print; next}
+    /^<!-- ref:/ {print; next}
+    /^<!-- repo:/ {print; next}
+    /^<!-- commit:/ {print "<!-- commit: " c " -->"; next}
+    /^<!-- generated_at:/ {print "<!-- generated_at: " t " -->"; next}
+    {print}
+  ' "$OUTFILE" > "$OUTFILE.tmp" && mv "$OUTFILE.tmp" "$OUTFILE"
+}
 titleize() {
   local base="$1"
   base="${base%.*}"                # drop extension
@@ -386,7 +442,54 @@ if [[ -n "${BASE_REF:-}" && -n "${HEAD_REF:-}" ]]; then
   fi
 fi
 
-# Now that HEAD_SHA is finalized, write header
+# If we have an existing LLMS and a changed set, do TEXT-MODE update (surgical)
+if [[ -f "$EXISTING_LLMS_PATH" && -s "$CHANGED_SET" ]]; then
+  OUTFILE="$STAGING_PATH"
+  cp "$EXISTING_LLMS_PATH" "$OUTFILE" 2>/dev/null || : > "$OUTFILE"
+  while IFS= read -r rel || [[ -n "$rel" ]]; do
+    [[ -z "$rel" ]] && continue
+    # Only operate on target paths (INCLUDE_DIRS + EXTENSIONS)
+    if ! path_is_target "$rel"; then
+      continue
+    fi
+    abs_file="${REPO_ROOT}/${rel}"
+    raw_url="$(rel_to_url "$rel")"
+    dir_rel="$(dirname "$rel")"; dir_rel="${dir_rel:-.}"
+    if [[ -f "$abs_file" ]]; then
+      title="$(titleize "$(basename "$abs_file")")"
+      # Default to existing description if present
+      existing_line="$(awk -F '\t' -v u="$raw_url" '$1==u{print $0; exit}' "$EXISTING_MAP" 2>/dev/null || true)"
+      desc="$(printf "%s" "$existing_line" | cut -f2- || true)"
+      if [[ -z "$desc" ]]; then
+        # Generate quickly (may call LLM if enabled)
+        f_desc="$(first_comment_line "$abs_file" || true)"
+        [[ -z "$f_desc" ]] && f_desc="Source file for ${title}"
+        if [[ "$USE_LLM" == "true" ]]; then
+          llm_desc="$(llm_describe_file "$rel" "$abs_file" "$raw_url" "$dir_rel" "$REPO_SLUG" || true)"
+          [[ -n "$llm_desc" ]] && f_desc="$llm_desc"
+        fi
+        desc="$f_desc"
+      fi
+      newline="- [${title}](${raw_url}): ${desc}"
+      replace_or_append_line "$rel" "$raw_url" "$newline" "$dir_rel"
+    else
+      # Removed file: delete line if present
+      remove_line_by_url "$raw_url"
+    fi
+  done < "$CHANGED_SET"
+  # Update header commit and timestamp
+  update_header_in_place "$HEAD_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  # Finalize output
+  if [[ -n "${OUTPUT_PATH}" && -n "${OUTPUT_SINK:-}" ]]; then
+    mv "$OUTFILE" "$OUTPUT_PATH"
+    echo "Wrote ${OUTPUT_PATH}" >&2
+  else
+    cat "$OUTFILE"
+  fi
+  exit 0
+fi
+
+# Now that HEAD_SHA is finalized (and no surgical mode), write header
 write_line "<!-- commit: ${HEAD_SHA} -->"
 write_line "<!-- generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ) -->"
 write_line "# Platform: ${human_platform}"
@@ -435,6 +538,7 @@ for dir in $INCLUDE_DIRS; do
     # Existing description from previous LLMS (if any)
     existing_line="$(awk -F '\t' -v u="$raw_url" '$1==u{print $0; exit}' "$EXISTING_MAP" 2>/dev/null || true)"
     existing_desc="$(printf "%s" "$existing_line" | cut -f2- || true)"
+    # (no full-line cache; surgical updates are handled earlier)
     # Start with fallback description
     desc="$(first_comment_line "$abs_file" || true)"
     [[ -z "$desc" ]] && desc="Source file for ${title}"
@@ -468,7 +572,12 @@ for dir in $INCLUDE_DIRS; do
       fi
     fi
 
-    line="- [${title}](${raw_url}): ${desc}"
+    # Preserve original line exactly for unchanged files when available and no LLM update
+    if [[ "$need_llm" != "true" && -n "$existing_full_line" ]]; then
+      line="$existing_full_line"
+    else
+      line="- [${title}](${raw_url}): ${desc}"
+    fi
     dir_rel="$(dirname "$rel")"
     dir_rel="${dir_rel:-.}"
     append_to_dir "$dir_rel" "$line"

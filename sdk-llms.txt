@@ -1,7 +1,7 @@
 <!-- repo: team-michael/notifly-ios-sdk -->
 <!-- ref: main -->
-<!-- commit: dba62b26a55869fbbf6943c8405597c6a916f81f -->
-<!-- generated_at: 2025-11-13T08:11:14Z -->
+<!-- commit: d30fbaffdd2b0a111fc7de875566ae78cd742fde -->
+<!-- generated_at: 2025-11-13T10:00:53Z -->
 # Platform: iOS
 
 ## NotiflyIOSSample/NotiflyIOSSample
@@ -47,7 +47,7 @@
 - [Inappmessagemanager](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/InAppMessageManager.swift): InAppMessageManager evaluates campaigns (UserStateManager, SegmentationHelper, TriggeringEventFilter, Notifly.main.
 - [Segmentationhelper](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/SegmentationHelper.swift): SegmentationHelper determines if a Campaign's condition-based segment matches a user/event via isEntityOfSegment(..
 - [Campaign](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/Campaign.swift): Parses and models in-app campaign payloads (Campaign.init?
-- [Webviewmodalviewcontroller](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/WebViewModalViewController.swift): WebViewModalViewController presents configurable WKWebView in-app message modals (init(notiflyInAppMessageData:)), handles JS message events, updates user hide-until state, tracks via Notifly, manages openedInAppMessageCount.
+- [Webviewmodalviewcontroller](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/WebViewModalViewController.swift): WebViewModalViewController presents a modal WKWebView for in‑app messages: loads URL, injects JS, handles script events (click/close/hide), tracks events via Notifly, updates hide-until user state, computes layout/mask.
 
 ## Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/Notifications
 - [Notificationsmanager](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/Notifications/NotificationsManager.swift): NotificationsManager manages APNs/FCM token acquisition with a Combine-based deviceToken publisher, exponential backoff retries/timeouts, UIApplication registration callbacks, local notification scheduling, and UNUserNotificationCenterDelegate handling, using FirebaseMessaging and UIKit.
@@ -68,7 +68,7 @@
 - [Notificationserviceextension](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyExtension/NotificationServiceExtension.swift): Handles push notification modification and tracking in extension: NotiflyNotificationServiceExtension overrides didReceive/serviceExtensionTimeWillExpire, register(projectId:username:); ExtensionManager fetches attachments, adds UNNotificationAttachment, and posts tracking via NotiflyExtensionAPI using NotiflyCustomUserDefaults/AppHelper.
 
 ## Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil
-- [Constants](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/Constants.swift): Defines SDK-wide constants, endpoints, tracking keys, time units, value/operator/trigger enums and NotiflyValue struct (Foundation dependency) used for event tracking, serialization, and condition evaluation—no side effects.
+- [Constants](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/Constants.swift): Defines SDK constants and enums (sdk version/wrapper, endpoints, tracking event names and UUID namespaces, time units, NotiflyValue/type enums, comparison/string operators), pure constants using Foundation.
 - [Notiflyerror](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/NotiflyError.swift): Defines NotiflyError enum (Error) for SDK-wide error reporting of initialization, authorization, token (APNS/FCM/device), payload, timeout, and nil/unexpected-nil conditions; depends on Foundation.
 - [Apphelper](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/AppHelper.swift): Provides app/device utilities: getNotiflyDeviceID/getDeviceID (Keychain fallback with UserDefaults caching), timestamp, app/version/platform identifiers; writes to Keychain/UserDefaults and depends on Security/UIKit and Notifly constants.
 - [Logger](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/Logger.swift): Simple static console logger using Foundation with Logger.info(_:)/error(_:) printing tagged messages (error includes emoji), Level enum present; private init prevents instantiation.

@@ -1,7 +1,7 @@
 <!-- repo: team-michael/notifly-ios-sdk -->
 <!-- ref: main -->
-<!-- commit: dba62b26a55869fbbf6943c8405597c6a916f81f -->
-<!-- generated_at: 2025-11-13T07:38:34Z -->
+<!-- commit: d30fbaffdd2b0a111fc7de875566ae78cd742fde -->
+<!-- generated_at: 2025-11-13T10:01:51Z -->
 # Platform: iOS
 
 ## NotiflyIOSSample/NotiflyIOSSample
@@ -47,7 +47,7 @@
 - [Inappmessagemanager](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/InAppMessageManager.swift): UserStateManager, SegmentationHelper, TriggeringEventFilter, Notifly 등 의존성을 사용해 캠페인 활성·필터·세그먼트·재가입·숨김을 검사하고 InAppMessageData 생성 후 메인스레드 지연으로 WebViewModal을 표시(UIApplication 상태·openedInAppMessageCount 검사·조작); 공개 엔트리: mayTriggerInAppMessage, addEventListener/removeAllEventListeners, dispatchInAppMessageEvent.
 - [Segmentationhelper](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/SegmentationHelper.swift): condition-based 세그먼트의 대상 판정 엔진으로 isEntityOfSegment(..
 - [Campaign](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/Campaign.swift): 서버 payload를 파싱해 활성 inApp 캠페인(Campaign, Message, ModalProperties, SegmentInfo 등)을 구성하고 부작용 없이 이벤트명/파라미터 매칭(match) 및 테스트·화이트리스트 처리를 제공; 진입점: Campaign.init?
-- [Webviewmodalviewcontroller](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/WebViewModalViewController.swift): WebViewModalViewController는 InAppMessageData로 WKWebView를 로드·표시하고 JS 이벤트(notiflyInAppMessageEventHandler)를 처리해 Notifly.main으로 이벤트 추적·UserState 갱신, 모달 크기·마스크·표시/해제(스레드 안전 openedInAppMessageCount) 등을 담당합니다.
+- [Webviewmodalviewcontroller](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/InAppMessage/WebViewModalViewController.swift): WKWebView 기반 모달로 인앱메시지 렌더링·표시하고 modalProps 기반 크기/모양 적용, JS 이벤트 수신해 Notifly 트래킹·UserStateManager 숨김 업데이트·URL 오픈·VC 표시/해제 수행; 진입점: init(notiflyInAppMessageData:), show(), userContentController(_:didReceive:), webView(_:didFinish:).
 
 ## Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/Notifications
 - [Notificationsmanager](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/Notifications/NotificationsManager.swift): NotificationsManager는 FirebaseMessaging·Combine·UserNotifications에 의존해 APNs/FCM 토큰을 획득하고(타임아웃·Future/deviceTokenPub), 재시도(지수 백오프)·추적 이벤트 전송, 푸시 예약 및 탭 처리(UNUserNotificationCenterDelegate)를 담당합니다.
@@ -68,7 +68,7 @@
 - [Notificationserviceextension](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyExtension/NotificationServiceExtension.swift): UNNotificationServiceExtension을 구현한 NotiflyNotificationServiceExtension은 register로 앱그룹(프로젝트/사용자) 정보 등록하고 didReceive에서 'push-notification' 판별 후 ExtensionManager.track로 노출 이벤트 전송 및 ExtensionManager.
 
 ## Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil
-- [Constants](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/Constants.swift): SDK 전역 상수·enum(NotiflySdkConfig, NotiflyConstant, TrackingConstant, TimeConstant, NotiflyValue 등)을 제공해 버전·엔드포인트·이벤트명·UUID 네임스페이스·시간 단위·값·연산자 타입으로 트래킹·네트워크 구성을 지원한다.
+- [Constants](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/Constants.swift): Foundation(UUID)에 의존하는 SDK 전역 상수 파일로 sdkVersion, 엔드포인트·프로젝트ID regex, 트래킹 이벤트명·HashNamespace UUID, 시간 단위, NotiflyValue(실패 가능 init) 및 연산자/조건 열거형을 제공한다.
 - [Notiflyerror](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/NotiflyError.swift): NotiflyError.swift는 Foundation 기반 Swift Error 열거형으로 SDK의 알림 관련 예외(APNs/FCM/디바이스 토큰, 권한·초기화·타임아웃·유효성·널)를 표준화해 SDK 함수에서 throw·전파되는 공개 진입점은 NotiflyError 케이스입니다.
 - [Apphelper](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/AppHelper.swift): AppHelper는 정적 API(getNotiflyDeviceID, getDeviceID, getCurrentTimestamp, getAppVersion, getDevicePlatform, getiOSVersion, getBundleIdentifier)를 제공하고, UserDefaults/Keychain에 디바이스ID 저장·조회(identifierForVendor fallback), Security/UIKit, NotiflyCustomUserDefaults·TrackingConstant·UUID 확장 및 Logger에 의존한다.
 - [Logger](https://raw.githubusercontent.com/team-michael/notifly-ios-sdk/main/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/Logger.swift): Logger.swift

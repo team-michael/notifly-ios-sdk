@@ -97,11 +97,10 @@ jobs:
             echo "OPENAI_API_KEY is not set. Add it in repository Secrets." >&2
             exit 1
           fi
-          cd sdks/notifly-ios-sdk
           # Always fetch default branch for raw links
           git fetch origin "${{ github.event.repository.default_branch }}" --depth=1 || true
 
-          # Determine per-language compare ranges (mirror local tested flow)
+          # Determine per-language compare ranges (strict surgical mode)
           if [[ "${LLM_MODE}" == "all" ]]; then
             EN_CMD='./scripts/generate_en_llms.ssh --llm-all --slug "team-michael/notifly-ios-sdk" --branch main'
             KR_CMD='./scripts/generate_kr_llms.ssh --llm-all --slug "team-michael/notifly-ios-sdk" --branch main'
@@ -117,10 +116,9 @@ jobs:
               EN_COMPARE="${COMPARE}"
               KR_COMPARE="${COMPARE}"
             else
-              # Read base SHAs from existing files' headers
+              # Read base SHAs from each existing file header
               BASE_EN="$(sed -nE 's/^<!--[[:space:]]*commit:[[:space:]]*([0-9a-f]+).*/\1/p' sdk-llms.txt | head -1 || true)"
               BASE_KR="$(sed -nE 's/^<!--[[:space:]]*commit:[[:space:]]*([0-9a-f]+).*/\1/p' sdk-llms-kr.txt | head -1 || true)"
-              # Fallback to HEAD_REF if missing (no changes)
               [[ -z "${BASE_EN}" ]] && BASE_EN="${HEAD_REF}"
               [[ -z "${BASE_KR}" ]] && BASE_KR="${HEAD_REF}"
               EN_COMPARE="${BASE_EN}...${HEAD_REF}"
@@ -140,7 +138,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cd sdks/notifly-ios-sdk
           # Stage files if present
           git add sdk-llms.txt sdk-llms-kr.txt 2>/dev/null || true
           if git diff --cached --quiet; then
