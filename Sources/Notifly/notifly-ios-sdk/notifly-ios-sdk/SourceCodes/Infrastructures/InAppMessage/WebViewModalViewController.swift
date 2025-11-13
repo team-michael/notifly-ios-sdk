@@ -49,6 +49,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .clear
         webView.navigationDelegate = self
         webView.configuration.userContentController.add(
             self, name: "notiflyInAppMessageEventHandler")
@@ -63,21 +64,19 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         let modalPositionConstraint = getModalPositionConstraint() as NSLayoutConstraint
 
         webView.translatesAutoresizingMaskIntoConstraints = false
-        if let backgroundOpacity = modalProps?.backgroundOpacity as? CGFloat,
-           backgroundOpacity >= 0 && backgroundOpacity <= 1
-        {
-            view.backgroundColor = UIColor.black.withAlphaComponent(CGFloat(backgroundOpacity))
-        } else {
-            view.backgroundColor = UIColor.black.withAlphaComponent(0.2)
-        }
+        let opacity = (modalProps?.backgroundOpacity as? CGFloat).map { max(0, min(1, $0)) } ?? 0.2
+        view.backgroundColor = UIColor.black.withAlphaComponent(opacity)
 
         webView.layer.mask = webViewLayer
-        
+
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
+        webView.scrollView.backgroundColor = .clear
+
         if let backgroundColorString = modalProps?.backgroundColor as? String,
            let backgroundColor = UIColor(hex: backgroundColorString)
         {
-            webView.isOpaque = false
-            webView.backgroundColor = backgroundColor
+            webView.scrollView.backgroundColor = backgroundColor
         }
 
         if let shouldDismissCTATapped = modalProps?.dismissCTATapped,
@@ -380,6 +379,20 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
 @available(iOSApplicationExtension, unavailable)
 class FullScreenWKWebView: WKWebView {
+    override init(frame: CGRect, configuration: WKWebViewConfiguration) {
+        super.init(frame: frame, configuration: configuration)
+        isOpaque = false
+        backgroundColor = .clear
+        scrollView.backgroundColor = .clear
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        isOpaque = false
+        backgroundColor = .clear
+        scrollView.backgroundColor = .clear
+    }
+
     override var safeAreaInsets: UIEdgeInsets {
         return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     }
