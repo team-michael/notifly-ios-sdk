@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Notifly iOS LLMS generator (outputs sdk-llms.txt)
+# Notifly iOS LLMS generator (outputs llms.txt)
 # Usage:
-#   ./scripts/generate_kr_llms.ssh --llm-all
-#   ./scripts/generate_kr_llms.ssh --base <old> --head <new> [--llm]
-#   ./scripts/generate_kr_llms.ssh --compare "<old>...<new>" [--llm]
+#   ./scripts/generate_llms.ssh --llm-all
+#   ./scripts/generate_llms.ssh --base <old> --head <new> [--llm]
+#   ./scripts/generate_llms.ssh --compare "<old>...<new>" [--llm]
 # Env:
 #   OPENAI_API_KEY  required for --llm
 #   INCLUDE_DIRS    dirs to scan (default ".")
@@ -14,7 +14,7 @@ set -euo pipefail
 #   DEFAULT_BRANCH  override branch for raw links (auto-detected)
 #   REPO_SLUG       org/repo (auto-detected)
 #   REPO_URL        optional repo to clone/scan
-#   OUTPUT          output path (default: sdk-llms.txt). Use OUTPUT="-" or --stdout for stdout
+#   OUTPUT          output path (default: llms.txt). Use OUTPUT="-" or --stdout for stdout
 # Notes:
 #   - Builds a flat index grouped by folder paths (no categories).
 #   - Incremental mode updates only new/changed files when base/head (or compare) provided.
@@ -34,10 +34,6 @@ args=("$@")
 positional=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    ios)
-      # Backward compatibility: ignore legacy platform arg
-      shift
-      ;;
     --base)
       BASE_REF="${2:-}"
       shift 2
@@ -156,7 +152,7 @@ REPO_ROOT="$(cd "$REPO_ROOT_RAW" && pwd -P)"
 human_platform="iOS"
 
 # Determine output path
-DEFAULT_OUTPUT="sdk-llms-kr.txt"
+DEFAULT_OUTPUT="llms.txt"
 if [[ "${PRINT_STDOUT}" == "true" ]]; then
   OUTPUT_PATH=""
 else
@@ -184,6 +180,7 @@ rel_to_url() { printf "%s/%s" "$RAW_BASE" "$(url_encode_spaces "$1")"; }
 
 path_is_target() {
   local rel="$1"
+  # Check extension
   local ext="${rel##*.}"
   local match_ext=0
   for e in "${exts[@]}"; do
@@ -192,11 +189,13 @@ path_is_target() {
     if [[ "$ext" == "$e" ]]; then match_ext=1; break; fi
   done
   [[ $match_ext -eq 1 ]] || return 1
+  # Check included dirs
   for d in $INCLUDE_DIRS; do
     case "$rel" in
       "$d"/*|"$d") return 0 ;;
     esac
   done
+  # If INCLUDE_DIRS is ".", allow all
   if [[ "$INCLUDE_DIRS" == "." ]]; then return 0; fi
   return 1
 }
@@ -206,6 +205,7 @@ replace_or_append_line() {
   if grep -F "](${raw_url}):" "$OUTFILE" >/dev/null 2>&1; then
     awk -v url="$raw_url" -v nl="$newline" 'index($0, "]("url"):") {print nl; next} {print}' "$OUTFILE" > "$OUTFILE.tmp" && mv "$OUTFILE.tmp" "$OUTFILE"
   else
+    # Ensure section header exists
     if ! grep -xq "## ${dir_rel}" "$OUTFILE" >/dev/null 2>&1; then
       printf "\n## %s\n" "$dir_rel" >> "$OUTFILE"
     fi
@@ -295,12 +295,12 @@ llm_describe_file() {
   esac
   local code
   code="$(fetch_code_for_llm "$url" "$file")"
-  local input_prompt="당신은 시니어 SDK 엔지니어입니다. 이 SDK 소스 파일을 개발자용 색인을 위해 한국어로 1개의 간결한 문장(<= 30 단어)으로 설명하세요. 기술적으로 구체적으로 작성하고 핵심 책임, 주요 흐름/부작용, 의존성, 주목할 공개 API/진입점을 포함하세요.
-저장소: ${repo}
-섹션: ${section}
-경로: ${rel}
+  local input_prompt="You are a senior SDK engineer. Write 1 concise sentences (<= 30 words) describing this SDK source file for a developer-facing index. Be specific and technical (core responsibilities, key flows/side-effects, dependencies, notable public APIs/entry points).
+Repository: ${repo}
+Section: ${section}
+Path: ${rel}
 
-소스 코드 (${lang}):
+Source code (${lang}):
 
 \`\`\`${lang}
 ${code}
@@ -449,13 +449,14 @@ if [[ -f "$EXISTING_LLMS_PATH" && -s "$CHANGED_SET" ]]; then
   cp "$EXISTING_LLMS_PATH" "$OUTFILE" 2>/dev/null || : > "$OUTFILE"
   while IFS= read -r rel || [[ -n "$rel" ]]; do
     [[ -z "$rel" ]] && continue
+    # Only operate on target paths (INCLUDE_DIRS + EXTENSIONS)
     if ! path_is_target "$rel"; then
       continue
     fi
     abs_file="${REPO_ROOT}/${rel}"
     raw_url="$(rel_to_url "$rel")"
     dir_rel="$(dirname "$rel")"; dir_rel="${dir_rel:-.}"
-    # 기존 라인이 있고 LLM을 사용하지 않으면 원본을 그대로 유지
+    # If the line already exists and LLM is not requested, keep it verbatim
     if grep -F -q "](${raw_url}):" "$OUTFILE" >/dev/null 2>&1; then
       if [[ "$USE_LLM" != "true" ]]; then
         continue
@@ -463,9 +464,11 @@ if [[ -f "$EXISTING_LLMS_PATH" && -s "$CHANGED_SET" ]]; then
     fi
     if [[ -f "$abs_file" ]]; then
       title="$(titleize "$(basename "$abs_file")")"
+      # Default to existing description if present
       existing_line="$(awk -F '\t' -v u="$raw_url" '$1==u{print $0; exit}' "$EXISTING_MAP" 2>/dev/null || true)"
       desc="$(printf "%s" "$existing_line" | cut -f2- || true)"
       if [[ -z "$desc" ]]; then
+        # Generate quickly (may call LLM if enabled)
         f_desc="$(first_comment_line "$abs_file" || true)"
         [[ -z "$f_desc" ]] && f_desc="Source file for ${title}"
         if [[ "$USE_LLM" == "true" ]]; then
@@ -477,10 +480,13 @@ if [[ -f "$EXISTING_LLMS_PATH" && -s "$CHANGED_SET" ]]; then
       newline="- [${title}](${raw_url}): ${desc}"
       replace_or_append_line "$rel" "$raw_url" "$newline" "$dir_rel"
     else
+      # Removed file: delete line if present
       remove_line_by_url "$raw_url"
     fi
   done < "$CHANGED_SET"
+  # Update header commit and timestamp
   update_header_in_place "$HEAD_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  # Finalize output
   if [[ -n "${OUTPUT_PATH}" && -n "${OUTPUT_SINK:-}" ]]; then
     mv "$OUTFILE" "$OUTPUT_PATH"
     echo "Wrote ${OUTPUT_PATH}" >&2
@@ -490,7 +496,7 @@ if [[ -f "$EXISTING_LLMS_PATH" && -s "$CHANGED_SET" ]]; then
   exit 0
 fi
 
-# 비교 범위가 있으나 변경 사항이 없으면 헤더만 갱신하고 종료
+# If a compare range was provided but there are NO changes, just refresh header and exit
 if [[ -f "$EXISTING_LLMS_PATH" && -n "${COMPARE_RANGE:-${BASE_REF:-}${HEAD_REF:-}}" && ! -s "$CHANGED_SET" ]]; then
   OUTFILE="$STAGING_PATH"
   cp "$EXISTING_LLMS_PATH" "$OUTFILE" 2>/dev/null || : > "$OUTFILE"
@@ -587,7 +593,7 @@ for dir in $INCLUDE_DIRS; do
       fi
     fi
 
-    # 항상 출력 라인을 구성합니다 (set -u 환경에서 미정의 변수 참조 회피)
+    # Always construct the output line (avoid referencing unset vars under set -u)
     line="- [${title}](${raw_url}): ${desc}"
     dir_rel="$(dirname "$rel")"
     dir_rel="${dir_rel:-.}"
