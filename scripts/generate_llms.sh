@@ -184,7 +184,8 @@ rel_to_url() { printf "%s/%s" "$RAW_BASE" "$(url_encode_spaces "$1")"; }
 
 path_is_target() {
   local rel="$1"
-  local base="$(basename "$rel")"
+  local base
+  base="$(basename "$rel")"
   # Whitelist select top-level docs regardless of EXTENSIONS/INCLUDE_DIRS
   case "$base" in
     README.md|CHANGELOG.md|LICENSE|Package.swift) return 0 ;;
