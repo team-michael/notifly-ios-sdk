@@ -27,7 +27,3 @@ type_name:
 cyclomatic_complexity:
   warning: 10
   error: 20
-
-type_body_length:
-  warning: 350
-  error: 400
