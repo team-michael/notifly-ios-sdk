@@ -1,7 +1,7 @@
 import Foundation
 
 enum NotiflySdkConfig {
-    static let sdkVersion: String = "2.1.0"
+    static let sdkVersion: String = "2.2.0"
     static var sdkWrapperVersion: String?
     static let sdkType: String = "native"
     static var sdkWrapperType: SdkWrapperType?
