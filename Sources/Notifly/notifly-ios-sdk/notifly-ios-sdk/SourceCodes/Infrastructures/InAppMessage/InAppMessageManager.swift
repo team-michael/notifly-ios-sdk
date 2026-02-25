@@ -14,6 +14,8 @@ import UIKit
 class InAppMessageManager {
     let userStateManager: UserStateManager
     private var eventListeners: [InAppMessageEventListener] = []
+    private var scheduledWorkItems: [String: DispatchWorkItem] = [:]
+    private let scheduleLock = NSLock()
 
     init(owner: String?) {
         userStateManager = UserStateManager(owner: owner)
@@ -25,6 +27,8 @@ class InAppMessageManager {
         guard !Notifly.inAppMessageDisabled else {
             return
         }
+
+        checkCancellationConditions(eventName: eventName, eventParams: eventParams)
 
         if var campaignsToTrigger = getCampaignsShouldBeTriggered(
             eventName: eventName, eventParams: eventParams)
@@ -163,7 +167,30 @@ class InAppMessageManager {
         guard let userID = userID else {
             return
         }
-        DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline) {
+        let campaignId = notiflyInAppMessageData.notiflyCampaignId
+        scheduleLock.lock()
+        scheduledWorkItems.removeValue(forKey: campaignId)?.cancel()
+        scheduleLock.unlock()
+
+        var workItem: DispatchWorkItem?
+        workItem = DispatchWorkItem { [weak self] in
+            guard let self = self, let workItem = workItem else { return }
+
+            // Only proceed if this is still the currently scheduled instance
+            self.scheduleLock.lock()
+            let isCurrent = self.scheduledWorkItems[campaignId] === workItem
+            if isCurrent {
+                self.scheduledWorkItems.removeValue(forKey: campaignId)
+            }
+            self.scheduleLock.unlock()
+            guard isCurrent else { return }
+
+            // CRITICAL: DispatchWorkItem.cancel() only sets flag, block still executes
+            guard !workItem.isCancelled else {
+                Logger.info("[Notifly] Cancelled campaign skipped: \(campaignId)")
+                return
+            }
+
             guard let currentUserID = try? Notifly.main.userManager.getNotiflyUserID(),
                   userID == currentUserID
             else {
@@ -172,7 +199,7 @@ class InAppMessageManager {
             }
 
             let currentUserData = self.userStateManager.userData
-            if let reEligibleCondition = notiflyInAppMessageData.notiflyReEligibleCondition {
+            if notiflyInAppMessageData.notiflyReEligibleCondition != nil {
                 guard
                     !self.isHiddenCampaign(
                         campaignID: notiflyInAppMessageData.notiflyCampaignId,
@@ -189,7 +216,7 @@ class InAppMessageManager {
             else {
                 return
             }
-            6
+
             guard WebViewModalViewController.openedInAppMessageCount == 0 else {
                 Logger.error("Already In App Message Opened. New In App Message Ignored.")
                 return
@@ -210,6 +237,47 @@ class InAppMessageManager {
                 WebViewModalViewController.openedInAppMessageCount = 0
                 return
             }
+        }
+
+        guard let workItem = workItem else { return }
+        scheduleLock.lock()
+        scheduledWorkItems[campaignId] = workItem
+        scheduleLock.unlock()
+        DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline, execute: workItem)
+    }
+
+    func getScheduledCampaignIds() -> [String] {
+        scheduleLock.lock()
+        defer { scheduleLock.unlock() }
+        return Array(scheduledWorkItems.keys)
+    }
+
+    func descheduleInAppMessage(campaignId: String) {
+        scheduleLock.lock()
+        let item = scheduledWorkItems.removeValue(forKey: campaignId)
+        scheduleLock.unlock()
+        item?.cancel()
+    }
+
+    private func checkCancellationConditions(eventName: String, eventParams: [String: Any]?) {
+        let scheduledIds = getScheduledCampaignIds()
+        if scheduledIds.isEmpty { return }
+
+        let campaigns = userStateManager.getInAppMessageCampaigns()
+        for campaignId in scheduledIds {
+            guard let campaign = campaigns.first(where: { $0.id == campaignId }),
+                  let cancellationConditions = campaign.cancellationConditions
+            else { continue }
+
+            guard cancellationConditions.match(eventName: eventName) else { continue }
+
+            if let filters = campaign.cancellationEventFilters,
+               !TriggeringEventFilter.matchFilterCondition(
+                   filters: filters.filters, eventParams: eventParams) {
+                continue
+            }
+
+            descheduleInAppMessage(campaignId: campaignId)
         }
     }
 

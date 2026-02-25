@@ -21,6 +21,8 @@ struct Campaign {
     let campaignEnd: Int?
     let delay: Int
     let reEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
+    let cancellationConditions: TriggeringConditions?
+    let cancellationEventFilters: TriggeringEventFilters?
 
     let testing: Bool
     let whitelist: [String]?
@@ -75,6 +77,8 @@ struct Campaign {
         delay = (from["delay"] as? Int) ?? 0
         reEligibleCondition = NotiflyReEligibleConditionEnum.ReEligibleCondition(
             from: from["re_eligible_condition"] as? [String: Any])
+        cancellationConditions = try? TriggeringConditions(from: from["cancellation_conditions"])
+        cancellationEventFilters = try? TriggeringEventFilters(from: from["cancellation_event_filters"])
 
         self.testing = testing
         whitelist = testing ? from["whitelist"] as? [String] : []
