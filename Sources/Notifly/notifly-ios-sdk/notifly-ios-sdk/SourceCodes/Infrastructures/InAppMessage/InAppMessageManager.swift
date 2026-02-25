@@ -14,6 +14,7 @@ import UIKit
 class InAppMessageManager {
     let userStateManager: UserStateManager
     private var eventListeners: [InAppMessageEventListener] = []
+    private var scheduledWorkItems: [String: DispatchWorkItem] = [:]
 
     init(owner: String?) {
         userStateManager = UserStateManager(owner: owner)
@@ -25,6 +26,8 @@ class InAppMessageManager {
         guard !Notifly.inAppMessageDisabled else {
             return
         }
+
+        checkCancellationConditions(eventName: eventName, eventParams: eventParams)
 
         if var campaignsToTrigger = getCampaignsShouldBeTriggered(
             eventName: eventName, eventParams: eventParams)
@@ -163,7 +166,20 @@ class InAppMessageManager {
         guard let userID = userID else {
             return
         }
-        DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline) {
+        let campaignId = notiflyInAppMessageData.notiflyCampaignId
+        scheduledWorkItems.removeValue(forKey: campaignId)?.cancel()
+
+        var workItem: DispatchWorkItem!
+        workItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            self.scheduledWorkItems.removeValue(forKey: campaignId)
+
+            // CRITICAL: DispatchWorkItem.cancel() only sets flag, block still executes
+            guard !workItem.isCancelled else {
+                Logger.info("[Notifly] Cancelled campaign skipped: \(campaignId)")
+                return
+            }
+
             guard let currentUserID = try? Notifly.main.userManager.getNotiflyUserID(),
                   userID == currentUserID
             else {
@@ -210,6 +226,41 @@ class InAppMessageManager {
                 WebViewModalViewController.openedInAppMessageCount = 0
                 return
             }
+        }
+
+        if notiflyInAppMessageData.deadline > DispatchTime.now() {
+            scheduledWorkItems[campaignId] = workItem
+        }
+        DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline, execute: workItem)
+    }
+
+    func getScheduledCampaignIds() -> [String] {
+        return Array(scheduledWorkItems.keys)
+    }
+
+    func descheduleInAppMessage(campaignId: String) {
+        scheduledWorkItems.removeValue(forKey: campaignId)?.cancel()
+    }
+
+    private func checkCancellationConditions(eventName: String, eventParams: [String: Any]?) {
+        let scheduledIds = getScheduledCampaignIds()
+        if scheduledIds.isEmpty { return }
+
+        let campaigns = userStateManager.getInAppMessageCampaigns()
+        for campaignId in scheduledIds {
+            guard let campaign = campaigns.first(where: { $0.id == campaignId }),
+                  let cancellationConditions = campaign.cancellationConditions
+            else { continue }
+
+            guard cancellationConditions.match(eventName: eventName) else { continue }
+
+            if let filters = campaign.cancellationEventFilters,
+               !TriggeringEventFilter.matchFilterCondition(
+                   filters: filters.filters, eventParams: eventParams) {
+                continue
+            }
+
+            descheduleInAppMessage(campaignId: campaignId)
         }
     }
 
