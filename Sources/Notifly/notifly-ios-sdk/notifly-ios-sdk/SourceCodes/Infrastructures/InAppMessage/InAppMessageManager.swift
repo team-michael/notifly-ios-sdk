@@ -15,6 +15,7 @@ class InAppMessageManager {
     let userStateManager: UserStateManager
     private var eventListeners: [InAppMessageEventListener] = []
     private var scheduledWorkItems: [String: DispatchWorkItem] = [:]
+    private let scheduleLock = NSLock()
 
     init(owner: String?) {
         userStateManager = UserStateManager(owner: owner)
@@ -167,12 +168,22 @@ class InAppMessageManager {
             return
         }
         let campaignId = notiflyInAppMessageData.notiflyCampaignId
+        scheduleLock.lock()
         scheduledWorkItems.removeValue(forKey: campaignId)?.cancel()
+        scheduleLock.unlock()
 
-        var workItem: DispatchWorkItem!
+        var workItem: DispatchWorkItem?
         workItem = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
-            self.scheduledWorkItems.removeValue(forKey: campaignId)
+            guard let self = self, let workItem = workItem else { return }
+
+            // Only proceed if this is still the currently scheduled instance
+            self.scheduleLock.lock()
+            let isCurrent = self.scheduledWorkItems[campaignId] === workItem
+            if isCurrent {
+                self.scheduledWorkItems.removeValue(forKey: campaignId)
+            }
+            self.scheduleLock.unlock()
+            guard isCurrent else { return }
 
             // CRITICAL: DispatchWorkItem.cancel() only sets flag, block still executes
             guard !workItem.isCancelled else {
@@ -188,7 +199,7 @@ class InAppMessageManager {
             }
 
             let currentUserData = self.userStateManager.userData
-            if let reEligibleCondition = notiflyInAppMessageData.notiflyReEligibleCondition {
+            if notiflyInAppMessageData.notiflyReEligibleCondition != nil {
                 guard
                     !self.isHiddenCampaign(
                         campaignID: notiflyInAppMessageData.notiflyCampaignId,
@@ -205,7 +216,7 @@ class InAppMessageManager {
             else {
                 return
             }
-            6
+
             guard WebViewModalViewController.openedInAppMessageCount == 0 else {
                 Logger.error("Already In App Message Opened. New In App Message Ignored.")
                 return
@@ -228,18 +239,24 @@ class InAppMessageManager {
             }
         }
 
-        if notiflyInAppMessageData.deadline > DispatchTime.now() {
-            scheduledWorkItems[campaignId] = workItem
-        }
+        guard let workItem = workItem else { return }
+        scheduleLock.lock()
+        scheduledWorkItems[campaignId] = workItem
+        scheduleLock.unlock()
         DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline, execute: workItem)
     }
 
     func getScheduledCampaignIds() -> [String] {
+        scheduleLock.lock()
+        defer { scheduleLock.unlock() }
         return Array(scheduledWorkItems.keys)
     }
 
     func descheduleInAppMessage(campaignId: String) {
-        scheduledWorkItems.removeValue(forKey: campaignId)?.cancel()
+        scheduleLock.lock()
+        let item = scheduledWorkItems.removeValue(forKey: campaignId)
+        scheduleLock.unlock()
+        item?.cancel()
     }
 
     private func checkCancellationConditions(eventName: String, eventParams: [String: Any]?) {
