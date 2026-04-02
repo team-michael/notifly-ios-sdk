@@ -229,15 +229,18 @@ class UserStateManager {
             segmentationEventParamKeys: segmentationEventParamKeys,
             dt: dt
         )
-        if eventData.eventCounts[eicID] == nil {
-            eventData.eventCounts[eicID] = EventIntermediateCount(
-                name: eventName,
-                dt: dt,
-                count: 0,
-                eventParams: eventParams ?? [:]
-            )
+        // read-modify-write를 atomic하게 처리
+        eventDataAccessQueue.sync {
+            if _eventData.eventCounts[eicID] == nil {
+                _eventData.eventCounts[eicID] = EventIntermediateCount(
+                    name: eventName,
+                    dt: dt,
+                    count: 0,
+                    eventParams: eventParams ?? [:]
+                )
+            }
+            _eventData.eventCounts[eicID]?.addCount(count: 1)
         }
-        eventData.eventCounts[eicID]?.addCount(count: 1)
     }
 
     private func shouldHandleExternalUserIdMismatch(
