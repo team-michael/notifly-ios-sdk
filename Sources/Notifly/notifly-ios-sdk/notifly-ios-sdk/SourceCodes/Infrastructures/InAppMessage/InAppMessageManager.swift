@@ -243,6 +243,7 @@ class InAppMessageManager {
         scheduleLock.lock()
         scheduledWorkItems[campaignId] = workItem
         scheduleLock.unlock()
+
         DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline, execute: workItem)
     }
 

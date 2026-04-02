@@ -130,7 +130,23 @@ class TrackingManager {
             let userID = (try? notifly.userManager.getNotiflyUserID()) ?? ""
             let externalUserID = notifly.userManager.externalUserID
             let currentTimestamp = AppHelper.getCurrentTimestamp()
-            let trackingTask = self?.handleTrackEvent(
+
+            let trackingEventName = NotiflyHelper.getEventName(
+                event: eventName, isInternalEvent: isInternal)
+            try? notifly.inAppMessageManager.userStateManager.incrementEic(
+                eventName: trackingEventName, eventParams: eventParams,
+                segmentationEventParamKeys: segmentationEventParamKeys
+            )
+            try? notifly.inAppMessageManager.mayTriggerInAppMessage(
+                eventName: trackingEventName, eventParams: eventParams,
+                segmentationEventParamKeys: segmentationEventParamKeys
+            )
+
+            // Release semaphore before createTrackingRecord to prevent deviceTokenPub
+            // from blocking subsequent tasks. The tracking record will be sent asynchronously.
+            finishTask()
+
+            let trackingTask = self?.createTrackingRecord(
                 eventName: eventName,
                 eventParams: eventParams,
                 isInternal: isInternal,
@@ -142,7 +158,6 @@ class TrackingManager {
                 receiveCompletion: { completion in
                     if case let .failure(error) = completion {
                         Logger.error("Failed to Track Event \(eventName). Error: \(error)")
-                        finishTask()
                     }
                 },
                 receiveValue: { [weak self] record in
@@ -151,37 +166,11 @@ class TrackingManager {
                     } else {
                         self?.eventPublisher.send(record)
                     }
-                    finishTask()
                 })
             if let task = trackingTask {
                 self?.storeCanellables(cancellable: task)
             }
         }
-    }
-
-    private func handleTrackEvent(
-        eventName: String, eventParams: [String: Any]?, isInternal: Bool,
-        segmentationEventParamKeys: [String]?, currentTimestamp: Int, userID: String,
-        externalUserID: String?
-    ) -> AnyPublisher<TrackingRecord, Error> {
-
-        let trackingEventName = NotiflyHelper.getEventName(
-            event: eventName, isInternalEvent: isInternal)
-        try? Notifly.main.inAppMessageManager.userStateManager.incrementEic(
-            eventName: trackingEventName, eventParams: eventParams,
-            segmentationEventParamKeys: segmentationEventParamKeys
-        )
-        try? Notifly.main.inAppMessageManager.mayTriggerInAppMessage(
-            eventName: trackingEventName, eventParams: eventParams,
-            segmentationEventParamKeys: segmentationEventParamKeys
-        )
-
-        return createTrackingRecord(
-            eventName: eventName,
-            eventParams: eventParams,
-            isInternal: isInternal,
-            segmentationEventParamKeys: segmentationEventParamKeys,
-            currentTimestamp: currentTimestamp, userID: userID, externalUserID: externalUserID)
     }
 
     func createTrackingRecord(
