@@ -1,4 +1,5 @@
 import Foundation
+import SafariServices
 import UIKit
 import WebKit
 
@@ -217,17 +218,25 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 if let urlString = messageEventData["link"] as? String,
                    let url = URL(string: urlString)
                 {
-                    UIApplication.shared.open(url, options: [:]) { _ in
-                        var paramsWithLink = params
-                        paramsWithLink["link"] = urlString
-                        notifly.trackingManager.trackInternalEvent(
-                            eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
-                            eventParams: paramsWithLink)
-                        notifly.inAppMessageManager.dispatchInAppMessageEvent(
-                            eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
-                            eventParams: paramsWithLink)
-                        self.dismissCTATapped()
+                    let openMode = Self.parseOpenMode(from: url)
+                    let cleanURL = Self.stripNotiflyParams(from: url)
+                    var paramsWithLink = params
+                    paramsWithLink["link"] = cleanURL.absoluteString
+
+                    if openMode == "in_app_browser" {
+                      let safariVC = SFSafariViewController(url: cleanURL)
+                      self.present(safariVC, animated: true)
+                    } else {
+                        UIApplication.shared.open(cleanURL)
                     }
+
+                    notifly.trackingManager.trackInternalEvent(
+                        eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
+                        eventParams: paramsWithLink)
+                    notifly.inAppMessageManager.dispatchInAppMessageEvent(
+                        eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
+                        eventParams: paramsWithLink)
+                    dismissCTATapped()
                 } else {
                     notifly.trackingManager.trackInternalEvent(
                         eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
@@ -273,6 +282,23 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 return
             }
         }
+    }
+
+    // MARK: - Link Open Mode Helpers
+
+    private static let nfOpenModeParam = "nf_open_mode"
+
+    private static func parseOpenMode(from url: URL) -> String? {
+        URLComponents(url: url, resolvingAgainstBaseURL: false)?
+            .queryItems?.first(where: { $0.name == nfOpenModeParam })?.value
+    }
+
+    private static func stripNotiflyParams(from url: URL) -> URL {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        else { return url }
+        components.queryItems = components.queryItems?.filter { $0.name != nfOpenModeParam }
+        if components.queryItems?.isEmpty == true { components.queryItems = nil }
+        return components.url ?? url
     }
 
     private func getModalSize() -> CGSize? {
