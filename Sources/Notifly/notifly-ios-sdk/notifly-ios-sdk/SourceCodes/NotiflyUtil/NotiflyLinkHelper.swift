@@ -1,5 +1,4 @@
 import Foundation
-import SafariServices
 import UIKit
 
 /// 인앱 메시지 링크의 open mode 파싱, URL 정제, Universal Link 처리를 담당합니다.
@@ -75,27 +74,46 @@ enum NotiflyLinkHelper {
     // MARK: - Universal Link Forwarding
 
     /// NSUserActivity를 생성하여 앱의 SceneDelegate 또는 AppDelegate로 직접 전달합니다.
+    /// - Parameters:
+    ///   - url: 전달할 Universal Link URL
+    ///   - windowScene: 호출처의 windowScene. nil이면 foreground active scene을 탐색합니다.
+    /// - Returns: delegate에 전달 성공 여부
     @available(iOSApplicationExtension, unavailable)
-    static func openAsUniversalLink(_ url: URL) {
+    @discardableResult
+    static func openAsUniversalLink(_ url: URL, in windowScene: UIWindowScene? = nil) -> Bool {
         Logger.info("[Notifly] Opening as Universal Link via NSUserActivity: \(url)")
         let activity = NSUserActivity(activityType: NSUserActivityTypeBrowsingWeb)
         activity.webpageURL = url
 
+        // 1) 명시적으로 전달받은 scene 사용
+        if let scene = windowScene, let sceneDelegate = scene.delegate {
+            Logger.info("[Notifly] Forwarding to SceneDelegate (explicit scene)")
+            sceneDelegate.scene?(scene, continue: activity)
+            return true
+        }
+
+        // 2) foreground active scene 탐색
         if let scene = UIApplication.shared.connectedScenes
             .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
            let sceneDelegate = scene.delegate
         {
-            Logger.info("[Notifly] Forwarding to SceneDelegate.scene(_:continue:)")
+            Logger.info("[Notifly] Forwarding to SceneDelegate (active scene)")
             sceneDelegate.scene?(scene, continue: activity)
-        } else if let appDelegate = UIApplication.shared.delegate {
-            Logger.info("[Notifly] Forwarding to AppDelegate.application(_:continue:)")
+            return true
+        }
+
+        // 3) AppDelegate fallback
+        if let appDelegate = UIApplication.shared.delegate {
+            Logger.info("[Notifly] Forwarding to AppDelegate")
             _ = appDelegate.application?(
                 UIApplication.shared,
                 continue: activity,
                 restorationHandler: { _ in }
             )
-        } else {
-            Logger.error("[Notifly] No delegate found to handle Universal Link")
+            return true
         }
+
+        Logger.error("[Notifly] No delegate found to handle Universal Link")
+        return false
     }
 }

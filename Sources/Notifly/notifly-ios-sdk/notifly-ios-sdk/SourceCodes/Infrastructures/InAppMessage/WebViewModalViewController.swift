@@ -240,15 +240,19 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                     if openMode == "in_app_browser",
                        scheme == "http" || scheme == "https"
                     {
+                        // Universal Link → 앱 딥링크 핸들러로 직접 전달 시도
                         if NotiflyLinkHelper.isOwnUniversalLink(cleanURL) {
-                            NotiflyLinkHelper.openAsUniversalLink(cleanURL)
-                            dismissCTATapped()
-                        } else {
-                            let presenter = self.presentingViewController
-                            dismissInAppMessage {
-                                let safariVC = SFSafariViewController(url: cleanURL)
-                                presenter?.present(safariVC, animated: true)
+                            let currentScene = self.view.window?.windowScene
+                            if NotiflyLinkHelper.openAsUniversalLink(cleanURL, in: currentScene) {
+                                dismissCTATapped()
+                                break
                             }
+                        }
+                        // 외부 URL 또는 Universal Link fallback → SFSafariViewController
+                        let presenter = self.presentingViewController
+                        dismissInAppMessage {
+                            let safariVC = SFSafariViewController(url: cleanURL)
+                            presenter?.present(safariVC, animated: true)
                         }
                     } else {
                         UIApplication.shared.open(cleanURL)

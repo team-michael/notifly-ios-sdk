@@ -88,18 +88,28 @@ class EntitlementsReader {
         binary.seek(to: UInt64(offset))
         for _ in 0..<cmdCount {
             guard let command: load_command = binary.read() else { break }
+            guard command.cmdsize >= UInt32(MemoryLayout<load_command>.size) else { break }
             if command.cmd == LC_CODE_SIGNATURE {
-                guard let signatureOffset: UInt32 = binary.read() else {
+                guard let sigOffset: UInt32 = binary.read() else {
                     throw Error.signatureReadingError
                 }
-                return try readEntitlementsFromSignature(startingAt: signatureOffset)
+                guard let sigSize: UInt32 = binary.read() else {
+                    throw Error.signatureReadingError
+                }
+                return try readEntitlementsFromSignature(
+                    startingAt: sigOffset,
+                    signatureSize: sigSize
+                )
             }
-            binary.seek(to: binary.currentOffset + UInt64(command.cmdsize - UInt32(MemoryLayout<load_command>.size)))
+            let skip = UInt64(command.cmdsize) - UInt64(MemoryLayout<load_command>.size)
+            binary.seek(to: binary.currentOffset + skip)
         }
         throw Error.codeSignatureCommandMissing
     }
 
-    private func readEntitlementsFromSignature(startingAt offset: UInt32) throws -> [String: Any] {
+    private func readEntitlementsFromSignature(startingAt offset: UInt32, signatureSize: UInt32) throws -> [String: Any] {
+        let sigEnd = UInt64(offset) + UInt64(signatureSize)
+
         binary.seek(to: UInt64(offset))
         guard let metaBlob: CSSuperBlob = binary.read() else {
             throw Error.signatureReadingError
@@ -108,21 +118,41 @@ class EntitlementsReader {
             throw Error.signatureReadingError
         }
 
+        let superBlobLength = CFSwapInt32(metaBlob.length)
+        guard superBlobLength <= signatureSize else {
+            throw Error.signatureReadingError
+        }
+
         let metaBlobSize = UInt32(MemoryLayout<CSSuperBlob>.size)
         let blobSize = UInt32(MemoryLayout<CSBlob>.size)
         let itemCount = CFSwapInt32(metaBlob.count)
 
         for index in 0..<itemCount {
-            binary.seek(to: UInt64(offset + metaBlobSize + index * blobSize))
+            let entryPos = UInt64(offset + metaBlobSize + index * blobSize)
+            guard entryPos + UInt64(blobSize) <= sigEnd else { continue }
+
+            binary.seek(to: entryPos)
             guard let blob: CSBlob = binary.read() else { continue }
-            binary.seek(to: UInt64(offset + CFSwapInt32(blob.offset)))
+
+            let blobOffset = CFSwapInt32(blob.offset)
+            let blobPos = UInt64(offset) + UInt64(blobOffset)
+            guard blobPos + 8 <= sigEnd else { continue }
+
+            binary.seek(to: blobPos)
             guard let blobMagicRaw: UInt32 = binary.read() else { continue }
             let blobMagic = CFSwapInt32(blobMagicRaw)
+
             if blobMagic == CSMagic.embeddedEntitlements {
                 guard let lengthRaw: UInt32 = binary.read() else { continue }
                 let length = Int(CFSwapInt32(lengthRaw))
                 guard length > 8 else { continue }
-                let data = binary.readData(ofLength: length - 8)
+
+                let dataLength = length - 8
+                guard blobPos + UInt64(length) <= sigEnd else { continue }
+
+                let data = binary.readData(ofLength: dataLength)
+                guard data.count == dataLength else { continue }
+
                 if let plist = try? PropertyListSerialization.propertyList(
                     from: data, options: [], format: nil
                 ) as? [String: Any] {
