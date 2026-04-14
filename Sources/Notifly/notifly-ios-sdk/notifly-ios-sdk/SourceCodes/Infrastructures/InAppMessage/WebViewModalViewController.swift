@@ -116,7 +116,11 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     }
 
     @objc
-    private func dismissCTATapped(completion: (() -> Void)? = nil) {
+    private func dismissCTATapped() {
+        dismissInAppMessage()
+    }
+
+    private func dismissInAppMessage(completion: (() -> Void)? = nil) {
         dismiss(animated: false) {
             WebViewModalViewController.openedInAppMessageCount = 0
             completion?()
@@ -241,7 +245,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                             dismissCTATapped()
                         } else {
                             let presenter = self.presentingViewController
-                            dismissCTATapped {
+                            dismissInAppMessage {
                                 let safariVC = SFSafariViewController(url: cleanURL)
                                 presenter?.present(safariVC, animated: true)
                             }
