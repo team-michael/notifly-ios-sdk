@@ -64,7 +64,7 @@ class EntitlementsReader {
 
     private func getBinaryType(fromSliceStartingAt offset: UInt64 = 0) -> BinaryType? {
         binary.seek(to: offset)
-        let header: mach_header = binary.read()
+        guard let header: mach_header = binary.read() else { return nil }
         let commandCount = Int(header.ncmds)
         switch header.magic {
         case MH_MAGIC:
@@ -79,7 +79,7 @@ class EntitlementsReader {
             ))
         default:
             binary.seek(to: 0)
-            let fatHeader: fat_header = binary.read()
+            guard let fatHeader: fat_header = binary.read() else { return nil }
             return CFSwapInt32(fatHeader.magic) == FAT_MAGIC ? .fat(header: fatHeader) : nil
         }
     }
@@ -87,9 +87,11 @@ class EntitlementsReader {
     private func readEntitlementsFromBinarySlice(startingAt offset: Int, cmdCount: Int) throws -> [String: Any] {
         binary.seek(to: UInt64(offset))
         for _ in 0..<cmdCount {
-            let command: load_command = binary.read()
+            guard let command: load_command = binary.read() else { break }
             if command.cmd == LC_CODE_SIGNATURE {
-                let signatureOffset: UInt32 = binary.read()
+                guard let signatureOffset: UInt32 = binary.read() else {
+                    throw Error.signatureReadingError
+                }
                 return try readEntitlementsFromSignature(startingAt: signatureOffset)
             }
             binary.seek(to: binary.currentOffset + UInt64(command.cmdsize - UInt32(MemoryLayout<load_command>.size)))
@@ -99,7 +101,9 @@ class EntitlementsReader {
 
     private func readEntitlementsFromSignature(startingAt offset: UInt32) throws -> [String: Any] {
         binary.seek(to: UInt64(offset))
-        let metaBlob: CSSuperBlob = binary.read()
+        guard let metaBlob: CSSuperBlob = binary.read() else {
+            throw Error.signatureReadingError
+        }
         guard CFSwapInt32(metaBlob.magic) == CSMagic.embeddedSignature else {
             throw Error.signatureReadingError
         }
@@ -110,12 +114,15 @@ class EntitlementsReader {
 
         for index in 0..<itemCount {
             binary.seek(to: UInt64(offset + metaBlobSize + index * blobSize))
-            let blob: CSBlob = binary.read()
+            guard let blob: CSBlob = binary.read() else { continue }
             binary.seek(to: UInt64(offset + CFSwapInt32(blob.offset)))
-            let blobMagic: UInt32 = CFSwapInt32(binary.read())
+            guard let blobMagicRaw: UInt32 = binary.read() else { continue }
+            let blobMagic = CFSwapInt32(blobMagicRaw)
             if blobMagic == CSMagic.embeddedEntitlements {
-                let length: UInt32 = CFSwapInt32(binary.read())
-                let data = binary.readData(ofLength: Int(length) - 8)
+                guard let lengthRaw: UInt32 = binary.read() else { continue }
+                let length = Int(CFSwapInt32(lengthRaw))
+                guard length > 8 else { continue }
+                let data = binary.readData(ofLength: length - 8)
                 if let plist = try? PropertyListSerialization.propertyList(
                     from: data, options: [], format: nil
                 ) as? [String: Any] {

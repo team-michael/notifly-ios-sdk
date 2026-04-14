@@ -19,8 +19,10 @@ class ApplicationBinary {
         handle.seek(toFileOffset: offset)
     }
 
-    func read<T>() -> T {
-        handle.readData(ofLength: MemoryLayout<T>.size).withUnsafeBytes { $0.load(as: T.self) }
+    func read<T>() -> T? {
+        let data = handle.readData(ofLength: MemoryLayout<T>.size)
+        guard data.count == MemoryLayout<T>.size else { return nil }
+        return data.withUnsafeBytes { $0.load(as: T.self) }
     }
 
     func readData(ofLength length: Int) -> Data {

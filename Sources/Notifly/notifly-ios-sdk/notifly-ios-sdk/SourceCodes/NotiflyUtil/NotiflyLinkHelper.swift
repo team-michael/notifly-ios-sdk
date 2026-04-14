@@ -24,33 +24,36 @@ enum NotiflyLinkHelper {
 
     // MARK: - Universal Link Detection
 
+    private static let domainQueue = DispatchQueue(label: "tech.notifly.link-helper.domains")
     private static var _cachedAssociatedDomains: [String]?
     private static var _didLoadAssociatedDomains = false
 
     static func getAssociatedDomains() -> [String] {
-        if _didLoadAssociatedDomains {
-            return _cachedAssociatedDomains ?? []
-        }
-        _didLoadAssociatedDomains = true
+        domainQueue.sync {
+            if _didLoadAssociatedDomains {
+                return _cachedAssociatedDomains ?? []
+            }
+            _didLoadAssociatedDomains = true
 
-        var rawDomains: [String] = []
+            var rawDomains: [String] = []
 
-        if let execName = Bundle.main.infoDictionary?["CFBundleExecutable"] as? String,
-           let execPath = Bundle.main.path(forResource: execName, ofType: nil),
-           let entitlements = try? EntitlementsReader(execPath).readEntitlements(),
-           let domains = entitlements["com.apple.developer.associated-domains"] as? [String]
-        {
-            rawDomains = domains
-        }
+            if let execName = Bundle.main.infoDictionary?["CFBundleExecutable"] as? String,
+               let execPath = Bundle.main.path(forResource: execName, ofType: nil),
+               let entitlements = try? EntitlementsReader(execPath).readEntitlements(),
+               let domains = entitlements["com.apple.developer.associated-domains"] as? [String]
+            {
+                rawDomains = domains
+            }
 
-        let hosts = rawDomains.compactMap { entry -> String? in
-            let cleaned = entry.components(separatedBy: "?").first ?? entry
-            guard cleaned.hasPrefix("applinks:") else { return nil }
-            return String(cleaned.dropFirst("applinks:".count)).lowercased()
+            let hosts = rawDomains.compactMap { entry -> String? in
+                let cleaned = entry.components(separatedBy: "?").first ?? entry
+                guard cleaned.hasPrefix("applinks:") else { return nil }
+                return String(cleaned.dropFirst("applinks:".count)).lowercased()
+            }
+            _cachedAssociatedDomains = hosts
+            Logger.info("[Notifly] Associated domains: \(hosts)")
+            return hosts
         }
-        _cachedAssociatedDomains = hosts
-        Logger.info("[Notifly] Associated domains: \(hosts)")
-        return hosts
     }
 
     static func isOwnUniversalLink(_ url: URL) -> Bool {
@@ -59,7 +62,12 @@ enum NotiflyLinkHelper {
               let host = url.host?.lowercased()
         else { return false }
         let domains = getAssociatedDomains()
-        let result = domains.contains(host)
+        let result = domains.contains { domain in
+            if domain.hasPrefix("*.") {
+                return host.hasSuffix(String(domain.dropFirst(1)))
+            }
+            return domain == host
+        }
         Logger.info("[Notifly] isOwnUniversalLink: host=\(host), domains=\(domains), result=\(result)")
         return result
     }
