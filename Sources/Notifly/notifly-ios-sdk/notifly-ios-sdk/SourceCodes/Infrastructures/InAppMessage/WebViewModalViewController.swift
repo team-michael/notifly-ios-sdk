@@ -116,9 +116,11 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     }
 
     @objc
-    private func dismissCTATapped() {
-        dismiss(animated: false)
-        WebViewModalViewController.openedInAppMessageCount = 0
+    private func dismissCTATapped(completion: (() -> Void)? = nil) {
+        dismiss(animated: false) {
+            WebViewModalViewController.openedInAppMessageCount = 0
+            completion?()
+        }
     }
 
     func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {
@@ -223,20 +225,23 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                     var paramsWithLink = params
                     paramsWithLink["link"] = cleanURL.absoluteString
 
-                    if openMode == "in_app_browser" {
-                      let safariVC = SFSafariViewController(url: cleanURL)
-                      self.present(safariVC, animated: true)
-                    } else {
-                        UIApplication.shared.open(cleanURL)
-                    }
-
                     notifly.trackingManager.trackInternalEvent(
                         eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
                         eventParams: paramsWithLink)
                     notifly.inAppMessageManager.dispatchInAppMessageEvent(
                         eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
                         eventParams: paramsWithLink)
-                    dismissCTATapped()
+
+                    if openMode == "in_app_browser" {
+                        let presenter = self.presentingViewController
+                        dismissCTATapped {
+                            let safariVC = SFSafariViewController(url: cleanURL)
+                            presenter?.present(safariVC, animated: true)
+                        }
+                    } else {
+                        UIApplication.shared.open(cleanURL)
+                        dismissCTATapped()
+                    }
                 } else {
                     notifly.trackingManager.trackInternalEvent(
                         eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
