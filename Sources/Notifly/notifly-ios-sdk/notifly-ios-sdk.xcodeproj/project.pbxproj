@@ -13,6 +13,7 @@
 		673F0E8529EBA7D200814217 /* notifly_ios_sdk.docc in Sources */ = {isa = PBXBuildFile; fileRef = 673F0E8429EBA7D200814217 /* notifly_ios_sdk.docc */; };
 		673F0E8B29EBA7D200814217 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */; };
 		673F0E9029EBA7D200814217 /* notifly_ios_sdkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F0E8F29EBA7D200814217 /* notifly_ios_sdkTests.swift */; };
+		AA00000000000010 /* NotiflyLinkHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000011 /* NotiflyLinkHelperTests.swift */; };
 		673F0EBB29EC610400814217 /* Notifly+PublicAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F0EBA29EC610400814217 /* Notifly+PublicAPI.swift */; };
 		B0521E422C1B572100D4E357 /* Timezone.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0521E412C1B572100D4E357 /* Timezone.swift */; };
 		F2E6697B2ADE600000DF9CA0 /* NotiflyExtensionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669792ADE600000DF9CA0 /* NotiflyExtensionAPI.swift */; };
@@ -65,6 +66,7 @@
 		673F0E8429EBA7D200814217 /* notifly_ios_sdk.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = notifly_ios_sdk.docc; sourceTree = "<group>"; };
 		673F0E8A29EBA7D200814217 /* notifly-ios-sdkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "notifly-ios-sdkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		673F0E8F29EBA7D200814217 /* notifly_ios_sdkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = notifly_ios_sdkTests.swift; sourceTree = "<group>"; };
+		AA00000000000011 /* NotiflyLinkHelperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotiflyLinkHelperTests.swift; sourceTree = "<group>"; };
 		673F0EBA29EC610400814217 /* Notifly+PublicAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notifly+PublicAPI.swift"; sourceTree = "<group>"; };
 		B0521E412C1B572100D4E357 /* Timezone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timezone.swift; sourceTree = "<group>"; };
 		F2E6696D2ADE5F7E00DF9CA0 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -152,6 +154,7 @@
 			isa = PBXGroup;
 			children = (
 				673F0E8F29EBA7D200814217 /* notifly_ios_sdkTests.swift */,
+				AA00000000000011 /* NotiflyLinkHelperTests.swift */,
 			);
 			path = "notifly-ios-sdkTests";
 			sourceTree = "<group>";
@@ -441,6 +444,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				673F0E9029EBA7D200814217 /* notifly_ios_sdkTests.swift in Sources */,
+				AA00000000000010 /* NotiflyLinkHelperTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
