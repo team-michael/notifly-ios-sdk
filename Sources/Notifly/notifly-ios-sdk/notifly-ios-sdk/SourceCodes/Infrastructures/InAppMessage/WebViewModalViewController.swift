@@ -232,7 +232,10 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                         eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
                         eventParams: paramsWithLink)
 
-                    if openMode == "in_app_browser" {
+                    let scheme = cleanURL.scheme?.lowercased()
+                    if openMode == "in_app_browser",
+                       scheme == "http" || scheme == "https"
+                    {
                         let presenter = self.presentingViewController
                         dismissCTATapped {
                             let safariVC = SFSafariViewController(url: cleanURL)
