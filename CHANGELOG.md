@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-04-14
+
+### Added
+
+- Support in-app browser mode for in-app message links: add `?nf_open_mode=in_app_browser` to open URLs in SFSafariViewController instead of an external browser.
+- Automatic Universal Link detection via Mach-O entitlements parsing: URLs matching the app's associated domains are forwarded to the app's deep link handler via NSUserActivity.
+
 ## [2.3.1] - 2026-04-02
 
 ### Fixed
