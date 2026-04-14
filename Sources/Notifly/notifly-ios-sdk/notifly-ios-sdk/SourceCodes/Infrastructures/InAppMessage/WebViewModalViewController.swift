@@ -220,8 +220,8 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 if let urlString = messageEventData["link"] as? String,
                    let url = URL(string: urlString)
                 {
-                    let openMode = Self.parseOpenMode(from: url)
-                    let cleanURL = Self.stripNotiflyParams(from: url)
+                    let openMode = NotiflyLinkHelper.parseOpenMode(from: url)
+                    let cleanURL = NotiflyLinkHelper.stripNotiflyParams(from: url)
                     var paramsWithLink = params
                     paramsWithLink["link"] = cleanURL.absoluteString
 
@@ -236,10 +236,15 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                     if openMode == "in_app_browser",
                        scheme == "http" || scheme == "https"
                     {
-                        let presenter = self.presentingViewController
-                        dismissCTATapped {
-                            let safariVC = SFSafariViewController(url: cleanURL)
-                            presenter?.present(safariVC, animated: true)
+                        if NotiflyLinkHelper.isOwnUniversalLink(cleanURL) {
+                            NotiflyLinkHelper.openAsUniversalLink(cleanURL)
+                            dismissCTATapped()
+                        } else {
+                            let presenter = self.presentingViewController
+                            dismissCTATapped {
+                                let safariVC = SFSafariViewController(url: cleanURL)
+                                presenter?.present(safariVC, animated: true)
+                            }
                         }
                     } else {
                         UIApplication.shared.open(cleanURL)
@@ -290,23 +295,6 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 return
             }
         }
-    }
-
-    // MARK: - Link Open Mode Helpers
-
-    private static let nfOpenModeParam = "nf_open_mode"
-
-    private static func parseOpenMode(from url: URL) -> String? {
-        URLComponents(url: url, resolvingAgainstBaseURL: false)?
-            .queryItems?.first(where: { $0.name == nfOpenModeParam })?.value
-    }
-
-    private static func stripNotiflyParams(from url: URL) -> URL {
-        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-        else { return url }
-        components.queryItems = components.queryItems?.filter { $0.name != nfOpenModeParam }
-        if components.queryItems?.isEmpty == true { components.queryItems = nil }
-        return components.url ?? url
     }
 
     private func getModalSize() -> CGSize? {

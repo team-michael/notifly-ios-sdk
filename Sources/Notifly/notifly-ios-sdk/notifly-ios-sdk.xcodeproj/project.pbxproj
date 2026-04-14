@@ -28,6 +28,9 @@
 		F2E669982ADE602900DF9CA0 /* TrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E6698C2ADE602900DF9CA0 /* TrackingManager.swift */; };
 		F2E669992ADE602900DF9CA0 /* UserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E6698E2ADE602900DF9CA0 /* UserManager.swift */; };
 		F2E6699A2ADE60A600DF9CA0 /* AppHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669762ADE5FD000DF9CA0 /* AppHelper.swift */; };
+		AA00000000000001 /* NotiflyLinkHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000002 /* NotiflyLinkHelper.swift */; };
+		AA00000000000003 /* ApplicationBinary.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000004 /* ApplicationBinary.swift */; };
+		AA00000000000005 /* EntitlementsReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000006 /* EntitlementsReader.swift */; };
 		F2E6699B2ADE60AA00DF9CA0 /* Notifly.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669772ADE5FD000DF9CA0 /* Notifly.swift */; };
 		F2E6699C2ADE60AD00DF9CA0 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E6696D2ADE5F7E00DF9CA0 /* Constants.swift */; };
 		F2E6699D2ADE60AF00DF9CA0 /* NotiflyError.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E6696E2ADE5F7E00DF9CA0 /* NotiflyError.swift */; };
@@ -73,6 +76,9 @@
 		F2E669732ADE5F7E00DF9CA0 /* UUID+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UUID+.swift"; sourceTree = "<group>"; };
 		F2E669742ADE5F7E00DF9CA0 /* TrackingEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingEvent.swift; sourceTree = "<group>"; };
 		F2E669762ADE5FD000DF9CA0 /* AppHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppHelper.swift; sourceTree = "<group>"; };
+		AA00000000000002 /* NotiflyLinkHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotiflyLinkHelper.swift; sourceTree = "<group>"; };
+		AA00000000000004 /* ApplicationBinary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationBinary.swift; sourceTree = "<group>"; };
+		AA00000000000006 /* EntitlementsReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementsReader.swift; sourceTree = "<group>"; };
 		F2E669772ADE5FD000DF9CA0 /* Notifly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifly.swift; sourceTree = "<group>"; };
 		F2E669792ADE600000DF9CA0 /* NotiflyExtensionAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotiflyExtensionAPI.swift; sourceTree = "<group>"; };
 		F2E6697A2ADE600000DF9CA0 /* NotificationServiceExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationServiceExtension.swift; sourceTree = "<group>"; };
@@ -161,11 +167,22 @@
 			path = SourceCodes;
 			sourceTree = "<group>";
 		};
+		AA00000000000007 /* Entitlements */ = {
+			isa = PBXGroup;
+			children = (
+				AA00000000000004 /* ApplicationBinary.swift */,
+				AA00000000000006 /* EntitlementsReader.swift */,
+			);
+			path = Entitlements;
+			sourceTree = "<group>";
+		};
 		F2E6696C2ADE5F7E00DF9CA0 /* NotiflyUtil */ = {
 			isa = PBXGroup;
 			children = (
 				2BA67CCF2C353D6C00240C17 /* AnyCodable.swift */,
 				F2E669762ADE5FD000DF9CA0 /* AppHelper.swift */,
+				AA00000000000002 /* NotiflyLinkHelper.swift */,
+				AA00000000000007 /* Entitlements */,
 				F2E6696D2ADE5F7E00DF9CA0 /* Constants.swift */,
 				F2E6696E2ADE5F7E00DF9CA0 /* NotiflyError.swift */,
 				F2E6696F2ADE5F7E00DF9CA0 /* Logger.swift */,
@@ -407,6 +424,9 @@
 				F2E6698F2ADE602900DF9CA0 /* NotificationsManager.swift in Sources */,
 				F2E669922ADE602900DF9CA0 /* InAppMessageManager.swift in Sources */,
 				F2E6699A2ADE60A600DF9CA0 /* AppHelper.swift in Sources */,
+				AA00000000000001 /* NotiflyLinkHelper.swift in Sources */,
+				AA00000000000003 /* ApplicationBinary.swift in Sources */,
+				AA00000000000005 /* EntitlementsReader.swift in Sources */,
 				F2E669952ADE602900DF9CA0 /* WebViewModalViewController.swift in Sources */,
 				F2E92DA12B4DC6FD00EAB6AB /* SegmentationHelper.swift in Sources */,
 				F2E6697B2ADE600000DF9CA0 /* NotiflyExtensionAPI.swift in Sources */,
