@@ -1,4 +1,5 @@
 import Foundation
+import SafariServices
 import UIKit
 import WebKit
 
@@ -116,8 +117,14 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     @objc
     private func dismissCTATapped() {
-        dismiss(animated: false)
-        WebViewModalViewController.openedInAppMessageCount = 0
+        dismissInAppMessage()
+    }
+
+    private func dismissInAppMessage(completion: (() -> Void)? = nil) {
+        dismiss(animated: false) {
+            WebViewModalViewController.openedInAppMessageCount = 0
+            completion?()
+        }
     }
 
     func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {
@@ -217,16 +224,39 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 if let urlString = messageEventData["link"] as? String,
                    let url = URL(string: urlString)
                 {
-                    UIApplication.shared.open(url, options: [:]) { _ in
-                        var paramsWithLink = params
-                        paramsWithLink["link"] = urlString
-                        notifly.trackingManager.trackInternalEvent(
-                            eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
-                            eventParams: paramsWithLink)
-                        notifly.inAppMessageManager.dispatchInAppMessageEvent(
-                            eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
-                            eventParams: paramsWithLink)
-                        self.dismissCTATapped()
+                    let openMode = NotiflyLinkHelper.parseOpenMode(from: url)
+                    let cleanURL = NotiflyLinkHelper.stripNotiflyParams(from: url)
+                    var paramsWithLink = params
+                    paramsWithLink["link"] = cleanURL.absoluteString
+
+                    notifly.trackingManager.trackInternalEvent(
+                        eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
+                        eventParams: paramsWithLink)
+                    notifly.inAppMessageManager.dispatchInAppMessageEvent(
+                        eventName: TrackingConstant.Internal.inAppMessageMainButtonClicked,
+                        eventParams: paramsWithLink)
+
+                    let scheme = cleanURL.scheme?.lowercased()
+                    if openMode == "in_app_browser",
+                       scheme == "http" || scheme == "https"
+                    {
+                        // Universal Link → 앱 딥링크 핸들러로 직접 전달 시도
+                        if NotiflyLinkHelper.isOwnUniversalLink(cleanURL) {
+                            let currentScene = self.view.window?.windowScene
+                            if NotiflyLinkHelper.openAsUniversalLink(cleanURL, in: currentScene) {
+                                dismissCTATapped()
+                                break
+                            }
+                        }
+                        // 외부 URL 또는 Universal Link fallback → SFSafariViewController
+                        let presenter = self.presentingViewController
+                        dismissInAppMessage {
+                            let safariVC = SFSafariViewController(url: cleanURL)
+                            presenter?.present(safariVC, animated: true)
+                        }
+                    } else {
+                        UIApplication.shared.open(cleanURL)
+                        dismissCTATapped()
                     }
                 } else {
                     notifly.trackingManager.trackInternalEvent(
