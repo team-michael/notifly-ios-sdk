@@ -20,7 +20,7 @@ final class SSEClientResponseValidationTests: XCTestCase {
         client.connect()
 
         waitForCondition(description: "204 → backoff → second connect") {
-            pb.capturedRequests.count >= 2
+            pb.capturedRequestCount >= 2
         }
 
         XCTAssertTrue(
@@ -45,7 +45,7 @@ final class SSEClientResponseValidationTests: XCTestCase {
         client.connect()
 
         waitForCondition(description: "wrong content-type → backoff → second connect") {
-            pb.capturedRequests.count >= 2
+            pb.capturedRequestCount >= 2
         }
 
         XCTAssertTrue(

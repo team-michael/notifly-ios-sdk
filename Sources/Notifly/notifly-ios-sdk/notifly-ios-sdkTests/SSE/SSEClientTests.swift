@@ -78,7 +78,7 @@ final class SSEClientTests: XCTestCase {
         client.connect()
         wait(for: [opened], timeout: 3)
 
-        let captured = pb.capturedRequests.first
+        let captured = pb.capturedRequestsSnapshot.first
         XCTAssertNotNil(captured)
         XCTAssertEqual(captured?.value(forHTTPHeaderField: "Authorization"), "Bearer my-token")
         XCTAssertEqual(captured?.value(forHTTPHeaderField: "Accept"), "text/event-stream")
@@ -101,7 +101,7 @@ final class SSEClientTests: XCTestCase {
         client.connect()
         wait(for: [opened], timeout: 3)
 
-        XCTAssertNil(pb.capturedRequests.first?.url?.query)
+        XCTAssertNil(pb.capturedRequestsSnapshot.first?.url?.query)
         client.disconnect()
     }
 
@@ -126,9 +126,9 @@ final class SSEClientTests: XCTestCase {
         }
 
         wait(for: [firstReceived], timeout: 3)
-        waitForCondition(description: "second request") { pb.capturedRequests.count >= 2 }
+        waitForCondition(description: "second request") { pb.capturedRequestCount >= 2 }
 
-        let secondRequest = pb.capturedRequests[1]
+        let secondRequest = pb.capturedRequestsSnapshot[1]
         XCTAssertEqual(secondRequest.value(forHTTPHeaderField: "Last-Event-ID"), "42")
         XCTAssertEqual(client.lastEventId, "42")
 
@@ -148,7 +148,7 @@ final class SSEClientTests: XCTestCase {
         client.connect()
 
         waitForCondition(description: "second request after 503") {
-            pb.capturedRequests.count >= 2
+            pb.capturedRequestCount >= 2
         }
 
         XCTAssertTrue(
@@ -184,7 +184,7 @@ final class SSEClientTests: XCTestCase {
             assertion.fulfill()
         }
         wait(for: [assertion], timeout: 2)
-        XCTAssertEqual(pb.capturedRequests.count, 1)
+        XCTAssertEqual(pb.capturedRequestCount, 1)
 
         client.disconnect()
     }
@@ -235,7 +235,7 @@ final class SSEClientTests: XCTestCase {
         client.connect()
         wait(for: [secondOpen], timeout: 3)
 
-        XCTAssertEqual(pb.capturedRequests.count, 2)
+        XCTAssertEqual(pb.capturedRequestCount, 2)
         client.disconnect()
     }
 
@@ -256,7 +256,7 @@ final class SSEClientTests: XCTestCase {
         client.connect()
 
         waitForCondition(timeout: 5, description: "second request after heartbeat") {
-            pb.capturedRequests.count >= 2
+            pb.capturedRequestCount >= 2
         }
 
         XCTAssertTrue(
@@ -296,7 +296,7 @@ final class SSEClientTests: XCTestCase {
         client.connect()
         wait(for: [opened], timeout: 3)
         // tokenProvider 실패는 request 가 만들어지기 전이라 capturedRequests 1건만.
-        XCTAssertEqual(pb.capturedRequests.count, 1)
+        XCTAssertEqual(pb.capturedRequestCount, 1)
         client.disconnect()
     }
 }

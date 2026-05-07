@@ -47,8 +47,18 @@ struct ProviderScenario {
 final class ProviderBuilder: @unchecked Sendable {
     private let lock = NSLock()
     private var scenarios: [ProviderScenario] = []
-    private(set) var capturedRequests: [URLRequest] = []
+    private var _capturedRequests: [URLRequest] = []
     var onRequest: ((URLRequest) -> Void)?
+
+    var capturedRequestCount: Int {
+        lock.lock(); defer { lock.unlock() }
+        return _capturedRequests.count
+    }
+
+    var capturedRequestsSnapshot: [URLRequest] {
+        lock.lock(); defer { lock.unlock() }
+        return _capturedRequests
+    }
 
     func enqueue(_ scenario: ProviderScenario) {
         lock.lock(); defer { lock.unlock() }
@@ -79,7 +89,7 @@ final class ProviderBuilder: @unchecked Sendable {
         return { [weak self] request in
             guard let self = self else { throw SSEClient.ConnectionError.invalidResponse }
             self.lock.lock()
-            self.capturedRequests.append(request)
+            self._capturedRequests.append(request)
             let cb = self.onRequest
             let scenario = self.scenarios.isEmpty
                 ? ProviderScenario(statusCode: 500, stream: nil)
@@ -143,12 +153,15 @@ extension XCTestCase {
     func waitForCondition(
         timeout: TimeInterval = 3,
         description: String = "condition",
+        file: StaticString = #file,
+        line: UInt = #line,
         _ check: @escaping () -> Bool
     ) {
         let exp = expectation(description: description)
         let queue = DispatchQueue.global()
-        var fulfilled = false
         let lock = NSLock()
+        var fulfilled = false
+        var timedOut = false
         let deadline = Date().addingTimeInterval(timeout)
         func tick() {
             queue.asyncAfter(deadline: .now() + 0.02) {
@@ -175,6 +188,7 @@ extension XCTestCase {
                     lock.lock()
                     if !fulfilled {
                         fulfilled = true
+                        timedOut = true
                         lock.unlock()
                         exp.fulfill()
                     } else {
@@ -185,5 +199,11 @@ extension XCTestCase {
         }
         tick()
         wait(for: [exp], timeout: timeout + 1)
+        lock.lock()
+        let didTimeOut = timedOut
+        lock.unlock()
+        if didTimeOut {
+            XCTFail("waitForCondition timed out: \(description)", file: file, line: line)
+        }
     }
 }
