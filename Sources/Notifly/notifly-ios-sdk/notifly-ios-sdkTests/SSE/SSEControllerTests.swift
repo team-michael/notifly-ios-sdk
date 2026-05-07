@@ -106,6 +106,32 @@ final class SSEControllerTests: XCTestCase {
         XCTAssertEqual(spy.syncRequestedCount, 1)
     }
 
+    func test_sync_blockedByInFlightEvenAfterDebounceWindow() {
+        let spy = Spy()
+        var heldCompletion: (() -> Void)?
+        let controller = SSEController(
+            sseClient: makeDummySSEClient(),
+            onSyncRequested: { completion in
+                spy.recordSync()
+                heldCompletion = completion
+            },
+            onServerEventTriggered: { _, _ in },
+            syncDebounceInterval: 1.0,
+            scheduler: { delay, work in spy.scheduleTask(delay, work) }
+        )
+
+        controller.handleMessage(type: "sync", data: "{}")
+        XCTAssertEqual(spy.syncRequestedCount, 1)
+
+        spy.flushScheduled()
+        controller.handleMessage(type: "sync", data: "{}")
+        XCTAssertEqual(spy.syncRequestedCount, 1)
+
+        heldCompletion?()
+        controller.handleMessage(type: "sync", data: "{}")
+        XCTAssertEqual(spy.syncRequestedCount, 2)
+    }
+
     func test_sync_afterDebounceWindow_triggersAgain() {
         let spy = Spy()
         let controller = makeController(spy: spy)

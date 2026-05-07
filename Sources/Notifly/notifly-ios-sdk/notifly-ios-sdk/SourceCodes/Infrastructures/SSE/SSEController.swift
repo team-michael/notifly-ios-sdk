@@ -27,6 +27,7 @@ final class SSEController: @unchecked Sendable {
     private var _mode: Mode = .sse
     private var _hasReachedOpen: Bool = false
     private var _pendingSyncDispatch: Bool = false
+    private var _syncInFlight: Bool = false
 
     // MARK: - Init
 
@@ -126,15 +127,18 @@ final class SSEController: @unchecked Sendable {
 
     private func triggerSyncStateDebounced() {
         let shouldDispatchNow: Bool = stateQueue.sync {
-            if _pendingSyncDispatch {
+            if _pendingSyncDispatch || _syncInFlight {
                 return false
             }
             _pendingSyncDispatch = true
+            _syncInFlight = true
             return true
         }
         guard shouldDispatchNow else { return }
 
-        onSyncRequested { }
+        onSyncRequested { [weak self] in
+            self?.stateQueue.sync { self?._syncInFlight = false }
+        }
         scheduler(syncDebounceInterval) { [weak self] in
             self?.stateQueue.sync { self?._pendingSyncDispatch = false }
         }

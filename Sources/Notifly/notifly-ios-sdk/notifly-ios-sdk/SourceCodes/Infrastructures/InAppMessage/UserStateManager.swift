@@ -38,8 +38,6 @@ class UserStateManager {
     private var eventDataAccessQueue = DispatchQueue(
         label: "com.yourapp.userStateManager.eventDataAccessQueue"
     )
-    private let syncStateGuardQueue = DispatchQueue(label: "com.notifly.userStateManager.syncStateGuardQueue")
-    private var _isSyncing: Bool = false
 
     var campaignData: CampaignData {
         get {
@@ -109,27 +107,6 @@ class UserStateManager {
             return
         }
 
-        let alreadyInFlight: Bool = syncStateGuardQueue.sync {
-            if _isSyncing {
-                return true
-            }
-            _isSyncing = true
-            return false
-        }
-        if alreadyInFlight {
-            Logger.info("syncState skipped: already in flight")
-            completion()
-            return
-        }
-
-        let clearInFlight: () -> Void = { [weak self] in
-            self?.syncStateGuardQueue.sync { self?._isSyncing = false }
-        }
-        // mismatch 분기에서 nested syncState 가 새 in-flight 를 셋업하면 outer receiveCompletion
-        // 의 clearInFlight 가 그 nested in-flight 를 race 로 해제할 수 있음 → mismatch 처리 후엔 skip.
-        let guardQueue = self.syncStateGuardQueue
-        var mismatchHandled = false
-
         let syncStateTask = NotiflyAPI().requestSyncState(
             projectId: projectId,
             notiflyUserID: notiflyUserID,
@@ -139,10 +116,6 @@ class UserStateManager {
             receiveCompletion: { syncStateCompletion in
                 if case let .failure(error) = syncStateCompletion {
                     Logger.error("Fail to sync user state: " + error.localizedDescription)
-                }
-                let skip = guardQueue.sync { mismatchHandled }
-                if !skip {
-                    clearInFlight()
                 }
             },
             receiveValue: { [weak self] jsonString in
@@ -187,9 +160,6 @@ class UserStateManager {
                         // SDK의 external_user_id를 DB 값으로 변경
                         notifly.userManager.changeExternalUserId(newValue: deviceExternalUserID)
 
-                        // nested syncState 가 가드에서 skip 되지 않도록 outer in-flight 해제.
-                        clearInFlight()
-                        guardQueue.sync { mismatchHandled = true }
                         notifly.inAppMessageManager.userStateManager.syncState(
                             postProcessConfig: PostProcessConfigForSyncState(
                                 merge: false,
@@ -210,7 +180,6 @@ class UserStateManager {
 
         guard let main = try? Notifly.main, syncStateTask != nil else {
             Logger.error("Fail to sync user state: Notifly is not initialized")
-            clearInFlight()
             completion()
             return
         }
