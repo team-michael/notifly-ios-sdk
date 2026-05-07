@@ -18,14 +18,18 @@
 		673F0E9029EBA7D200814217 /* notifly_ios_sdkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F0E8F29EBA7D200814217 /* notifly_ios_sdkTests.swift */; };
 		673F0EBB29EC610400814217 /* Notifly+PublicAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F0EBA29EC610400814217 /* Notifly+PublicAPI.swift */; };
 		8A43318D8B623E19A6120EEF /* SSELineParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58EB4E2A48E97C9719C16565 /* SSELineParser.swift */; };
+		A86C7442166A9C64FEC1DDB7 /* SSEMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 791AA0E993C3AF80BA96B985 /* SSEMessageTests.swift */; };
 		AA00000000000001 /* NotiflyLinkHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000002 /* NotiflyLinkHelper.swift */; };
 		AA00000000000003 /* ApplicationBinary.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000004 /* ApplicationBinary.swift */; };
 		AA00000000000005 /* EntitlementsReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000006 /* EntitlementsReader.swift */; };
 		AA00000000000010 /* NotiflyLinkHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000011 /* NotiflyLinkHelperTests.swift */; };
+		AB9D9076100F90E306A0CAE0 /* SSEController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DB7ADB011179147141734D5 /* SSEController.swift */; };
 		AF5757CF8D911756FE798205 /* SSEClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8FB665159427B654E3954 /* SSEClient.swift */; };
 		B0521E422C1B572100D4E357 /* Timezone.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0521E412C1B572100D4E357 /* Timezone.swift */; };
 		B1F29A6F46F27718F38014F4 /* SSEEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8663B7A6BC0A5C187DC265CC /* SSEEvent.swift */; };
+		CE59D0CEAFC4E9DFE98E831B /* SSEMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F73731CE6187DC3BD9A3F5 /* SSEMessage.swift */; };
 		D57A8723E4967D4B8BAA69E9 /* SSEClientResponseValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C512F3BA05105F3657B0788 /* SSEClientResponseValidationTests.swift */; };
+		E8D7CCFF63B1227A9060F876 /* SSEControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CADC01D5E1D922E3E1463E /* SSEControllerTests.swift */; };
 		F2E6697B2ADE600000DF9CA0 /* NotiflyExtensionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E669792ADE600000DF9CA0 /* NotiflyExtensionAPI.swift */; };
 		F2E6697C2ADE600000DF9CA0 /* NotificationServiceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E6697A2ADE600000DF9CA0 /* NotificationServiceExtension.swift */; };
 		F2E6698F2ADE602900DF9CA0 /* NotificationsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E6697F2ADE602900DF9CA0 /* NotificationsManager.swift */; };
@@ -66,10 +70,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		24F73731CE6187DC3BD9A3F5 /* SSEMessage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSEMessage.swift; sourceTree = "<group>"; };
 		2B91499B2BDA3C3A0066CDD0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		2BA089BB2C28725000BEEE8F /* AsyncWorker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncWorker.swift; sourceTree = "<group>"; };
 		2BA67CCF2C353D6C00240C17 /* AnyCodable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCodable.swift; sourceTree = "<group>"; };
 		2CC56C102B6001B31A226813 /* SSELineParserTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSELineParserTests.swift; sourceTree = "<group>"; };
+		2DB7ADB011179147141734D5 /* SSEController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSEController.swift; sourceTree = "<group>"; };
 		4DF8FB665159427B654E3954 /* SSEClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSEClient.swift; sourceTree = "<group>"; };
 		58EB4E2A48E97C9719C16565 /* SSELineParser.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSELineParser.swift; sourceTree = "<group>"; };
 		673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = notifly_ios_sdk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -77,6 +83,8 @@
 		673F0E8A29EBA7D200814217 /* notifly-ios-sdkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "notifly-ios-sdkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		673F0E8F29EBA7D200814217 /* notifly_ios_sdkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = notifly_ios_sdkTests.swift; sourceTree = "<group>"; };
 		673F0EBA29EC610400814217 /* Notifly+PublicAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notifly+PublicAPI.swift"; sourceTree = "<group>"; };
+		69CADC01D5E1D922E3E1463E /* SSEControllerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSEControllerTests.swift; sourceTree = "<group>"; };
+		791AA0E993C3AF80BA96B985 /* SSEMessageTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSEMessageTests.swift; sourceTree = "<group>"; };
 		7C512F3BA05105F3657B0788 /* SSEClientResponseValidationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSEClientResponseValidationTests.swift; sourceTree = "<group>"; };
 		8088603A8294AD238004B695 /* SSEClientTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSEClientTests.swift; sourceTree = "<group>"; };
 		8663B7A6BC0A5C187DC265CC /* SSEEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSEEvent.swift; sourceTree = "<group>"; };
@@ -142,6 +150,8 @@
 				8088603A8294AD238004B695 /* SSEClientTests.swift */,
 				99830B8E91F63DCE23D278DD /* SSEClientTestSupport.swift */,
 				7C512F3BA05105F3657B0788 /* SSEClientResponseValidationTests.swift */,
+				791AA0E993C3AF80BA96B985 /* SSEMessageTests.swift */,
+				69CADC01D5E1D922E3E1463E /* SSEControllerTests.swift */,
 			);
 			name = SSE;
 			path = SSE;
@@ -153,6 +163,8 @@
 				8663B7A6BC0A5C187DC265CC /* SSEEvent.swift */,
 				58EB4E2A48E97C9719C16565 /* SSELineParser.swift */,
 				4DF8FB665159427B654E3954 /* SSEClient.swift */,
+				24F73731CE6187DC3BD9A3F5 /* SSEMessage.swift */,
+				2DB7ADB011179147141734D5 /* SSEController.swift */,
 			);
 			name = SSE;
 			path = SSE;
@@ -478,6 +490,8 @@
 				B1F29A6F46F27718F38014F4 /* SSEEvent.swift in Sources */,
 				8A43318D8B623E19A6120EEF /* SSELineParser.swift in Sources */,
 				AF5757CF8D911756FE798205 /* SSEClient.swift in Sources */,
+				CE59D0CEAFC4E9DFE98E831B /* SSEMessage.swift in Sources */,
+				AB9D9076100F90E306A0CAE0 /* SSEController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -491,6 +505,8 @@
 				1B35C9B1103465E89B62A05C /* SSEClientTests.swift in Sources */,
 				4D4437A6DFC7EDD0358CEE97 /* SSEClientTestSupport.swift in Sources */,
 				D57A8723E4967D4B8BAA69E9 /* SSEClientResponseValidationTests.swift in Sources */,
+				A86C7442166A9C64FEC1DDB7 /* SSEMessageTests.swift in Sources */,
+				E8D7CCFF63B1227A9060F876 /* SSEControllerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
