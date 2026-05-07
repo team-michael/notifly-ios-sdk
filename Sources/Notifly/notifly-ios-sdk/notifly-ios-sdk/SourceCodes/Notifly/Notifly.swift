@@ -33,6 +33,7 @@ import UIKit
     let trackingManager: TrackingManager
     let userManager: UserManager
     let inAppMessageManager: InAppMessageManager
+    var sseController: SSEController?
 
     // MARK: Lifecycle
 
