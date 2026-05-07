@@ -253,8 +253,13 @@ final class SSEClient: @unchecked Sendable {
         let request = try makeRequest(token: token)
 
         let (http, lines) = try await streamLineProvider(request)
-        guard (200..<300).contains(http.statusCode) else {
+        // 200 외 status (204, 304 등) 는 빈 body 로 즉시 종료 → 재연결 thrashing 유발하므로 reject.
+        guard http.statusCode == 200 else {
             throw ConnectionError.httpStatus(http.statusCode)
+        }
+        let contentType = (http.value(forHTTPHeaderField: "Content-Type") ?? "").lowercased()
+        guard contentType.hasPrefix("text/event-stream") else {
+            throw ConnectionError.invalidResponse
         }
 
         transition(to: .open)

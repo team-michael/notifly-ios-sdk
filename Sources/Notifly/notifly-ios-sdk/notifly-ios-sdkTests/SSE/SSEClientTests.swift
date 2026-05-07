@@ -50,6 +50,7 @@ final class SSEClientTests: XCTestCase {
     private final class ProviderBuilder: @unchecked Sendable {
         struct Scenario {
             var statusCode: Int = 200
+            var contentType: String = "text/event-stream"
             var stream: TestStream?
         }
 
@@ -68,7 +69,17 @@ final class SSEClientTests: XCTestCase {
             return stream
         }
 
+        func enqueueOpenWithContentType(_ contentType: String, stream: TestStream = TestStream()) -> TestStream {
+            enqueue(Scenario(statusCode: 200, contentType: contentType, stream: stream))
+            return stream
+        }
+
         func enqueueHTTPError(_ code: Int) {
+            enqueue(Scenario(statusCode: code, stream: nil))
+        }
+
+        /// non-200 success (204 등). body 비어있는 stream 으로 즉시 finish.
+        func enqueueNoContent(_ code: Int = 204) {
             enqueue(Scenario(statusCode: code, stream: nil))
         }
 
@@ -88,7 +99,7 @@ final class SSEClientTests: XCTestCase {
                     url: request.url!,
                     statusCode: scenario.statusCode,
                     httpVersion: "HTTP/1.1",
-                    headerFields: ["Content-Type": "text/event-stream"]
+                    headerFields: ["Content-Type": scenario.contentType]
                 )!
                 let stream = scenario.stream?.stream ?? AsyncThrowingStream<String, Error> { c in
                     c.finish()
@@ -317,6 +328,69 @@ final class SSEClientTests: XCTestCase {
             "Expected .reconnecting in \(recorder.snapshot)"
         )
 
+        client.disconnect()
+    }
+
+    func test_204NoContent_isRejectedAndBacksOff() {
+        let pb = ProviderBuilder()
+        pb.enqueueNoContent(204)
+        _ = pb.enqueueOpen()
+
+        let recorder = StateRecorder()
+        let client = makeClient(backoff: [0.02], provider: pb.makeProvider())
+        client.onState = { recorder.append($0) }
+        client.connect()
+
+        waitForCondition(description: "204 → backoff → second connect") {
+            pb.capturedRequests.count >= 2
+        }
+
+        XCTAssertTrue(
+            recorder.snapshot.contains { state in
+                if case .reconnecting = state { return true }
+                return false
+            },
+            "Expected .reconnecting after 204 in \(recorder.snapshot)"
+        )
+
+        client.disconnect()
+    }
+
+    func test_wrongContentType_isRejectedAndBacksOff() {
+        let pb = ProviderBuilder()
+        _ = pb.enqueueOpenWithContentType("application/json")
+        _ = pb.enqueueOpen()
+
+        let recorder = StateRecorder()
+        let client = makeClient(backoff: [0.02], provider: pb.makeProvider())
+        client.onState = { recorder.append($0) }
+        client.connect()
+
+        waitForCondition(description: "wrong content-type → backoff → second connect") {
+            pb.capturedRequests.count >= 2
+        }
+
+        XCTAssertTrue(
+            recorder.snapshot.contains { state in
+                if case .reconnecting = state { return true }
+                return false
+            }
+        )
+
+        client.disconnect()
+    }
+
+    func test_eventStreamWithCharsetParam_isAccepted() {
+        let pb = ProviderBuilder()
+        _ = pb.enqueueOpenWithContentType("text/event-stream; charset=utf-8")
+
+        let opened = expectation(description: "opened")
+        let client = makeClient(provider: pb.makeProvider())
+        client.onState = { state in
+            if state == .open { opened.fulfill() }
+        }
+        client.connect()
+        wait(for: [opened], timeout: 3)
         client.disconnect()
     }
 
