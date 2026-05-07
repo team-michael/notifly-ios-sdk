@@ -106,6 +106,29 @@ final class SSEControllerTests: XCTestCase {
         XCTAssertEqual(spy.syncRequestedCount, 1)
     }
 
+    func test_shutdown_scheduledReconnectSkipsAfterStop() {
+        let spy = Spy()
+        let pb = ProviderBuilder()
+        pb.enqueueOpen()
+        let client = makeSSEClient(provider: pb.makeProvider())
+        let controller = SSEController(
+            sseClient: client,
+            onSyncRequested: { completion in
+                spy.recordSync()
+                completion()
+            },
+            onServerEventTriggered: { _, _ in },
+            scheduler: { delay, work in spy.scheduleTask(delay, work) }
+        )
+
+        controller.handleMessage(type: "shutdown", data: "{\"reconnectInMs\":2000}")
+        controller.stop()
+        spy.flushScheduled()
+
+        // controller.stop() 후 scheduled fire 시 새 connect 시도가 일어나지 않아야 한다.
+        XCTAssertEqual(pb.capturedRequestCount, 0)
+    }
+
     func test_sync_blockedByInFlightEvenAfterDebounceWindow() {
         let spy = Spy()
         var heldCompletion: (() -> Void)?

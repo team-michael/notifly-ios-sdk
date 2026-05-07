@@ -28,6 +28,7 @@ final class SSEController: @unchecked Sendable {
     private var _hasReachedOpen: Bool = false
     private var _pendingSyncDispatch: Bool = false
     private var _syncInFlight: Bool = false
+    private var _generation: Int = 0
 
     // MARK: - Init
 
@@ -63,6 +64,7 @@ final class SSEController: @unchecked Sendable {
     }
 
     func stop() {
+        stateQueue.sync { _generation += 1 }
         sseClient.disconnect()
     }
 
@@ -147,9 +149,13 @@ final class SSEController: @unchecked Sendable {
     private func handleShutdown(reconnectInMs: Int) {
         Logger.info("SSE shutdown received, reconnect in \(reconnectInMs)ms")
         sseClient.disconnect()
+        let scheduledGen = stateQueue.sync { _generation }
         let delay = max(TimeInterval(reconnectInMs) / 1000.0, 0)
         scheduler(delay) { [weak self] in
-            self?.sseClient.connect()
+            guard let self = self else { return }
+            let currentGen = self.stateQueue.sync { self._generation }
+            guard currentGen == scheduledGen else { return }
+            self.sseClient.connect()
         }
     }
 }
