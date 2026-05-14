@@ -56,8 +56,8 @@ extension Notifly {
         sseAccessQueue.sync {
             _sseController?.stop()
             _sseController = controller
+            controller.start()
         }
-        controller.start()
     }
 
     func stopSSE() {
