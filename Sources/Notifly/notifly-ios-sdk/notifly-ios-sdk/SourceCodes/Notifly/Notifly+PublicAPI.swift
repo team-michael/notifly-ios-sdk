@@ -198,7 +198,10 @@ import UIKit
             return
         }
         main.userManager.setExternalUserId(userId)
-        main.restartSSE()
+        Notifly.asyncWorker.addTask { finishTask in
+            main.restartSSE()
+            finishTask()
+        }
     }
 
     static func getNotiflyUserId() -> String? {
