@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		10A6432EEA64DAA79DEE3CEE /* SSELineParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CC56C102B6001B31A226813 /* SSELineParserTests.swift */; };
 		1B35C9B1103465E89B62A05C /* SSEClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8088603A8294AD238004B695 /* SSEClientTests.swift */; };
+		E4AA3EB7E4B248B587DD5FA8 /* SSEByteLineSplitterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7881ACB16354E06A9A02640 /* SSEByteLineSplitterTests.swift */; };
 		2BA089BC2C28725000BEEE8F /* AsyncWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA089BB2C28725000BEEE8F /* AsyncWorker.swift */; };
 		2BA67CD02C353D6C00240C17 /* AnyCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA67CCF2C353D6C00240C17 /* AnyCodable.swift */; };
 		446EFABE891D933D8731EAC9 /* Notifly+SSE.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6C1A7FCDEED01E7D5936DE1 /* Notifly+SSE.swift */; };
@@ -76,6 +77,7 @@
 		2BA089BB2C28725000BEEE8F /* AsyncWorker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncWorker.swift; sourceTree = "<group>"; };
 		2BA67CCF2C353D6C00240C17 /* AnyCodable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCodable.swift; sourceTree = "<group>"; };
 		2CC56C102B6001B31A226813 /* SSELineParserTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSELineParserTests.swift; sourceTree = "<group>"; };
+		C7881ACB16354E06A9A02640 /* SSEByteLineSplitterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSEByteLineSplitterTests.swift; sourceTree = "<group>"; };
 		2DB7ADB011179147141734D5 /* SSEController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSEController.swift; sourceTree = "<group>"; };
 		4DF8FB665159427B654E3954 /* SSEClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSEClient.swift; sourceTree = "<group>"; };
 		58EB4E2A48E97C9719C16565 /* SSELineParser.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSELineParser.swift; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 				7C512F3BA05105F3657B0788 /* SSEClientResponseValidationTests.swift */,
 				791AA0E993C3AF80BA96B985 /* SSEMessageTests.swift */,
 				69CADC01D5E1D922E3E1463E /* SSEControllerTests.swift */,
+				C7881ACB16354E06A9A02640 /* SSEByteLineSplitterTests.swift */,
 			);
 			name = SSE;
 			path = SSE;
@@ -511,6 +514,7 @@
 				D57A8723E4967D4B8BAA69E9 /* SSEClientResponseValidationTests.swift in Sources */,
 				A86C7442166A9C64FEC1DDB7 /* SSEMessageTests.swift in Sources */,
 				E8D7CCFF63B1227A9060F876 /* SSEControllerTests.swift in Sources */,
+				E4AA3EB7E4B248B587DD5FA8 /* SSEByteLineSplitterTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

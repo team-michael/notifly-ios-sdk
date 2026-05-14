@@ -15,7 +15,7 @@ enum NotiflyConstant {
             "https://e.notifly.tech/records"
         static let syncStateEndPoint = "https://api.notifly.tech/user-state"
         static let authorizationEndPoint = "https://api.notifly.tech/authorize"
-        static let streamEndPoint = "https://api.notifly.tech/streams"
+        static let streamEndPoint = "https://api.notifly.tech"
     }
 }
 

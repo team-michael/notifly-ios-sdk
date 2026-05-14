@@ -27,10 +27,7 @@ extension Notifly {
             deviceId: deviceId,
             tokenProvider: { [weak auth] in
                 guard let auth = auth else { throw NotiflyError.notInitialized }
-                for try await token in auth.authorizationPub.first().values {
-                    return token
-                }
-                throw NotiflyError.notAuthorized
+                return try await Notifly.fetchAuthorizationToken(auth: auth)
             }
         )
 
@@ -56,13 +53,20 @@ extension Notifly {
             }
         )
 
-        sseController?.stop()
-        sseController = controller
+        sseAccessQueue.sync {
+            _sseController?.stop()
+            _sseController = controller
+        }
         controller.start()
     }
 
     func stopSSE() {
-        sseController?.stop()
+        let previous: SSEController? = sseAccessQueue.sync {
+            let c = _sseController
+            _sseController = nil
+            return c
+        }
+        previous?.stop()
     }
 
     func restartSSE() {
@@ -70,20 +74,63 @@ extension Notifly {
     }
 
     func registerSSELifecycleObservers() {
+        let shouldRegister: Bool = sseAccessQueue.sync {
+            if _sseObserversRegistered { return false }
+            _sseObserversRegistered = true
+            return true
+        }
+        guard shouldRegister else { return }
+
         let center = NotificationCenter.default
-        center.addObserver(
+        let bgToken = center.addObserver(
             forName: UIApplication.didEnterBackgroundNotification,
             object: nil,
             queue: nil
         ) { [weak self] _ in
             self?.stopSSE()
         }
-        center.addObserver(
+        let fgToken = center.addObserver(
             forName: UIApplication.willEnterForegroundNotification,
             object: nil,
             queue: nil
         ) { [weak self] _ in
             self?.startSSE()
+        }
+        sseAccessQueue.sync {
+            _sseLifecycleObserverTokens = [bgToken, fgToken]
+        }
+    }
+
+    func unregisterSSELifecycleObservers() {
+        let tokens: [NSObjectProtocol] = sseAccessQueue.sync {
+            let t = _sseLifecycleObserverTokens
+            _sseLifecycleObserverTokens = []
+            _sseObserversRegistered = false
+            return t
+        }
+        let center = NotificationCenter.default
+        for token in tokens {
+            center.removeObserver(token)
+        }
+    }
+
+    private static func fetchAuthorizationToken(auth: Auth) async throws -> String {
+        try await withThrowingTaskGroup(of: String.self) { group in
+            group.addTask {
+                for try await token in auth.authorizationPub.first().values {
+                    return token
+                }
+                throw NotiflyError.notAuthorized
+            }
+            group.addTask {
+                try await Task.sleep(nanoseconds: 10_000_000_000)
+                throw NotiflyError.notAuthorized
+            }
+            defer { group.cancelAll() }
+            guard let first = try await group.next() else {
+                throw NotiflyError.notAuthorized
+            }
+            return first
         }
     }
 }

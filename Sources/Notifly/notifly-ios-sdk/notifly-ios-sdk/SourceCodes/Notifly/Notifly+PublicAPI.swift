@@ -72,8 +72,11 @@ import UIKit
             finishTask()
         }
 
-        main.registerSSELifecycleObservers()
-        main.startSSE()
+        Notifly.asyncWorker.addTask { finishTask in
+            main.registerSSELifecycleObservers()
+            main.startSSE()
+            finishTask()
+        }
     }
 
     static func application(
