@@ -40,11 +40,14 @@ final class SSEClient: @unchecked Sendable {
     static let openStableThreshold: TimeInterval = 30
 
     static func makeDefaultSession() -> URLSession {
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 5
-        // 서버 Connection TTL 30분(±10%) 보다 긴 35분.
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = defaultHeartbeatTimeout
         config.timeoutIntervalForResource = 35 * 60
         config.waitsForConnectivity = false
+        config.httpMaximumConnectionsPerHost = 1
+        config.httpShouldUsePipelining = false
+        config.urlCache = nil
+        config.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         return URLSession(configuration: config)
     }
 
@@ -128,20 +131,40 @@ final class SSEClient: @unchecked Sendable {
             guard let http = response as? HTTPURLResponse else {
                 throw ConnectionError.invalidResponse
             }
-            let stream = AsyncThrowingStream<String, Error> { continuation in
-                let task = Task {
-                    do {
-                        for try await line in bytes.lines {
-                            continuation.yield(line)
+            return (http, splitSSELines(bytes))
+        }
+    }
+
+    internal static func splitSSELines<S: AsyncSequence>(_ bytes: S) -> AsyncThrowingStream<String, Error>
+    where S.Element == UInt8 {
+        AsyncThrowingStream<String, Error> { continuation in
+            let task = Task {
+                do {
+                    var buffer: [UInt8] = []
+                    var prevWasCR = false
+                    for try await byte in bytes {
+                        if byte == 0x0A {
+                            if prevWasCR {
+                                prevWasCR = false
+                                continue
+                            }
+                            continuation.yield(String(decoding: buffer, as: UTF8.self))
+                            buffer.removeAll(keepingCapacity: true)
+                        } else if byte == 0x0D {
+                            continuation.yield(String(decoding: buffer, as: UTF8.self))
+                            buffer.removeAll(keepingCapacity: true)
+                            prevWasCR = true
+                        } else {
+                            prevWasCR = false
+                            buffer.append(byte)
                         }
-                        continuation.finish()
-                    } catch {
-                        continuation.finish(throwing: error)
                     }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
                 }
-                continuation.onTermination = { _ in task.cancel() }
             }
-            return (http, stream)
+            continuation.onTermination = { _ in task.cancel() }
         }
     }
 
@@ -374,13 +397,13 @@ final class SSEClient: @unchecked Sendable {
         components.scheme = baseURL.scheme
         components.host = baseURL.host
         components.port = baseURL.port
-        // path component reserved/non-ASCII 대비 percent-encode.
-        let encodedProjectId = projectId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? projectId
-        let encodedUserId = notiflyUserId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? notiflyUserId
-        // baseURL.path 의 trailing slash 로 인한 // double slash 방지.
+        var pathSegmentAllowed = CharacterSet.urlPathAllowed
+        pathSegmentAllowed.remove(charactersIn: "/")
+        let encodedProjectId = projectId.addingPercentEncoding(withAllowedCharacters: pathSegmentAllowed) ?? projectId
+        let encodedUserId = notiflyUserId.addingPercentEncoding(withAllowedCharacters: pathSegmentAllowed) ?? notiflyUserId
         let normalizedBasePath = baseURL.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         let prefix = normalizedBasePath.isEmpty ? "" : "/\(normalizedBasePath)"
-        components.path = "\(prefix)/\(encodedProjectId)/\(encodedUserId)"
+        components.path = "\(prefix)/projects/\(encodedProjectId)/users/\(encodedUserId)/streams"
         if let device = deviceId, !device.isEmpty {
             components.queryItems = [URLQueryItem(name: "deviceId", value: device)]
         }
@@ -390,7 +413,9 @@ final class SSEClient: @unchecked Sendable {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
+        request.networkServiceType = .responsiveData
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue(NotiflySdkConfig.sdkVersion, forHTTPHeaderField: "x-notifly-sdk-version")
         request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
 
         let last: String? = stateAccessQueue.sync { _lastEventId }

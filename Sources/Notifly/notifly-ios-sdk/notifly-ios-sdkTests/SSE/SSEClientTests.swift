@@ -83,7 +83,7 @@ final class SSEClientTests: XCTestCase {
         XCTAssertEqual(captured?.value(forHTTPHeaderField: "Authorization"), "Bearer my-token")
         XCTAssertEqual(captured?.value(forHTTPHeaderField: "Accept"), "text/event-stream")
         XCTAssertNil(captured?.value(forHTTPHeaderField: "Last-Event-ID"))
-        XCTAssertEqual(captured?.url?.path, "/streams/00000000000000000000000000000abc/user-42")
+        XCTAssertEqual(captured?.url?.path, "/projects/00000000000000000000000000000abc/users/user-42/streams")
         XCTAssertEqual(captured?.url?.query, "deviceId=device-1")
 
         client.disconnect()

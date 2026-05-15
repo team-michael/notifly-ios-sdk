@@ -142,7 +142,7 @@ extension XCTestCase {
             notiflyUserId: "user-42",
             deviceId: deviceId,
             tokenProvider: token,
-            baseURLString: "https://test.local/streams",
+            baseURLString: "https://test.local",
             backoffSchedule: backoff,
             heartbeatTimeout: heartbeatTimeout,
             streamLineProvider: provider,

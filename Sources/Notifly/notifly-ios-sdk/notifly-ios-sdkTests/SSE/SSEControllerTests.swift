@@ -57,7 +57,7 @@ final class SSEControllerTests: XCTestCase {
             notiflyUserId: "u",
             deviceId: nil,
             tokenProvider: { "t" },
-            baseURLString: "https://test.local/streams",
+            baseURLString: "https://test.local",
             streamLineProvider: { _ in
                 throw NSError(domain: "should-not-be-called", code: 0)
             }
