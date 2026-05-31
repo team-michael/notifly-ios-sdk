@@ -16,6 +16,13 @@ extension Notifly {
             Logger.info("SSE: skip start — no notifly user id yet")
             return
         }
+
+        let existing: SSEController? = sseAccessQueue.sync { _sseController }
+        if let existing = existing {
+            existing.start()
+            return
+        }
+
         let deviceId = AppHelper.getNotiflyDeviceID()
         let auth = self.auth
         let userStateManager = inAppMessageManager.userStateManager
@@ -54,22 +61,23 @@ extension Notifly {
         )
 
         sseAccessQueue.sync {
-            _sseController?.stop()
             _sseController = controller
-            controller.start()
         }
+        controller.start()
     }
 
     func stopSSE() {
+        let current: SSEController? = sseAccessQueue.sync { _sseController }
+        current?.sseClient.disconnect()
+    }
+
+    func restartSSE() {
         let previous: SSEController? = sseAccessQueue.sync {
             let c = _sseController
             _sseController = nil
             return c
         }
         previous?.stop()
-    }
-
-    func restartSSE() {
         startSSE()
     }
 
