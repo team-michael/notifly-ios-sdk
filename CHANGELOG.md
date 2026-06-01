@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-06-01
+
+### Changed
+
+- Switch SSE reconnect backoff to full jitter (100ms ~ 10s) across all attempts.
+  - Previous schedule was `[1, 2, 4, 8, 30]s` with ±20% multiplicative jitter; attempt 1 spread was only ~400ms.
+  - New schedule uses a single 10s base with 0~1 uniform jitter (clamped to 100ms minimum), producing a ~9.9s window to better disperse reconnect bursts after server-side disconnects (e.g. rolling deploys).
+- Reduce SSE verbose logging. Keep: `connected`, `disconnected`, `sync received` plus error logs (`connection error`, `handshake failed`, `invalid content-type`, `malformed message`). Remove per-attempt traces, `Last-Event-ID` headers, `event received`, `shutdown received`, and lifecycle entry/exit logs.
+
 ## [2.4.0] - 2026-04-14
 
 ### Added
