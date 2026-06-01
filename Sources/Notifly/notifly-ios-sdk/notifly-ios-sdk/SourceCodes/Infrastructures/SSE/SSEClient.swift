@@ -34,7 +34,7 @@ final class SSEClient: @unchecked Sendable {
 
     // MARK: - Static defaults
 
-    static let defaultBackoffSchedule: [TimeInterval] = [1, 2, 4, 8, 30]
+    static let defaultBackoffSchedule: [TimeInterval] = [10]
     static let defaultHeartbeatTimeout: TimeInterval = 60
     /// .open 이 이 시간 이상 유지된 뒤 끊기면 정상 운영 상태로 간주, 백오프 attempt 카운터를 리셋한다.
     static let openStableThreshold: TimeInterval = 30
@@ -103,7 +103,7 @@ final class SSEClient: @unchecked Sendable {
         backoffSchedule: [TimeInterval] = SSEClient.defaultBackoffSchedule,
         heartbeatTimeout: TimeInterval = SSEClient.defaultHeartbeatTimeout,
         streamLineProvider: StreamLineProvider? = nil,
-        jitterProvider: @escaping () -> Double = { Double.random(in: 0.8...1.2) },
+        jitterProvider: @escaping () -> Double = { Double.random(in: 0..<1) },
         nowProvider: @escaping () -> Date = { Date() }
     ) {
         self.projectId = projectId
@@ -199,6 +199,7 @@ final class SSEClient: @unchecked Sendable {
             didStart = true
         }
         if didStart {
+            Logger.info("SSE connect requested: projectId=\(projectId) userId=\(notiflyUserId) deviceId=\(deviceId ?? "-")")
             emitState(.connecting)
         }
     }
@@ -216,6 +217,7 @@ final class SSEClient: @unchecked Sendable {
 
         connTask?.cancel()
         if !alreadyStopped {
+            Logger.info("SSE disconnect requested: projectId=\(projectId) userId=\(notiflyUserId)")
             emitState(.stopped)
         }
     }
@@ -278,14 +280,17 @@ final class SSEClient: @unchecked Sendable {
         let (http, lines) = try await streamLineProvider(request)
         // 200 외 status (204, 304 등) 는 빈 body 로 즉시 종료 → 재연결 thrashing 유발하므로 reject.
         guard http.statusCode == 200 else {
+            Logger.error("SSE handshake failed: status=\(http.statusCode) projectId=\(projectId)")
             throw ConnectionError.httpStatus(http.statusCode)
         }
         let contentType = (http.value(forHTTPHeaderField: "Content-Type") ?? "").lowercased()
         guard contentType.hasPrefix("text/event-stream") else {
+            Logger.error("SSE invalid content-type: \(contentType) projectId=\(projectId)")
             throw ConnectionError.invalidResponse
         }
 
         transition(to: .open)
+        Logger.info("SSE connected: projectId=\(projectId) userId=\(notiflyUserId) deviceId=\(deviceId ?? "-")")
         setLastDataAt(nowProvider())
 
         try await withThrowingTaskGroup(of: Void.self) { group in
@@ -382,7 +387,9 @@ final class SSEClient: @unchecked Sendable {
     private func backoffDelay(attempt: Int) -> TimeInterval {
         let idx = min(max(attempt - 1, 0), backoffSchedule.count - 1)
         let base = backoffSchedule[idx]
-        return base * jitterProvider()
+        let delay = max(0.1, base * jitterProvider())
+        Logger.info("SSE backoff attempt=\(attempt) delay=\(Int(delay * 1000))ms")
+        return delay
     }
 
     private func nanoseconds(from seconds: TimeInterval) -> UInt64 {
@@ -421,6 +428,9 @@ final class SSEClient: @unchecked Sendable {
         let last: String? = stateAccessQueue.sync { _lastEventId }
         if let last = last, !last.isEmpty {
             request.setValue(last, forHTTPHeaderField: "Last-Event-ID")
+            Logger.info("SSE sending Last-Event-ID: \(last)")
+        } else {
+            Logger.info("SSE sending Last-Event-ID: (none)")
         }
         return request
     }
