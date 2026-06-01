@@ -68,7 +68,7 @@ extension Notifly {
 
     func stopSSE() {
         let current: SSEController? = sseAccessQueue.sync { _sseController }
-        current?.sseClient.disconnect()
+        current?.stop()
     }
 
     func restartSSE() {
