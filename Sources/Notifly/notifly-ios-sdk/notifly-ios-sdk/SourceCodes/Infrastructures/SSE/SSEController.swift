@@ -69,7 +69,6 @@ final class SSEController: @unchecked Sendable {
     }
 
     func reconnect(reason: String) {
-        Logger.info("SSE reconnect requested: \(reason)")
         sseClient.disconnect()
         sseClient.connect()
     }
@@ -89,6 +88,7 @@ final class SSEController: @unchecked Sendable {
                 _mode = .sse
             }
         case .sync:
+            Logger.info("SSE sync received")
             triggerSyncStateDebounced()
         case .event(let name, let params):
             onServerEventTriggered(name, params)
@@ -96,8 +96,8 @@ final class SSEController: @unchecked Sendable {
             handleShutdown(reconnectInMs: ms)
         case .ttlExpired:
             reconnect(reason: "ttl-expired")
-        case .unknown(let raw):
-            Logger.info("SSE unknown message type: \(raw)")
+        case .unknown:
+            break
         case .malformed(let raw):
             Logger.error("SSE malformed message: type=\(raw)")
         }
@@ -117,7 +117,6 @@ final class SSEController: @unchecked Sendable {
                 return true
             }
             if shouldFallback {
-                Logger.info("SSE entering fallback mode (attempt=\(attempt))")
                 sseClient.disconnect()
             }
         default:
@@ -147,7 +146,6 @@ final class SSEController: @unchecked Sendable {
     }
 
     private func handleShutdown(reconnectInMs: Int) {
-        Logger.info("SSE shutdown received, reconnect in \(reconnectInMs)ms")
         sseClient.disconnect()
         let scheduledGen = stateQueue.sync { _generation }
         let delay = max(TimeInterval(reconnectInMs) / 1000.0, 0)

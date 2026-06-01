@@ -199,7 +199,6 @@ final class SSEClient: @unchecked Sendable {
             didStart = true
         }
         if didStart {
-            Logger.info("SSE connect requested: projectId=\(projectId) userId=\(notiflyUserId) deviceId=\(deviceId ?? "-")")
             emitState(.connecting)
         }
     }
@@ -217,7 +216,7 @@ final class SSEClient: @unchecked Sendable {
 
         connTask?.cancel()
         if !alreadyStopped {
-            Logger.info("SSE disconnect requested: projectId=\(projectId) userId=\(notiflyUserId)")
+            Logger.info("SSE disconnected")
             emitState(.stopped)
         }
     }
@@ -290,7 +289,7 @@ final class SSEClient: @unchecked Sendable {
         }
 
         transition(to: .open)
-        Logger.info("SSE connected: projectId=\(projectId) userId=\(notiflyUserId) deviceId=\(deviceId ?? "-")")
+        Logger.info("SSE connected")
         setLastDataAt(nowProvider())
 
         try await withThrowingTaskGroup(of: Void.self) { group in
@@ -329,7 +328,6 @@ final class SSEClient: @unchecked Sendable {
             try await Task.sleep(nanoseconds: nanoseconds(from: checkInterval))
             let elapsed = nowProvider().timeIntervalSince(getLastDataAt())
             if elapsed > heartbeatTimeout {
-                Logger.info("SSE heartbeat timeout: \(Int(elapsed))s")
                 throw ConnectionError.heartbeatTimeout
             }
         }
@@ -387,9 +385,7 @@ final class SSEClient: @unchecked Sendable {
     private func backoffDelay(attempt: Int) -> TimeInterval {
         let idx = min(max(attempt - 1, 0), backoffSchedule.count - 1)
         let base = backoffSchedule[idx]
-        let delay = max(0.1, base * jitterProvider())
-        Logger.info("SSE backoff attempt=\(attempt) delay=\(Int(delay * 1000))ms")
-        return delay
+        return max(0.1, base * jitterProvider())
     }
 
     private func nanoseconds(from seconds: TimeInterval) -> UInt64 {
@@ -428,9 +424,6 @@ final class SSEClient: @unchecked Sendable {
         let last: String? = stateAccessQueue.sync { _lastEventId }
         if let last = last, !last.isEmpty {
             request.setValue(last, forHTTPHeaderField: "Last-Event-ID")
-            Logger.info("SSE sending Last-Event-ID: \(last)")
-        } else {
-            Logger.info("SSE sending Last-Event-ID: (none)")
         }
         return request
     }
