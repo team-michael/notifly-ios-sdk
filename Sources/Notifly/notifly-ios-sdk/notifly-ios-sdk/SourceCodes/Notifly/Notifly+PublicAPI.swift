@@ -71,6 +71,12 @@ import UIKit
             Logger.info("📡 Notifly SDK is successfully initialized.")
             finishTask()
         }
+
+        Notifly.asyncWorker.addTask { finishTask in
+            main.registerSSELifecycleObservers()
+            main.startSSE()
+            finishTask()
+        }
     }
 
     static func application(
@@ -192,6 +198,10 @@ import UIKit
             return
         }
         main.userManager.setExternalUserId(userId)
+        Notifly.asyncWorker.addTask { finishTask in
+            main.restartSSE()
+            finishTask()
+        }
     }
 
     static func getNotiflyUserId() -> String? {

@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-06-01
+
+### Added
+
+- **Real-time campaign data sync over SSE.**
+  - Open a long-lived SSE channel from the SDK to Notifly server. When campaign state changes server-side (e.g. a new in-app message is triggered or a popup is updated), the SDK refreshes its local campaign data immediately instead of waiting for the next event-driven fetch.
+  - On reconnect, the SDK sends `Last-Event-ID` so the server can replay popup entries that were missed during the disconnect window, recovering messages that fired while offline.
+  - If the SSE channel cannot reach OPEN state within the fallback threshold, the SDK falls back to the legacy event-driven sync path automatically.
+
+### Changed
+
+- Reconnect backoff uses full jitter (100ms ~ 10s) across all attempts to disperse reconnect bursts after server-side disconnects such as rolling deploys.
+- Reduce SSE verbose logging. Keep: `SSE connected`, `SSE disconnected`, `SSE sync received` plus error logs.
+
 ## [2.4.0] - 2026-04-14
 
 ### Added

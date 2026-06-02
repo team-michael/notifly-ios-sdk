@@ -34,6 +34,11 @@ import UIKit
     let userManager: UserManager
     let inAppMessageManager: InAppMessageManager
 
+    let sseAccessQueue = DispatchQueue(label: "com.notifly.sse.access.queue")
+    var _sseController: SSEController?
+    var _sseLifecycleObserverTokens: [NSObjectProtocol] = []
+    var _sseObserversRegistered: Bool = false
+
     // MARK: Lifecycle
 
     init(
