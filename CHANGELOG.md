@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] - 2026-06-10
+
+### Fixed
+
+- **APNs → FCM token acquisition ordering race on cold start.** The APNs token was assigned to Firebase Messaging on an async dispatch while the FCM token request was issued synchronously right after, so `Messaging.token(completion:)` could run before the APNs token was associated. This could register a stale/unassociated FCM token and drive repeated token re-acquisition. The APNs token assignment and the FCM token request now run within the same main-queue block, so the assignment is guaranteed to happen first (matching the ordering already used in the retry path).
+
 ## [2.5.0] - 2026-06-01
 
 ### Added
