@@ -144,11 +144,17 @@ class NotificationsManager: NSObject {
             ])
         }
 
-        DispatchQueue.main.async {
+        // Assign the APNs token to Firebase and request the FCM token within the same
+        // main-queue block so the assignment is guaranteed to happen before
+        // Messaging.token(completion:) runs. Previously the assignment was dispatched
+        // async while requestFCMTokenWithRetry() ran synchronously outside the block,
+        // so the FCM token could be requested before the APNs token was associated —
+        // yielding a stale/unassociated token on cold start and driving repeated token
+        // re-acquisition. (This mirrors the ordering already used in the retry path.)
+        DispatchQueue.main.async { [weak self] in
             Messaging.messaging().apnsToken = deviceToken
+            self?.requestFCMTokenWithRetry()
         }
-
-        requestFCMTokenWithRetry()
     }
 
     func registerFCMToken(token: String) {
