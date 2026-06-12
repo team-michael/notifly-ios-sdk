@@ -22,6 +22,7 @@ import UIKit
     }
 
     static var coldStartNotificationData: [AnyHashable: Any]?
+    static var coldStartNotificationActionIdentifier: String?
     static var inAppMessageDisabled: Bool = false
 
     private let cancellablesAccessQueue = DispatchQueue(label: "com.notifly.manager.access.queue")
