@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-06-15
+
+### Added
+
+- **Ad push opt-out ("수신거부") action.** Push notifications carrying an `unsubscribe_url` custom-data field are treated as ad pushes and now expose a "수신거부" action on long-press; tapping it opens the `unsubscribe_url` (custom scheme deep link or web page). The SDK registers the `NOTIFLY_AD` notification category — merged with any categories the host app already registered — and handles the action tap. The cold-start case is covered: the tapped action identifier is cached so that, when the app is launched from a kill state by the opt-out tap, it navigates to the unsubscribe destination rather than the notification's content URL.
+  - Requires the server to deliver ad pushes with `aps.category = "NOTIFLY_AD"` (alongside the `unsubscribe_url` custom data).
+
 ## [2.5.1] - 2026-06-10
 
 ### Fixed

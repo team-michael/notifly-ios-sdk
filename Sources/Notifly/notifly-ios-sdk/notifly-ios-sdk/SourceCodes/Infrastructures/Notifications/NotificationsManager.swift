@@ -489,6 +489,33 @@ class NotificationsManager: NSObject {
 
     private func setup() {
         startTokenAcquisition()
+        registerAdPushCategory()
+    }
+
+    /// 광고 푸시 수신거부 액션 카테고리를 등록한다.
+    /// 앱이 이미 등록한 다른 카테고리를 덮어쓰지 않도록 기존 카테고리와 병합한다.
+    private func registerAdPushCategory() {
+        let center = UNUserNotificationCenter.current()
+        center.getNotificationCategories { existing in
+            guard
+                !existing.contains(where: {
+                    $0.identifier == NotiflyConstant.AdPush.categoryIdentifier
+                })
+            else {
+                return
+            }
+
+            let unsubscribeAction = UNNotificationAction(
+                identifier: NotiflyConstant.AdPush.unsubscribeActionIdentifier,
+                title: NotiflyConstant.AdPush.unsubscribeActionTitle,
+                options: [.foreground])
+            let adCategory = UNNotificationCategory(
+                identifier: NotiflyConstant.AdPush.categoryIdentifier,
+                actions: [unsubscribeAction],
+                intentIdentifiers: [],
+                options: [])
+            center.setNotificationCategories(existing.union([adCategory]))
+        }
     }
 }
 
@@ -501,6 +528,17 @@ extension NotificationsManager: UNUserNotificationCenterDelegate {
         _: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) {
+        // 광고 푸시의 "수신거부" 액션을 탭한 경우: unsubscribe_url 스킴/URL로 이동.
+        if response.actionIdentifier == NotiflyConstant.AdPush.unsubscribeActionIdentifier {
+            if let urlString = response.notification.request.content.userInfo[
+                NotiflyConstant.AdPush.unsubscribeUrlKey] as? String,
+                let url = URL(string: urlString)
+            {
+                UIApplication.shared.open(url, options: [:])
+            }
+            return
+        }
+
         if let pushData = response.notification.request.content.userInfo as [AnyHashable: Any]?,
             let clickStatus = UIApplication.shared.applicationState == .active
                 ? "foreground" : "background"

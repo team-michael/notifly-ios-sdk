@@ -1,7 +1,7 @@
 import Foundation
 
 enum NotiflySdkConfig {
-    static let sdkVersion: String = "2.5.1"
+    static let sdkVersion: String = "2.6.0"
     static var sdkWrapperVersion: String?
     static let sdkType: String = "native"
     static var sdkWrapperType: SdkWrapperType?
@@ -10,6 +10,17 @@ enum NotiflySdkConfig {
 enum NotiflyConstant {
     static let iosPlatform: String = "ios"
     static let projectIdRegex: String = "^[0-9a-fA-F]{32}$"
+
+    /// 광고 푸시 수신거부 액션 관련 상수.
+    /// 푸시 payload(커스텀 데이터)에 `unsubscribe_url`이 있으면 광고 푸시로 간주하고,
+    /// 길게 눌렀을 때 "수신거부" 액션이 노출되도록 한다.
+    enum AdPush {
+        static let categoryIdentifier = "NOTIFLY_AD"
+        static let unsubscribeActionIdentifier = "NOTIFLY_UNSUBSCRIBE"
+        static let unsubscribeUrlKey = "unsubscribe_url"
+        static let unsubscribeActionTitle = "수신거부"
+    }
+
     enum EndPoint {
         static let trackEventEndPoint =
             "https://e.notifly.tech/records"

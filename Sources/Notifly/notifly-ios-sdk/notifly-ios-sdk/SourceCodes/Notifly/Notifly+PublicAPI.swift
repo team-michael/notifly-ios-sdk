@@ -46,23 +46,35 @@ import UIKit
         }
 
         if let pushData = Notifly.coldStartNotificationData {
-            let clickStatus = "background"
-            if let urlString = pushData["url"] as? String,
-                let url = URL(string: urlString)
+            if Notifly.coldStartNotificationActionIdentifier
+                == NotiflyConstant.AdPush.unsubscribeActionIdentifier
             {
-                UIApplication.shared.open(url, options: [:]) { _ in
+                // 콜드스타트에서 "수신거부" 액션이 탭된 경우: 본문 url 이 아니라 unsubscribe_url 로 이동.
+                if let urlString = pushData[NotiflyConstant.AdPush.unsubscribeUrlKey] as? String,
+                    let url = URL(string: urlString)
+                {
+                    UIApplication.shared.open(url, options: [:])
+                }
+            } else {
+                let clickStatus = "background"
+                if let urlString = pushData["url"] as? String,
+                    let url = URL(string: urlString)
+                {
+                    UIApplication.shared.open(url, options: [:]) { _ in
+                        main.trackingManager.trackPushClickInternalEvent(
+                            pushData: pushData,
+                            clickStatus: clickStatus
+                        )
+                    }
+                } else {
                     main.trackingManager.trackPushClickInternalEvent(
                         pushData: pushData,
                         clickStatus: clickStatus
                     )
                 }
-            } else {
-                main.trackingManager.trackPushClickInternalEvent(
-                    pushData: pushData,
-                    clickStatus: clickStatus
-                )
             }
             Notifly.coldStartNotificationData = nil
+            Notifly.coldStartNotificationActionIdentifier = nil
         }
 
         // NotificationsManager now handles all token acquisition logic
@@ -131,6 +143,7 @@ import UIKit
             }
             guard let main = try? main else {
                 Notifly.coldStartNotificationData = pushData
+                Notifly.coldStartNotificationActionIdentifier = response.actionIdentifier
                 return
             }
 
