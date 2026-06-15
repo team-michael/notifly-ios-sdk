@@ -159,6 +159,7 @@ class NotificationsManager: NSObject {
 
     func registerFCMToken(token: String) {
         let publisher = Just(token).setFailureType(to: Error.self).eraseToAnyPublisher()
+        let isFirebaseAPNsTokenMissing = Messaging.messaging().apnsToken == nil
 
         var promiseToFulfill: Future<String, Error>.Promise?
         var shouldTrackDeviceTokenEvent = false
@@ -186,11 +187,22 @@ class NotificationsManager: NSObject {
 
         promiseToFulfill?(.success(token))
 
-        // 동일 device_token의 중복 내부 이벤트 전송 억제로 JSON 인코딩 스파이크 완화
-        if shouldTrackDeviceTokenEvent, let notifly = try? Notifly.main {
-            notifly.trackingManager.trackSetDevicePropertiesInternalEvent(properties: [
+        // 동일 device_token의 중복 내부 이벤트 전송 억제로 JSON 인코딩 스파이크 완화.
+        // APNs 토큰이 Firebase Messaging에 아직 연결되지 않은 상태에서 FCM 토큰이
+        // 등록되는 경우는 서버/Athena에서 관찰할 수 있도록 중복 토큰이어도 진단 이벤트를 남긴다.
+        if shouldTrackDeviceTokenEvent || isFirebaseAPNsTokenMissing,
+            let notifly = try? Notifly.main
+        {
+            var properties: [String: Any] = [
                 "device_token": token
-            ])
+            ]
+
+            if isFirebaseAPNsTokenMissing {
+                properties["fcm_registration_apns_token_missing"] = true
+                properties["fcm_registration_diagnostic"] = "messaging_apns_token_nil"
+            }
+
+            notifly.trackingManager.trackSetDevicePropertiesInternalEvent(properties: properties)
         }
     }
 
