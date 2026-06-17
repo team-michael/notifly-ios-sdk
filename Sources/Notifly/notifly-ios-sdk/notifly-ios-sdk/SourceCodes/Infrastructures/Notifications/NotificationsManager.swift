@@ -338,7 +338,6 @@ class NotificationsManager: NSObject {
     private func requestFCMTokenWithRetry() {
         // 중복/재진입 가드 (이미 요청중이면 재진입 차단)
         var previousFCMToken: String?
-        var retryAttempt = 0
         let shouldRequest = stateQueue.sync { () -> Bool in
             if isFCMRequestInFlight {
                 return false
@@ -346,14 +345,12 @@ class NotificationsManager: NSObject {
             isFCMRequestInFlight = true
             fcmTokenState = .pending
             previousFCMToken = lastFCMToken
-            retryAttempt = fcmRetryAttempt
             return true
         }
 
         guard shouldRequest else { return }
 
         let previousToken = previousFCMToken
-        let currentRetryAttempt = retryAttempt
 
         // Beta recovery path for stale FCM tokens: Firebase can return a locally cached
         // registration token while the server already reports it as UNREGISTERED. Delete
@@ -378,13 +375,16 @@ class NotificationsManager: NSObject {
                     }
 
                     let fetchSucceeded = token != nil && error == nil
-                    self.trackFCMTokenRefreshInternalEvent(
-                        deleteSucceeded: deleteError == nil,
-                        fetchSucceeded: fetchSucceeded,
-                        tokenChanged: token.map { $0 != previousToken } ?? false,
-                        hadPreviousToken: previousToken != nil,
-                        retryAttempt: currentRetryAttempt
-                    )
+                    if let notifly = try? Notifly.main {
+                        notifly.trackingManager.trackInternalEvent(
+                            eventName: TrackingConstant.Internal.fcmTokenRefreshEventName,
+                            eventParams: [
+                                "source": "delete_then_fetch",
+                                "delete_success": deleteError == nil,
+                                "fetch_success": fetchSucceeded,
+                                "token_changed": token.map { $0 != previousToken } ?? false
+                            ])
+                    }
 
                     if let token = token, error == nil {
                         self.registerFCMToken(token: token)
@@ -400,28 +400,6 @@ class NotificationsManager: NSObject {
                 }
             }
         }
-    }
-
-    private func trackFCMTokenRefreshInternalEvent(
-        deleteSucceeded: Bool,
-        fetchSucceeded: Bool,
-        tokenChanged: Bool,
-        hadPreviousToken: Bool,
-        retryAttempt: Int
-    ) {
-        guard let notifly = try? Notifly.main else { return }
-
-        notifly.trackingManager.trackInternalEvent(
-            eventName: TrackingConstant.Internal.fcmTokenRefreshEventName,
-            eventParams: [
-                "source": "delete_then_fetch",
-                "delete_success": deleteSucceeded,
-                "fetch_success": fetchSucceeded,
-                "token_changed": tokenChanged,
-                "had_previous_token": hadPreviousToken,
-                "retry_attempt": retryAttempt
-            ]
-        )
     }
 
     private func retryFCMTokenRequest() {
