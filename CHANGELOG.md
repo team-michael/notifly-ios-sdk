@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Prevent `session_start` internal events from being tracked unless the host app is in the foreground active state. This avoids recording background remote-notification/fetch process wakes as user-visible sessions.
 
+## [2.6.1-beta.0] - 2026-06-16
+
+### Fixed
+
+- **FCM token refresh after cached-token invalidation.** The SDK now deletes Firebase Messaging's cached FCM registration token before requesting a replacement token, so beta builds do not keep re-registering a locally cached token that FCM already reports as `UNREGISTERED`.
+
 ## [2.6.0] - 2026-06-15
 
 ### Added
