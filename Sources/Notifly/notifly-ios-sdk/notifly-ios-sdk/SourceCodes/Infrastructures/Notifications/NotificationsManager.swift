@@ -39,7 +39,6 @@ class NotificationsManager: NSObject {
     // Timeout configuration
     private var deviceTokenPromiseTimeoutInterval: TimeInterval = 10.0  // Increased from 5.0
     private let retryBaseDelay: TimeInterval = 1.0
-    private let fcmTokenRefreshDelay: TimeInterval = 0.5
 
     // Timer management (stateQueue protected)
     private var timeoutWorkItem: DispatchWorkItem?
@@ -364,7 +363,7 @@ class NotificationsManager: NSObject {
                 )
             }
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + self.fcmTokenRefreshDelay) { [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 guard let self = self else { return }
 
                 Messaging.messaging().token { [weak self] token, error in
@@ -374,14 +373,13 @@ class NotificationsManager: NSObject {
                         self.isFCMRequestInFlight = false
                     }
 
-                    let fetchSucceeded = token != nil && error == nil
                     if let notifly = try? Notifly.main {
                         notifly.trackingManager.trackInternalEvent(
                             eventName: TrackingConstant.Internal.fcmTokenRefreshEventName,
                             eventParams: [
                                 "source": "delete_then_fetch",
                                 "delete_success": deleteError == nil,
-                                "fetch_success": fetchSucceeded,
+                                "fetch_success": token != nil && error == nil,
                                 "token_changed": token.map { $0 != previousToken } ?? false
                             ])
                     }
