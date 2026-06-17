@@ -54,6 +54,7 @@ enum TrackingConstant {
 
         static let pushClickEventName = "push_click"
         static let pushNotificationMessageShown = "push_delivered"
+        static let fcmTokenRefreshEventName = "fcm_token_refresh"
         static let inAppMessageShown = "in_app_message_show"
         static let inAppMessageCloseButtonClicked = "close_button_click"
         static let inAppMessageMainButtonClicked = "main_button_click"
