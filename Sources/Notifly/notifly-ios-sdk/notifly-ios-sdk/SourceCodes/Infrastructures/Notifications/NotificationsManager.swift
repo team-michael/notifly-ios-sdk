@@ -39,6 +39,7 @@ class NotificationsManager: NSObject {
     // Timeout configuration
     private var deviceTokenPromiseTimeoutInterval: TimeInterval = 10.0  // Increased from 5.0
     private let retryBaseDelay: TimeInterval = 1.0
+    private let fcmTokenRefreshDelay: TimeInterval = 0.5
 
     // Timer management (stateQueue protected)
     private var timeoutWorkItem: DispatchWorkItem?
@@ -347,23 +348,40 @@ class NotificationsManager: NSObject {
 
         guard shouldRequest else { return }
 
-        Messaging.messaging().token { [weak self] token, error in
+        // Beta recovery path for stale FCM tokens: Firebase can return a locally cached
+        // registration token while the server already reports it as UNREGISTERED. Delete
+        // the cached token first, then ask Firebase Messaging to mint/fetch a replacement.
+        Messaging.messaging().deleteToken { [weak self] deleteError in
             guard let self = self else { return }
 
-            self.stateQueue.async {
-                self.isFCMRequestInFlight = false
+            if let deleteError = deleteError {
+                Logger.error(
+                    "Error deleting cached FCM registration token: \(deleteError.localizedDescription)"
+                )
             }
 
-            if let token = token, error == nil {
-                self.registerFCMToken(token: token)
-            } else {
-                Logger.error(
-                    "Error fetching FCM registration token: \(error?.localizedDescription ?? "Unknown error")"
-                )
-                self.stateQueue.async {
-                    self.fcmTokenState = .failed
+            DispatchQueue.main.asyncAfter(deadline: .now() + self.fcmTokenRefreshDelay) { [weak self] in
+                guard let self = self else { return }
+
+                Messaging.messaging().token { [weak self] token, error in
+                    guard let self = self else { return }
+
+                    self.stateQueue.async {
+                        self.isFCMRequestInFlight = false
+                    }
+
+                    if let token = token, error == nil {
+                        self.registerFCMToken(token: token)
+                    } else {
+                        Logger.error(
+                            "Error fetching FCM registration token: \(error?.localizedDescription ?? "Unknown error")"
+                        )
+                        self.stateQueue.async {
+                            self.fcmTokenState = .failed
+                        }
+                        self.retryFCMTokenRequest()
+                    }
                 }
-                self.retryFCMTokenRequest()
             }
         }
     }

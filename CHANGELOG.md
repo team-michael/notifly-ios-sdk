@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.1-beta.0] - 2026-06-16
+
+### Fixed
+
+- **FCM token refresh after cached-token invalidation.** The SDK now deletes Firebase Messaging's cached FCM registration token before requesting a replacement token, so beta builds do not keep re-registering a locally cached token that FCM already reports as `UNREGISTERED`.
+
 ## [2.6.0] - 2026-06-15
 
 ### Added
