@@ -1,9 +1,19 @@
 import Combine
+import FirebaseCore
 import FirebaseMessaging
 import Foundation
 import SafariServices
 import UIKit
 import UserNotifications
+
+private func notiflyAPNSEnvironment() -> String {
+    guard let execName = Bundle.main.infoDictionary?["CFBundleExecutable"] as? String,
+        let execPath = Bundle.main.path(forResource: execName, ofType: nil),
+        let entitlements = try? EntitlementsReader(execPath).readEntitlements(),
+        let environment = entitlements["aps-environment"] as? String
+    else { return "unknown" }
+    return environment
+}
 
 // MARK: - Token State Management
 enum TokenState: Equatable {
@@ -14,6 +24,7 @@ enum TokenState: Equatable {
 }
 
 @available(iOSApplicationExtension, unavailable)
+// swiftlint:disable:next type_body_length
 class NotificationsManager: NSObject {
     // MARK: Properties
 
@@ -380,7 +391,11 @@ class NotificationsManager: NSObject {
                                 "source": "delete_then_fetch",
                                 "delete_success": deleteError == nil,
                                 "fetch_success": token != nil && error == nil,
-                                "token_changed": token.map { $0 != previousToken } ?? false
+                                "token_changed": token.map { $0 != previousToken } ?? false,
+                                "apns_environment": notiflyAPNSEnvironment(),
+                                "bundle_id": AppHelper.getBundleIdentifier() ?? "",
+                                "firebase_project_id": FirebaseApp.app()?.options.projectID ?? "",
+                                "firebase_sender_id": FirebaseApp.app()?.options.gcmSenderID ?? ""
                             ])
                     }
 
