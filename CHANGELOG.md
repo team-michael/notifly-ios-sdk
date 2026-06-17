@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Prevent `session_start` internal events from being tracked unless the host app is in the foreground active state. This avoids recording background remote-notification/fetch process wakes as user-visible sessions.
 
-## [2.6.1-beta.0] - 2026-06-16
+## [2.6.1-beta.1] - 2026-06-17
 
 ### Fixed
 
