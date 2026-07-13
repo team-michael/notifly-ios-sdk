@@ -47,7 +47,25 @@ class TrackingManager {
         }
     }
 
+    static func canTrackSessionStart(applicationState: UIApplication.State) -> Bool {
+        applicationState == .active
+    }
+
+    private static func canTrackSessionStartInCurrentApplicationState() -> Bool {
+        if Thread.isMainThread {
+            return canTrackSessionStart(applicationState: UIApplication.shared.applicationState)
+        }
+
+        return DispatchQueue.main.sync {
+            canTrackSessionStart(applicationState: UIApplication.shared.applicationState)
+        }
+    }
+
     func trackSessionStartInternalEvent() {
+        guard Self.canTrackSessionStartInCurrentApplicationState() else {
+            return
+        }
+
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             var authStatus = 0
             switch settings.authorizationStatus {
