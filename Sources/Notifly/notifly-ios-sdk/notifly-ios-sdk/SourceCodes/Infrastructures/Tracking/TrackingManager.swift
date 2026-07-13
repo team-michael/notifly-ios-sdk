@@ -19,9 +19,6 @@ class TrackingManager {
     private var cancellables = Set<AnyCancellable>()
     private let cancellablesAccessQueue = DispatchQueue(
         label: "TrackingManagerCancellablesAccessQueue")
-    private var isSessionStartPendingUntilActive = false
-    private let sessionStartStateQueue = DispatchQueue(
-        label: "TrackingManagerSessionStartStateQueue")
 
     init(projectId: String) {
         self.projectId = projectId
@@ -66,12 +63,7 @@ class TrackingManager {
 
     func trackSessionStartInternalEvent() {
         guard Self.canTrackSessionStartInCurrentApplicationState() else {
-            scheduleSessionStartWhenApplicationBecomesActive()
             return
-        }
-
-        sessionStartStateQueue.sync {
-            isSessionStartPendingUntilActive = false
         }
 
         UNUserNotificationCenter.current().getNotificationSettings { settings in
@@ -102,53 +94,6 @@ class TrackingManager {
                 lockAcquired: true
             )
         }
-    }
-
-    private func scheduleSessionStartWhenApplicationBecomesActive() {
-        let shouldSchedule = sessionStartStateQueue.sync { () -> Bool in
-            guard !isSessionStartPendingUntilActive else {
-                return false
-            }
-
-            isSessionStartPendingUntilActive = true
-            return true
-        }
-
-        guard shouldSchedule else {
-            return
-        }
-
-        let cancellable = NotificationCenter.default.publisher(
-            for: UIApplication.didBecomeActiveNotification
-        )
-        .prefix(1)
-        .sink { [weak self] _ in
-            self?.trackPendingSessionStartIfNeeded()
-        }
-
-        storeCanellables(cancellable: cancellable)
-
-        if Self.canTrackSessionStartInCurrentApplicationState() {
-            cancellable.cancel()
-            trackPendingSessionStartIfNeeded()
-        }
-    }
-
-    private func trackPendingSessionStartIfNeeded() {
-        let shouldTrack = sessionStartStateQueue.sync { () -> Bool in
-            guard isSessionStartPendingUntilActive else {
-                return false
-            }
-
-            isSessionStartPendingUntilActive = false
-            return true
-        }
-
-        guard shouldTrack else {
-            return
-        }
-
-        trackSessionStartInternalEvent()
     }
 
     func trackSetDevicePropertiesInternalEvent(properties: [String: Any]) {
