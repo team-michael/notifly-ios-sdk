@@ -123,10 +123,32 @@ class TrackingManager {
         )
         .prefix(1)
         .sink { [weak self] _ in
-            self?.trackSessionStartInternalEvent()
+            self?.trackPendingSessionStartIfNeeded()
         }
 
         storeCanellables(cancellable: cancellable)
+
+        if Self.canTrackSessionStartInCurrentApplicationState() {
+            cancellable.cancel()
+            trackPendingSessionStartIfNeeded()
+        }
+    }
+
+    private func trackPendingSessionStartIfNeeded() {
+        let shouldTrack = sessionStartStateQueue.sync { () -> Bool in
+            guard isSessionStartPendingUntilActive else {
+                return false
+            }
+
+            isSessionStartPendingUntilActive = false
+            return true
+        }
+
+        guard shouldTrack else {
+            return
+        }
+
+        trackSessionStartInternalEvent()
     }
 
     func trackSetDevicePropertiesInternalEvent(properties: [String: Any]) {
