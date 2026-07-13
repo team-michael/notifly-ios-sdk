@@ -19,6 +19,9 @@ class TrackingManager {
     private var cancellables = Set<AnyCancellable>()
     private let cancellablesAccessQueue = DispatchQueue(
         label: "TrackingManagerCancellablesAccessQueue")
+    private var isSessionStartPendingUntilActive = false
+    private let sessionStartStateQueue = DispatchQueue(
+        label: "TrackingManagerSessionStartStateQueue")
 
     init(projectId: String) {
         self.projectId = projectId
@@ -47,7 +50,30 @@ class TrackingManager {
         }
     }
 
+    static func canTrackSessionStart(applicationState: UIApplication.State) -> Bool {
+        applicationState == .active
+    }
+
+    private static func canTrackSessionStartInCurrentApplicationState() -> Bool {
+        if Thread.isMainThread {
+            return canTrackSessionStart(applicationState: UIApplication.shared.applicationState)
+        }
+
+        return DispatchQueue.main.sync {
+            canTrackSessionStart(applicationState: UIApplication.shared.applicationState)
+        }
+    }
+
     func trackSessionStartInternalEvent() {
+        guard Self.canTrackSessionStartInCurrentApplicationState() else {
+            scheduleSessionStartWhenApplicationBecomesActive()
+            return
+        }
+
+        sessionStartStateQueue.sync {
+            isSessionStartPendingUntilActive = false
+        }
+
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             var authStatus = 0
             switch settings.authorizationStatus {
@@ -76,6 +102,31 @@ class TrackingManager {
                 lockAcquired: true
             )
         }
+    }
+
+    private func scheduleSessionStartWhenApplicationBecomesActive() {
+        let shouldSchedule = sessionStartStateQueue.sync { () -> Bool in
+            guard !isSessionStartPendingUntilActive else {
+                return false
+            }
+
+            isSessionStartPendingUntilActive = true
+            return true
+        }
+
+        guard shouldSchedule else {
+            return
+        }
+
+        let cancellable = NotificationCenter.default.publisher(
+            for: UIApplication.didBecomeActiveNotification
+        )
+        .prefix(1)
+        .sink { [weak self] _ in
+            self?.trackSessionStartInternalEvent()
+        }
+
+        storeCanellables(cancellable: cancellable)
     }
 
     func trackSetDevicePropertiesInternalEvent(properties: [String: Any]) {
