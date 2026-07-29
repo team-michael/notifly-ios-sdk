@@ -19,6 +19,7 @@ final class SSEController: @unchecked Sendable {
     private let onSyncRequested: (@escaping () -> Void) -> Void
     private let onServerEventTriggered: (_ name: String, _ eventParams: [String: Any]?) -> Void
     private let scheduler: (TimeInterval, @escaping () -> Void) -> Void
+    private let canConnect: () -> Bool
     private let syncDebounceInterval: TimeInterval
 
     // MARK: - State
@@ -36,12 +37,14 @@ final class SSEController: @unchecked Sendable {
         sseClient: SSEClient,
         onSyncRequested: @escaping (@escaping () -> Void) -> Void,
         onServerEventTriggered: @escaping (_ name: String, _ eventParams: [String: Any]?) -> Void,
+        canConnect: @escaping () -> Bool = { true },
         syncDebounceInterval: TimeInterval = 1.0,
         scheduler: @escaping (TimeInterval, @escaping () -> Void) -> Void = SSEController.defaultScheduler
     ) {
         self.sseClient = sseClient
         self.onSyncRequested = onSyncRequested
         self.onServerEventTriggered = onServerEventTriggered
+        self.canConnect = canConnect
         self.syncDebounceInterval = syncDebounceInterval
         self.scheduler = scheduler
 
@@ -60,7 +63,7 @@ final class SSEController: @unchecked Sendable {
     // MARK: - Public API
 
     func start() {
-        sseClient.connect()
+        connectIfForeground()
     }
 
     func stop() {
@@ -70,7 +73,7 @@ final class SSEController: @unchecked Sendable {
 
     func reconnect(reason: String) {
         sseClient.disconnect()
-        sseClient.connect()
+        connectIfForeground()
     }
 
     var mode: Mode {
@@ -153,7 +156,12 @@ final class SSEController: @unchecked Sendable {
             guard let self = self else { return }
             let currentGen = self.stateQueue.sync { self._generation }
             guard currentGen == scheduledGen else { return }
-            self.sseClient.connect()
+            self.connectIfForeground()
         }
+    }
+
+    private func connectIfForeground() {
+        guard canConnect() else { return }
+        sseClient.connect()
     }
 }
