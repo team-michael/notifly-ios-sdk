@@ -66,7 +66,8 @@ final class SSEControllerTests: XCTestCase {
 
     private func makeController(
         spy: Spy,
-        debounce: TimeInterval = 1.0
+        debounce: TimeInterval = 1.0,
+        canConnect: @escaping () -> Bool = { true }
     ) -> SSEController {
         let client = makeDummySSEClient()
         return SSEController(
@@ -78,11 +79,48 @@ final class SSEControllerTests: XCTestCase {
             onServerEventTriggered: { name, params in
                 spy.recordEvent(name, params)
             },
+            canConnect: canConnect,
             syncDebounceInterval: debounce,
             scheduler: { delay, work in
                 spy.scheduleTask(delay, work)
             }
         )
+    }
+
+    private func assertNoSSERequest(action: (SSEController) -> Void) {
+        let provider = ProviderBuilder()
+        let unexpectedRequest = expectation(description: "SSE request must not start")
+        unexpectedRequest.isInverted = true
+        provider.onRequestCaptured = { unexpectedRequest.fulfill() }
+
+        let controller = SSEController(
+            sseClient: makeSSEClient(provider: provider.makeProvider()),
+            onSyncRequested: { $0() },
+            onServerEventTriggered: { _, _ in },
+            canConnect: { false },
+            scheduler: { _, work in work() }
+        )
+
+        action(controller)
+
+        wait(for: [unexpectedRequest], timeout: 0.2)
+        XCTAssertEqual(provider.capturedRequestCount, 0)
+    }
+
+    // MARK: - Foreground connection guard
+
+    func test_start_whenConnectionNotAllowed_doesNotConnect() {
+        assertNoSSERequest { $0.start() }
+    }
+
+    func test_ttlExpired_whenConnectionNotAllowed_doesNotReconnect() {
+        assertNoSSERequest { $0.handleMessage(type: "ttl-expired", data: "{}") }
+    }
+
+    func test_shutdown_whenConnectionNotAllowed_doesNotReconnect() {
+        assertNoSSERequest {
+            $0.handleMessage(type: "shutdown", data: "{\"reconnectInMs\":0}")
+        }
     }
 
     // MARK: - sync routing + 디바운스

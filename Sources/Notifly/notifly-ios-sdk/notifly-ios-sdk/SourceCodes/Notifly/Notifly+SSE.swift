@@ -57,7 +57,8 @@ extension Notifly {
                     eventParams: params,
                     segmentationEventParamKeys: nil
                 )
-            }
+            },
+            canConnect: { Notifly.isApplicationInForeground() }
         )
 
         sseAccessQueue.sync {
@@ -119,6 +120,15 @@ extension Notifly {
         let center = NotificationCenter.default
         for token in tokens {
             center.removeObserver(token)
+        }
+    }
+
+    private static func isApplicationInForeground() -> Bool {
+        if Thread.isMainThread {
+            return UIApplication.shared.applicationState != .background
+        }
+        return DispatchQueue.main.sync {
+            UIApplication.shared.applicationState != .background
         }
     }
 
