@@ -20,6 +20,7 @@ final class SSEController: @unchecked Sendable {
     private let onServerEventTriggered: (_ name: String, _ eventParams: [String: Any]?) -> Void
     private let scheduler: (TimeInterval, @escaping () -> Void) -> Void
     private let syncDebounceInterval: TimeInterval
+    private let runIfConnectionAllowed: (@escaping () -> Void) -> Void
 
     // MARK: - State
 
@@ -37,13 +38,15 @@ final class SSEController: @unchecked Sendable {
         onSyncRequested: @escaping (@escaping () -> Void) -> Void,
         onServerEventTriggered: @escaping (_ name: String, _ eventParams: [String: Any]?) -> Void,
         syncDebounceInterval: TimeInterval = 1.0,
-        scheduler: @escaping (TimeInterval, @escaping () -> Void) -> Void = SSEController.defaultScheduler
+        scheduler: @escaping (TimeInterval, @escaping () -> Void) -> Void = SSEController.defaultScheduler,
+        runIfConnectionAllowed: @escaping (@escaping () -> Void) -> Void = { connect in connect() }
     ) {
         self.sseClient = sseClient
         self.onSyncRequested = onSyncRequested
         self.onServerEventTriggered = onServerEventTriggered
         self.syncDebounceInterval = syncDebounceInterval
         self.scheduler = scheduler
+        self.runIfConnectionAllowed = runIfConnectionAllowed
 
         sseClient.onMessage = { [weak self] type, data in
             self?.handleMessage(type: type, data: data)
@@ -60,7 +63,7 @@ final class SSEController: @unchecked Sendable {
     // MARK: - Public API
 
     func start() {
-        sseClient.connect()
+        connectIfAllowed()
     }
 
     func stop() {
@@ -70,7 +73,7 @@ final class SSEController: @unchecked Sendable {
 
     func reconnect(reason: String) {
         sseClient.disconnect()
-        sseClient.connect()
+        connectIfAllowed()
     }
 
     var mode: Mode {
@@ -153,7 +156,13 @@ final class SSEController: @unchecked Sendable {
             guard let self = self else { return }
             let currentGen = self.stateQueue.sync { self._generation }
             guard currentGen == scheduledGen else { return }
-            self.sseClient.connect()
+            self.connectIfAllowed()
+        }
+    }
+
+    private func connectIfAllowed() {
+        runIfConnectionAllowed { [sseClient] in
+            sseClient.connect()
         }
     }
 }

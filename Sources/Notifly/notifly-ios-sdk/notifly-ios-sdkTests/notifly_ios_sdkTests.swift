@@ -21,4 +21,10 @@ class notifly_ios_sdkTests: XCTestCase {
             TrackingManager.canTrackSessionStart(applicationState: .background)
         )
     }
+
+    func testSSEIsAllowedOnlyWhenApplicationIsActive() {
+        XCTAssertTrue(Notifly.canStartSSE(applicationState: .active))
+        XCTAssertFalse(Notifly.canStartSSE(applicationState: .inactive))
+        XCTAssertFalse(Notifly.canStartSSE(applicationState: .background))
+    }
 }

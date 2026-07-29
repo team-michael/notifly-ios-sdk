@@ -57,6 +57,9 @@ extension Notifly {
                     eventParams: params,
                     segmentationEventParamKeys: nil
                 )
+            },
+            runIfConnectionAllowed: { connect in
+                Notifly.runIfApplicationActive(connect)
             }
         )
 
@@ -93,14 +96,14 @@ extension Notifly {
         let bgToken = center.addObserver(
             forName: UIApplication.didEnterBackgroundNotification,
             object: nil,
-            queue: nil
+            queue: .main
         ) { [weak self] _ in
             self?.stopSSE()
         }
         let fgToken = center.addObserver(
-            forName: UIApplication.willEnterForegroundNotification,
+            forName: UIApplication.didBecomeActiveNotification,
             object: nil,
-            queue: nil
+            queue: .main
         ) { [weak self] _ in
             self?.startSSE()
         }
@@ -119,6 +122,25 @@ extension Notifly {
         let center = NotificationCenter.default
         for token in tokens {
             center.removeObserver(token)
+        }
+    }
+
+    static func canStartSSE(applicationState: UIApplication.State) -> Bool {
+        applicationState == .active
+    }
+
+    private static func runIfApplicationActive(_ work: @escaping () -> Void) {
+        if Thread.isMainThread {
+            if canStartSSE(applicationState: UIApplication.shared.applicationState) {
+                work()
+            }
+            return
+        }
+
+        DispatchQueue.main.sync {
+            if canStartSSE(applicationState: UIApplication.shared.applicationState) {
+                work()
+            }
         }
     }
 

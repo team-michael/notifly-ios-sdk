@@ -85,6 +85,49 @@ final class SSEControllerTests: XCTestCase {
         )
     }
 
+    private func assertNoSSERequest(
+        file: StaticString = #filePath,
+        line: UInt = #line,
+        action: (SSEController) -> Void
+    ) {
+        let provider = ProviderBuilder()
+        let unexpectedRequest = expectation(description: "SSE request")
+        unexpectedRequest.isInverted = true
+        provider.onRequest = { _ in unexpectedRequest.fulfill() }
+        let controller = SSEController(
+            sseClient: makeSSEClient(provider: provider.makeProvider()),
+            onSyncRequested: { completion in completion() },
+            onServerEventTriggered: { _, _ in },
+            scheduler: { _, work in work() },
+            runIfConnectionAllowed: { _ in }
+        )
+
+        action(controller)
+
+        wait(for: [unexpectedRequest], timeout: 0.2)
+        XCTAssertEqual(provider.capturedRequestCount, 0, file: file, line: line)
+    }
+
+    // MARK: - Foreground connection guard
+
+    func test_start_whenConnectionNotAllowed_doesNotConnect() {
+        assertNoSSERequest { controller in
+            controller.start()
+        }
+    }
+
+    func test_ttlExpired_whenConnectionNotAllowed_doesNotReconnect() {
+        assertNoSSERequest { controller in
+            controller.handleMessage(type: "ttl-expired", data: "{}")
+        }
+    }
+
+    func test_shutdown_whenConnectionNotAllowed_doesNotReconnect() {
+        assertNoSSERequest { controller in
+            controller.handleMessage(type: "shutdown", data: "{\"reconnectInMs\":100}")
+        }
+    }
+
     // MARK: - sync routing + 디바운스
 
     func test_sync_singleMessage_triggersSyncOnce() {
