@@ -21,4 +21,24 @@ class notifly_ios_sdkTests: XCTestCase {
             TrackingManager.canTrackSessionStart(applicationState: .background)
         )
     }
+
+    func testFCMTokenRefreshExperimentIsEnabledForBetaVersion() {
+        XCTAssertTrue(
+            NotiflySdkConfig.isFCMTokenRefreshExperimentEnabled(for: "2.6.3-beta.0")
+        )
+    }
+
+    func testCurrentSdkBuildEnablesFCMTokenRefreshExperiment() {
+        XCTAssertTrue(
+            NotiflySdkConfig.isFCMTokenRefreshExperimentEnabled(
+                for: NotiflySdkConfig.sdkVersion
+            )
+        )
+    }
+
+    func testFCMTokenRefreshExperimentIsDisabledForStableVersion() {
+        XCTAssertFalse(
+            NotiflySdkConfig.isFCMTokenRefreshExperimentEnabled(for: "2.6.3")
+        )
+    }
 }

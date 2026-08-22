@@ -1,10 +1,14 @@
 import Foundation
 
 enum NotiflySdkConfig {
-    static let sdkVersion: String = "2.6.2"
+    static let sdkVersion: String = "2.6.3-beta.0"
     static var sdkWrapperVersion: String?
     static let sdkType: String = "native"
     static var sdkWrapperType: SdkWrapperType?
+
+    static func isFCMTokenRefreshExperimentEnabled(for sdkVersion: String) -> Bool {
+        sdkVersion.contains("-beta.")
+    }
 }
 
 enum NotiflyConstant {

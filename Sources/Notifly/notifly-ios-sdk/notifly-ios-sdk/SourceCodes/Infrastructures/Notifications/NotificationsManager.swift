@@ -362,6 +362,15 @@ class NotificationsManager: NSObject {
 
         let previousToken = previousFCMToken
 
+        // Stable builds keep Firebase's cached token. The destructive refresh is scoped
+        // to explicit beta SDK builds so normal cold starts do not create a delivery gap.
+        guard NotiflySdkConfig.isFCMTokenRefreshExperimentEnabled(
+            for: NotiflySdkConfig.sdkVersion
+        ) else {
+            requestFCMToken(previousToken: previousToken)
+            return
+        }
+
         // Beta recovery path for stale FCM tokens: Firebase can return a locally cached
         // registration token while the server already reports it as UNREGISTERED. Delete
         // the cached token first, then ask Firebase Messaging to mint/fetch a replacement.
@@ -375,42 +384,52 @@ class NotificationsManager: NSObject {
             }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                guard let self = self else { return }
+                self?.requestFCMToken(
+                    previousToken: previousToken,
+                    deleteError: deleteError,
+                    shouldTrackRefresh: true
+                )
+            }
+        }
+    }
 
-                Messaging.messaging().token { [weak self] token, error in
-                    guard let self = self else { return }
+    private func requestFCMToken(
+        previousToken: String?,
+        deleteError: Error? = nil,
+        shouldTrackRefresh: Bool = false
+    ) {
+        Messaging.messaging().token { [weak self] token, error in
+            guard let self = self else { return }
 
-                    self.stateQueue.async {
-                        self.isFCMRequestInFlight = false
-                    }
+            self.stateQueue.async {
+                self.isFCMRequestInFlight = false
+            }
 
-                    if let notifly = try? Notifly.main {
-                        notifly.trackingManager.trackInternalEvent(
-                            eventName: TrackingConstant.Internal.fcmTokenRefreshEventName,
-                            eventParams: [
-                                "source": "delete_then_fetch",
-                                "delete_success": deleteError == nil,
-                                "fetch_success": token != nil && error == nil,
-                                "token_changed": token.map { $0 != previousToken } ?? false,
-                                "apns_environment": notiflyAPNSEnvironment(),
-                                "bundle_id": AppHelper.getBundleIdentifier() ?? "",
-                                "firebase_project_id": FirebaseApp.app()?.options.projectID ?? "",
-                                "firebase_sender_id": FirebaseApp.app()?.options.gcmSenderID ?? ""
-                            ])
-                    }
+            if shouldTrackRefresh, let notifly = try? Notifly.main {
+                notifly.trackingManager.trackInternalEvent(
+                    eventName: TrackingConstant.Internal.fcmTokenRefreshEventName,
+                    eventParams: [
+                        "source": "delete_then_fetch",
+                        "delete_success": deleteError == nil,
+                        "fetch_success": token != nil && error == nil,
+                        "token_changed": token.map { $0 != previousToken } ?? false,
+                        "apns_environment": notiflyAPNSEnvironment(),
+                        "bundle_id": AppHelper.getBundleIdentifier() ?? "",
+                        "firebase_project_id": FirebaseApp.app()?.options.projectID ?? "",
+                        "firebase_sender_id": FirebaseApp.app()?.options.gcmSenderID ?? ""
+                    ])
+            }
 
-                    if let token = token, error == nil {
-                        self.registerFCMToken(token: token)
-                    } else {
-                        Logger.error(
-                            "Error fetching FCM registration token: \(error?.localizedDescription ?? "Unknown error")"
-                        )
-                        self.stateQueue.async {
-                            self.fcmTokenState = .failed
-                        }
-                        self.retryFCMTokenRequest()
-                    }
+            if let token = token, error == nil {
+                self.registerFCMToken(token: token)
+            } else {
+                Logger.error(
+                    "Error fetching FCM registration token: \(error?.localizedDescription ?? "Unknown error")"
+                )
+                self.stateQueue.async {
+                    self.fcmTokenState = .failed
                 }
+                self.retryFCMTokenRequest()
             }
         }
     }
