@@ -91,7 +91,7 @@ final class SSEControllerTests: XCTestCase {
         let provider = ProviderBuilder()
         let unexpectedRequest = expectation(description: "SSE request must not start")
         unexpectedRequest.isInverted = true
-        provider.onRequestCaptured = { unexpectedRequest.fulfill() }
+        provider.onRequest = { _ in unexpectedRequest.fulfill() }
 
         let controller = SSEController(
             sseClient: makeSSEClient(provider: provider.makeProvider()),
