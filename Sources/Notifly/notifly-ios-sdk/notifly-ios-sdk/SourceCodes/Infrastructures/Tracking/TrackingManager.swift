@@ -160,33 +160,32 @@ class TrackingManager {
                 segmentationEventParamKeys: segmentationEventParamKeys
             )
 
-            // Release semaphore before createTrackingRecord to prevent deviceTokenPub
-            // from blocking subsequent tasks. The tracking record will be sent asynchronously.
-            finishTask()
+            guard let self = self else {
+                finishTask()
+                return
+            }
+            defer { finishTask() }
 
-            let trackingTask = self?.createTrackingRecord(
+            guard let record = self.createTrackingRecord(
                 eventName: eventName,
                 eventParams: eventParams,
                 isInternal: isInternal,
                 segmentationEventParamKeys: segmentationEventParamKeys,
                 currentTimestamp: currentTimestamp,
                 userID: userID,
-                externalUserID: externalUserID
-            ).sink(
-                receiveCompletion: { completion in
-                    if case let .failure(error) = completion {
-                        Logger.error("Failed to Track Event \(eventName). Error: \(error)")
-                    }
-                },
-                receiveValue: { [weak self] record in
-                    if isInternal {
-                        self?.internalEventPublisher.send(record)
-                    } else {
-                        self?.eventPublisher.send(record)
-                    }
-                })
-            if let task = trackingTask {
-                self?.storeCanellables(cancellable: task)
+                externalUserID: externalUserID,
+                deviceToken: notifly.notificationsManager.latestFCMToken
+            ) else {
+                Logger.error(
+                    "Failed to Track Event \(eventName). TrackingRecord Data is invalid"
+                )
+                return
+            }
+
+            if isInternal {
+                self.internalEventPublisher.send(record)
+            } else {
+                self.eventPublisher.send(record)
             }
         }
     }
@@ -196,68 +195,48 @@ class TrackingManager {
         eventParams: [String: Any]?,
         isInternal: Bool,
         segmentationEventParamKeys: [String]?,
-        currentTimestamp: Int, userID: String, externalUserID: String?
-    ) -> AnyPublisher<TrackingRecord, Error> {
-        guard let notifly = try? Notifly.main else {
-            return Fail(outputType: TrackingRecord.self, failure: NotiflyError.notInitialized)
-                .eraseToAnyPublisher()
-        }
-        guard let deviceTokenPub = notifly.notificationsManager.deviceTokenPub else {
-            return Fail(
-                outputType: TrackingRecord.self,
-                failure: NotiflyError.unexpectedNil("APN Device Token is nil")
-            )
-            .eraseToAnyPublisher()
-        }
-
+        currentTimestamp: Int,
+        userID: String,
+        externalUserID: String?,
+        deviceToken: String?
+    ) -> TrackingRecord? {
         guard let notiflyDeviceID = AppHelper.getNotiflyDeviceID(),
             let deviceID = AppHelper.getDeviceID(),
             let appVersion = AppHelper.getAppVersion()
         else {
             Logger.error("Failed to track event: " + eventName)
-            return Fail(
-                outputType: TrackingRecord.self,
-                failure: NotiflyError.unexpectedNil("Device data is invalid.")
-            )
-            .eraseToAnyPublisher()
+            return nil
         }
 
-        return deviceTokenPub.tryMap { pushToken in
-            if let data = TrackingData(
-                id: UUID().uuidString,
-                name: eventName,
-                notifly_user_id: userID,
-                external_user_id: externalUserID,
-                time: currentTimestamp,
-                notifly_device_id: notiflyDeviceID,
-                external_device_id: deviceID,
-                device_token: pushToken,
-                is_internal_event: isInternal,
-                segmentation_event_param_keys: segmentationEventParamKeys,
-                project_id: notifly.projectId,
-                platform: AppHelper.getDevicePlatform(),
-                os_version: AppHelper.getiOSVersion(),
-                app_version: appVersion,
-                sdk_version: NotiflyHelper.getSdkVersion(),
-                sdk_type: NotiflyHelper.getSdkType(),
-                event_params: try? NotiflyAnyCodable(eventParams)
-            ) as? TrackingData,
-                let stringfiedData = try? String(data: JSONEncoder().encode(data), encoding: .utf8)
-            {
-                return TrackingRecord(partitionKey: notiflyDeviceID, data: stringfiedData)
-            } else {
-                Logger.error("Failed to track event: " + eventName)
-                throw NotiflyError.unexpectedNil("Failed to create tracking data")
-            }
+        let data = TrackingData(
+            id: UUID().uuidString,
+            name: eventName,
+            notifly_user_id: userID,
+            external_user_id: externalUserID,
+            time: currentTimestamp,
+            notifly_device_id: notiflyDeviceID,
+            external_device_id: deviceID,
+            device_token: deviceToken,
+            is_internal_event: isInternal,
+            segmentation_event_param_keys: segmentationEventParamKeys,
+            project_id: projectId,
+            platform: AppHelper.getDevicePlatform(),
+            os_version: AppHelper.getiOSVersion(),
+            app_version: appVersion,
+            sdk_version: NotiflyHelper.getSdkVersion(),
+            sdk_type: NotiflyHelper.getSdkType(),
+            event_params: try? NotiflyAnyCodable(eventParams)
+        )
+
+        guard
+            let encodedData = try? JSONEncoder().encode(data),
+            let stringifiedData = String(data: encodedData, encoding: .utf8)
+        else {
+            Logger.error("Failed to track event: " + eventName)
+            return nil
         }
-        .catch { _ in
-            Fail(
-                outputType: TrackingRecord.self,
-                failure: NotiflyError.unexpectedNil("TrackingRecord Data is invalid")
-            )
-            .eraseToAnyPublisher()
-        }
-        .eraseToAnyPublisher()
+
+        return TrackingRecord(partitionKey: notiflyDeviceID, data: stringifiedData)
     }
 
     private func setup() {
