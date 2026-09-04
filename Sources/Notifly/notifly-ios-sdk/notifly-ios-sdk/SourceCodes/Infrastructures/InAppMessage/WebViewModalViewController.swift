@@ -29,6 +29,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     var notiflyExtraData: [String: Any]?
     var notiflyReEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
     var modalProps: ModalProperties?
+    private var didReleaseOpenedInAppMessageGate = false
 
     convenience init(notiflyInAppMessageData: InAppMessageData) throws {
         self.init(nibName: nil, bundle: nil)
@@ -54,6 +55,23 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         webView.navigationDelegate = self
         webView.configuration.userContentController.add(
             self, name: "notiflyInAppMessageEventHandler")
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        guard isBeingDismissed
+            || presentingViewController == nil
+            || presentingViewController?.isBeingDismissed == true
+        else {
+            return
+        }
+        releaseOpenedInAppMessageGateIfNeeded()
+    }
+
+    private func releaseOpenedInAppMessageGateIfNeeded() {
+        guard !didReleaseOpenedInAppMessageGate else { return }
+        didReleaseOpenedInAppMessageGate = true
+        WebViewModalViewController.openedInAppMessageCount = 0
     }
 
     func setupUI() -> Bool {
@@ -122,7 +140,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     private func dismissInAppMessage(completion: (() -> Void)? = nil) {
         dismiss(animated: false) {
-            WebViewModalViewController.openedInAppMessageCount = 0
+            self.releaseOpenedInAppMessageGateIfNeeded()
             completion?()
         }
     }
