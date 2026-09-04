@@ -5,6 +5,7 @@
 //  Created by Juyong Kim on 4/15/23.
 //
 
+import Combine
 import UIKit
 import XCTest
 @testable import notifly_ios_sdk
@@ -49,6 +50,100 @@ class notifly_ios_sdkTests: XCTestCase {
         XCTAssertEqual(object["device_token"] as? String, "valid-fcm-token")
     }
 
+    func testTrackWithoutTokenPublishesCustomEventAndReleasesWorker() throws {
+        let (manager, worker) = makeTrackingManagerForIntegrationTest(deviceToken: nil)
+
+        let payloadReceived = expectation(description: "custom event payload received")
+        payloadReceived.assertForOverFulfill = true
+        let workerReleased = expectation(description: "following worker task started")
+        var payloads: [TrackingEvent] = []
+        let payloadsLock = NSLock()
+        var cancellables = Set<AnyCancellable>()
+
+        manager.eventRequestPayloadPublisher
+            .sink { payload in
+                payloadsLock.lock()
+                payloads.append(payload)
+                payloadsLock.unlock()
+                payloadReceived.fulfill()
+            }
+            .store(in: &cancellables)
+
+        manager.track(
+            eventName: "pre_apns_custom_event",
+            eventParams: ["source": "cold-start"],
+            isInternal: false,
+            segmentationEventParamKeys: ["source"]
+        )
+        worker.addTask { finishTask in
+            finishTask()
+            workerReleased.fulfill()
+        }
+
+        wait(for: [payloadReceived, workerReleased], timeout: 2)
+
+        payloadsLock.lock()
+        let capturedPayloads = payloads
+        payloadsLock.unlock()
+        let payload = try XCTUnwrap(capturedPayloads.first)
+        XCTAssertEqual(capturedPayloads.count, 1)
+        XCTAssertEqual(payload.records.count, 1)
+
+        let object = try decodeTrackingData(from: try XCTUnwrap(payload.records.first))
+        XCTAssertEqual(object["name"] as? String, "pre_apns_custom_event")
+        XCTAssertEqual(object["is_internal_event"] as? Bool, false)
+        XCTAssertFalse(object.keys.contains("device_token"))
+        withExtendedLifetime(cancellables) {}
+    }
+
+    func testTrackWithRegisteredTokenPublishesInternalEventAndReleasesWorker() throws {
+        let (manager, worker) = makeTrackingManagerForIntegrationTest(
+            deviceToken: "registered-fcm-token"
+        )
+
+        let payloadReceived = expectation(description: "internal event payload received")
+        payloadReceived.assertForOverFulfill = true
+        let workerReleased = expectation(description: "following worker task started")
+        var payloads: [TrackingEvent] = []
+        let payloadsLock = NSLock()
+        var cancellables = Set<AnyCancellable>()
+
+        manager.internalEventRequestPayloadPublisher
+            .sink { payload in
+                payloadsLock.lock()
+                payloads.append(payload)
+                payloadsLock.unlock()
+                payloadReceived.fulfill()
+            }
+            .store(in: &cancellables)
+
+        manager.track(
+            eventName: "registered_internal_event",
+            eventParams: nil,
+            isInternal: true,
+            segmentationEventParamKeys: nil
+        )
+        worker.addTask { finishTask in
+            finishTask()
+            workerReleased.fulfill()
+        }
+
+        wait(for: [payloadReceived, workerReleased], timeout: 2)
+
+        payloadsLock.lock()
+        let capturedPayloads = payloads
+        payloadsLock.unlock()
+        let payload = try XCTUnwrap(capturedPayloads.first)
+        XCTAssertEqual(capturedPayloads.count, 1)
+        XCTAssertEqual(payload.records.count, 1)
+
+        let object = try decodeTrackingData(from: try XCTUnwrap(payload.records.first))
+        XCTAssertEqual(object["name"] as? String, "registered_internal_event")
+        XCTAssertEqual(object["is_internal_event"] as? Bool, true)
+        XCTAssertEqual(object["device_token"] as? String, "registered-fcm-token")
+        withExtendedLifetime(cancellables) {}
+    }
+
     private func makeTrackingRecord(deviceToken: String?) throws -> TrackingRecord {
         let manager = TrackingManager(projectId: trackingTestProjectID)
         return try XCTUnwrap(
@@ -62,6 +157,27 @@ class notifly_ios_sdkTests: XCTestCase {
                 externalUserID: "external-user",
                 deviceToken: deviceToken
             )
+        )
+    }
+
+    private func makeTrackingManagerForIntegrationTest(deviceToken: String?)
+        -> (TrackingManager, NotiflyAsyncWorker)
+    {
+        let worker = NotiflyAsyncWorker()
+        let dependencies = TrackingManager.Dependencies(
+            asyncWorker: worker,
+            contextProvider: {
+                TrackingManager.RuntimeContext(
+                    userID: "notifly-user",
+                    externalUserID: "external-user",
+                    deviceTokenProvider: { deviceToken },
+                    processEvent: { _, _, _ in }
+                )
+            }
+        )
+        return (
+            TrackingManager(projectId: trackingTestProjectID, dependencies: dependencies),
+            worker
         )
     }
 
