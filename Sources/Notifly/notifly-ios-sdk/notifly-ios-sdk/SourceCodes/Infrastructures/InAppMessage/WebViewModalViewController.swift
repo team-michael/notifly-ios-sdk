@@ -58,12 +58,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        guard isBeingDismissed
-            || presentingViewController == nil
-            || presentingViewController?.isBeingDismissed == true
-        else {
-            return
-        }
+        guard isBeingDismissed else { return }
         WebViewModalViewController.openedInAppMessageCount = 0
     }
 

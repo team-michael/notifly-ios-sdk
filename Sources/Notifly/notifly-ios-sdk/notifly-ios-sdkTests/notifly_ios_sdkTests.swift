@@ -30,7 +30,6 @@ class notifly_ios_sdkTests: XCTestCase {
     func testExternalDismissReleasesInAppMessageGate() {
         let popup = LifecycleStateWebViewModalViewController()
         popup.stubIsBeingDismissed = true
-        popup.stubPresentingViewController = UIViewController()
         WebViewModalViewController.openedInAppMessageCount = 1
 
         popup.viewDidDisappear(false)
@@ -38,34 +37,9 @@ class notifly_ios_sdkTests: XCTestCase {
         XCTAssertEqual(WebViewModalViewController.openedInAppMessageCount, 0)
     }
 
-    func testRootReplacementReleasesInAppMessageGate() {
+    func testDisappearanceWithoutDismissKeepsInAppMessageGate() {
         let popup = LifecycleStateWebViewModalViewController()
         popup.stubIsBeingDismissed = false
-        popup.stubPresentingViewController = nil
-        WebViewModalViewController.openedInAppMessageCount = 1
-
-        popup.viewDidDisappear(false)
-
-        XCTAssertEqual(WebViewModalViewController.openedInAppMessageCount, 0)
-    }
-
-    func testPresentingControllerDismissReleasesInAppMessageGate() {
-        let presenter = LifecycleStateViewController()
-        presenter.stubIsBeingDismissed = true
-        let popup = LifecycleStateWebViewModalViewController()
-        popup.stubIsBeingDismissed = false
-        popup.stubPresentingViewController = presenter
-        WebViewModalViewController.openedInAppMessageCount = 1
-
-        popup.viewDidDisappear(false)
-
-        XCTAssertEqual(WebViewModalViewController.openedInAppMessageCount, 0)
-    }
-
-    func testTemporaryCoverageKeepsInAppMessageGate() {
-        let popup = LifecycleStateWebViewModalViewController()
-        popup.stubIsBeingDismissed = false
-        popup.stubPresentingViewController = UIViewController()
         WebViewModalViewController.openedInAppMessageCount = 1
 
         popup.viewDidDisappear(false)
@@ -74,25 +48,12 @@ class notifly_ios_sdkTests: XCTestCase {
     }
 }
 
-private final class LifecycleStateViewController: UIViewController {
-    var stubIsBeingDismissed = false
-
-    override var isBeingDismissed: Bool {
-        stubIsBeingDismissed
-    }
-}
-
 private final class LifecycleStateWebViewModalViewController:
     WebViewModalViewController
 {
     var stubIsBeingDismissed = false
-    var stubPresentingViewController: UIViewController?
 
     override var isBeingDismissed: Bool {
         stubIsBeingDismissed
-    }
-
-    override var presentingViewController: UIViewController? {
-        stubPresentingViewController
     }
 }
