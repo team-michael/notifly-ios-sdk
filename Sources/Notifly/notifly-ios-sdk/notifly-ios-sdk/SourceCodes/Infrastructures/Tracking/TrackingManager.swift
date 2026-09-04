@@ -4,49 +4,6 @@ import UIKit
 
 @available(iOSApplicationExtension, unavailable)
 class TrackingManager {
-    struct RuntimeContext {
-        let userID: String
-        let externalUserID: String?
-        let deviceTokenProvider: () -> String?
-        let processEvent: (String, [String: Any]?, [String]?) -> Void
-    }
-
-    struct Dependencies {
-        let asyncWorker: NotiflyAsyncWorker
-        let contextProvider: () -> RuntimeContext?
-
-        static var live: Dependencies {
-            Dependencies(
-                asyncWorker: Notifly.asyncWorker,
-                contextProvider: {
-                    guard let notifly = try? Notifly.main else {
-                        return nil
-                    }
-
-                    return RuntimeContext(
-                        userID: (try? notifly.userManager.getNotiflyUserID()) ?? "",
-                        externalUserID: notifly.userManager.externalUserID,
-                        deviceTokenProvider: {
-                            notifly.notificationsManager.latestFCMToken
-                        },
-                        processEvent: { eventName, eventParams, segmentationEventParamKeys in
-                            try? notifly.inAppMessageManager.userStateManager.incrementEic(
-                                eventName: eventName,
-                                eventParams: eventParams,
-                                segmentationEventParamKeys: segmentationEventParamKeys
-                            )
-                            try? notifly.inAppMessageManager.mayTriggerInAppMessage(
-                                eventName: eventName,
-                                eventParams: eventParams,
-                                segmentationEventParamKeys: segmentationEventParamKeys
-                            )
-                        }
-                    )
-                }
-            )
-        }
-    }
-
     // var trackingFiringInterval: TimeInterval = 5
     // var maxTrackingRecordsPerRequest: Int = 10
 
@@ -58,15 +15,13 @@ class TrackingManager {
     private let internalEventPublisher = PassthroughSubject<TrackingRecord, Never>()
 
     private let projectId: String
-    private let dependencies: Dependencies
 
     private var cancellables = Set<AnyCancellable>()
     private let cancellablesAccessQueue = DispatchQueue(
         label: "TrackingManagerCancellablesAccessQueue")
 
-    init(projectId: String, dependencies: Dependencies = .live) {
+    init(projectId: String) {
         self.projectId = projectId
-        self.dependencies = dependencies
         // Collect the events from the `eventPublisher` queue at specified interval and fire the event.
         eventRequestPayloadPublisher =
             eventPublisher
@@ -184,20 +139,25 @@ class TrackingManager {
         segmentationEventParamKeys: [String]?,
         lockAcquired: Bool = false
     ) {
-        dependencies.asyncWorker.addTask(lockAcquired: lockAcquired) { [weak self] finishTask in
-            guard let self = self, let context = self.dependencies.contextProvider() else {
+        Notifly.asyncWorker.addTask(lockAcquired: lockAcquired) { [weak self] finishTask in
+            guard let self = self, let notifly = try? Notifly.main else {
                 Logger.error("Fail to track Event. \(eventName)")
                 finishTask()
                 return
             }
+            let userID = (try? notifly.userManager.getNotiflyUserID()) ?? ""
+            let externalUserID = notifly.userManager.externalUserID
             let currentTimestamp = AppHelper.getCurrentTimestamp()
 
             let trackingEventName = NotiflyHelper.getEventName(
                 event: eventName, isInternalEvent: isInternal)
-            context.processEvent(
-                trackingEventName,
-                eventParams,
-                segmentationEventParamKeys
+            try? notifly.inAppMessageManager.userStateManager.incrementEic(
+                eventName: trackingEventName, eventParams: eventParams,
+                segmentationEventParamKeys: segmentationEventParamKeys
+            )
+            try? notifly.inAppMessageManager.mayTriggerInAppMessage(
+                eventName: trackingEventName, eventParams: eventParams,
+                segmentationEventParamKeys: segmentationEventParamKeys
             )
 
             defer { finishTask() }
@@ -208,9 +168,9 @@ class TrackingManager {
                 isInternal: isInternal,
                 segmentationEventParamKeys: segmentationEventParamKeys,
                 currentTimestamp: currentTimestamp,
-                userID: context.userID,
-                externalUserID: context.externalUserID,
-                deviceToken: context.deviceTokenProvider()
+                userID: userID,
+                externalUserID: externalUserID,
+                deviceToken: notifly.notificationsManager.latestFCMToken
             ) else {
                 Logger.error(
                     "Failed to Track Event \(eventName). TrackingRecord Data is invalid"
