@@ -29,7 +29,6 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     var notiflyExtraData: [String: Any]?
     var notiflyReEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
     var modalProps: ModalProperties?
-    private var didReleaseOpenedInAppMessageGate = false
 
     convenience init(notiflyInAppMessageData: InAppMessageData) throws {
         self.init(nibName: nil, bundle: nil)
@@ -65,12 +64,6 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         else {
             return
         }
-        releaseOpenedInAppMessageGateIfNeeded()
-    }
-
-    private func releaseOpenedInAppMessageGateIfNeeded() {
-        guard !didReleaseOpenedInAppMessageGate else { return }
-        didReleaseOpenedInAppMessageGate = true
         WebViewModalViewController.openedInAppMessageCount = 0
     }
 
@@ -139,10 +132,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     }
 
     private func dismissInAppMessage(completion: (() -> Void)? = nil) {
-        dismiss(animated: false) {
-            self.releaseOpenedInAppMessageGateIfNeeded()
-            completion?()
-        }
+        dismiss(animated: false, completion: completion)
     }
 
     func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {

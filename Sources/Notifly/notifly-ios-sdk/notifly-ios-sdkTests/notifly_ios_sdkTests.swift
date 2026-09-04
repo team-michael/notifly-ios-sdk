@@ -72,21 +72,6 @@ class notifly_ios_sdkTests: XCTestCase {
 
         XCTAssertEqual(WebViewModalViewController.openedInAppMessageCount, 1)
     }
-
-    func testRepeatedCleanupFromOldControllerDoesNotReleaseNewGate() {
-        let oldPopup = LifecycleStateWebViewModalViewController()
-        oldPopup.stubIsBeingDismissed = true
-        oldPopup.stubPresentingViewController = UIViewController()
-        WebViewModalViewController.openedInAppMessageCount = 1
-
-        oldPopup.viewDidDisappear(false)
-        XCTAssertEqual(WebViewModalViewController.openedInAppMessageCount, 0)
-
-        WebViewModalViewController.openedInAppMessageCount = 1
-        oldPopup.viewDidDisappear(false)
-
-        XCTAssertEqual(WebViewModalViewController.openedInAppMessageCount, 1)
-    }
 }
 
 private final class LifecycleStateViewController: UIViewController {
