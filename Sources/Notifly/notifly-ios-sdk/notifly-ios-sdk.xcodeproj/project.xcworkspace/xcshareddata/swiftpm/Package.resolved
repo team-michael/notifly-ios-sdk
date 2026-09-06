@@ -1,4 +1,5 @@
 {
+  "originHash" : "7ac1b2dc771468395447f130f764c1d4e8ffe29a2826e38bcdf140ad1c764180",
   "pins" : [
     {
       "identity" : "abseil-cpp-swiftpm",
@@ -91,6 +92,15 @@
       }
     },
     {
+      "identity" : "notifly-kmp-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/team-michael/notifly-kmp-sdk",
+      "state" : {
+        "revision" : "5a2bff2ca515a1ab65ee2f644c73ffda99e23cd4",
+        "version" : "0.1.0-alpha.2"
+      }
+    },
+    {
       "identity" : "promises",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/google/promises.git",
@@ -109,5 +119,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

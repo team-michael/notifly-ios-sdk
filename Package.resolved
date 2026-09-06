@@ -92,6 +92,15 @@
         }
       },
       {
+        "package": "NotiflyKMP",
+        "repositoryURL": "https://github.com/team-michael/notifly-kmp-sdk.git",
+        "state": {
+          "branch": null,
+          "revision": "5a2bff2ca515a1ab65ee2f644c73ffda99e23cd4",
+          "version": "0.1.0-alpha.2"
+        }
+      },
+      {
         "package": "Promises",
         "repositoryURL": "https://github.com/google/promises.git",
         "state": {

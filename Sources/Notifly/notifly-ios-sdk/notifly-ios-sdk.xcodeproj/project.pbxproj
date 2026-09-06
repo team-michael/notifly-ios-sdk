@@ -15,6 +15,9 @@
 		446EFABE891D933D8731EAC9 /* Notifly+SSE.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6C1A7FCDEED01E7D5936DE1 /* Notifly+SSE.swift */; };
 		4D4437A6DFC7EDD0358CEE97 /* SSEClientTestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99830B8E91F63DCE23D278DD /* SSEClientTestSupport.swift */; };
 		672E7DF329EFA50400B3E9F2 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 672E7DF229EFA50400B3E9F2 /* FirebaseMessaging */; };
+		A10000000000000000000003 /* NotiflyKMP in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000002 /* NotiflyKMP */; };
+		A10000000000000000000004 /* NotiflyKMP in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000007 /* NotiflyKMP */; };
+		A10000000000000000000006 /* UserIdTransitionPolicyIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000005 /* UserIdTransitionPolicyIntegrationTests.swift */; };
 		673F0E8529EBA7D200814217 /* notifly_ios_sdk.docc in Sources */ = {isa = PBXBuildFile; fileRef = 673F0E8429EBA7D200814217 /* notifly_ios_sdk.docc */; };
 		673F0E8B29EBA7D200814217 /* notifly_ios_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */; };
 		673F0E9029EBA7D200814217 /* notifly_ios_sdkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F0E8F29EBA7D200814217 /* notifly_ios_sdkTests.swift */; };
@@ -72,6 +75,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A10000000000000000000005 /* UserIdTransitionPolicyIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserIdTransitionPolicyIntegrationTests.swift; sourceTree = "<group>"; };
 		24F73731CE6187DC3BD9A3F5 /* SSEMessage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSEMessage.swift; sourceTree = "<group>"; };
 		2B91499B2BDA3C3A0066CDD0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		2BA089BB2C28725000BEEE8F /* AsyncWorker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncWorker.swift; sourceTree = "<group>"; };
@@ -133,6 +137,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				672E7DF329EFA50400B3E9F2 /* FirebaseMessaging in Frameworks */,
+				A10000000000000000000003 /* NotiflyKMP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,6 +146,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				673F0E8B29EBA7D200814217 /* notifly_ios_sdk.framework in Frameworks */,
+				A10000000000000000000004 /* NotiflyKMP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,6 +215,7 @@
 			children = (
 				673F0E8F29EBA7D200814217 /* notifly_ios_sdkTests.swift */,
 				AA00000000000011 /* NotiflyLinkHelperTests.swift */,
+				A10000000000000000000005 /* UserIdTransitionPolicyIntegrationTests.swift */,
 				074A991EAD22EC70CA4CFBC7 /* SSE */,
 			);
 			path = "notifly-ios-sdkTests";
@@ -374,6 +381,7 @@
 			name = "notifly-ios-sdk";
 			packageProductDependencies = (
 				672E7DF229EFA50400B3E9F2 /* FirebaseMessaging */,
+				A10000000000000000000002 /* NotiflyKMP */,
 			);
 			productName = "notifly-ios-sdk";
 			productReference = 673F0E8029EBA7D200814217 /* notifly_ios_sdk.framework */;
@@ -393,6 +401,9 @@
 				673F0E8D29EBA7D200814217 /* PBXTargetDependency */,
 			);
 			name = "notifly-ios-sdkTests";
+			packageProductDependencies = (
+				A10000000000000000000007 /* NotiflyKMP */,
+			);
 			productName = "notifly-ios-sdkTests";
 			productReference = 673F0E8A29EBA7D200814217 /* notifly-ios-sdkTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -426,6 +437,7 @@
 			mainGroup = 673F0E7629EBA7D200814217;
 			packageReferences = (
 				672E7DF129EFA50400B3E9F2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				A10000000000000000000001 /* XCRemoteSwiftPackageReference "notifly-kmp-sdk" */,
 			);
 			productRefGroup = 673F0E8129EBA7D200814217 /* Products */;
 			projectDirPath = "";
@@ -508,6 +520,7 @@
 			files = (
 				673F0E9029EBA7D200814217 /* notifly_ios_sdkTests.swift in Sources */,
 				AA00000000000010 /* NotiflyLinkHelperTests.swift in Sources */,
+				A10000000000000000000006 /* UserIdTransitionPolicyIntegrationTests.swift in Sources */,
 				10A6432EEA64DAA79DEE3CEE /* SSELineParserTests.swift in Sources */,
 				1B35C9B1103465E89B62A05C /* SSEClientTests.swift in Sources */,
 				4D4437A6DFC7EDD0358CEE97 /* SSEClientTestSupport.swift in Sources */,
@@ -795,6 +808,14 @@
 				minimumVersion = 9.6.0;
 			};
 		};
+		A10000000000000000000001 /* XCRemoteSwiftPackageReference "notifly-kmp-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/team-michael/notifly-kmp-sdk";
+			requirement = {
+				kind = exactVersion;
+				version = "0.1.0-alpha.2";
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -802,6 +823,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 672E7DF129EFA50400B3E9F2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseMessaging;
+		};
+		A10000000000000000000002 /* NotiflyKMP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000000000000000000001 /* XCRemoteSwiftPackageReference "notifly-kmp-sdk" */;
+			productName = NotiflyKMP;
+		};
+		A10000000000000000000007 /* NotiflyKMP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000000000000000000001 /* XCRemoteSwiftPackageReference "notifly-kmp-sdk" */;
+			productName = NotiflyKMP;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
