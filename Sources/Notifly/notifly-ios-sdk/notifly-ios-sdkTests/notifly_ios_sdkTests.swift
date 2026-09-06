@@ -13,6 +13,11 @@ class notifly_ios_sdkTests: XCTestCase {
     private let trackingTestProjectID = "0123456789abcdef0123456789abcdef"
     private let trackingTestTimestamp = 1_788_498_000_000_000
 
+    override func tearDown() {
+        WebViewModalViewController.openedInAppMessageCount = 0
+        super.tearDown()
+    }
+
     func testSessionStartIsAllowedOnlyWhenApplicationIsActive() {
         XCTAssertTrue(
             TrackingManager.canTrackSessionStart(applicationState: .active)
@@ -49,6 +54,26 @@ class notifly_ios_sdkTests: XCTestCase {
         XCTAssertEqual(object["device_token"] as? String, "valid-fcm-token")
     }
 
+    func testExternalDismissReleasesInAppMessageGate() {
+        let popup = LifecycleStateWebViewModalViewController()
+        popup.stubIsBeingDismissed = true
+        WebViewModalViewController.openedInAppMessageCount = 1
+
+        popup.viewDidDisappear(false)
+
+        XCTAssertEqual(WebViewModalViewController.openedInAppMessageCount, 0)
+    }
+
+    func testDisappearanceWithoutDismissKeepsInAppMessageGate() {
+        let popup = LifecycleStateWebViewModalViewController()
+        popup.stubIsBeingDismissed = false
+        WebViewModalViewController.openedInAppMessageCount = 1
+
+        popup.viewDidDisappear(false)
+
+        XCTAssertEqual(WebViewModalViewController.openedInAppMessageCount, 1)
+    }
+
     private func makeTrackingRecord(deviceToken: String?) throws -> TrackingRecord {
         let manager = TrackingManager(projectId: trackingTestProjectID)
         return try XCTUnwrap(
@@ -71,5 +96,15 @@ class notifly_ios_sdkTests: XCTestCase {
         return try XCTUnwrap(
             JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
+    }
+}
+
+private final class LifecycleStateWebViewModalViewController:
+    WebViewModalViewController
+{
+    var stubIsBeingDismissed = false
+
+    override var isBeingDismissed: Bool {
+        stubIsBeingDismissed
     }
 }
