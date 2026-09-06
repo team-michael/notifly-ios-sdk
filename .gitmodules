@@ -1,0 +1,3 @@
+[submodule "notifly-kmp-sdk"]
+	path = notifly-kmp-sdk
+	url = https://github.com/team-michael/notifly-kmp-sdk.git
