@@ -1,0 +1,3384 @@
+{
+  "ABIRoot": {
+    "kind": "Root",
+    "name": "notifly_sdk",
+    "printedName": "notifly_sdk",
+    "children": [
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Dispatch",
+        "printedName": "Dispatch",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "FirebaseCore",
+        "printedName": "FirebaseCore",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "FirebaseMessaging",
+        "printedName": "FirebaseMessaging",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "FirebaseMessaging",
+        "printedName": "FirebaseMessaging",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "NotiflyKMP",
+        "printedName": "NotiflyKMP",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "Notifly",
+        "printedName": "Notifly",
+        "children": [
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Notifly",
+                "printedName": "notifly_sdk.Notifly",
+                "usr": "c:@M@notifly_sdk@objc(cs)Notifly"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@notifly_sdk@objc(cs)Notifly(im)init",
+            "mangledName": "$s11notifly_sdk7NotiflyCACycfc",
+            "moduleName": "notifly_sdk",
+            "overriding": true,
+            "implicit": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Function",
+            "name": "initialize",
+            "printedName": "initialize(projectId:username:password:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)initializeWithProjectId:username:password:",
+            "mangledName": "$s11notifly_sdk7NotiflyC10initialize9projectId8username8passwordySS_S2StFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "application",
+            "printedName": "application(_:didRegisterForRemoteNotificationsWithDeviceToken:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UIApplication",
+                "printedName": "UIKit.UIApplication",
+                "usr": "c:objc(cs)UIApplication"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Data",
+                "printedName": "Foundation.Data",
+                "usr": "s:10Foundation4DataV"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)application:didRegisterForRemoteNotificationsWithDeviceToken:",
+            "mangledName": "$s11notifly_sdk7NotiflyC11application_48didRegisterForRemoteNotificationsWithDeviceTokenySo13UIApplicationC_10Foundation4DataVtFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "application",
+            "printedName": "application(_:didFailToRegisterForRemoteNotificationsWithError:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UIApplication",
+                "printedName": "UIKit.UIApplication",
+                "usr": "c:objc(cs)UIApplication"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Error",
+                "printedName": "any Swift.Error",
+                "usr": "s:s5ErrorP"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)application:didFailToRegisterForRemoteNotificationsWithError:",
+            "mangledName": "$s11notifly_sdk7NotiflyC11application_48didFailToRegisterForRemoteNotificationsWithErrorySo13UIApplicationC_s0M0_ptFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "application",
+            "printedName": "application(_:didReceiveRemoteNotification:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UIApplication",
+                "printedName": "UIKit.UIApplication",
+                "usr": "c:objc(cs)UIApplication"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Dictionary",
+                "printedName": "[Swift.AnyHashable : Any]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "AnyHashable",
+                    "printedName": "Swift.AnyHashable",
+                    "usr": "s:s11AnyHashableV"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ProtocolComposition",
+                    "printedName": "Any"
+                  }
+                ],
+                "usr": "s:SD"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)application:didReceiveRemoteNotification:",
+            "mangledName": "$s11notifly_sdk7NotiflyC11application_28didReceiveRemoteNotificationySo13UIApplicationC_SDys11AnyHashableVypGtFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "userNotificationCenter",
+            "printedName": "userNotificationCenter(_:didReceive:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UNUserNotificationCenter",
+                "printedName": "UserNotifications.UNUserNotificationCenter",
+                "usr": "c:objc(cs)UNUserNotificationCenter"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UNNotificationResponse",
+                "printedName": "UserNotifications.UNNotificationResponse",
+                "usr": "c:objc(cs)UNNotificationResponse"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)userNotificationCenter:didReceive:",
+            "mangledName": "$s11notifly_sdk7NotiflyC22userNotificationCenter_10didReceiveySo06UNUsereF0C_So22UNNotificationResponseCtFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "userNotificationCenter",
+            "printedName": "userNotificationCenter(_:willPresent:withCompletionHandler:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UNUserNotificationCenter",
+                "printedName": "UserNotifications.UNUserNotificationCenter",
+                "usr": "c:objc(cs)UNUserNotificationCenter"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UNNotification",
+                "printedName": "UserNotifications.UNNotification",
+                "usr": "c:objc(cs)UNNotification"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(UserNotifications.UNNotificationPresentationOptions) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "UNNotificationPresentationOptions",
+                    "printedName": "UserNotifications.UNNotificationPresentationOptions",
+                    "usr": "c:@E@UNNotificationPresentationOptions"
+                  }
+                ],
+                "typeAttributes": [
+                  "noescape"
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)userNotificationCenter:willPresent:withCompletionHandler:",
+            "mangledName": "$s11notifly_sdk7NotiflyC22userNotificationCenter_11willPresent21withCompletionHandlerySo06UNUsereF0C_So14UNNotificationCySo0M19PresentationOptionsVXEtFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "trackEvent",
+            "printedName": "trackEvent(eventName:eventParams:segmentationEventParamKeys:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "[Swift.String : Any]?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Dictionary",
+                    "printedName": "[Swift.String : Any]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "ProtocolComposition",
+                        "printedName": "Any"
+                      }
+                    ],
+                    "usr": "s:SD"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "[Swift.String]?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Array",
+                    "printedName": "[Swift.String]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      }
+                    ],
+                    "usr": "s:Sa"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)trackEventWithEventName:eventParams:segmentationEventParamKeys:",
+            "mangledName": "$s11notifly_sdk7NotiflyC10trackEvent9eventName0F6Params012segmentationE9ParamKeysySS_SDySSypGSgSaySSGSgtFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "setUserId",
+            "printedName": "setUserId(userId:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)setUserIdWithUserId:",
+            "mangledName": "$s11notifly_sdk7NotiflyC9setUserId04userF0ySSSg_tFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "getNotiflyUserId",
+            "printedName": "getNotiflyUserId()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)getNotiflyUserId",
+            "mangledName": "$s11notifly_sdk7NotiflyC03getC6UserIdSSSgyFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "setUserProperties",
+            "printedName": "setUserProperties(userProperties:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Dictionary",
+                "printedName": "[Swift.String : Any]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ProtocolComposition",
+                    "printedName": "Any"
+                  }
+                ],
+                "usr": "s:SD"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)setUserPropertiesWithUserProperties:",
+            "mangledName": "$s11notifly_sdk7NotiflyC17setUserProperties04userF0ySDySSypG_tFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "setPhoneNumber",
+            "printedName": "setPhoneNumber(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)setPhoneNumber:",
+            "mangledName": "$s11notifly_sdk7NotiflyC14setPhoneNumberyySSFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "setEmail",
+            "printedName": "setEmail(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)setEmail:",
+            "mangledName": "$s11notifly_sdk7NotiflyC8setEmailyySSFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "setTimezone",
+            "printedName": "setTimezone(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)setTimezone:",
+            "mangledName": "$s11notifly_sdk7NotiflyC11setTimezoneyySSFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "setSdkType",
+            "printedName": "setSdkType(type:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)setSdkTypeWithType:",
+            "mangledName": "$s11notifly_sdk7NotiflyC10setSdkType4typeySS_tFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "setSdkVersion",
+            "printedName": "setSdkVersion(version:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)setSdkVersionWithVersion:",
+            "mangledName": "$s11notifly_sdk7NotiflyC13setSdkVersion7versionySS_tFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "disableInAppMessage",
+            "printedName": "disableInAppMessage()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)disableInAppMessage",
+            "mangledName": "$s11notifly_sdk7NotiflyC19disableInAppMessageyyFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "schedulePushNotification",
+            "printedName": "schedulePushNotification(title:body:url:delay:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "URL",
+                "printedName": "Foundation.URL",
+                "usr": "s:10Foundation3URLV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Double",
+                "printedName": "Swift.Double",
+                "usr": "s:Sd"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)schedulePushNotificationWithTitle:body:url:delay:",
+            "mangledName": "$s11notifly_sdk7NotiflyC24schedulePushNotification5title4body3url5delayySSSg_AI10Foundation3URLVSdtFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "registerFCMToken",
+            "printedName": "registerFCMToken(token:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)registerFCMTokenWithToken:",
+            "mangledName": "$s11notifly_sdk7NotiflyC16registerFCMToken5tokenySSSg_tFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "addInAppMessageEventListener",
+            "printedName": "addInAppMessageEventListener(listener:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.String, [Swift.String : Any]?) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Tuple",
+                    "printedName": "(Swift.String, [Swift.String : Any]?)",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Optional",
+                        "printedName": "[Swift.String : Any]?",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Dictionary",
+                            "printedName": "[Swift.String : Any]",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "ProtocolComposition",
+                                "printedName": "Any"
+                              }
+                            ],
+                            "usr": "s:SD"
+                          }
+                        ],
+                        "usr": "s:Sq"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)addInAppMessageEventListenerWithListener:",
+            "mangledName": "$s11notifly_sdk7NotiflyC28addInAppMessageEventListener8listeneryySS_SDySSypGSgtc_tFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "removeAllInAppMessageEventListener",
+            "printedName": "removeAllInAppMessageEventListener()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@notifly_sdk@objc(cs)Notifly(cm)removeAllInAppMessageEventListener",
+            "mangledName": "$s11notifly_sdk7NotiflyC34removeAllInAppMessageEventListeneryyFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@notifly_sdk@objc(cs)Notifly",
+        "mangledName": "$s11notifly_sdk7NotiflyC",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC",
+          "Available"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "hasMissingDesignatedInitializers": true,
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "NotiflyAnyCodable",
+        "printedName": "NotiflyAnyCodable",
+        "children": [
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "NotiflyAnyCodable",
+                "printedName": "notifly_sdk.NotiflyAnyCodable",
+                "usr": "s:11notifly_sdk17NotiflyAnyCodableV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Any?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ProtocolComposition",
+                    "printedName": "Any"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:11notifly_sdk17NotiflyAnyCodableVyACypSgcfc",
+            "mangledName": "$s11notifly_sdk17NotiflyAnyCodableVyACypSgcfc",
+            "moduleName": "notifly_sdk",
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(from:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "NotiflyAnyCodable",
+                "printedName": "notifly_sdk.NotiflyAnyCodable",
+                "usr": "s:11notifly_sdk17NotiflyAnyCodableV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Decoder",
+                "printedName": "any Swift.Decoder",
+                "usr": "s:s7DecoderP"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:11notifly_sdk17NotiflyAnyCodableV4fromACs7Decoder_p_tKcfc",
+            "mangledName": "$s11notifly_sdk17NotiflyAnyCodableV4fromACs7Decoder_p_tKcfc",
+            "moduleName": "notifly_sdk",
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "throwing": true,
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Function",
+            "name": "encode",
+            "printedName": "encode(to:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Encoder",
+                "printedName": "any Swift.Encoder",
+                "usr": "s:s7EncoderP"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:11notifly_sdk17NotiflyAnyCodableV6encode2toys7Encoder_p_tKF",
+            "mangledName": "$s11notifly_sdk17NotiflyAnyCodableV6encode2toys7Encoder_p_tKF",
+            "moduleName": "notifly_sdk",
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "throwing": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "parseJsonString",
+            "printedName": "parseJsonString(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "[Swift.String : Any]?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Dictionary",
+                    "printedName": "[Swift.String : Any]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "ProtocolComposition",
+                        "printedName": "Any"
+                      }
+                    ],
+                    "usr": "s:SD"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:11notifly_sdk17NotiflyAnyCodableV15parseJsonStringySDySSypGSgSSFZ",
+            "mangledName": "$s11notifly_sdk17NotiflyAnyCodableV15parseJsonStringySDySSypGSgSSFZ",
+            "moduleName": "notifly_sdk",
+            "static": true,
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Struct",
+        "usr": "s:11notifly_sdk17NotiflyAnyCodableV",
+        "mangledName": "$s11notifly_sdk17NotiflyAnyCodableV",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "AccessControl"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Decodable",
+            "printedName": "Decodable",
+            "usr": "s:Se",
+            "mangledName": "$sSe"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Encodable",
+            "printedName": "Encodable",
+            "usr": "s:SE",
+            "mangledName": "$sSE"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "UserNotifications",
+        "printedName": "UserNotifications",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "NotiflyNotificationServiceExtension",
+        "printedName": "NotiflyNotificationServiceExtension",
+        "children": [
+          {
+            "kind": "Function",
+            "name": "register",
+            "printedName": "register(projectId:username:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:11notifly_sdk35NotiflyNotificationServiceExtensionC8register9projectId8usernameySS_SStF",
+            "mangledName": "$s11notifly_sdk35NotiflyNotificationServiceExtensionC8register9projectId8usernameySS_SStF",
+            "moduleName": "notifly_sdk",
+            "isOpen": true,
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "didReceive",
+            "printedName": "didReceive(_:withContentHandler:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UNNotificationRequest",
+                "printedName": "UserNotifications.UNNotificationRequest",
+                "usr": "c:objc(cs)UNNotificationRequest"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(UserNotifications.UNNotificationContent) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "UNNotificationContent",
+                    "printedName": "UserNotifications.UNNotificationContent",
+                    "usr": "c:objc(cs)UNNotificationContent"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@notifly_sdk@objc(cs)NotiflyNotificationServiceExtension(im)didReceiveNotificationRequest:withContentHandler:",
+            "mangledName": "$s11notifly_sdk35NotiflyNotificationServiceExtensionC10didReceive_18withContentHandlerySo21UNNotificationRequestC_ySo0lJ0CctF",
+            "moduleName": "notifly_sdk",
+            "overriding": true,
+            "isOpen": true,
+            "objc_name": "didReceiveNotificationRequest:withContentHandler:",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "AccessControl",
+              "Override"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "serviceExtensionTimeWillExpire",
+            "printedName": "serviceExtensionTimeWillExpire()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@notifly_sdk@objc(cs)NotiflyNotificationServiceExtension(im)serviceExtensionTimeWillExpire",
+            "mangledName": "$s11notifly_sdk35NotiflyNotificationServiceExtensionC07serviceF14TimeWillExpireyyF",
+            "moduleName": "notifly_sdk",
+            "overriding": true,
+            "isOpen": true,
+            "objc_name": "serviceExtensionTimeWillExpire",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "AccessControl",
+              "Override"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "NotiflyNotificationServiceExtension",
+                "printedName": "notifly_sdk.NotiflyNotificationServiceExtension",
+                "usr": "c:@M@notifly_sdk@objc(cs)NotiflyNotificationServiceExtension"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@notifly_sdk@objc(cs)NotiflyNotificationServiceExtension(im)init",
+            "mangledName": "$s11notifly_sdk35NotiflyNotificationServiceExtensionCACycfc",
+            "moduleName": "notifly_sdk",
+            "overriding": true,
+            "implicit": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@notifly_sdk@objc(cs)NotiflyNotificationServiceExtension",
+        "mangledName": "$s11notifly_sdk35NotiflyNotificationServiceExtensionC",
+        "moduleName": "notifly_sdk",
+        "isOpen": true,
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)UNNotificationServiceExtension",
+        "inheritsConvenienceInitializers": true,
+        "superclassNames": [
+          "UserNotifications.UNNotificationServiceExtension",
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "ExtensionManager",
+        "printedName": "ExtensionManager",
+        "children": [
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "ExtensionManager",
+                "printedName": "notifly_sdk.ExtensionManager",
+                "usr": "c:@M@notifly_sdk@objc(cs)ExtensionManager"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@notifly_sdk@objc(cs)ExtensionManager(im)init",
+            "mangledName": "$s11notifly_sdk16ExtensionManagerCACycfc",
+            "moduleName": "notifly_sdk",
+            "overriding": true,
+            "implicit": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@notifly_sdk@objc(cs)ExtensionManager",
+        "mangledName": "$s11notifly_sdk16ExtensionManagerC",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "hasMissingDesignatedInitializers": true,
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "CommonCrypto",
+        "printedName": "CommonCrypto",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "SdkWrapperType",
+        "printedName": "SdkWrapperType",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "react_native",
+            "printedName": "react_native",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(notifly_sdk.SdkWrapperType.Type) -> notifly_sdk.SdkWrapperType",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "SdkWrapperType",
+                    "printedName": "notifly_sdk.SdkWrapperType",
+                    "usr": "s:11notifly_sdk14SdkWrapperTypeO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "notifly_sdk.SdkWrapperType.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "SdkWrapperType",
+                        "printedName": "notifly_sdk.SdkWrapperType",
+                        "usr": "s:11notifly_sdk14SdkWrapperTypeO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:11notifly_sdk14SdkWrapperTypeO12react_nativeyA2CmF",
+            "mangledName": "$s11notifly_sdk14SdkWrapperTypeO12react_nativeyA2CmF",
+            "moduleName": "notifly_sdk"
+          },
+          {
+            "kind": "Var",
+            "name": "flutter",
+            "printedName": "flutter",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(notifly_sdk.SdkWrapperType.Type) -> notifly_sdk.SdkWrapperType",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "SdkWrapperType",
+                    "printedName": "notifly_sdk.SdkWrapperType",
+                    "usr": "s:11notifly_sdk14SdkWrapperTypeO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "notifly_sdk.SdkWrapperType.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "SdkWrapperType",
+                        "printedName": "notifly_sdk.SdkWrapperType",
+                        "usr": "s:11notifly_sdk14SdkWrapperTypeO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:11notifly_sdk14SdkWrapperTypeO7flutteryA2CmF",
+            "mangledName": "$s11notifly_sdk14SdkWrapperTypeO7flutteryA2CmF",
+            "moduleName": "notifly_sdk"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(rawValue:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "notifly_sdk.SdkWrapperType?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "SdkWrapperType",
+                    "printedName": "notifly_sdk.SdkWrapperType",
+                    "usr": "s:11notifly_sdk14SdkWrapperTypeO"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:11notifly_sdk14SdkWrapperTypeO8rawValueACSgSS_tcfc",
+            "mangledName": "$s11notifly_sdk14SdkWrapperTypeO8rawValueACSgSS_tcfc",
+            "moduleName": "notifly_sdk",
+            "implicit": true,
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Var",
+            "name": "rawValue",
+            "printedName": "rawValue",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:11notifly_sdk14SdkWrapperTypeO8rawValueSSvp",
+            "mangledName": "$s11notifly_sdk14SdkWrapperTypeO8rawValueSSvp",
+            "moduleName": "notifly_sdk",
+            "implicit": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:11notifly_sdk14SdkWrapperTypeO8rawValueSSvg",
+                "mangledName": "$s11notifly_sdk14SdkWrapperTypeO8rawValueSSvg",
+                "moduleName": "notifly_sdk",
+                "implicit": true,
+                "accessorKind": "get"
+              }
+            ]
+          }
+        ],
+        "declKind": "Enum",
+        "usr": "s:11notifly_sdk14SdkWrapperTypeO",
+        "mangledName": "$s11notifly_sdk14SdkWrapperTypeO",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "AccessControl"
+        ],
+        "enumRawTypeName": "String",
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "RawRepresentable",
+            "printedName": "RawRepresentable",
+            "children": [
+              {
+                "kind": "TypeWitness",
+                "name": "RawValue",
+                "printedName": "RawValue",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ]
+              }
+            ],
+            "usr": "s:SY",
+            "mangledName": "$sSY"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "MobileCoreServices",
+        "printedName": "MobileCoreServices",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "FirebaseMessaging",
+        "printedName": "FirebaseMessaging",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "SafariServices",
+        "printedName": "SafariServices",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "UserNotifications",
+        "printedName": "UserNotifications",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Dispatch",
+        "printedName": "Dispatch",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Security",
+        "printedName": "Security",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "MachO",
+        "printedName": "MachO",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "SafariServices",
+        "printedName": "SafariServices",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "WebKit",
+        "printedName": "WebKit",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "notifly_sdk"
+      }
+    ],
+    "json_format_version": 8
+  },
+  "ConstValues": [
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/UserStateManager.swift",
+      "kind": "StringLiteral",
+      "offset": 309,
+      "length": 41,
+      "value": "\"com.yourapp.userStateManager.ownerQueue\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/UserStateManager.swift",
+      "kind": "Array",
+      "offset": 647,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/UserStateManager.swift",
+      "kind": "Dictionary",
+      "offset": 701,
+      "length": 3,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/UserStateManager.swift",
+      "kind": "Dictionary",
+      "offset": 765,
+      "length": 3,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/UserStateManager.swift",
+      "kind": "StringLiteral",
+      "offset": 842,
+      "length": 54,
+      "value": "\"com.yourapp.userStateManager.campaignDataAccessQueue\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/UserStateManager.swift",
+      "kind": "StringLiteral",
+      "offset": 971,
+      "length": 50,
+      "value": "\"com.yourapp.userStateManager.userDataAccessQueue\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/UserStateManager.swift",
+      "kind": "StringLiteral",
+      "offset": 1097,
+      "length": 51,
+      "value": "\"com.yourapp.userStateManager.eventDataAccessQueue\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/UserStateManager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 2166,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/NotiflyCustomUserDefaults.swift",
+      "kind": "StringLiteral",
+      "offset": 3617,
+      "length": 20,
+      "value": "\"notifly_project_id\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/NotiflyCustomUserDefaults.swift",
+      "kind": "StringLiteral",
+      "offset": 3664,
+      "length": 18,
+      "value": "\"notifly_username\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/NotiflyCustomUserDefaults.swift",
+      "kind": "StringLiteral",
+      "offset": 3709,
+      "length": 18,
+      "value": "\"notifly_password\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/NotiflyCustomUserDefaults.swift",
+      "kind": "StringLiteral",
+      "offset": 3760,
+      "length": 26,
+      "value": "\"notifly_external_user_id\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/NotiflyCustomUserDefaults.swift",
+      "kind": "StringLiteral",
+      "offset": 3814,
+      "length": 19,
+      "value": "\"notifly_authToken\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/NotiflyCustomUserDefaults.swift",
+      "kind": "StringLiteral",
+      "offset": 3860,
+      "length": 18,
+      "value": "\"notifly_deviceId\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/NotiflyCustomUserDefaults.swift",
+      "kind": "StringLiteral",
+      "offset": 3914,
+      "length": 26,
+      "value": "\"notifly_isRegisteredAPNs\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/AsyncWorker.swift",
+      "kind": "StringLiteral",
+      "offset": 136,
+      "length": 30,
+      "value": "\"com.notifly.asyncWorkerQueue\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/AsyncWorker.swift",
+      "kind": "Array",
+      "offset": 233,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/AsyncWorker.swift",
+      "kind": "IntegerLiteral",
+      "offset": 326,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/AsyncWorker.swift",
+      "kind": "IntegerLiteral",
+      "offset": 364,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/AsyncWorker.swift",
+      "kind": "IntegerLiteral",
+      "offset": 413,
+      "length": 2,
+      "value": "10"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/AsyncWorker.swift",
+      "kind": "IntegerLiteral",
+      "offset": 448,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/AsyncWorker.swift",
+      "kind": "BooleanLiteral",
+      "offset": 709,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/Tracking\/TrackingManager.swift",
+      "kind": "StringLiteral",
+      "offset": 860,
+      "length": 40,
+      "value": "\"TrackingManagerCancellablesAccessQueue\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/Tracking\/TrackingManager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 4553,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/Tracking\/TrackingManager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 4965,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/User\/UserManager.swift",
+      "kind": "StringLiteral",
+      "offset": 254,
+      "length": 51,
+      "value": "\"com.notifly.userManager.changeExternalUserIdQueue\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/User\/UserManager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 5523,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Notifly\/Notifly.swift",
+      "kind": "BooleanLiteral",
+      "offset": 711,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Notifly\/Notifly.swift",
+      "kind": "StringLiteral",
+      "offset": 781,
+      "length": 34,
+      "value": "\"com.notifly.manager.access.queue\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Notifly\/Notifly.swift",
+      "kind": "StringLiteral",
+      "offset": 1137,
+      "length": 30,
+      "value": "\"com.notifly.sse.access.queue\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Notifly\/Notifly.swift",
+      "kind": "Array",
+      "offset": 1266,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Notifly\/Notifly.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1309,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/UserState+Constant.swift",
+      "kind": "FloatLiteral",
+      "offset": 223,
+      "length": 3,
+      "value": "5.0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3292,
+      "length": 2,
+      "value": "-1"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3312,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3332,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3354,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3377,
+      "length": 1,
+      "value": "3"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "StringLiteral",
+      "offset": 11234,
+      "length": 11,
+      "value": "\"condition\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "StringLiteral",
+      "offset": 13774,
+      "length": 4,
+      "value": "\"OR\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "StringLiteral",
+      "offset": 14365,
+      "length": 5,
+      "value": "\"AND\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "StringLiteral",
+      "offset": 14520,
+      "length": 15,
+      "value": "\"user_metadata\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "StringLiteral",
+      "offset": 18847,
+      "length": 9,
+      "value": "\"count X\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "StringLiteral",
+      "offset": 18894,
+      "length": 19,
+      "value": "\"count X in Y days\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "StringLiteral",
+      "offset": 19096,
+      "length": 3,
+      "value": "\"h\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "StringLiteral",
+      "offset": 19119,
+      "length": 3,
+      "value": "\"d\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "StringLiteral",
+      "offset": 19143,
+      "length": 3,
+      "value": "\"w\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "StringLiteral",
+      "offset": 19168,
+      "length": 3,
+      "value": "\"m\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/Campaign.swift",
+      "kind": "IntegerLiteral",
+      "offset": 19674,
+      "length": 2,
+      "value": "-1"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/Notifications\/NotificationsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 495,
+      "length": 40,
+      "value": "\"com.notifly.notificationsManager.state\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/Notifications\/NotificationsManager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 976,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/Notifications\/NotificationsManager.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1073,
+      "length": 1,
+      "value": "4"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/Notifications\/NotificationsManager.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1115,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/Notifications\/NotificationsManager.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1156,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/Notifications\/NotificationsManager.swift",
+      "kind": "FloatLiteral",
+      "offset": 1254,
+      "length": 4,
+      "value": "10.0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/Notifications\/NotificationsManager.swift",
+      "kind": "FloatLiteral",
+      "offset": 1329,
+      "length": 3,
+      "value": "1.0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/InAppMessageManager.swift",
+      "kind": "Array",
+      "offset": 345,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/InAppMessageManager.swift",
+      "kind": "Dictionary",
+      "offset": 413,
+      "length": 3,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/NotiflyLinkHelper.swift",
+      "kind": "StringLiteral",
+      "offset": 226,
+      "length": 14,
+      "value": "\"nf_open_mode\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/NotiflyLinkHelper.swift",
+      "kind": "StringLiteral",
+      "offset": 937,
+      "length": 34,
+      "value": "\"tech.notifly.link-helper.domains\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/NotiflyLinkHelper.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1083,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Entitlements\/EntitlementsReader.swift",
+      "kind": "IntegerLiteral",
+      "offset": 701,
+      "length": 10,
+      "value": "0xfade0cc0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Entitlements\/EntitlementsReader.swift",
+      "kind": "IntegerLiteral",
+      "offset": 762,
+      "length": 10,
+      "value": "0xfade7171"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Entitlements\/EntitlementsReader.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1760,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/WebViewModalViewController.swift",
+      "kind": "StringLiteral",
+      "offset": 324,
+      "length": 42,
+      "value": "\"com.notifly.openedInAppMessageCountQueue\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/WebViewModalViewController.swift",
+      "kind": "IntegerLiteral",
+      "offset": 423,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/WebViewModalViewController.swift",
+      "kind": "BooleanLiteral",
+      "offset": 4172,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/WebViewModalViewController.swift",
+      "kind": "IntegerLiteral",
+      "offset": 18022,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/WebViewModalViewController.swift",
+      "kind": "IntegerLiteral",
+      "offset": 18031,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/WebViewModalViewController.swift",
+      "kind": "IntegerLiteral",
+      "offset": 18042,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/WebViewModalViewController.swift",
+      "kind": "IntegerLiteral",
+      "offset": 18052,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyExtension\/NotiflyExtensionAPI.swift",
+      "kind": "Dictionary",
+      "offset": 4030,
+      "length": 36,
+      "value": "[(\"Content-Type\", \"application\/json\")]"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/Auth\/Auth.swift",
+      "kind": "StringLiteral",
+      "offset": 174,
+      "length": 35,
+      "value": "\"com.notifly.tracking.access.queue\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/Auth\/Auth.swift",
+      "kind": "FloatLiteral",
+      "offset": 1279,
+      "length": 4,
+      "value": "10.0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/InAppMessage+Constant.swift",
+      "kind": "StringLiteral",
+      "offset": 236,
+      "length": 105,
+      "value": "\"https:\/\/om97mq7cx4.execute-api.ap-northeast-2.amazonaws.com\/default\/notifly-js-sdk-user-state-retrieval\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/InAppMessage+Constant.swift",
+      "kind": "StringLiteral",
+      "offset": 391,
+      "length": 4,
+      "value": "\"OR\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/InAppMessage+Constant.swift",
+      "kind": "StringLiteral",
+      "offset": 449,
+      "length": 5,
+      "value": "\"AND\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/InAppMessage+Constant.swift",
+      "kind": "StringLiteral",
+      "offset": 487,
+      "length": 5,
+      "value": "\"~|~\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/InAppMessage+Constant.swift",
+      "kind": "StringLiteral",
+      "offset": 529,
+      "length": 541,
+      "value": "\"const button_trigger = document.getElementById('notifly-button-trigger'); button_trigger.addEventListener('click', function(event){\nif (!event.notifly_button_click_type) return;\nwindow.webkit.messageHandlers.notiflyInAppMessageEventHandler.postMessage(JSON.stringify({\n    type: event.notifly_button_click_type,\n    button_name: event.notifly_button_name,\n    link: event.notifly_button_click_link,\n    extra_data: event.notifly_extra_data,\n}));\n    });\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/InAppMessage\/InAppMessage+Constant.swift",
+      "kind": "StringLiteral",
+      "offset": 1108,
+      "length": 16,
+      "value": "\"in-app-message\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 79,
+      "length": 7,
+      "value": "\"2.6.2\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 162,
+      "length": 8,
+      "value": "\"native\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 281,
+      "length": 5,
+      "value": "\"ios\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 327,
+      "length": 19,
+      "value": "\"^[0-9a-fA-F]{32}$\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 650,
+      "length": 12,
+      "value": "\"NOTIFLY_AD\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 712,
+      "length": 21,
+      "value": "\"NOTIFLY_UNSUBSCRIBE\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 773,
+      "length": 17,
+      "value": "\"unsubscribe_url\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 835,
+      "length": 14,
+      "value": "\"수신거부\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 929,
+      "length": 32,
+      "value": "\"https:\/\/e.notifly.tech\/records\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1001,
+      "length": 37,
+      "value": "\"https:\/\/api.notifly.tech\/user-state\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1082,
+      "length": 36,
+      "value": "\"https:\/\/api.notifly.tech\/authorize\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1155,
+      "length": 26,
+      "value": "\"https:\/\/api.notifly.tech\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1286,
+      "length": 38,
+      "value": "\"830b5f7b-e392-43db-a17b-d835f0bcab2b\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1382,
+      "length": 38,
+      "value": "\"ce7c62f9-e8ae-4009-8fd6-468e9581fa21\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1480,
+      "length": 38,
+      "value": "\"a6446dcf-c057-4de7-a360-56af8659d52f\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1568,
+      "length": 38,
+      "value": "\"830848b3-2444-467d-9cd8-3430d2738c57\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1705,
+      "length": 15,
+      "value": "\"session_start\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1771,
+      "length": 23,
+      "value": "\"set_device_properties\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1844,
+      "length": 21,
+      "value": "\"set_user_properties\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1917,
+      "length": 25,
+      "value": "\"remove_external_user_id\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1987,
+      "length": 18,
+      "value": "\"external_user_id\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2041,
+      "length": 17,
+      "value": "\"notifly_user_id\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2102,
+      "length": 26,
+      "value": "\"previous_notifly_user_id\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2173,
+      "length": 27,
+      "value": "\"previous_external_user_id\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2242,
+      "length": 12,
+      "value": "\"push_click\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2305,
+      "length": 16,
+      "value": "\"push_delivered\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2361,
+      "length": 21,
+      "value": "\"in_app_message_show\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2435,
+      "length": 20,
+      "value": "\"close_button_click\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2507,
+      "length": 19,
+      "value": "\"main_button_click\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2587,
+      "length": 34,
+      "value": "\"hide_in_app_message_button_click\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2681,
+      "length": 28,
+      "value": "\"survey_submit_button_click\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2785,
+      "length": 15,
+      "value": "\"$phone_number\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2828,
+      "length": 8,
+      "value": "\"$email\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2867,
+      "length": 11,
+      "value": "\"$timezone\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2944,
+      "length": 2,
+      "value": "60"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2981,
+      "length": 2,
+      "value": "60"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3038,
+      "length": 2,
+      "value": "24"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3094,
+      "length": 1,
+      "value": "7"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3149,
+      "length": 2,
+      "value": "30"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3223,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3252,
+      "length": 9,
+      "value": "1000000"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3321,
+      "length": 6,
+      "value": "\"TEXT\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3343,
+      "length": 5,
+      "value": "\"INT\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3365,
+      "length": 6,
+      "value": "\"BOOL\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3390,
+      "length": 8,
+      "value": "\"DOUBLE\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3416,
+      "length": 7,
+      "value": "\"ARRAY\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3443,
+      "length": 9,
+      "value": "\"CGFLOAT\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3742,
+      "length": 9,
+      "value": "\"IS_NULL\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3773,
+      "length": 13,
+      "value": "\"IS_NOT_NULL\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3804,
+      "length": 3,
+      "value": "\"=\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3828,
+      "length": 4,
+      "value": "\"<>\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3853,
+      "length": 4,
+      "value": "\"@>\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3881,
+      "length": 3,
+      "value": "\">\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3915,
+      "length": 4,
+      "value": "\">=\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3940,
+      "length": 3,
+      "value": "\"<\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3971,
+      "length": 4,
+      "value": "\"<=\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 4045,
+      "length": 12,
+      "value": "\"event_name\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 4116,
+      "length": 3,
+      "value": "\"=\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 4141,
+      "length": 4,
+      "value": "\"!=\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 4168,
+      "length": 13,
+      "value": "\"starts_with\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 4210,
+      "length": 21,
+      "value": "\"does_not_start_with\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 4252,
+      "length": 11,
+      "value": "\"ends_with\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 4290,
+      "length": 19,
+      "value": "\"does_not_end_with\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 4354,
+      "length": 18,
+      "value": "\"does_not_contain\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 4397,
+      "length": 15,
+      "value": "\"matches_regex\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/NotiflyUtil\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 4442,
+      "length": 22,
+      "value": "\"does_not_match_regex\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSELineParser.swift",
+      "kind": "Array",
+      "offset": 273,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSELineParser.swift",
+      "kind": "BooleanLiteral",
+      "offset": 312,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSEClient.swift",
+      "kind": "Array",
+      "offset": 1080,
+      "length": 4,
+      "value": "[10]"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSEClient.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1140,
+      "length": 2,
+      "value": "60"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSEClient.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1331,
+      "length": 2,
+      "value": "30"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSEClient.swift",
+      "kind": "StringLiteral",
+      "offset": 2630,
+      "length": 34,
+      "value": "\"com.notifly.sse.stateAccessQueue\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSEClient.swift",
+      "kind": "IntegerLiteral",
+      "offset": 4169,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSEClient.swift",
+      "kind": "IntegerLiteral",
+      "offset": 4173,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSEController.swift",
+      "kind": "StringLiteral",
+      "offset": 696,
+      "length": 38,
+      "value": "\"com.notifly.sse.controllerStateQueue\""
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSEController.swift",
+      "kind": "BooleanLiteral",
+      "offset": 811,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSEController.swift",
+      "kind": "BooleanLiteral",
+      "offset": 862,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSEController.swift",
+      "kind": "BooleanLiteral",
+      "offset": 906,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSEController.swift",
+      "kind": "IntegerLiteral",
+      "offset": 947,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSEController.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1222,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/gunwoo\/Documents\/Git\/.codex-worktrees\/notifly-ios-sdk\/use-notifly-kmp-sdk\/Sources\/Notifly\/notifly-ios-sdk\/notifly-ios-sdk\/SourceCodes\/Infrastructures\/SSE\/SSEController.swift",
+      "kind": "FloatLiteral",
+      "offset": 1275,
+      "length": 3,
+      "value": "1.0"
+    }
+  ]
+}

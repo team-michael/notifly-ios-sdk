@@ -24,7 +24,6 @@ fi
 
 "$SUBMODULE_DIR/gradlew" \
   -p "$SUBMODULE_DIR" \
-  :kmp:iosSimulatorArm64Test \
   :kmp:assembleNotiflyKMPReleaseXCFramework \
   --no-daemon
 

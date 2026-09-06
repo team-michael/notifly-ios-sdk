@@ -1,6 +1,6 @@
 import Combine
-import FirebaseCore
-import FirebaseMessaging
+@_implementationOnly import FirebaseCore
+@_implementationOnly import FirebaseMessaging
 import Foundation
 import UIKit
 

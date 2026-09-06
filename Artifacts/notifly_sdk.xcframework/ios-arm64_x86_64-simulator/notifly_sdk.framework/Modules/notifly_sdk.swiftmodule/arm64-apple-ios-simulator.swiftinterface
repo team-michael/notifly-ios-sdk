@@ -1,0 +1,75 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.3.3 effective-5.10 (swiftlang-6.3.3.1.3 clang-2100.1.1.101)
+// swift-module-flags: -target arm64-apple-ios15.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name notifly_sdk
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.3
+import Combine
+import CommonCrypto
+import Dispatch
+import Foundation
+import MachO
+import MobileCoreServices
+import SafariServices
+import Security
+import Swift
+import UIKit
+import UserNotifications
+import WebKit
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+@available(iOSApplicationExtension, unavailable)
+@objc extension notifly_sdk.Notifly {
+  @objc public static func initialize(projectId: Swift.String, username: Swift.String, password: Swift.String)
+  @objc public static func application(_ application: UIKit.UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Foundation.Data)
+  @objc public static func application(_ application: UIKit.UIApplication, didFailToRegisterForRemoteNotificationsWithError error: any Swift.Error)
+  @objc public static func application(_: UIKit.UIApplication, didReceiveRemoteNotification _: [Swift.AnyHashable : Any])
+  @objc public static func userNotificationCenter(_ notificationCenter: UserNotifications.UNUserNotificationCenter, didReceive response: UserNotifications.UNNotificationResponse)
+  @objc public static func userNotificationCenter(_ notificationCenter: UserNotifications.UNUserNotificationCenter, willPresent notification: UserNotifications.UNNotification, withCompletionHandler completion: (UserNotifications.UNNotificationPresentationOptions) -> Swift.Void)
+  @objc public static func trackEvent(eventName: Swift.String, eventParams: [Swift.String : Any]? = nil, segmentationEventParamKeys: [Swift.String]? = nil)
+  @objc public static func setUserId(userId: Swift.String? = nil)
+  @objc public static func getNotiflyUserId() -> Swift.String?
+  @objc public static func setUserProperties(userProperties: [Swift.String : Any])
+  @objc public static func setPhoneNumber(_ phoneNumber: Swift.String)
+  @objc public static func setEmail(_ email: Swift.String)
+  @objc public static func setTimezone(_ timezone: Swift.String)
+  @objc public static func setSdkType(type: Swift.String)
+  @objc public static func setSdkVersion(version: Swift.String)
+  @objc public static func disableInAppMessage()
+  @objc public static func schedulePushNotification(title: Swift.String?, body: Swift.String?, url: Foundation.URL, delay: Foundation.TimeInterval)
+  @objc public static func registerFCMToken(token: Swift.String?)
+  @objc public static func addInAppMessageEventListener(listener: @escaping notifly_sdk.InAppMessageEventListener)
+  @objc public static func removeAllInAppMessageEventListener()
+}
+@_hasMissingDesignatedInitializers @available(iOSApplicationExtension, unavailable)
+@objc public class Notifly : ObjectiveC.NSObject {
+  @objc deinit
+}
+public struct NotiflyAnyCodable : Swift.Codable {
+  public init(_ value: Any?)
+  public init(from decoder: any Swift.Decoder) throws
+  public func encode(to encoder: any Swift.Encoder) throws
+  public static func parseJsonString(_ jsonString: Swift.String) -> [Swift.String : Any]?
+}
+@_inheritsConvenienceInitializers @objc open class NotiflyNotificationServiceExtension : UserNotifications.UNNotificationServiceExtension {
+  open func register(projectId: Swift.String, username: Swift.String)
+  @objc override dynamic open func didReceive(_ request: UserNotifications.UNNotificationRequest, withContentHandler contentHandler: @escaping (UserNotifications.UNNotificationContent) -> Swift.Void)
+  @objc override dynamic open func serviceExtensionTimeWillExpire()
+  @objc override dynamic public init()
+  @objc deinit
+}
+@_hasMissingDesignatedInitializers @objc public class ExtensionManager : ObjectiveC.NSObject {
+  @objc deinit
+}
+public enum SdkWrapperType : Swift.String {
+  case react_native
+  case flutter
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public typealias InAppMessageEventListener = (Swift.String, [Swift.String : Any]?) -> Swift.Void
+extension notifly_sdk.SdkWrapperType : Swift.Equatable {}
+extension notifly_sdk.SdkWrapperType : Swift.Hashable {}
+extension notifly_sdk.SdkWrapperType : Swift.RawRepresentable {}

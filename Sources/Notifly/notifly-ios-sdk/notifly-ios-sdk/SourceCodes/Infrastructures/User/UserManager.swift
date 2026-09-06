@@ -1,5 +1,5 @@
 import Combine
-import FirebaseMessaging
+@_implementationOnly import FirebaseMessaging
 import Foundation
 @_implementationOnly import NotiflyKMP
 

@@ -9,7 +9,7 @@ let package = Package(
     products: [
         .library(
             name: "notifly_sdk",
-            targets: ["notifly_sdk"]
+            targets: ["NotiflySDKWrapper"]
         )
     ],
     dependencies: [
@@ -19,12 +19,16 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "notifly_sdk",
+            name: "NotiflySDKWrapper",
             dependencies: [
+                "notifly_sdk",
                 .product(name: "FirebaseMessaging", package: "Firebase")
             ],
-            path: "Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk",
-            sources: ["SourceCodes", "PrivacyInfo.xcprivacy"]
-        )
+            path: "Sources/NotiflySDKWrapper"
+        ),
+        .binaryTarget(
+            name: "notifly_sdk",
+            path: "Artifacts/notifly_sdk.xcframework"
+        ),
     ]
 )

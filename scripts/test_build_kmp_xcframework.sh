@@ -23,6 +23,15 @@ if [[ "$ACTUAL_COMMIT" != "$EXPECTED_COMMIT" ]]; then
   exit 1
 fi
 
+if [[ -z "${JAVA_HOME:-}" && -d "/Applications/Android Studio.app/Contents/jbr/Contents/Home" ]]; then
+  export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+fi
+
+"$SUBMODULE_DIR/gradlew" \
+  -p "$SUBMODULE_DIR" \
+  :kmp:iosSimulatorArm64Test \
+  --no-daemon
+
 "$ROOT_DIR/scripts/build_kmp_xcframework.sh"
 
 if [[ ! -f "$OUTPUT/Info.plist" ]]; then
