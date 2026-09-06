@@ -1,7 +1,7 @@
 import Combine
 import FirebaseMessaging
 import Foundation
-import NotiflyKMP
+@_implementationOnly import NotiflyKMP
 
 @available(iOSApplicationExtension, unavailable)
 class UserManager {
