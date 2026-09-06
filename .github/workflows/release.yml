@@ -18,6 +18,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
 
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -31,6 +39,15 @@ jobs:
         with:
           version: ${{ github.event.inputs.version }}
 
+      - name: Build distributable SDK
+        run: |
+          ./scripts/build_notifly_xcframework.sh
+          ./scripts/verify_release_artifacts.sh
+          ./scripts/test_distribution_boundary.sh
+          ditto -c -k --sequesterRsrc --keepParent \
+            Artifacts/notifly_sdk.xcframework \
+            notifly_sdk.xcframework.zip
+
       - name: Create Release
         if: steps.read_changelog.outputs.changes
         uses: ncipollo/release-action@v1
@@ -38,6 +55,7 @@ jobs:
           tag: ${{ github.event.inputs.version }}
           name: Release ${{ github.event.inputs.version }}
           body: ${{ steps.read_changelog.outputs.changes }}
+          artifacts: notifly_sdk.xcframework.zip
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
