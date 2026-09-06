@@ -54,6 +54,12 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
             self, name: "notiflyInAppMessageEventHandler")
     }
 
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        guard isBeingDismissed else { return }
+        WebViewModalViewController.openedInAppMessageCount = 0
+    }
+
     func setupUI() -> Bool {
         guard let modalSize = getModalSize() as? CGSize,
               let webViewLayer = getWebViewLayer(modalSize: modalSize) as? CALayer?
