@@ -64,7 +64,7 @@ struct TrackingData: Codable {
     let time: Int
     let notifly_device_id: String
     let external_device_id: String
-    let device_token: String
+    let device_token: String?
     let is_internal_event: Bool
     let segmentation_event_param_keys: [String]?
     let project_id: String

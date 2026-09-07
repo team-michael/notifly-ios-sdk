@@ -105,6 +105,11 @@ class NotificationsManager: NSObject {
             }
         }
     }
+
+    var latestFCMToken: String? {
+        stateQueue.sync { lastFCMToken }
+    }
+
     // Device token promise (stateQueue protected)
     var deviceTokenPromise: Future<String, Error>.Promise?
 
