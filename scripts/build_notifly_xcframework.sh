@@ -18,6 +18,11 @@ SOURCE_PACKAGES="$ROOT_DIR/build/SourcePackages"
 rm -rf "$BUILD_ROOT"
 mkdir -p "$BUILD_ROOT" "$OUTPUT_DIR"
 
+xcodebuild -resolvePackageDependencies \
+  -project "$PROJECT" \
+  -scheme "$SCHEME" \
+  -clonedSourcePackagesDirPath "$SOURCE_PACKAGES"
+
 archive_framework() {
   local destination="$1"
   local archive_path="$2"

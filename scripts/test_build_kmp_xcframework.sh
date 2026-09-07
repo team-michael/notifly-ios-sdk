@@ -25,6 +25,8 @@ if [[ "$ACTUAL_URL" != "$EXPECTED_URL" ]]; then
   exit 1
 fi
 
+git -C "$SUBMODULE_DIR" fetch --force origin 'refs/tags/*:refs/tags/*'
+
 if ! KMP_TAG="$(git -C "$SUBMODULE_DIR" describe --tags --exact-match HEAD 2>/dev/null)"; then
   echo "notifly-kmp-sdk must point to an exact release tag" >&2
   exit 1

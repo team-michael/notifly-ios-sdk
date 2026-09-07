@@ -14,12 +14,15 @@ on:
 jobs:
   release:
     runs-on: macos-15
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -56,7 +59,8 @@ jobs:
           name: Release ${{ github.event.inputs.version }}
           body: ${{ steps.read_changelog.outputs.changes }}
           artifacts: notifly_sdk.xcframework.zip
-          allowUpdates: true
+          artifactErrorsFailBuild: true
+          immutableCreate: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
       # https://fuller.li/posts/automated-cocoapods-releases-with-ci/

@@ -20,5 +20,6 @@ if grep -E "dependency ['\"]NotiflyKMP['\"]" "$ROOT_DIR/notifly_sdk.podspec" >/d
 fi
 
 swift package --package-path "$ROOT_DIR" dump-package >/dev/null
+"$ROOT_DIR/scripts/test_swiftpm_consumer.sh"
 
 echo "SwiftPM and CocoaPods expose only notifly_sdk at the package boundary."

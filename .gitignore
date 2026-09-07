@@ -36,6 +36,7 @@ DerivedData
 *.ipa
 
 /.build
+**/.build/
 /Packages
 /*.xcodeproj
 .swiftpm/config/registries.json
