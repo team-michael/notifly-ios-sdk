@@ -6,7 +6,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROJECT_FILE="$ROOT_DIR/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk.xcodeproj/project.pbxproj"
 USER_MANAGER="$ROOT_DIR/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/User/UserManager.swift"
 
-if grep -F 'github.com/team-michael/notifly-kmp-sdk' "$ROOT_DIR/Package.swift" >/dev/null; then
+if grep -E 'github.com/(team-michael|notifly-tech)/notifly-kmp-sdk' "$ROOT_DIR/Package.swift" >/dev/null; then
   echo "Package.swift exposes notifly-kmp-sdk" >&2
   exit 1
 fi

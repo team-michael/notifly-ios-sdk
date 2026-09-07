@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-if grep -F 'github.com/team-michael/notifly-kmp-sdk' "$ROOT_DIR/Package.swift" >/dev/null; then
+if grep -E 'github.com/(team-michael|notifly-tech)/notifly-kmp-sdk' "$ROOT_DIR/Package.swift" >/dev/null; then
   echo "SwiftPM exposes notifly-kmp-sdk to consumers" >&2
   exit 1
 fi

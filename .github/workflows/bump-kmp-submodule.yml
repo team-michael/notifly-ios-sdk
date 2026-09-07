@@ -1,0 +1,62 @@
+name: Bump KMP submodule
+
+on:
+  workflow_dispatch:
+    inputs:
+      kmp_version:
+        description: Exact notifly-kmp-sdk tag, including the v prefix
+        required: true
+        type: string
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Pin KMP source tag
+        env:
+          KMP_TAG: ${{ inputs.kmp_version }}
+          KMP_REPOSITORY: https://github.com/notifly-tech/notifly-kmp-sdk.git
+        run: |
+          set -euo pipefail
+          [[ "$KMP_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]
+          test "$(git -C notifly-kmp-sdk remote get-url origin)" = "$KMP_REPOSITORY"
+          git -C notifly-kmp-sdk fetch origin "refs/tags/$KMP_TAG:refs/tags/$KMP_TAG"
+          git -C notifly-kmp-sdk checkout --detach "$KMP_TAG"
+          test "$(git -C notifly-kmp-sdk rev-parse "refs/tags/$KMP_TAG^{commit}")" = "$(git -C notifly-kmp-sdk rev-parse HEAD)"
+
+      - name: Open update PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KMP_TAG: ${{ inputs.kmp_version }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- notifly-kmp-sdk; then
+            echo "iOS already pins $KMP_TAG"
+            exit 0
+          fi
+
+          branch="chore/bump-kmp-${KMP_TAG#v}"
+          git switch -c "$branch"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add notifly-kmp-sdk
+          git commit -m "chore: bump notifly-kmp-sdk to $KMP_TAG"
+          git push --force-with-lease origin "HEAD:$branch"
+
+          gh pr view "$branch" --json url --jq .url 2>/dev/null || \
+            gh pr create \
+              --base main \
+              --head "$branch" \
+              --title "chore: bump notifly-kmp-sdk to $KMP_TAG" \
+              --body "Pins the iOS SDK to notifly-tech/notifly-kmp-sdk@$KMP_TAG."
+          gh workflow run ci.yml --ref "$branch"
