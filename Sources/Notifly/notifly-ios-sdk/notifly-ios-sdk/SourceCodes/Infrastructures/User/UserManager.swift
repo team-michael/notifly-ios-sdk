@@ -1,6 +1,7 @@
 import Combine
 import FirebaseMessaging
 import Foundation
+import NotiflyCore
 
 @available(iOSApplicationExtension, unavailable)
 class UserManager {
@@ -77,7 +78,11 @@ class UserManager {
                     return
                 }
 
-                guard externalUserID != newExternalUserID else {
+                let transition = UserIdTransitionPolicy.shared.evaluate(
+                    previousUserId: externalUserID,
+                    newUserId: newExternalUserID
+                )
+                guard transition.changed else {
                     Logger.info(
                         "External User Id is not changed because the new user id is same as the current user id."
                     )
@@ -85,16 +90,12 @@ class UserManager {
                     return
                 }
 
-                let previousExternalUserID = externalUserID
                 self.changeExternalUserId(newValue: newExternalUserID)
-                let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(
-                    previousExternalUserID: previousExternalUserID,
-                    newExternalUserID: newExternalUserID
+                let postProcessConfigForSyncState = PostProcessConfigForSyncState(
+                    merge: transition.shouldMerge,
+                    clear: transition.shouldClear
                 )
-                if shouldRequestSyncState(
-                    previousExternalUserID: previousExternalUserID,
-                    newExternalUserID: newExternalUserID
-                ) {
+                if transition.shouldSync {
                     notifly.inAppMessageManager.userStateManager.syncState(
                         postProcessConfig: postProcessConfigForSyncState
                     ) {
@@ -124,16 +125,17 @@ class UserManager {
                 return
             }
             let previousExternalUserID = externalUserID
+            let transition = UserIdTransitionPolicy.shared.evaluate(
+                previousUserId: previousExternalUserID,
+                newUserId: nil
+            )
             self.changeExternalUserId(newValue: nil)
 
-            let postProcessConfigForSyncState = constructPostProcessConfigForSyncState(
-                previousExternalUserID: previousExternalUserID,
-                newExternalUserID: nil
+            let postProcessConfigForSyncState = PostProcessConfigForSyncState(
+                merge: transition.shouldMerge,
+                clear: transition.shouldClear
             )
-            if shouldRequestSyncState(
-                previousExternalUserID: previousExternalUserID,
-                newExternalUserID: nil
-            ) {
+            if transition.shouldSync {
                 notifly.inAppMessageManager.userStateManager.syncState(
                     postProcessConfig: postProcessConfigForSyncState
                 ) {
@@ -210,33 +212,4 @@ class UserManager {
         return uuidV5.notiflyStyleString
     }
 
-    private func constructPostProcessConfigForSyncState(
-        previousExternalUserID: String?,
-        newExternalUserID: String?
-    ) -> PostProcessConfigForSyncState {
-        return PostProcessConfigForSyncState(
-            merge: shouldMergeStateAfterSyncState(
-                previousExternalUserID: previousExternalUserID,
-                newExternalUserID: newExternalUserID
-            ),
-            clear: shouldClearStateAfterSyncState(newExternalUserID: newExternalUserID)
-        )
-    }
-
-    private func shouldMergeStateAfterSyncState(
-        previousExternalUserID: String?,
-        newExternalUserID _: String?
-    ) -> Bool {
-        return externalUserID != nil && previousExternalUserID == nil
-    }
-
-    private func shouldClearStateAfterSyncState(newExternalUserID: String?) -> Bool {
-        return newExternalUserID == nil
-    }
-
-    private func shouldRequestSyncState(previousExternalUserID: String?, newExternalUserID: String?)
-        -> Bool
-    {
-        return newExternalUserID != previousExternalUserID
-    }
 }
