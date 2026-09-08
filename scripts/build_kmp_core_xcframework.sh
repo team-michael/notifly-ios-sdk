@@ -5,7 +5,7 @@ set -euo pipefail
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 core_dir="$root_dir/core"
 source_xcframework="$core_dir/build/XCFrameworks/release/NotiflyCore.xcframework"
-output_dir="$root_dir/Artifacts"
+output_dir="$root_dir/build"
 output_xcframework="$output_dir/NotiflyCore.xcframework"
 
 if [[ ! -x "$core_dir/gradlew" ]]; then

@@ -1,5 +1,8 @@
 name: Release
 
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
     inputs:
@@ -19,6 +22,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           submodules: recursive
 
       - name: Set up Java
@@ -44,13 +48,37 @@ jobs:
           ./scripts/build_kmp_core_xcframework.sh
           ./scripts/smoke_kmp_core_connectivity.sh
 
+      - name: Package KMP Core
+        id: package_core
+        run: ./scripts/package_kmp_core_release.sh
+
+      - name: Pin release asset in package manifests
+        id: release_commit
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+          CORE_CHECKSUM: ${{ steps.package_core.outputs.checksum }}
+        run: |
+          ./scripts/prepare_kmp_core_release.rb "$VERSION" "$CORE_CHECKSUM"
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Package.swift notifly_core.podspec
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: pin NotiflyCore $VERSION release asset"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: Create Release
-        if: steps.read_changelog.outputs.changes
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.event.inputs.version }}
+          commit: ${{ steps.release_commit.outputs.sha }}
           name: Release ${{ github.event.inputs.version }}
           body: ${{ steps.read_changelog.outputs.changes }}
+          artifacts: ${{ steps.package_core.outputs.archive }}
+          artifactErrorsFailBuild: true
+          immutableCreate: true
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -60,5 +88,6 @@ jobs:
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         run: |
+          pod trunk push --allow-warnings notifly_core.podspec
           pod trunk push --allow-warnings notifly_sdk.podspec
           pod trunk push --allow-warnings notifly_sdk_push_extension.podspec

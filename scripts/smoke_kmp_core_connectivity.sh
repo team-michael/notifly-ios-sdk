@@ -4,7 +4,7 @@ set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 consumer_dir="$root_dir/Tests/CoreConnectivity"
-core_binary="$root_dir/Artifacts/NotiflyCore.xcframework/ios-arm64/NotiflyCore.framework/NotiflyCore"
+core_binary="$root_dir/build/NotiflyCore.xcframework/ios-arm64/NotiflyCore.framework/NotiflyCore"
 derived_data="$(mktemp -d)"
 trap 'rm -rf "$derived_data"' EXIT
 

@@ -39,6 +39,7 @@ jobs:
         run: |
           ./scripts/build_kmp_core_xcframework.sh
           ./scripts/smoke_kmp_core_connectivity.sh
+          ./scripts/package_kmp_core_release.sh
 
       - name: Find Available iOS Simulator
         id: find_simulator
