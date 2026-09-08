@@ -1,0 +1,4 @@
+KMP_FRAMEWORK_DIR[sdk=iphoneos*] = $(SRCROOT)/../../../build/kmp/NotiflyKMP.xcframework/ios-arm64
+KMP_FRAMEWORK_DIR[sdk=iphonesimulator*] = $(SRCROOT)/../../../build/kmp/NotiflyKMP.xcframework/ios-arm64_x86_64-simulator
+
+FRAMEWORK_SEARCH_PATHS = $(inherited) "$(KMP_FRAMEWORK_DIR)"

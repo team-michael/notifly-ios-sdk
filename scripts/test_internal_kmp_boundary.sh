@@ -5,6 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROJECT_FILE="$ROOT_DIR/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk.xcodeproj/project.pbxproj"
 USER_MANAGER="$ROOT_DIR/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Infrastructures/User/UserManager.swift"
+PROJECT="$ROOT_DIR/Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk.xcodeproj"
 
 if grep -E 'github.com/(team-michael|notifly-tech)/notifly-kmp-sdk' "$ROOT_DIR/Package.swift" >/dev/null; then
   echo "Package.swift exposes notifly-kmp-sdk" >&2
@@ -22,7 +23,24 @@ if grep -F 'XCRemoteSwiftPackageReference "notifly-kmp-sdk"' "$PROJECT_FILE" >/d
 fi
 
 grep -F '@_implementationOnly import NotiflyKMP' "$USER_MANAGER" >/dev/null
-grep -F 'Build NotiflyKMP' "$PROJECT_FILE" >/dev/null
-grep -F -- '-force_load' "$PROJECT_FILE" >/dev/null
 
-echo "NotiflyKMP is configured as an internal Xcode implementation dependency."
+if grep -F 'Build NotiflyKMP' "$PROJECT_FILE" >/dev/null; then
+  echo "Xcode builds NotiflyKMP instead of consuming the prepared framework" >&2
+  exit 1
+fi
+
+BUILD_SETTINGS="$(
+  xcodebuild \
+    -project "$PROJECT" \
+    -scheme notifly-ios-sdk \
+    -configuration Debug \
+    -sdk iphonesimulator \
+    -destination 'generic/platform=iOS Simulator' \
+    -showBuildSettings
+)"
+
+grep -E 'KMP_FRAMEWORK_DIR = .*/build/kmp/NotiflyKMP\.xcframework/ios-arm64_x86_64-simulator$' <<<"$BUILD_SETTINGS" >/dev/null
+grep -E 'FRAMEWORK_SEARCH_PATHS = .*"?.*/build/kmp/NotiflyKMP\.xcframework/ios-arm64_x86_64-simulator"?' <<<"$BUILD_SETTINGS" >/dev/null
+grep -E 'OTHER_LDFLAGS = .* -force_load "?.*/NotiflyKMP\.framework/NotiflyKMP"?$' <<<"$BUILD_SETTINGS" >/dev/null
+
+echo "Xcode consumes the prepared NotiflyKMP framework as an internal implementation dependency."
