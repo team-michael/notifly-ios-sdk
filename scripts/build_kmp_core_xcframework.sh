@@ -34,6 +34,8 @@ mkdir -p "$output_dir"
 temporary_output="$(mktemp -d "$output_dir/.NotiflyCore.XXXXXX")"
 trap 'rm -rf "$temporary_output"' EXIT
 cp -R "$source_xcframework" "$temporary_output/NotiflyCore.xcframework"
+find "$temporary_output/NotiflyCore.xcframework" -name Info.plist -type f -exec \
+  perl -pi -e 's/[ \t]+$//' {} +
 
 rm -rf "$output_xcframework"
 mv "$temporary_output/NotiflyCore.xcframework" "$output_xcframework"
