@@ -10,6 +10,10 @@ let package = Package(
         .library(
             name: "notifly_sdk",
             targets: ["notifly_sdk"]
+        ),
+        .library(
+            name: "NotiflyCore",
+            targets: ["NotiflyCore"]
         )
     ],
     dependencies: [
@@ -21,10 +25,15 @@ let package = Package(
         .target(
             name: "notifly_sdk",
             dependencies: [
+                "NotiflyCore",
                 .product(name: "FirebaseMessaging", package: "Firebase")
             ],
             path: "Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk",
             sources: ["SourceCodes", "PrivacyInfo.xcprivacy"]
+        ),
+        .binaryTarget(
+            name: "NotiflyCore",
+            path: "Artifacts/NotiflyCore.xcframework"
         )
     ]
 )

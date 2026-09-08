@@ -1,0 +1,8 @@
+framework module "NotiflyCore" {
+    umbrella header "NotiflyCore.h"
+
+    export *
+    module * { export * }
+
+    use Foundation
+}
