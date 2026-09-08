@@ -2,14 +2,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "CoreConnectivity",
+    name: "NotiflyKmpSdkSmokeHost",
     platforms: [.iOS(.v15)],
     dependencies: [
         .package(name: "notifly_sdk", path: "../..")
     ],
     targets: [
         .executableTarget(
-            name: "CoreConnectivity",
+            name: "NotiflyKmpSdkSmokeHost",
             dependencies: [
                 .product(name: "NotiflyCore", package: "notifly_sdk")
             ]

@@ -3,13 +3,13 @@
 set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-core_dir="$root_dir/core"
+core_dir="$root_dir/notifly-kmp-sdk"
 source_xcframework="$core_dir/build/XCFrameworks/release/NotiflyCore.xcframework"
 output_dir="$root_dir/build"
 output_xcframework="$output_dir/NotiflyCore.xcframework"
 
 if [[ ! -x "$core_dir/gradlew" ]]; then
-  echo "core submodule is not initialized. Run: git submodule update --init --recursive" >&2
+  echo "notifly-kmp-sdk submodule is not initialized. Run: git submodule update --init --recursive" >&2
   exit 1
 fi
 

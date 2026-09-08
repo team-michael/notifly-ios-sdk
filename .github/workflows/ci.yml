@@ -38,7 +38,7 @@ jobs:
       - name: Build and smoke-test KMP Core
         run: |
           ./scripts/build_kmp_core_xcframework.sh
-          ./scripts/smoke_kmp_core_connectivity.sh
+          ./scripts/smoke_notifly_kmp_sdk_host.sh
           ./scripts/package_kmp_core_release.sh
 
       - name: Find Available iOS Simulator
