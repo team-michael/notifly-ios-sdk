@@ -18,6 +18,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
 
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -30,6 +38,11 @@ jobs:
         uses: mindsers/changelog-reader-action@v2
         with:
           version: ${{ github.event.inputs.version }}
+
+      - name: Build and smoke-test KMP Core
+        run: |
+          ./scripts/build_kmp_core_xcframework.sh
+          ./scripts/smoke_kmp_core_connectivity.sh
 
       - name: Create Release
         if: steps.read_changelog.outputs.changes
