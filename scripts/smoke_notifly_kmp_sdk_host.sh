@@ -22,14 +22,28 @@ for slice in ios-arm64 ios-arm64_x86_64-simulator; do
   fi
 done
 
+simulator_id="${SIMULATOR_ID:-}"
+if [[ -z "$simulator_id" ]]; then
+  simulator_id="$(xcrun simctl list devices available -j | ruby -rjson -e '
+    devices = JSON.parse(STDIN.read).fetch("devices")
+      .select { |runtime, _| runtime.include?(".iOS-") }
+      .values.flatten
+      .select { |device| device["isAvailable"] && device["name"].start_with?("iPhone") }
+    device = devices.find { |candidate| candidate["state"] == "Booted" } || devices.first
+    abort "No available iPhone simulator found for the Core runtime test." unless device
+    puts device.fetch("udid")
+  ')"
+fi
+
 (
   cd "$consumer_dir"
-  xcodebuild build \
+  xcodebuild test \
     -quiet \
-    -scheme NotiflyKmpSdkSmokeHost \
-    -destination "generic/platform=iOS Simulator" \
+    -scheme NotiflyKmpSdkSmokeHost-Package \
+    -destination "platform=iOS Simulator,id=$simulator_id" \
     -derivedDataPath "$derived_data" \
+    -parallel-testing-enabled NO \
     CODE_SIGNING_ALLOWED=NO
 )
 
-echo "SwiftPM smoke host imports and calls NotiflyCore."
+echo "SwiftPM runtime test imported NotiflyCore and received a Core function result."

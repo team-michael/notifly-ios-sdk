@@ -8,8 +8,8 @@ let package = Package(
         .package(name: "notifly_sdk", path: "../..")
     ],
     targets: [
-        .executableTarget(
-            name: "NotiflyKmpSdkSmokeHost",
+        .testTarget(
+            name: "NotiflyKmpSdkSmokeHostTests",
             dependencies: [
                 .product(name: "NotiflyCore", package: "notifly_sdk")
             ]
