@@ -78,6 +78,19 @@ jobs:
         with:
           xcode-version: "16"
 
+      - name: Determine release type
+        id: release_type
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          # Build metadata does not make a version a prerelease.
+          version_without_build="${VERSION%%+*}"
+          if [[ "$version_without_build" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Read Changelog
         id: read_changelog
         if: ${{ !endsWith(github.event.inputs.version, 'SNAPSHOT') }}
@@ -168,6 +181,7 @@ jobs:
           commit: ${{ steps.release_commit.outputs.sha }}
           name: Release ${{ github.event.inputs.version }}
           body: ${{ steps.read_changelog.outputs.changes }}
+          prerelease: ${{ steps.release_type.outputs.prerelease }}
           artifacts: build/release/NotiflyCore.xcframework.zip
           artifactErrorsFailBuild: true
           immutableCreate: true
