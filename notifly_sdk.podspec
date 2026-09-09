@@ -10,10 +10,11 @@ Pod::Spec.new do |s|
   s.homepage         = 'https://github.com/team-michael/notifly-ios-sdk'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Grey Box Inc.' => 'team@greyboxhq.com' }
-  s.source           = { :git => 'https://github.com/team-michael/notifly-ios-sdk.git', :tag => s.version.to_s, :submodules => true }
+  s.source           = { :git => 'https://github.com/team-michael/notifly-ios-sdk.git', :tag => s.version.to_s }
 
   s.ios.deployment_target = '15.0'
   s.swift_versions = '5.0'
+  s.default_subspec = 'Full'
   s.pod_target_xcconfig = { 'IPHONEOS_DEPLOYMENT_TARGET' => '15.0' }
 
   s.subspec 'Full' do |full|
@@ -21,6 +22,7 @@ Pod::Spec.new do |s|
     full.resource_bundles = {'notifly_sdk_resources' => ['Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/PrivacyInfo.xcprivacy']}
     full.dependency 'FirebaseCore', '>= 10.0.0', '< 20.0.0'
     full.dependency 'FirebaseMessaging', '>= 10.0.0', '< 20.0.0'
+    full.dependency 'notifly_core', s.version.to_s
   end
 
   s.subspec 'Extension' do |e|
