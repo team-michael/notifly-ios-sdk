@@ -113,8 +113,38 @@ jobs:
           existing_tag="$(gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/tags/$VERSION" |
             jq --arg ref "refs/tags/$VERSION" '[.[] | select(.ref == $ref)] | length')"
           if [[ "$existing_tag" != "0" ]]; then
-            echo "Tag $VERSION already exists; refusing to replace release artifacts." >&2
-            exit 1
+            release="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$VERSION")"
+            jq -e --arg version "$VERSION" '
+              .tag_name == $version and .draft == false and
+              ([.assets[] | select(.name == "NotiflyCore.xcframework.zip" and .state == "uploaded")] | length) == 1
+            ' <<< "$release" > /dev/null
+
+            git fetch --no-tags origin "refs/tags/$VERSION"
+            sha="$(git rev-parse 'FETCH_HEAD^{commit}')"
+            parents="$(git show -s --format=%P "$sha")"
+            if [[ "$sha" != "$GITHUB_SHA" && "$parents" != "$GITHUB_SHA" ]]; then
+              echo "Existing release was not created from this source commit." >&2
+              exit 1
+            fi
+
+            # Reuse the published archive, not a potentially non-identical rebuild.
+            checksum="$(git show "$sha:Package.swift" |
+              sed -nE 's/^let releasedCoreChecksum = "([0-9a-f]{64})"$/\1/p')"
+            archive_dir="$(mktemp -d)"
+            trap 'rm -rf "$archive_dir"' EXIT
+            gh release download "$VERSION" --repo "$GITHUB_REPOSITORY" \
+              --pattern NotiflyCore.xcframework.zip --dir "$archive_dir"
+            actual_checksum="$(swift package compute-checksum "$archive_dir/NotiflyCore.xcframework.zip")"
+            if [[ "$actual_checksum" != "$checksum" ]]; then
+              echo "Published Core archive does not match the tagged checksum." >&2
+              exit 1
+            fi
+            ./scripts/prepare_kmp_core_release.rb "$VERSION" "$checksum"
+            # Require identical source and manifests, including the Core pod checksum.
+            git diff --exit-code "$sha" --
+            echo "sha=$sha" >> "$GITHUB_OUTPUT"
+            echo "existing=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
           # Create Git objects without moving a branch or exposing a release tag.
@@ -128,8 +158,10 @@ jobs:
             -f "message=chore: pin NotiflyCore $VERSION release asset" \
             -f "tree=$tree" -f "parents[]=$GITHUB_SHA" --jq .sha)"
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "existing=false" >> "$GITHUB_OUTPUT"
 
       - name: Create Release
+        if: steps.release_commit.outputs.existing != 'true'
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.event.inputs.version }}
@@ -146,6 +178,19 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_COMMIT: ${{ steps.release_commit.outputs.sha }}
         run: |
+          current_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$GITHUB_REF_NAME" --jq .object.sha)"
+          if [[ "$current_sha" == "$RELEASE_COMMIT" ]]; then
+            exit 0
+          fi
+          comparison="$(gh api "repos/$GITHUB_REPOSITORY/compare/$RELEASE_COMMIT...$current_sha" --jq .status)"
+          if [[ "$comparison" == "ahead" ]]; then
+            echo "Branch already contains the release commit."
+            exit 0
+          fi
+          if [[ "$comparison" != "behind" ]]; then
+            echo "Branch diverged from the release commit; refusing to move it." >&2
+            exit 1
+          fi
           gh api --method PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/$GITHUB_REF_NAME" \
             -f "sha=$RELEASE_COMMIT" -F force=false
 
@@ -154,7 +199,33 @@ jobs:
         if: ${{ github.event.inputs.skip_cocoapods != 'true' }}
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+          VERSION: ${{ github.event.inputs.version }}
         run: |
-          pod trunk push --allow-warnings notifly_core.podspec
-          pod trunk push --allow-warnings notifly_sdk.podspec
-          pod trunk push --allow-warnings notifly_sdk_push_extension.podspec
+          spec_dir="$(mktemp -d)"
+          trap 'rm -rf "$spec_dir"' EXIT
+          for pod_name in notifly_core notifly_sdk notifly_sdk_push_extension; do
+            podspec="$pod_name.podspec"
+            status="$(curl --silent --show-error --location --retry 3 --max-time 120 \
+              --proto '=https' --proto-redir '=https' \
+              --output "$spec_dir/published.json" --write-out '%{http_code}' \
+              "https://trunk.cocoapods.org/api/v1/pods/$pod_name/specs/$VERSION")"
+            case "$status" in
+              200)
+                pod ipc spec "$podspec" > "$spec_dir/local.json"
+                # Trunk adds this publishing-tool metadata; all spec fields must match.
+                if ! jq -e -s 'map(del(.pushed_with_swift_version)) | .[0] == .[1]' \
+                  "$spec_dir/local.json" "$spec_dir/published.json" > /dev/null; then
+                  echo "Published $pod_name@$VERSION differs from this release." >&2
+                  exit 1
+                fi
+                echo "$pod_name@$VERSION is already published and matches; skipping."
+                ;;
+              404)
+                pod trunk push --allow-warnings "$podspec"
+                ;;
+              *)
+                echo "Could not check $pod_name@$VERSION (HTTP $status)." >&2
+                exit 1
+                ;;
+            esac
+          done

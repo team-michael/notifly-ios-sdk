@@ -92,7 +92,7 @@ jobs:
           persist-credentials: false
 
       - name: Code Review GPT
-        uses: mattzcarey/code-review-gpt@v0.8.0
+        uses: mattzcarey/code-review-gpt@844c8337f6e0042e557cf2632b6bd7f8d1cd96b6 # v0.8.0
         with:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
