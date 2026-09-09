@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9F6DCE102EB0000100000002 /* NotiflyCore.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F6DCE102EB0000100000001 /* NotiflyCore.xcframework */; };
+		9F6DCE102EB0000100000003 /* NotiflyCore.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9F6DCE102EB0000100000001 /* NotiflyCore.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		9F6DCE102EB0000100000004 /* NotiflyCore.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F6DCE102EB0000100000001 /* NotiflyCore.xcframework */; };
 		2B19B0552BA161E500E33F4B /* TestConstant.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F3CE7A2A13A2DD009FEAF0 /* TestConstant.swift */; };
 		2BC9CB7F2C3E741F0047F006 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC9CB7E2C3E741F0047F006 /* NotificationService.swift */; };
 		2BC9CB832C3E741F0047F006 /* NotiflyNotificationExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2BC9CB7C2C3E741F0047F006 /* NotiflyNotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -87,6 +90,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				F2DF20CC2AB17AB700CB9703 /* notifly_ios_sdk.framework in Embed Frameworks */,
+				9F6DCE102EB0000100000003 /* NotiflyCore.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -105,6 +109,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9F6DCE102EB0000100000001 /* NotiflyCore.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = NotiflyCore.xcframework; path = ../build/NotiflyCore.xcframework; sourceTree = "<group>"; };
 		2BC9CB7C2C3E741F0047F006 /* NotiflyNotificationExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotiflyNotificationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		2BC9CB7E2C3E741F0047F006 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		2BC9CB802C3E741F0047F006 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -136,6 +141,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2BC9CB872C3E743A0047F006 /* notifly_ios_sdk.framework in Frameworks */,
+				9F6DCE102EB0000100000004 /* NotiflyCore.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -144,6 +150,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F22B77BC2AA98B6800F7C432 /* notifly_ios_sdk.framework in Frameworks */,
+				9F6DCE102EB0000100000002 /* NotiflyCore.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -163,6 +170,7 @@
 		672E7B6029ED1D3500B3E9F2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9F6DCE102EB0000100000001 /* NotiflyCore.xcframework */,
 				F22B77B12AA989A400F7C432 /* notifly-ios-sdk.xcodeproj */,
 			);
 			name = Frameworks;

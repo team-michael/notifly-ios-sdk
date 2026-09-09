@@ -1,5 +1,8 @@
 name: iOS CI
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     branches: [main]
@@ -16,6 +19,7 @@ jobs:
         with:
           fetch-depth: 2
           submodules: recursive
+          persist-credentials: false
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -24,7 +28,7 @@ jobs:
           java-version: "17"
 
       - name: Cache Derived Data
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/Library/Developer/Xcode/DerivedData
           key: derived-data-${{ runner.os }}-${{ hashFiles('**/*.xcodeproj/**', '**/*.xcworkspace/**') }}
@@ -73,6 +77,19 @@ jobs:
             -destination 'platform=iOS Simulator,id=${{ steps.find_simulator.outputs.simulator_id }}' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO
+
+  review:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
 
       - name: Code Review GPT
         uses: mattzcarey/code-review-gpt@v0.8.0

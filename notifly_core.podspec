@@ -11,7 +11,9 @@ Pod::Spec.new do |s|
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Grey Box Inc.' => 'team@greyboxhq.com' }
   s.source           = {
-    :http => "https://github.com/team-michael/notifly-ios-sdk/releases/download/#{s.version}/NotiflyCore.xcframework.zip"
+    :http => "https://github.com/team-michael/notifly-ios-sdk/releases/download/#{s.version}/NotiflyCore.xcframework.zip",
+    # Updated together with the SwiftPM checksum by prepare_kmp_core_release.rb.
+    :sha256 => '0000000000000000000000000000000000000000000000000000000000000000'
   }
 
   s.ios.deployment_target = '15.0'

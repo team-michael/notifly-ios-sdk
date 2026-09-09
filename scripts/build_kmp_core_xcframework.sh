@@ -37,6 +37,12 @@ cp -R "$source_xcframework" "$temporary_output/NotiflyCore.xcframework"
 find "$temporary_output/NotiflyCore.xcframework" -name Info.plist -type f -exec \
   plutil -convert xml1 {} +
 
+# Kotlin/Native emits iPhoneOS for simulator frameworks as well.
+plutil -replace CFBundleSupportedPlatforms -json '["iPhoneOS"]' \
+  "$temporary_output/NotiflyCore.xcframework/ios-arm64/NotiflyCore.framework/Info.plist"
+plutil -replace CFBundleSupportedPlatforms -json '["iPhoneSimulator"]' \
+  "$temporary_output/NotiflyCore.xcframework/ios-arm64_x86_64-simulator/NotiflyCore.framework/Info.plist"
+
 rm -rf "$output_xcframework"
 mv "$temporary_output/NotiflyCore.xcframework" "$output_xcframework"
 

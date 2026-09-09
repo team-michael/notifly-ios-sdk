@@ -1,7 +1,11 @@
 name: Release
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: ios-sdk-release
+  cancel-in-progress: false
 
 on:
   workflow_dispatch:
@@ -15,8 +19,10 @@ on:
         default: false
 
 jobs:
-  release:
+  build:
     runs-on: macos-15
+    outputs:
+      checksum: ${{ steps.package_core.outputs.checksum }}
 
     steps:
       - name: Checkout code
@@ -24,12 +30,48 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
+          persist-credentials: false
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "16"
+
+      - name: Build and smoke-test KMP Core
+        run: |
+          ./scripts/build_kmp_core_xcframework.sh
+          ./scripts/smoke_notifly_kmp_sdk_host.sh
+
+      - name: Package KMP Core
+        id: package_core
+        run: ./scripts/package_kmp_core_release.sh
+
+      - name: Upload Core build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: notifly-core-release
+          path: build/release/NotiflyCore.xcframework.zip
+          if-no-files-found: error
+          retention-days: 3
+
+  release:
+    needs: build
+    if: github.ref_type == 'branch'
+    runs-on: macos-15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout release source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
 
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -43,31 +85,49 @@ jobs:
         with:
           version: ${{ github.event.inputs.version }}
 
-      - name: Build and smoke-test KMP Core
-        run: |
-          ./scripts/build_kmp_core_xcframework.sh
-          ./scripts/smoke_notifly_kmp_sdk_host.sh
+      - name: Download Core build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: notifly-core-release
+          path: build/release
 
-      - name: Package KMP Core
-        id: package_core
-        run: ./scripts/package_kmp_core_release.sh
+      - name: Verify Core archive
+        env:
+          EXPECTED_CHECKSUM: ${{ needs.build.outputs.checksum }}
+        run: |
+          actual_checksum="$(swift package compute-checksum build/release/NotiflyCore.xcframework.zip)"
+          if [[ "$actual_checksum" != "$EXPECTED_CHECKSUM" ]]; then
+            echo "Core archive checksum does not match the build job." >&2
+            exit 1
+          fi
 
       - name: Pin release asset in package manifests
         id: release_commit
         env:
           VERSION: ${{ github.event.inputs.version }}
-          CORE_CHECKSUM: ${{ steps.package_core.outputs.checksum }}
+          CORE_CHECKSUM: ${{ needs.build.outputs.checksum }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           ./scripts/prepare_kmp_core_release.rb "$VERSION" "$CORE_CHECKSUM"
           git diff --check
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Package.swift notifly_core.podspec
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: pin NotiflyCore $VERSION release asset"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
+          existing_tag="$(gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/tags/$VERSION" |
+            jq --arg ref "refs/tags/$VERSION" '[.[] | select(.ref == $ref)] | length')"
+          if [[ "$existing_tag" != "0" ]]; then
+            echo "Tag $VERSION already exists; refusing to replace release artifacts." >&2
+            exit 1
           fi
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+          # Create Git objects without moving a branch or exposing a release tag.
+          tree="$(jq -n --arg base "$(git rev-parse "$GITHUB_SHA^{tree}")" \
+            --rawfile package Package.swift --rawfile podspec notifly_core.podspec \
+            '{base_tree: $base, tree: [
+              {path: "Package.swift", mode: "100644", type: "blob", content: $package},
+              {path: "notifly_core.podspec", mode: "100644", type: "blob", content: $podspec}
+            ]}' | gh api "repos/$GITHUB_REPOSITORY/git/trees" --input - --jq .sha)"
+          sha="$(gh api "repos/$GITHUB_REPOSITORY/git/commits" \
+            -f "message=chore: pin NotiflyCore $VERSION release asset" \
+            -f "tree=$tree" -f "parents[]=$GITHUB_SHA" --jq .sha)"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         uses: ncipollo/release-action@v1
@@ -76,11 +136,18 @@ jobs:
           commit: ${{ steps.release_commit.outputs.sha }}
           name: Release ${{ github.event.inputs.version }}
           body: ${{ steps.read_changelog.outputs.changes }}
-          artifacts: ${{ steps.package_core.outputs.archive }}
+          artifacts: build/release/NotiflyCore.xcframework.zip
           artifactErrorsFailBuild: true
           immutableCreate: true
-          allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Advance branch after release is available
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_COMMIT: ${{ steps.release_commit.outputs.sha }}
+        run: |
+          gh api --method PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/$GITHUB_REF_NAME" \
+            -f "sha=$RELEASE_COMMIT" -F force=false
 
       # https://fuller.li/posts/automated-cocoapods-releases-with-ci/
       - name: Release to CocoaPods

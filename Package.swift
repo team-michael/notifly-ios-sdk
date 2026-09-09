@@ -6,13 +6,22 @@ import PackageDescription
 let releasedCoreVersion = "LOCAL"
 let releasedCoreChecksum = "0000000000000000000000000000000000000000000000000000000000000000"
 let localCorePath = "build/NotiflyCore.xcframework"
+let localCoreURL = URL(fileURLWithPath: #filePath)
+    .deletingLastPathComponent()
+    .appendingPathComponent(localCorePath)
 
 let coreBinaryTarget: Target
-if FileManager.default.fileExists(atPath: localCorePath) || releasedCoreVersion == "LOCAL" {
+if FileManager.default.fileExists(atPath: localCoreURL.appendingPathComponent("Info.plist").path) {
     coreBinaryTarget = .binaryTarget(
         name: "NotiflyCore",
         path: localCorePath
     )
+} else if releasedCoreVersion == "LOCAL" {
+    fatalError("""
+        NotiflyCore is not built. In the notifly-ios-sdk checkout, run:
+        git submodule update --init --recursive
+        ./scripts/build_kmp_core_xcframework.sh
+        """)
 } else {
     coreBinaryTarget = .binaryTarget(
         name: "NotiflyCore",
