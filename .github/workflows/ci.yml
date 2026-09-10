@@ -37,7 +37,7 @@ jobs:
         env:
           CI_PRIMARY_REPOSITORY_PATH: ${{ github.workspace }}
         run: |
-          ./NotiflyTestApp/ci_scripts/ci_pre_xcodebuild.sh
+          ./ci_scripts/ci_pre_xcodebuild.sh
           ./scripts/smoke_notifly_kmp_sdk_host.sh
           ./scripts/package_kmp_core_release.sh
 
