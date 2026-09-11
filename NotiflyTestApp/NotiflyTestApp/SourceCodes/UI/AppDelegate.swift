@@ -9,6 +9,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _: UIApplication,
         didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        // Add your own GoogleService-Info.plist to this app target to enable SDK features.
+        guard let configurationPath = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+            let options = FirebaseOptions(contentsOfFile: configurationPath)
+        else {
+            print("Firebase configuration is unavailable. Running the sample without Firebase and Notifly initialization.")
+            return true
+        }
+
+        FirebaseApp.configure(options: options)
+
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
             granted, error in
             if let error = error {
@@ -24,8 +34,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
         }
-
-        FirebaseApp.configure()
 
         Notifly.initialize(
             projectId: TestConstant.projectID, username: TestConstant.username,
@@ -46,6 +54,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
+        guard FirebaseApp.app() != nil else { return }
         Notifly.application(
             application,
             didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
@@ -55,6 +64,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
+        guard FirebaseApp.app() != nil else { return }
         Notifly.application(
             application,
             didFailToRegisterForRemoteNotificationsWithError: error)
@@ -67,6 +77,10 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse,
         withCompletionHandler completion: () -> Void
     ) {
+        guard FirebaseApp.app() != nil else {
+            completion()
+            return
+        }
         Notifly.userNotificationCenter(
             notificationCenter,
             didReceive: response)
@@ -78,6 +92,10 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         willPresent notification: UNNotification,
         withCompletionHandler completion: (UNNotificationPresentationOptions) -> Void
     ) {
+        guard FirebaseApp.app() != nil else {
+            completion([])
+            return
+        }
         Notifly.userNotificationCenter(
             notificationCenter,
             willPresent: notification,
