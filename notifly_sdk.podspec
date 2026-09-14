@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
   s.name             = 'notifly_sdk'
-  s.version          = '2.7.0'
+  s.version          = '2.8.0-alpha.1'
   s.summary          = 'Notifly iOS SDK.'
 
   s.description      = <<-DESC
-  NOTIFLY iOS SDK : 2.7.0
+  NOTIFLY iOS SDK : 2.8.0-alpha.1
   DESC
 
   s.homepage         = 'https://github.com/team-michael/notifly-ios-sdk'
