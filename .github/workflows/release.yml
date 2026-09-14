@@ -242,4 +242,8 @@ jobs:
                 exit 1
                 ;;
             esac
+            # Trunk registration can precede the CDN index used by dependency resolution.
+            if [[ "$pod_name" == "notifly_core" ]]; then
+              ruby scripts/wait_for_cocoapods.rb "$pod_name" "$VERSION"
+            fi
           done
