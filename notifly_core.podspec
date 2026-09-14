@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'notifly_core'
-  s.version          = '2.7.0'
+  s.version          = '2.8.0-alpha.1'
   s.summary          = 'Notifly shared Core SDK.'
 
   s.description      = <<-DESC
