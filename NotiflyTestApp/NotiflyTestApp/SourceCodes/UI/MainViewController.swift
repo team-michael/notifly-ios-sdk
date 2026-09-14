@@ -1,7 +1,3 @@
-import Combine
-
-// @testable import notifly_ios_sdk
-
 import UIKit
 
 class MainViewController: UIViewController {
@@ -21,8 +17,6 @@ class MainViewController: UIViewController {
     let testTrackingButton = UIButton()
     let testPushNotificationButton = UIButton()
     let testUserSettingsButton = UIButton()
-
-    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Lifecycle
 

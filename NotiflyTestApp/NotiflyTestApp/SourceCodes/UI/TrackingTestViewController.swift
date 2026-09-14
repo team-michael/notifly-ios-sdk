@@ -1,7 +1,5 @@
-import Combine
+import notifly_ios_sdk
 import UIKit
-
-@testable import notifly_ios_sdk
 
 class TrackingTestViewController: UIViewController {
     // MARK: UI Components
@@ -15,10 +13,6 @@ class TrackingTestViewController: UIViewController {
     let customEventParamsButton = UIButton()
     let submitTrackingEventButton = UIButton()
 
-    let requestPayloadTextView = UITextView()
-    let responsePayloadTextView = UITextView()
-
-    private var cancellables = Set<AnyCancellable>()
     private var customEventParams: [String: String]?
 
     override func viewDidLoad() {
@@ -28,30 +22,6 @@ class TrackingTestViewController: UIViewController {
 
     private func setup() {
         setupUI()
-
-        // Inspect request payload
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
-
-        try? Notifly.main.trackingManager.eventRequestPayloadPublisher
-            .encode(encoder: encoder)
-            .map {
-                String(data: $0, encoding: .utf8) ?? "Encoding Error"
-            }
-            .catch {
-                Just("Failed to encode Event payload with error: \($0)")
-            }
-            .receive(on: RunLoop.main)
-            .assign(to: \.text, on: requestPayloadTextView)
-            .store(in: &cancellables)
-
-        // Inspect Response Payload.
-        try? Notifly.main.trackingManager.eventRequestResponsePublisher
-            .receive(on: RunLoop.main)
-            .sink { [weak self] resultingString in
-                self?.responsePayloadTextView.text = resultingString
-            }
-            .store(in: &cancellables)
     }
 
     private func setupUI() {
@@ -62,9 +32,6 @@ class TrackingTestViewController: UIViewController {
         eventNameTextField.placeholder = "Test Event Name"
         segmentationEventParamsTextField.placeholder =
             "Comma (',') Separated. e.g. 'value1, value2'"
-
-        requestPayloadTextView.text = "N/A"
-        responsePayloadTextView.text = "N/A"
 
         submitTrackingEventButton.addTarget(
             self, action: #selector(submitBtnTapped(sender:)), for: .touchUpInside)
@@ -102,9 +69,6 @@ class TrackingTestViewController: UIViewController {
         stackView.addCTAView(
             labelText: "Queue Tracking Event", button: submitTrackingEventButton, bgColor: .blue)
 
-        stackView.addInfoView(labelText: "Request Payload", textView: requestPayloadTextView)
-        stackView.addInfoView(labelText: "Response Payload", textView: responsePayloadTextView)
-
         stackView.addArrangedSubview(UIView())
     }
 
@@ -124,8 +88,6 @@ class TrackingTestViewController: UIViewController {
             .split(separator: ",")
             .map(String.init)
 
-        responsePayloadTextView.text = "N/A"
-
         // let wrongGroup = DispatchGroup()
         // let wrongQueue = DispatchQueue(label: "WrongQueue")
         // for i in 0 ..< 30 {
@@ -140,7 +102,7 @@ class TrackingTestViewController: UIViewController {
         // }
         // wrongGroup.wait()
 
-        try? Notifly.trackEvent(
+        Notifly.trackEvent(
             eventName: eventName,
             eventParams: customEventParams,
             segmentationEventParamKeys: segmentationEventParamKeys)

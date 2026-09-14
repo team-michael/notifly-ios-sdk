@@ -1,6 +1,5 @@
-import Combine
 import Foundation
-@testable import notifly_ios_sdk
+import notifly_ios_sdk
 import UIKit
 
 class UserSettingsTestViewController: UIViewController {
