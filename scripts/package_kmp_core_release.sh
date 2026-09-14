@@ -4,6 +4,7 @@ set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 xcframework="$root_dir/build/NotiflyCore.xcframework"
+license="$root_dir/LICENSE"
 release_dir="$root_dir/build/release"
 archive="$release_dir/NotiflyCore.xcframework.zip"
 
@@ -12,9 +13,15 @@ if [[ ! -d "$xcframework" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$license" ]]; then
+  echo "LICENSE is missing. Core release archives must include the license declared in notifly_core.podspec." >&2
+  exit 1
+fi
+
 mkdir -p "$release_dir"
 rm -f "$archive"
 ditto -c -k --sequesterRsrc --keepParent "$xcframework" "$archive"
+zip -q -j "$archive" "$license"
 
 checksum="$(swift package compute-checksum "$archive")"
 echo "archive=$archive"
