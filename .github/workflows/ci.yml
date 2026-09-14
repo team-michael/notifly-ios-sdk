@@ -21,6 +21,9 @@ jobs:
           submodules: recursive
           persist-credentials: false
 
+      - name: Test CocoaPods release ordering
+        run: ruby scripts/test_cocoapods_release.rb
+
       - name: Cache Derived Data
         uses: actions/cache@v4
         with:
