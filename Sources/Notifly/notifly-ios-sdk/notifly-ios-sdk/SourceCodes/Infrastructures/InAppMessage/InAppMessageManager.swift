@@ -14,11 +14,15 @@ import UIKit
 class InAppMessageManager {
     let userStateManager: UserStateManager
     private var eventListeners: [InAppMessageEventListener] = []
+    private let renderer: InAppMessageRenderer
     private var scheduledWorkItems: [String: DispatchWorkItem] = [:]
     private let scheduleLock = NSLock()
 
-    init(owner: String?) {
+    init(owner: String?, projectId: String, renderingBaseURL: String = NotiflyConstant.EndPoint.popupRenderingEndPoint) {
         userStateManager = UserStateManager(owner: owner)
+        renderer = InAppMessageRenderer(
+            projectId: projectId, baseURL: renderingBaseURL,
+            sdkVersion: "notifly/ios/\(NotiflyHelper.getNativeSdkVersion())")
     }
 
     func mayTriggerInAppMessage(
@@ -39,7 +43,7 @@ class InAppMessageManager {
             campaignsToTrigger.sort(by: { $0.updatedAt > $1.updatedAt })
             for campaignToTrigger in campaignsToTrigger {
                 if let notiflyInAppMessageData = prepareInAppMessageData(
-                    campaign: campaignToTrigger)
+                    campaign: campaignToTrigger, eventName: eventName, eventParams: eventParams)
                 {
                     showInAppMessage(
                         userID: try? Notifly.main.userManager.getNotiflyUserID(),
@@ -143,7 +147,9 @@ class InAppMessageManager {
         return false
     }
 
-    private func prepareInAppMessageData(campaign: Campaign) -> InAppMessageData? {
+    private func prepareInAppMessageData(
+        campaign: Campaign, eventName: String, eventParams: [String: Any]?
+    ) -> InAppMessageData? {
         let messageId = UUID().uuidString.replacingOccurrences(of: "-", with: "")
         let campaignId = campaign.id
         let urlString = campaign.message.htmlURL
@@ -155,87 +161,43 @@ class InAppMessageManager {
             return InAppMessageData(
                 notiflyMessageId: messageId, notiflyCampaignId: campaignId,
                 modalProps: modalProperties, url: url, deadline: deadline,
-                notiflyReEligibleCondition: campaign.reEligibleCondition)
+                notiflyReEligibleCondition: campaign.reEligibleCondition,
+                templateRenderingMode: campaign.message.templateRenderingMode,
+                deviceID: AppHelper.getNotiflyDeviceID(), eventName: eventName, eventParams: eventParams)
         }
         return nil
     }
 
-    private func showInAppMessage(
-        userID: String?,
-        notiflyInAppMessageData: InAppMessageData
-    ) {
-        guard let userID = userID else {
-            return
-        }
-        let campaignId = notiflyInAppMessageData.notiflyCampaignId
+    private func showInAppMessage(userID: String?, notiflyInAppMessageData data: InAppMessageData) {
+        guard let userID = userID else { return }
+        let campaignId = data.notiflyCampaignId
         scheduleLock.lock()
         scheduledWorkItems.removeValue(forKey: campaignId)?.cancel()
         scheduleLock.unlock()
 
         var workItem: DispatchWorkItem?
         workItem = DispatchWorkItem { [weak self] in
-            guard let self = self, let workItem = workItem else { return }
-
-            // Only proceed if this is still the currently scheduled instance
-            self.scheduleLock.lock()
-            let isCurrent = self.scheduledWorkItems[campaignId] === workItem
-            if isCurrent {
-                self.scheduledWorkItems.removeValue(forKey: campaignId)
-            }
-            self.scheduleLock.unlock()
-            guard isCurrent else { return }
-
-            // CRITICAL: DispatchWorkItem.cancel() only sets flag, block still executes
-            guard !workItem.isCancelled else {
-                Logger.info("[Notifly] Cancelled campaign skipped: \(campaignId)")
+            guard let self = self, let workItem = workItem, !workItem.isCancelled else { return }
+            guard self.canPresentInAppMessage(userID: userID, data: data) else {
+                self.completeScheduledWorkItem(campaignId: campaignId, workItem: workItem)
                 return
             }
-
-            guard let currentUserID = try? Notifly.main.userManager.getNotiflyUserID(),
-                  userID == currentUserID
-            else {
-                Logger.error("Skip to present in app message schedule: user id is changed.")
-                return
-            }
-
-            let currentUserData = self.userStateManager.userData
-            if notiflyInAppMessageData.notiflyReEligibleCondition != nil {
-                guard
-                    !self.isHiddenCampaign(
-                        campaignID: notiflyInAppMessageData.notiflyCampaignId,
-                        userData: currentUserData)
-                else {
-                    return
+            self.renderer.render(data: data, userID: userID) { [weak self] content in
+                DispatchQueue.main.async {
+                    guard let self = self,
+                          self.completeScheduledWorkItem(campaignId: campaignId, workItem: workItem),
+                          !workItem.isCancelled, let content = content,
+                          self.canPresentInAppMessage(userID: userID, data: data)
+                    else { return }
+                    WebViewModalViewController.openedInAppMessageCount = 1
+                    guard (try? WebViewModalViewController(
+                        notiflyInAppMessageData: data, content: content)) != nil
+                    else {
+                        WebViewModalViewController.openedInAppMessageCount = 0
+                        Logger.error("Error presenting in app message")
+                        return
+                    }
                 }
-            }
-
-            guard
-                !self.isHiddenTemplate(
-                    templateName: notiflyInAppMessageData.modalProps.templateName,
-                    userData: currentUserData)
-            else {
-                return
-            }
-
-            guard WebViewModalViewController.openedInAppMessageCount == 0 else {
-                Logger.error("Already In App Message Opened. New In App Message Ignored.")
-                return
-            }
-
-            WebViewModalViewController.openedInAppMessageCount = 1
-            guard UIApplication.shared.applicationState == .active else {
-                Logger.error(
-                    "Due to being in a background state, in-app messages are being ignored.")
-                WebViewModalViewController.openedInAppMessageCount = 0
-                return
-            }
-            guard
-                let vc = try? WebViewModalViewController(
-                    notiflyInAppMessageData: notiflyInAppMessageData)
-            else {
-                Logger.error("Error presenting in app message")
-                WebViewModalViewController.openedInAppMessageCount = 0
-                return
             }
         }
 
@@ -243,8 +205,30 @@ class InAppMessageManager {
         scheduleLock.lock()
         scheduledWorkItems[campaignId] = workItem
         scheduleLock.unlock()
+        DispatchQueue.main.asyncAfter(deadline: data.deadline, execute: workItem)
+    }
 
-        DispatchQueue.main.asyncAfter(deadline: notiflyInAppMessageData.deadline, execute: workItem)
+    /// Applies the existing display checks before and after the asynchronous render request.
+    private func canPresentInAppMessage(userID: String, data: InAppMessageData) -> Bool {
+        guard !Notifly.inAppMessageDisabled,
+              userID == (try? Notifly.main.userManager.getNotiflyUserID()),
+              UIApplication.shared.applicationState == .active,
+              WebViewModalViewController.openedInAppMessageCount == 0
+        else { return false }
+        let userData = userStateManager.userData
+        if data.notiflyReEligibleCondition != nil,
+           isHiddenCampaign(campaignID: data.notiflyCampaignId, userData: userData) { return false }
+        return !isHiddenTemplate(templateName: data.modalProps.templateName, userData: userData)
+    }
+
+    /// Removes only this request, leaving a newer request for the same campaign untouched.
+    @discardableResult
+    private func completeScheduledWorkItem(campaignId: String, workItem: DispatchWorkItem) -> Bool {
+        scheduleLock.lock()
+        defer { scheduleLock.unlock() }
+        guard scheduledWorkItems[campaignId] === workItem else { return false }
+        scheduledWorkItems.removeValue(forKey: campaignId)
+        return true
     }
 
     func getScheduledCampaignIds() -> [String] {

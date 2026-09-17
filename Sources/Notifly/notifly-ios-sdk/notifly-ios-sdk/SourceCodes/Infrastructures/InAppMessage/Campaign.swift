@@ -86,7 +86,9 @@ struct Campaign {
         self.segmentType = segmentType
         segmentInfo = NotiflySegmentation.SegmentInfo(from: segmentInfoDict)
 
-        message = Message(htmlURL: htmlURL, modalProperties: modalProperties)
+        message = Message(
+            htmlURL: htmlURL, modalProperties: modalProperties,
+            templateRenderingMode: messageDict["template_rendering_mode"] as? String)
 
         self.updatedAt = updatedAt
     }
@@ -105,6 +107,7 @@ enum CampaignStatus: Int {
 struct Message {
     let htmlURL: String
     let modalProperties: ModalProperties
+    let templateRenderingMode: String?
 }
 
 @available(iOSApplicationExtension, unavailable)

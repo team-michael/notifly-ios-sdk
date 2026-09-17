@@ -36,4 +36,14 @@ struct InAppMessageData {
     let url: URL
     let deadline: DispatchTime
     let notiflyReEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
+    let templateRenderingMode: String?
+    let deviceID: String?
+    let eventName: String
+    let eventParams: [String: Any]?
+}
+
+@available(iOSApplicationExtension, unavailable)
+enum InAppMessageContent: Equatable {
+    case url(URL)
+    case html(String, baseURL: URL)
 }
