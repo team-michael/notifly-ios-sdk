@@ -164,6 +164,15 @@ class UserManager {
             return
         }
 
+        if !Notifly.inAppMessageDisabled,
+           let userID = try? getNotiflyUserID(),
+           let existing = notifly.inAppMessageManager.userStateManager.getUserData(userID: userID)?.userProperties,
+           let previous = try? JSONSerialization.data(withJSONObject: existing.filter { userProperties.keys.contains($0.key) }, options: [.sortedKeys]),
+           let incoming = try? JSONSerialization.data(withJSONObject: userProperties, options: [.sortedKeys]),
+           previous == incoming {
+            return
+        }
+
         if !Notifly.inAppMessageDisabled {
             Notifly.asyncWorker.addTask { [weak self] finishTask in
                 guard let self = self else {
