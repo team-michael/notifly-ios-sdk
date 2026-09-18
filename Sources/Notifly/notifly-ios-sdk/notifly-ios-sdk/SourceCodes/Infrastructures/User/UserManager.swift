@@ -5,6 +5,7 @@ import NotiflyCore
 
 @available(iOSApplicationExtension, unavailable)
 class UserManager {
+    private var lastUserPropertiesSentAt: TimeInterval?
     private let userIdAccessQueue = DispatchQueue(
         label: "com.notifly.userManager.changeExternalUserIdQueue"
     )
@@ -42,6 +43,7 @@ class UserManager {
     }
 
     func changeExternalUserId(newValue: String?) {
+        lastUserPropertiesSentAt = nil
         notiflyUserIDCache = nil
         externalUserID = newValue
         userIdAccessQueue.async {
@@ -164,7 +166,9 @@ class UserManager {
             return
         }
 
-        if !Notifly.inAppMessageDisabled,
+        if let lastUserPropertiesSentAt = lastUserPropertiesSentAt,
+           (0..<5).contains(Date().timeIntervalSince1970 - lastUserPropertiesSentAt),
+           !Notifly.inAppMessageDisabled,
            let userID = try? getNotiflyUserID(),
            let existing = notifly.inAppMessageManager.userStateManager.getUserData(userID: userID)?.userProperties,
            let previous = try? JSONSerialization.data(withJSONObject: existing.filter { userProperties.keys.contains($0.key) }, options: [.sortedKeys]),
@@ -187,6 +191,9 @@ class UserManager {
             }
         }
 
+        if userProperties[TrackingConstant.Internal.notiflyExternalUserID] == nil {
+            lastUserPropertiesSentAt = Date().timeIntervalSince1970
+        }
         notifly.trackingManager.trackInternalEvent(
             eventName: TrackingConstant.Internal.setUserPropertiesEventName,
             eventParams: userProperties,
