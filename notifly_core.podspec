@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'notifly_core'
-  s.version          = '2.8.0-alpha.1'
+  s.version          = '2.8.0'
   s.summary          = 'Notifly shared Core SDK.'
 
   s.description      = <<-DESC
@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
   s.source           = {
     :http => "https://github.com/team-michael/notifly-ios-sdk/releases/download/#{s.version}/NotiflyCore.xcframework.zip",
     # Updated together with the SwiftPM checksum by prepare_kmp_core_release.rb.
-    :sha256 => '22af0e1224033b39e34ced8e333a8d37ac3fe741a6156a6a5dfb0bffae8b569f'
+    :sha256 => '8b19b86d77495cb96475f6807e3b27249d71cddcbcd2606ad3dceeebf5f923b9'
   }
 
   s.ios.deployment_target = '15.0'
