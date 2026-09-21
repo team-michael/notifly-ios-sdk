@@ -8,29 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Integrate KMP Core 0.1.0 to display server-rendered in-app popups with Liquid personalization, catalogs, Connected Content, and render-abort handling.
-- Read `message.template_rendering_mode`; request rendered HTML only for `ssr`, and preserve URL loading for static, missing, or unrecognized modes.
-- Pass the triggering event name and nested event parameters together with the campaign, user, and device IDs to the rendering service after the campaign delay.
-- Load rendered HTML in WKWebView with the original template URL as its base URL, preserving relative resources and existing popup interactions.
-- Recheck the scheduled request, user identity, foreground state, display availability, and campaign/template hiding conditions after rendering. Skip failed, aborted, cancelled, or superseded results instead of displaying the unrendered template.
-- Expose shared Core as a separate `NotiflyCore` SwiftPM product and `notifly_core` CocoaPod, distributed as a dynamic XCFramework for devices and simulators.
-- Add SwiftPM Core runtime smoke tests, popup rendering regression tests, and CocoaPods publication-order tests.
+- Support KMP-based popup personalization with Liquid, catalogs, Connected Content, and render-abort handling.
+- Expose shared Core through SwiftPM and CocoaPods and unify user ID transition handling.
 
 ### Changed
 
-- Use shared Core decisions for user ID changes and the corresponding state synchronization, merging, and clearing.
-- Skip `setUserProperties` calls whose supplied keys and values match available local state within five seconds of the last non-identity property send attempt. First calls, changed values, and calls at or after five seconds follow the normal path; skipped calls do not extend the window, and identity changes reset it. Comparison requires enabled in-app messaging and is not a server-acknowledgement cache.
-- Make `Full` the default CocoaPods subspec and depend on an exactly matching Core version. SwiftPM uses the built local XCFramework during source development and a checksummed release asset for distributed packages.
-- Build and validate Core before release, attach the archive, and pin its actual version/checksum in SwiftPM and CocoaPods manifests before tagging. Verify existing assets/specifications when retrying publication and distinguish prereleases from stable releases.
-- Publish Core, the full SDK, and the push extension in dependency order; promote the SDK and push extension to stable `2.8.0`, with Core manifest pinning performed by the release workflow.
-- Separate automated review from build CI, restrict workflow permissions, and pin the review action revision.
+- Skip unchanged user-property updates within five seconds.
+- Preserve static popup behavior and validate display conditions after rendering.
 
 ### Fixed
 
-- Prepare the pinned KMP Core before Xcode Cloud builds, including JDK setup and proxy configuration, while skipping the preparation hook for `test-without-building`.
-- Allow the test app to build and launch without a bundled Firebase configuration; initialize Firebase and Notifly only when configuration is supplied. Replace test-only SDK imports and remove internal request/response inspectors from the sample.
-- Wait for the Core CocoaPods specification to propagate to the CDN before publishing dependent SDK pods.
-- Include `LICENSE` in the Core release archive so CocoaPods can validate the binary package.
+- Fix Core packaging, CocoaPods publication ordering, Xcode Cloud preparation, and sample builds without Firebase configuration.
 
 ## [2.8.0-alpha.1] - 2026-09-14
 
