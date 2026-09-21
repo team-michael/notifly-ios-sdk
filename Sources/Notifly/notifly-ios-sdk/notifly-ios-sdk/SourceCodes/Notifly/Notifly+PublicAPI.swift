@@ -227,6 +227,14 @@ import UIKit
         return try? main.userManager.getNotiflyUserID()
     }
 
+    /// Sets the supplied user properties.
+    /// When in-app messaging is enabled and local user properties are available,
+    /// a call is skipped if every supplied key/value matches local state and less than
+    /// 5 seconds have elapsed since the last non-identity property send attempt.
+    /// The window starts at the send attempt, not a server acknowledgement.
+    /// Skipped calls do not extend the window; changing the user identity resets it.
+    /// First calls, changed values, and calls at or after 5 seconds follow the normal send flow.
+    /// Server/API changes may not yet be reflected in the local state used for comparison.
     static func setUserProperties(userProperties: [String: Any]) {
         guard let main = try? main else {
             Logger.error(

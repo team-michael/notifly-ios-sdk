@@ -5,6 +5,7 @@ import NotiflyCore
 
 @available(iOSApplicationExtension, unavailable)
 class UserManager {
+    private var lastUserPropertiesSentAt: TimeInterval?
     private let userIdAccessQueue = DispatchQueue(
         label: "com.notifly.userManager.changeExternalUserIdQueue"
     )
@@ -42,6 +43,7 @@ class UserManager {
     }
 
     func changeExternalUserId(newValue: String?) {
+        lastUserPropertiesSentAt = nil
         notiflyUserIDCache = nil
         externalUserID = newValue
         userIdAccessQueue.async {
@@ -164,25 +166,37 @@ class UserManager {
             return
         }
 
-        if !Notifly.inAppMessageDisabled {
-            Notifly.asyncWorker.addTask { [weak self] finishTask in
-                guard let self = self else {
-                    finishTask()
-                    return
-                }
+        Notifly.asyncWorker.addTask(lockAcquired: lockAcquired) { [weak self] finishTask in
+            defer { finishTask() }
+            guard let self = self else { return }
+
+            if let lastUserPropertiesSentAt = self.lastUserPropertiesSentAt,
+               (0..<5).contains(Date().timeIntervalSince1970 - lastUserPropertiesSentAt),
+               !Notifly.inAppMessageDisabled,
+               let userID = try? self.getNotiflyUserID(),
+               let existing = notifly.inAppMessageManager.userStateManager.getUserData(userID: userID)?.userProperties,
+               let previous = try? JSONSerialization.data(withJSONObject: existing.filter { userProperties.keys.contains($0.key) }, options: [.sortedKeys]),
+               let incoming = try? JSONSerialization.data(withJSONObject: userProperties, options: [.sortedKeys]),
+               previous == incoming {
+                return
+            }
+
+            if !Notifly.inAppMessageDisabled {
                 notifly.inAppMessageManager.userStateManager.updateUserData(
-                    userID: try? getNotiflyUserID(),
+                    userID: try? self.getNotiflyUserID(),
                     properties: userProperties
                 )
-                finishTask()
             }
-        }
 
-        notifly.trackingManager.trackInternalEvent(
-            eventName: TrackingConstant.Internal.setUserPropertiesEventName,
-            eventParams: userProperties,
-            lockAcquired: lockAcquired
-        )
+            if userProperties[TrackingConstant.Internal.notiflyExternalUserID] == nil {
+                self.lastUserPropertiesSentAt = Date().timeIntervalSince1970
+            }
+            notifly.trackingManager.trackInternalEvent(
+                eventName: TrackingConstant.Internal.setUserPropertiesEventName,
+                eventParams: userProperties,
+                lockAcquired: true
+            )
+        }
     }
 
     func getNotiflyUserID() throws -> String {
