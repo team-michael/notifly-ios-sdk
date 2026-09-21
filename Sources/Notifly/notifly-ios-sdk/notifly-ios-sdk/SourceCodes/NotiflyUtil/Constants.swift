@@ -1,7 +1,7 @@
 import Foundation
 
 enum NotiflySdkConfig {
-    static let sdkVersion: String = "2.8.0-alpha.1"
+    static let sdkVersion: String = "2.8.0"
     static var sdkWrapperVersion: String?
     static let sdkType: String = "native"
     static var sdkWrapperType: SdkWrapperType?
@@ -27,6 +27,7 @@ enum NotiflyConstant {
         static let syncStateEndPoint = "https://api.notifly.tech/user-state"
         static let authorizationEndPoint = "https://api.notifly.tech/authorize"
         static let streamEndPoint = "https://api.notifly.tech"
+        static let popupRenderingEndPoint = "https://render.notifly.tech"
     }
 }
 

@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2026-09-21
+
+### Added
+
+- Support KMP-based popup personalization with Liquid, catalogs, Connected Content, and render-abort handling.
+- Expose shared Core through SwiftPM and CocoaPods and unify user ID transition handling.
+
+### Changed
+
+- Skip unchanged user-property updates within five seconds.
+- Preserve static popup behavior and validate display conditions after rendering.
+
+### Fixed
+
+- Fix Core packaging, CocoaPods publication ordering, Xcode Cloud preparation, and sample builds without Firebase configuration.
+
 ## [2.8.0-alpha.1] - 2026-09-14
 
 ### Added
