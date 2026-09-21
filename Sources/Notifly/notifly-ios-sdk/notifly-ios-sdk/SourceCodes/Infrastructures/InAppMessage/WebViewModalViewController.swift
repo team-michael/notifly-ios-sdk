@@ -30,7 +30,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     var notiflyReEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
     var modalProps: ModalProperties?
 
-    convenience init(notiflyInAppMessageData: InAppMessageData) throws {
+    convenience init(notiflyInAppMessageData: InAppMessageData, content: InAppMessageContent) throws {
         self.init(nibName: nil, bundle: nil)
         view.isHidden = false
         modalPresentationStyle = .overFullScreen
@@ -38,13 +38,23 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         notiflyMessageID = notiflyInAppMessageData.notiflyMessageId
         notiflyReEligibleCondition = notiflyInAppMessageData.notiflyReEligibleCondition
         modalProps = notiflyInAppMessageData.modalProps
-        guard UIApplication.shared.canOpenURL(notiflyInAppMessageData.url) else {
+        if case let .url(url) = content, !UIApplication.shared.canOpenURL(url) {
             Logger.error("Fail to load in app message: invalid url.")
             throw NotiflyError.unexpectedNil(
                 "Fail to load in app message: invalid url or Network issue.")
         }
         DispatchQueue.main.async { [weak self] in
-            self?.webView.load(URLRequest(url: notiflyInAppMessageData.url))
+            self?.loadContent(content)
+        }
+    }
+
+    /// Keeps the original URL as the base for relative assets in rendered HTML.
+    func loadContent(_ content: InAppMessageContent) {
+        switch content {
+        case let .url(url):
+            webView.load(URLRequest(url: url))
+        case let .html(html, baseURL):
+            webView.loadHTMLString(html, baseURL: baseURL)
         }
     }
 
