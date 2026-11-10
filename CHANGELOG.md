@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Resize in-app popup WebViews and corner masks when the container size changes, preserving the loaded content and existing sizing rules.
+- Improve iPhone Duo support by resizing in-app popup WebViews and corner masks when the container size changes, preserving the loaded content and existing sizing rules.
 
 ## [2.8.1] - 2026-09-29
 
