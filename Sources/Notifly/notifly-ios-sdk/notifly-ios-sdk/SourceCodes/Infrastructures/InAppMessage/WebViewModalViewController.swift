@@ -29,6 +29,9 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
     var notiflyExtraData: [String: Any]?
     var notiflyReEligibleCondition: NotiflyReEligibleConditionEnum.ReEligibleCondition?
     var modalProps: ModalProperties?
+    private var modalWidthConstraint: NSLayoutConstraint?
+    private var modalHeightConstraint: NSLayoutConstraint?
+    private var lastMaskSize: CGSize?
 
     convenience init(notiflyInAppMessageData: InAppMessageData, content: InAppMessageContent) throws {
         self.init(nibName: nil, bundle: nil)
@@ -72,8 +75,25 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         WebViewModalViewController.openedInAppMessageCount = 0
     }
 
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        guard view.window != nil else { return }
+        updateModalSize(containerSize: view.bounds.size)
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        guard view.window != nil,
+              modalWidthConstraint != nil,
+              modalHeightConstraint != nil
+        else { return }
+        updateWebViewMaskIfNeeded()
+    }
+
     func setupUI() -> Bool {
-        guard let modalSize = getModalSize() as? CGSize,
+        let initialSize = UIApplication.shared.keyWindow?.bounds.size
+            ?? UIScreen.main.bounds.size
+        guard let modalSize = getModalSize(in: initialSize),
               let webViewLayer = getWebViewLayer(modalSize: modalSize) as? CALayer?
         else {
             return false
@@ -104,9 +124,13 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         }
 
         view.addSubview(webView)
+        let width = webView.widthAnchor.constraint(equalToConstant: modalSize.width)
+        let height = webView.heightAnchor.constraint(equalToConstant: modalSize.height)
+        modalWidthConstraint = width
+        modalHeightConstraint = height
         NSLayoutConstraint.activate([
-            webView.widthAnchor.constraint(equalToConstant: modalSize.width),
-            webView.heightAnchor.constraint(equalToConstant: modalSize.height),
+            width,
+            height,
             view.centerXAnchor.constraint(equalTo: webView.centerXAnchor),
             modalPositionConstraint
         ])
@@ -126,6 +150,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
                 Logger.error("Fail to present in app message.")
                 return
             }
+            self.updateModalSize(containerSize: window.bounds.size)
             topVC.present(self, animated: animated)
         }
         return true
@@ -318,14 +343,7 @@ class WebViewModalViewController: UIViewController, WKNavigationDelegate, WKScri
         }
     }
 
-    private func getModalSize() -> CGSize? {
-        let screenSize: CGSize
-        if let window = UIApplication.shared.keyWindow {
-            screenSize = window.bounds.size
-        } else {
-            screenSize = UIScreen.main.bounds.size
-        }
-
+    private func getModalSize(in screenSize: CGSize) -> CGSize? {
         let screenWidth = screenSize.width
         let screenHeight = screenSize.height
         if screenWidth == 0 || screenHeight == 0 {
@@ -444,6 +462,47 @@ class FullScreenWKWebView: WKWebView {
 private extension UIWindow {
     var topMostViewController: UIViewController? {
         return rootViewController?.topMostViewController
+    }
+}
+
+@available(iOSApplicationExtension, unavailable)
+private extension WebViewModalViewController {
+    func updateModalSize(containerSize: CGSize) {
+        guard containerSize.width.isFinite,
+              containerSize.height.isFinite,
+              containerSize.width > 0,
+              containerSize.height > 0,
+              let width = modalWidthConstraint,
+              let height = modalHeightConstraint,
+              let size = getModalSize(in: containerSize)
+        else { return }
+
+        if width.constant != size.width { width.constant = size.width }
+        if height.constant != size.height { height.constant = size.height }
+    }
+
+    func updateWebViewMaskIfNeeded() {
+        let size = webView.bounds.size
+        guard size.width.isFinite,
+              size.height.isFinite,
+              size.width > 0,
+              size.height > 0,
+              size != lastMaskSize
+        else { return }
+
+        let calculatedMask = getWebViewLayer(modalSize: size) as? CAShapeLayer
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        if let calculatedMask = calculatedMask {
+            let mask = (webView.layer.mask as? CAShapeLayer) ?? calculatedMask
+            mask.frame = CGRect(origin: .zero, size: size)
+            mask.path = calculatedMask.path
+            webView.layer.mask = mask
+        } else {
+            webView.layer.mask = nil
+        }
+        CATransaction.commit()
+        lastMaskSize = size
     }
 }
 
