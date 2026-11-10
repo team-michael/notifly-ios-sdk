@@ -21,7 +21,7 @@ jobs:
           submodules: recursive
           persist-credentials: false
 
-      - name: Test CocoaPods release ordering
+      - name: Test CocoaPods release recovery and ordering
         run: ruby scripts/test_cocoapods_release.rb
 
       - name: Cache Derived Data
