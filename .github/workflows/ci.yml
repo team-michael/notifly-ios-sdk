@@ -77,6 +77,15 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO
 
+      - name: Run SDK regression tests
+        run: |
+          xcodebuild test \
+            -project ./Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk.xcodeproj \
+            -scheme notifly-ios-sdkTests \
+            -destination 'platform=iOS Simulator,id=${{ steps.find_simulator.outputs.simulator_id }}' \
+            -parallel-testing-enabled NO \
+            CODE_SIGNING_ALLOWED=NO
+
   review:
     if: github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest

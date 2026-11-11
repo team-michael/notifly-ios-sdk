@@ -39,6 +39,7 @@ import UIKit
     var _sseController: SSEController?
     var _sseLifecycleObserverTokens: [NSObjectProtocol] = []
     var _sseObserversRegistered: Bool = false
+    var _sseInvalidated: Bool = false
 
     // MARK: Lifecycle
 
@@ -75,6 +76,7 @@ import UIKit
         username: String,
         password: String
     ) {
+        _main?.invalidateSSE()
         _main = Notifly(
             projectId: projectId,
             username: username,
