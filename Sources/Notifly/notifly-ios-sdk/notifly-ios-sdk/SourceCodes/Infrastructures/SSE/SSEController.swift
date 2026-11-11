@@ -30,6 +30,7 @@ final class SSEController: @unchecked Sendable {
     private var _pendingSyncDispatch: Bool = false
     private var _syncInFlight: Bool = false
     private var _generation: Int = 0
+    private var _invalidated: Bool = false
 
     // MARK: - Init
 
@@ -71,6 +72,17 @@ final class SSEController: @unchecked Sendable {
         sseClient.disconnect()
     }
 
+    /// Unlike a background stop, invalidation must reject every subsequent start.
+    func invalidate() {
+        stateQueue.sync {
+            _invalidated = true
+            _generation += 1
+            sseClient.onMessage = nil
+            sseClient.onState = nil
+            sseClient.disconnect()
+        }
+    }
+
     func reconnect(reason: String) {
         sseClient.disconnect()
         connectIfForeground()
@@ -83,6 +95,7 @@ final class SSEController: @unchecked Sendable {
     // MARK: - Internal handlers
 
     func handleMessage(type: String, data: String) {
+        guard stateQueue.sync(execute: { !_invalidated }) else { return }
         let message = SSEMessage.decode(type: type, data: data)
         switch message {
         case .connected:
@@ -107,6 +120,7 @@ final class SSEController: @unchecked Sendable {
     }
 
     func handleStateChange(_ state: SSEClient.State) {
+        guard stateQueue.sync(execute: { !_invalidated }) else { return }
         switch state {
         case .open:
             stateQueue.sync {
@@ -161,7 +175,13 @@ final class SSEController: @unchecked Sendable {
     }
 
     private func connectIfForeground() {
+        guard stateQueue.sync(execute: { !_invalidated }) else { return }
+        // canConnect may synchronously check UIApplication on the main queue.
+        // Keep it outside stateQueue, then serialize the final start with invalidation.
         guard canConnect() else { return }
-        sseClient.connect()
+        stateQueue.sync {
+            guard !_invalidated else { return }
+            sseClient.connect()
+        }
     }
 }
