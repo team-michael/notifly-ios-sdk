@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Stop the previous SSE connection and remove its lifecycle observers when reinitializing the SDK. Prevent queued work and delayed callbacks from reconnecting a replaced instance.
+- Resume SSE when the app becomes active so the background-state check does not skip reconnection during foreground transitions.
 
 ## [2.8.2] - 2026-11-10
 

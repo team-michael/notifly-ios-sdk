@@ -110,7 +110,7 @@ extension Notifly {
                 self?.stopSSE()
             }
             let fgToken = center.addObserver(
-                forName: UIApplication.willEnterForegroundNotification,
+                forName: UIApplication.didBecomeActiveNotification,
                 object: nil,
                 queue: nil
             ) { [weak self] _ in
