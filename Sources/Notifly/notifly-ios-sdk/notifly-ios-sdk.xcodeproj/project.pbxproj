@@ -260,7 +260,6 @@
 				F2E669732ADE5F7E00DF9CA0 /* UUID+.swift */,
 				F2E669742ADE5F7E00DF9CA0 /* TrackingEvent.swift */,
 				B0521E412C1B572100D4E357 /* Timezone.swift */,
-				AABA00000000000000000004 /* UserPropertyKeyWarning.swift */,
 				2BA089BB2C28725000BEEE8F /* AsyncWorker.swift */,
 			);
 			path = NotiflyUtil;
@@ -271,6 +270,7 @@
 			children = (
 				F2E669772ADE5FD000DF9CA0 /* Notifly.swift */,
 				673F0EBA29EC610400814217 /* Notifly+PublicAPI.swift */,
+				AABA00000000000000000004 /* UserPropertyKeyWarning.swift */,
 				F2E669A42ADE633400DF9CA0 /* Notifly+Helper.swift */,
 				C6C1A7FCDEED01E7D5936DE1 /* Notifly+SSE.swift */,
 			);
