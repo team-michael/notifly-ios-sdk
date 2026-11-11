@@ -267,7 +267,7 @@ import UIKit
             }
         }
 
-        if let warning = UserPropertyKeyPolicy.warningMessage(for: Array(userProperties.keys)) {
+        if let warning = UserPropertyKeyWarning.message(for: Array(userProperties.keys)) {
             Logger.warning(warning)
         }
 

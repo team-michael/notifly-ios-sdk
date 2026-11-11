@@ -31,7 +31,7 @@
 		AB9D9076100F90E306A0CAE0 /* SSEController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DB7ADB011179147141734D5 /* SSEController.swift */; };
 		AF5757CF8D911756FE798205 /* SSEClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8FB665159427B654E3954 /* SSEClient.swift */; };
 		B0521E422C1B572100D4E357 /* Timezone.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0521E412C1B572100D4E357 /* Timezone.swift */; };
-		AABA00000000000000000003 /* UserPropertyKeyPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABA00000000000000000004 /* UserPropertyKeyPolicy.swift */; };
+		AABA00000000000000000003 /* UserPropertyKeyWarning.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABA00000000000000000004 /* UserPropertyKeyWarning.swift */; };
 		B1F29A6F46F27718F38014F4 /* SSEEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8663B7A6BC0A5C187DC265CC /* SSEEvent.swift */; };
 		CE59D0CEAFC4E9DFE98E831B /* SSEMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F73731CE6187DC3BD9A3F5 /* SSEMessage.swift */; };
 		D57A8723E4967D4B8BAA69E9 /* SSEClientResponseValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C512F3BA05105F3657B0788 /* SSEClientResponseValidationTests.swift */; };
@@ -104,7 +104,7 @@
 		AA00000000000011 /* NotiflyLinkHelperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotiflyLinkHelperTests.swift; sourceTree = "<group>"; };
 		AABA00000000000000000002 /* UserPropertyKeyWarningTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPropertyKeyWarningTests.swift; sourceTree = "<group>"; };
 		B0521E412C1B572100D4E357 /* Timezone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timezone.swift; sourceTree = "<group>"; };
-		AABA00000000000000000004 /* UserPropertyKeyPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPropertyKeyPolicy.swift; sourceTree = "<group>"; };
+		AABA00000000000000000004 /* UserPropertyKeyWarning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPropertyKeyWarning.swift; sourceTree = "<group>"; };
 		C6C1A7FCDEED01E7D5936DE1 /* Notifly+SSE.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Notifly+SSE.swift"; sourceTree = "<group>"; };
 		F2E6696D2ADE5F7E00DF9CA0 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		F2E6696E2ADE5F7E00DF9CA0 /* NotiflyError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotiflyError.swift; sourceTree = "<group>"; };
@@ -260,7 +260,7 @@
 				F2E669732ADE5F7E00DF9CA0 /* UUID+.swift */,
 				F2E669742ADE5F7E00DF9CA0 /* TrackingEvent.swift */,
 				B0521E412C1B572100D4E357 /* Timezone.swift */,
-				AABA00000000000000000004 /* UserPropertyKeyPolicy.swift */,
+				AABA00000000000000000004 /* UserPropertyKeyWarning.swift */,
 				2BA089BB2C28725000BEEE8F /* AsyncWorker.swift */,
 			);
 			path = NotiflyUtil;
@@ -486,7 +486,7 @@
 				2BA67CD02C353D6C00240C17 /* AnyCodable.swift in Sources */,
 				F2E6697C2ADE600000DF9CA0 /* NotificationServiceExtension.swift in Sources */,
 				B0521E422C1B572100D4E357 /* Timezone.swift in Sources */,
-				AABA00000000000000000003 /* UserPropertyKeyPolicy.swift in Sources */,
+				AABA00000000000000000003 /* UserPropertyKeyWarning.swift in Sources */,
 				F2E92DA72B50F68C00EAB6AB /* UserState+Constant.swift in Sources */,
 				F2E669A12ADE60B900DF9CA0 /* UUID+.swift in Sources */,
 				F2E669942ADE602900DF9CA0 /* Campaign.swift in Sources */,
