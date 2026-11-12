@@ -12,17 +12,23 @@ extension Notifly {
 
     func startSSE() {
         guard !Notifly.inAppMessageDisabled else { return }
-        guard let notiflyUserId = try? userManager.getNotiflyUserID() else {
-            Logger.info("SSE: skip start — no notifly user id yet")
-            return
+        let current: SSEController? = sseAccessQueue.sync {
+            guard !_sseInvalidated else { return nil }
+            if let existing = _sseController { return existing }
+            guard let notiflyUserId = try? userManager.getNotiflyUserID() else {
+                Logger.info("SSE: skip start — no notifly user id yet")
+                return nil
+            }
+            // Snapshot the user and install its controller atomically with restart/teardown.
+            let controller = makeSSEController(notiflyUserId: notiflyUserId)
+            _sseController = controller
+            return controller
         }
+        // Starting can synchronously check UIApplication on the main queue.
+        current?.start()
+    }
 
-        let existing: SSEController? = sseAccessQueue.sync { _sseController }
-        if let existing = existing {
-            existing.start()
-            return
-        }
-
+    private func makeSSEController(notiflyUserId: String) -> SSEController {
         let deviceId = AppHelper.getNotiflyDeviceID()
         let auth = self.auth
         let userStateManager = inAppMessageManager.userStateManager
@@ -38,7 +44,7 @@ extension Notifly {
             }
         )
 
-        let controller = SSEController(
+        return SSEController(
             sseClient: client,
             onSyncRequested: { [weak userStateManager] completion in
                 guard let mgr = userStateManager else {
@@ -61,15 +67,23 @@ extension Notifly {
             canConnect: { Notifly.isApplicationInForeground() }
         )
 
-        sseAccessQueue.sync {
-            _sseController = controller
-        }
-        controller.start()
     }
 
     func stopSSE() {
         let current: SSEController? = sseAccessQueue.sync { _sseController }
         current?.stop()
+    }
+
+    /// Permanently retire SSE before replacing this SDK instance.
+    func invalidateSSE() {
+        let current: SSEController? = sseAccessQueue.sync {
+            _sseInvalidated = true
+            let controller = _sseController
+            _sseController = nil
+            return controller
+        }
+        current?.invalidate()
+        unregisterSSELifecycleObservers()
     }
 
     func restartSSE() {
@@ -78,34 +92,30 @@ extension Notifly {
             _sseController = nil
             return c
         }
-        previous?.stop()
+        previous?.invalidate()
         startSSE()
     }
 
     func registerSSELifecycleObservers() {
-        let shouldRegister: Bool = sseAccessQueue.sync {
-            if _sseObserversRegistered { return false }
-            _sseObserversRegistered = true
-            return true
-        }
-        guard shouldRegister else { return }
-
-        let center = NotificationCenter.default
-        let bgToken = center.addObserver(
-            forName: UIApplication.didEnterBackgroundNotification,
-            object: nil,
-            queue: nil
-        ) { [weak self] _ in
-            self?.stopSSE()
-        }
-        let fgToken = center.addObserver(
-            forName: UIApplication.willEnterForegroundNotification,
-            object: nil,
-            queue: nil
-        ) { [weak self] _ in
-            self?.startSSE()
-        }
         sseAccessQueue.sync {
+            guard !_sseInvalidated, !_sseObserversRegistered else { return }
+            _sseObserversRegistered = true
+
+            let center = NotificationCenter.default
+            let bgToken = center.addObserver(
+                forName: UIApplication.didEnterBackgroundNotification,
+                object: nil,
+                queue: nil
+            ) { [weak self] _ in
+                self?.stopSSE()
+            }
+            let fgToken = center.addObserver(
+                forName: UIApplication.didBecomeActiveNotification,
+                object: nil,
+                queue: nil
+            ) { [weak self] _ in
+                self?.startSSE()
+            }
             _sseLifecycleObserverTokens = [bgToken, fgToken]
         }
     }

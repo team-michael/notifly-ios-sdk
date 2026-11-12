@@ -3,8 +3,8 @@ import Foundation
 import PackageDescription
 
 // Updated by scripts/prepare_kmp_core_release.rb when an iOS SDK release is created.
-let releasedCoreVersion = "2.8.2"
-let releasedCoreChecksum = "67aee16ac1a4f76edeeeab3cecbd65673c68bf5b66a2b44466d01f9f10f4adf1"
+let releasedCoreVersion = "2.8.3"
+let releasedCoreChecksum = "7a85523e88f000187238dd738f4e63533f881d177ae4d58a16f5a28ce410ef97"
 let localCorePath = "build/NotiflyCore.xcframework"
 let localCoreURL = URL(fileURLWithPath: #filePath)
     .deletingLastPathComponent()

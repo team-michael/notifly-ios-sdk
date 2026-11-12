@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Warn when `setUserProperties` receives custom keys containing characters other than ASCII letters, digits, or underscores (or an empty key). Known built-in keys remain exempt, and warnings do not block or modify property updates.
 
+## [2.8.3] - 2026-11-11
+
+### Fixed
+
+- Stop the previous SSE connection and remove its lifecycle observers when reinitializing the SDK. Prevent queued work and delayed callbacks from reconnecting a replaced instance.
+- Resume SSE when the app becomes active so the background-state check does not skip reconnection during foreground transitions.
+
 ## [2.8.2] - 2026-11-10
 
 ### Fixed
