@@ -228,6 +228,8 @@ import UIKit
     }
 
     /// Sets the supplied user properties.
+    /// Custom keys support only ASCII letters, digits, and underscores. Invalid keys
+    /// produce a warning without blocking the call. Built-in and official integration keys are exempt.
     /// When in-app messaging is enabled and local user properties are available,
     /// a call is skipped if every supplied key/value matches local state and less than
     /// 5 seconds have elapsed since the last non-identity property send attempt.
@@ -263,6 +265,10 @@ import UIKit
                 )
                 return setUserProperties(userProperties: newUserProperties)
             }
+        }
+
+        if let warning = UserPropertyKeyWarning.message(for: Array(userProperties.keys)) {
+            Logger.warning(warning)
         }
 
         main.userManager.setUserProperties(userProperties: userProperties)

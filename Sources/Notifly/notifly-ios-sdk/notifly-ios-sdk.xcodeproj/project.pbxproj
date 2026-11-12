@@ -27,9 +27,11 @@
 		AA00000000000003 /* ApplicationBinary.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000004 /* ApplicationBinary.swift */; };
 		AA00000000000005 /* EntitlementsReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000006 /* EntitlementsReader.swift */; };
 		AA00000000000010 /* NotiflyLinkHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000011 /* NotiflyLinkHelperTests.swift */; };
+		AABA00000000000000000001 /* UserPropertyKeyWarningTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABA00000000000000000002 /* UserPropertyKeyWarningTests.swift */; };
 		AB9D9076100F90E306A0CAE0 /* SSEController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DB7ADB011179147141734D5 /* SSEController.swift */; };
 		AF5757CF8D911756FE798205 /* SSEClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8FB665159427B654E3954 /* SSEClient.swift */; };
 		B0521E422C1B572100D4E357 /* Timezone.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0521E412C1B572100D4E357 /* Timezone.swift */; };
+		AABA00000000000000000003 /* UserPropertyKeyWarning.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABA00000000000000000004 /* UserPropertyKeyWarning.swift */; };
 		B1F29A6F46F27718F38014F4 /* SSEEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8663B7A6BC0A5C187DC265CC /* SSEEvent.swift */; };
 		CE59D0CEAFC4E9DFE98E831B /* SSEMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F73731CE6187DC3BD9A3F5 /* SSEMessage.swift */; };
 		D57A8723E4967D4B8BAA69E9 /* SSEClientResponseValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C512F3BA05105F3657B0788 /* SSEClientResponseValidationTests.swift */; };
@@ -100,7 +102,9 @@
 		AA00000000000004 /* ApplicationBinary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationBinary.swift; sourceTree = "<group>"; };
 		AA00000000000006 /* EntitlementsReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementsReader.swift; sourceTree = "<group>"; };
 		AA00000000000011 /* NotiflyLinkHelperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotiflyLinkHelperTests.swift; sourceTree = "<group>"; };
+		AABA00000000000000000002 /* UserPropertyKeyWarningTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPropertyKeyWarningTests.swift; sourceTree = "<group>"; };
 		B0521E412C1B572100D4E357 /* Timezone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timezone.swift; sourceTree = "<group>"; };
+		AABA00000000000000000004 /* UserPropertyKeyWarning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPropertyKeyWarning.swift; sourceTree = "<group>"; };
 		C6C1A7FCDEED01E7D5936DE1 /* Notifly+SSE.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Notifly+SSE.swift"; sourceTree = "<group>"; };
 		F2E6696D2ADE5F7E00DF9CA0 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		F2E6696E2ADE5F7E00DF9CA0 /* NotiflyError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotiflyError.swift; sourceTree = "<group>"; };
@@ -214,6 +218,7 @@
 				BC1744000000000000000002 /* InAppMessageRenderingTests.swift */,
 				673F0E8F29EBA7D200814217 /* notifly_ios_sdkTests.swift */,
 				AA00000000000011 /* NotiflyLinkHelperTests.swift */,
+				AABA00000000000000000002 /* UserPropertyKeyWarningTests.swift */,
 				074A991EAD22EC70CA4CFBC7 /* SSE */,
 			);
 			path = "notifly-ios-sdkTests";
@@ -265,6 +270,7 @@
 			children = (
 				F2E669772ADE5FD000DF9CA0 /* Notifly.swift */,
 				673F0EBA29EC610400814217 /* Notifly+PublicAPI.swift */,
+				AABA00000000000000000004 /* UserPropertyKeyWarning.swift */,
 				F2E669A42ADE633400DF9CA0 /* Notifly+Helper.swift */,
 				C6C1A7FCDEED01E7D5936DE1 /* Notifly+SSE.swift */,
 			);
@@ -480,6 +486,7 @@
 				2BA67CD02C353D6C00240C17 /* AnyCodable.swift in Sources */,
 				F2E6697C2ADE600000DF9CA0 /* NotificationServiceExtension.swift in Sources */,
 				B0521E422C1B572100D4E357 /* Timezone.swift in Sources */,
+				AABA00000000000000000003 /* UserPropertyKeyWarning.swift in Sources */,
 				F2E92DA72B50F68C00EAB6AB /* UserState+Constant.swift in Sources */,
 				F2E669A12ADE60B900DF9CA0 /* UUID+.swift in Sources */,
 				F2E669942ADE602900DF9CA0 /* Campaign.swift in Sources */,
@@ -516,6 +523,7 @@
 				BC1744000000000000000001 /* InAppMessageRenderingTests.swift in Sources */,
 				673F0E9029EBA7D200814217 /* notifly_ios_sdkTests.swift in Sources */,
 				AA00000000000010 /* NotiflyLinkHelperTests.swift in Sources */,
+				AABA00000000000000000001 /* UserPropertyKeyWarningTests.swift in Sources */,
 				10A6432EEA64DAA79DEE3CEE /* SSELineParserTests.swift in Sources */,
 				1B35C9B1103465E89B62A05C /* SSEClientTests.swift in Sources */,
 				4D4437A6DFC7EDD0358CEE97 /* SSEClientTestSupport.swift in Sources */,

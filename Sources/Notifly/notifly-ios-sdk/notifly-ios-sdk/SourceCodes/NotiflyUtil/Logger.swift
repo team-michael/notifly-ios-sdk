@@ -18,6 +18,10 @@ class Logger {
         print("[Notifly Info] ", msg)
     }
 
+    static func warning(_ msg: String) {
+        print("[Notifly Warning] ", msg)
+    }
+
     static func error(_ msg: String) {
         print("🔥 [Notifly Error] ", msg)
     }
