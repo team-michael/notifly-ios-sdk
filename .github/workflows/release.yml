@@ -215,33 +215,8 @@ jobs:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
           VERSION: ${{ github.event.inputs.version }}
         run: |
-          spec_dir="$(mktemp -d)"
-          trap 'rm -rf "$spec_dir"' EXIT
           for pod_name in notifly_core notifly_sdk notifly_sdk_push_extension; do
-            podspec="$pod_name.podspec"
-            status="$(curl --silent --show-error --location --retry 3 --max-time 120 \
-              --proto '=https' --proto-redir '=https' \
-              --output "$spec_dir/published.json" --write-out '%{http_code}' \
-              "https://trunk.cocoapods.org/api/v1/pods/$pod_name/specs/$VERSION")"
-            case "$status" in
-              200)
-                pod ipc spec "$podspec" > "$spec_dir/local.json"
-                # Trunk adds this publishing-tool metadata; all spec fields must match.
-                if ! jq -e -s 'map(del(.pushed_with_swift_version)) | .[0] == .[1]' \
-                  "$spec_dir/local.json" "$spec_dir/published.json" > /dev/null; then
-                  echo "Published $pod_name@$VERSION differs from this release." >&2
-                  exit 1
-                fi
-                echo "$pod_name@$VERSION is already published and matches; skipping."
-                ;;
-              404)
-                pod trunk push --allow-warnings "$podspec"
-                ;;
-              *)
-                echo "Could not check $pod_name@$VERSION (HTTP $status)." >&2
-                exit 1
-                ;;
-            esac
+            ruby scripts/publish_cocoapods.rb "$pod_name" "$VERSION"
             # Trunk registration can precede the CDN index used by dependency resolution.
             if [[ "$pod_name" == "notifly_core" ]]; then
               ruby scripts/wait_for_cocoapods.rb "$pod_name" "$VERSION"
