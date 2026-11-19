@@ -490,3 +490,113 @@ final class WebViewModalLayoutTests: XCTestCase {
         return properties
     }
 }
+
+@available(iOSApplicationExtension, unavailable)
+final class SegmentationNotIncludeTests: XCTestCase {
+    func testNotIncludeMatchesArrayWithoutValue() throws {
+        XCTAssertTrue(
+            try isInSegment(
+                conditions: [condition(attribute: "tags", operator: "NOT_INCLUDE", value: "c")],
+                userProperties: ["tags": ["a", "b"]]
+            )
+        )
+    }
+
+    func testNotIncludeRejectsArrayWithValue() throws {
+        XCTAssertFalse(
+            try isInSegment(
+                conditions: [
+                    condition(attribute: "plan", operator: "=", value: "pro"),
+                    condition(attribute: "tags", operator: "NOT_INCLUDE", value: "a")
+                ],
+                userProperties: ["plan": "pro", "tags": ["a", "b"]]
+            )
+        )
+    }
+
+    func testNotIncludeRejectsMissingProperty() throws {
+        XCTAssertFalse(
+            try isInSegment(
+                conditions: [
+                    condition(attribute: "plan", operator: "=", value: "pro"),
+                    condition(attribute: "tags", operator: "NOT_INCLUDE", value: "c")
+                ],
+                userProperties: ["plan": "pro"]
+            )
+        )
+    }
+
+    func testNotIncludeRejectsNonArrayProperty() throws {
+        XCTAssertFalse(
+            try isInSegment(
+                conditions: [
+                    condition(attribute: "plan", operator: "=", value: "pro"),
+                    condition(attribute: "tags", operator: "NOT_INCLUDE", value: "c")
+                ],
+                userProperties: ["plan": "pro", "tags": "a,b"]
+            )
+        )
+    }
+
+    func testCampaignKeepsNotIncludeCondition() throws {
+        let campaign = try makeCampaign(
+            conditions: [condition(attribute: "tags", operator: "NOT_INCLUDE", value: "c")]
+        )
+        let parsed = try XCTUnwrap(campaign.segmentInfo?.groups?.first?.conditions?.first)
+        guard case let .UserBasedType(userCondition) = parsed else {
+            return XCTFail("expected a user-based condition")
+        }
+        XCTAssertEqual(userCondition.operator.rawValue, "NOT_INCLUDE")
+    }
+
+    private func isInSegment(
+        conditions: [[String: Any]],
+        userProperties: [String: Any]
+    ) throws -> Bool {
+        SegmentationHelper.isEntityOfSegment(
+            campaign: try makeCampaign(conditions: conditions),
+            eventParams: nil,
+            userData: UserData(data: ["user_properties": userProperties]),
+            eventData: EventData(eventCounts: [:])
+        )
+    }
+
+    private func makeCampaign(conditions: [[String: Any]]) throws -> Campaign {
+        try XCTUnwrap(
+            Campaign(from: [
+                "id": "not-include-campaign",
+                "channel": "in-app-message",
+                "status": 1,
+                "testing": false,
+                "triggering_conditions": [
+                    [["type": "event_name", "operator": "=", "operand": "app_open"]]
+                ],
+                "message": [
+                    "html_url": "https://example.com/popup.html",
+                    "modal_properties": ["template_name": "segment-test"]
+                ],
+                "segment_type": "condition",
+                "segment_info": [
+                    "group_operator": "OR",
+                    "groups": [["condition_operator": "AND", "conditions": conditions]]
+                ],
+                "updated_at": "2026-11-18T00:00:00.000Z"
+            ])
+        )
+    }
+
+    private func condition(
+        attribute: String,
+        operator op: String,
+        value: String
+    ) -> [String: Any] {
+        [
+            "unit": "user",
+            "attribute": attribute,
+            "operator": op,
+            "valueType": "TEXT",
+            "value": value,
+            "useEventParamsAsConditionValue": false
+        ]
+    }
+}

@@ -111,6 +111,7 @@ enum NotiflyOperator: String {
     case equal = "="
     case notEqual = "<>"
     case contains = "@>"
+    case notContains = "NOT_INCLUDE"
     case greaterThan = ">"
     case greaterOrEqualThan = ">="
     case lessThan = "<"

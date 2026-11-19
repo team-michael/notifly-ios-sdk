@@ -122,7 +122,8 @@ enum NotiflyValueComparator {
         default:
             if let type = type,
                 let typedSourceValue = NotiflyValueComparator.castAnyToSpecifiedType(
-                    value: sourceValue, type: `operator` == .contains ? "ARRAY" : type),
+                    value: sourceValue,
+                    type: [.contains, .notContains].contains(`operator`) ? "ARRAY" : type),
                 let typedTargetValue = NotiflyValueComparator.castAnyToSpecifiedType(
                     value: targetValue, type: type)
             {
@@ -135,6 +136,9 @@ enum NotiflyValueComparator {
                         value1: typedSourceValue, value2: typedTargetValue, type: type)
                 case .contains:
                     return NotiflyValueComparator.doesContain(
+                        value1: typedSourceValue, value2: typedTargetValue, type: type)
+                case .notContains:
+                    return !NotiflyValueComparator.doesContain(
                         value1: typedSourceValue, value2: typedTargetValue, type: type)
                 case .greaterThan:
                     return NotiflyValueComparator.isGreaterThan(
