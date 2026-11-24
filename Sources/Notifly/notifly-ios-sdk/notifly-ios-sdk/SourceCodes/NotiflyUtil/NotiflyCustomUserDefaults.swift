@@ -148,3 +148,13 @@ class NotiflyCustomUserDefaults {
         }
     }
 }
+
+enum NotiflyCustomDefaultKey {
+    static let projectId = "notifly_project_id"
+    static let username = "notifly_username"
+    static let password = "notifly_password"
+    static let externalUserId = "notifly_external_user_id"
+    static let authToken = "notifly_authToken"
+    static let deviceId = "notifly_deviceId"
+    static let alreadyRegistered = "notifly_isRegisteredAPNs"
+}

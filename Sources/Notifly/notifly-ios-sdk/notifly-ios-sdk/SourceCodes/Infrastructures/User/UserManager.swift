@@ -74,6 +74,9 @@ class UserManager {
                 newUserId: newExternalUserID
             )
             guard transition.changed else {
+                Logger.info(
+                    "External User Id is not changed because the new user id is same as the current user id."
+                )
                 finishTask()
                 return
             }

@@ -116,7 +116,6 @@ class UserStateManager {
             receiveCompletion: { syncStateCompletion in
                 if case let .failure(error) = syncStateCompletion {
                     Logger.error("Fail to sync user state: " + error.localizedDescription)
-                    completion()
                 }
             },
             receiveValue: { [weak self] jsonString in
