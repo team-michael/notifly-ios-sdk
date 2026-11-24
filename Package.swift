@@ -57,7 +57,9 @@ let package = Package(
                 "NotiflyCore",
                 .product(name: "FirebaseMessaging", package: "Firebase")
             ],
-            path: "Sources/notifly_sdk"
+            path: "Sources/notifly_sdk",
+            // CocoaPods compatibility header; SwiftPM exposes the Swift module directly.
+            exclude: ["Interface/notifly_sdk.h"]
         ),
         coreBinaryTarget,
         .testTarget(
