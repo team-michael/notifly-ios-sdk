@@ -285,23 +285,41 @@ final class AsyncWorkerVerboseSmokeTests: XCTestCase {
             ])
 
         let worker = NotiflyAsyncWorker()
-        let done = expectation(description: "done")
+        let innerDone = expectation(description: "inner task completed")
+        let done = expectation(description: "follow-up task unlocked")
 
-        L.step("Outer 스케줄 (lockAcquired=false)")
-        worker.addTask(lockAcquired: false) { outerFinish in
-            L.step("Outer 시작")
-            L.step("Inner 스케줄 (lockAcquired=true)")
-            worker.addTask(lockAcquired: true) { innerFinish in
-                L.step("Inner 시작")
-                innerFinish()
-                L.step("Inner 종료(no-op)")
+        // The SDK owns its worker for the process lifetime. Keep this local worker
+        // alive until the outer task and the follow-up task have both unlocked.
+        withExtendedLifetime(worker) {
+            L.step("Outer 스케줄 (lockAcquired=false)")
+            worker.addTask(lockAcquired: false) { outerFinish in
+                L.step("Outer 시작")
+                L.step("Inner 스케줄 (lockAcquired=true)")
+                worker.addTask(lockAcquired: true) { innerFinish in
+                    L.step("Inner 시작")
+                    innerFinish()
+                    L.step("Inner 종료(no-op)")
+                    innerDone.fulfill()
+
+                    // Keep the outer lock held until the nested task completes.
+                    outerFinish()
+                    L.step("Outer 종료")
+                }
             }
-            outerFinish()
-            L.step("Outer 종료")
-            done.fulfill()
-        }
 
-        wait(for: [done], timeout: 3)
+            worker.addTask { finish in
+                L.step("Follow-up started after the outer task unlocked")
+                finish()
+
+                // finish() only enqueues an unlock. This no-lock marker runs on
+                // the same serial queue after that unlock without acquiring again.
+                worker.addTask(lockAcquired: true) { _ in
+                    done.fulfill()
+                }
+            }
+
+            wait(for: [innerDone, done], timeout: 3, enforceOrder: true)
+        }
         L.caseEnd()
     }
 
