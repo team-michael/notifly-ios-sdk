@@ -1,0 +1,11 @@
+# Preserve the existing test style until test conventions are adopted.
+# Continue inheriting all other rules, including missing_docs and redundant_self.
+disabled_rules:
+  - indentation_width
+  - multiline_arguments
+  - multiline_arguments_brackets
+  - multiline_parameters
+  - multiline_parameters_brackets
+
+statement_position:
+  statement_mode: default
