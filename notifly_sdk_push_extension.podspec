@@ -19,6 +19,7 @@ Pod::Spec.new do |s|
       'Sources/notifly_sdk/Interface/NotificationServiceExtension.swift',
       'Sources/notifly_sdk/Interface/Models/**/*.swift',
       'Sources/notifly_sdk/NotiflyExtension/**/*.swift',
-      'Sources/notifly_sdk/NotiflyUtil/**/*.swift'
+      'Sources/notifly_sdk/NotiflyUtil/**/*.swift',
+      'Sources/notifly_sdk/Shared/**/*.swift'
   ]
 end

@@ -28,7 +28,7 @@ class NotiflyExtensionAPI {
 
     private func cleanAuth() {
         authToken = nil
-        NotiflyCustomUserDefaults.authTokenInUserDefaults = nil
+        NotiflyStore.authToken = nil
     }
 
     func track(
@@ -66,15 +66,15 @@ class NotiflyExtensionAPI {
             completion(.success(tokenInCache))
             return
         }
-        else if let tokenInUserDefaults = NotiflyCustomUserDefaults.authTokenInUserDefaults {
-            completion(.success(tokenInUserDefaults))
+        else if let storedToken = NotiflyStore.authToken {
+            completion(.success(storedToken))
             return
         }
         authorize { result in
             switch result {
             case let .success(token):
                 self.authToken = token
-                NotiflyCustomUserDefaults.authTokenInUserDefaults = token
+                NotiflyStore.authToken = token
                 completion(.success(token))
                 return
             case let .failure(error):
@@ -85,8 +85,8 @@ class NotiflyExtensionAPI {
     }
 
     private func authorize(completion: @escaping (Result<String, Error>) -> Void) {
-        guard let username = NotiflyCustomUserDefaults.usernameInUserDefaults,
-            let password = NotiflyCustomUserDefaults.passwordInUserDefaults
+        guard let username = NotiflyStore.username,
+            let password = NotiflyStore.password
         else {
             Logger.error("ExtensionAPI: Fail to Authorize - username and password error")
             completion(.failure(NotiflyError.notAuthorized))
