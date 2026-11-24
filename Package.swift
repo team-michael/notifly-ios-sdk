@@ -57,9 +57,12 @@ let package = Package(
                 "NotiflyCore",
                 .product(name: "FirebaseMessaging", package: "Firebase")
             ],
-            path: "Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk",
-            sources: ["SourceCodes", "PrivacyInfo.xcprivacy"]
+            path: "Sources/notifly_sdk"
         ),
-        coreBinaryTarget
+        coreBinaryTarget,
+        .testTarget(
+            name: "NotiflySDKTests",
+            dependencies: ["notifly_sdk"]
+        )
     ]
 )

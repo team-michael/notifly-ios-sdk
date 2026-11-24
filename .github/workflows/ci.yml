@@ -28,7 +28,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/Library/Developer/Xcode/DerivedData
-          key: derived-data-${{ runner.os }}-${{ hashFiles('**/*.xcodeproj/**', '**/*.xcworkspace/**') }}
+          key: derived-data-${{ runner.os }}-${{ hashFiles('Package.swift', 'Package.resolved', '**/project.pbxproj', '**/*.xcscheme') }}
 
       - name: Install SwiftLint
         run: brew install swiftlint
@@ -47,35 +47,42 @@ jobs:
       - name: Find Available iOS Simulator
         id: find_simulator
         run: |
-          # List all available devices and find the first iPhone
-          echo "Available devices:"
-          xcrun simctl list devices available
-          
-          # Find the first available iPhone simulator ID
-          SIMULATOR_ID=$(xcrun simctl list devices available | grep -E 'iPhone.*\(' | head -1 | sed -E 's/.*\(([A-F0-9-]+)\).*/\1/')
-          
-          if [ -z "$SIMULATOR_ID" ]; then
-            # Fallback to any iOS simulator device ID
-            SIMULATOR_ID=$(xcrun simctl list devices available | grep -E 'iOS.*\(' | head -1 | sed -E 's/.*\(([A-F0-9-]+)\).*/\1/')
-          fi
-          
-          if [ -z "$SIMULATOR_ID" ]; then
-            echo "No simulator found, using generic placeholder"
-            SIMULATOR_ID="dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder"
-          fi
-          
+          SIMULATOR_ID="$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          devices = [
+              device
+              for runtime, entries in json.load(sys.stdin)["devices"].items()
+              if ".iOS-" in runtime
+              for device in entries
+              if device["isAvailable"] and device["name"].startswith("iPhone")
+          ]
+          if not devices:
+              sys.exit("No available iPhone simulator found for SDK tests.")
+          device = next((device for device in devices if device["state"] == "Booted"), devices[0])
+          print(device["udid"])
+          ')"
+
           echo "simulator_id=$SIMULATOR_ID" >> $GITHUB_OUTPUT
           echo "Using simulator ID: $SIMULATOR_ID"
 
-      - name: Build Sources with xcodebuild
+      - name: Build TestApp with the local Swift package
         run: |
-          xcodebuild clean build \
-            -project ./Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk.xcodeproj \
-            -scheme notifly-ios-sdk \
+          xcodebuild build \
+            -project NotiflyExample/NotiflyTestApp.xcodeproj \
+            -scheme NotiflyTestApp \
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,id=${{ steps.find_simulator.outputs.simulator_id }}' \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO
+            -onlyUsePackageVersionsFromResolvedFile \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run SDK Swift package tests
+        run: |
+          xcodebuild test \
+            -scheme notifly_sdk-Package \
+            -destination 'platform=iOS Simulator,id=${{ steps.find_simulator.outputs.simulator_id }}' \
+            -onlyUsePackageVersionsFromResolvedFile \
+            -parallel-testing-enabled NO \
+            CODE_SIGNING_ALLOWED=NO
 
   review:
     if: github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'

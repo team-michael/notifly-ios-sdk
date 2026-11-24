@@ -54,5 +54,5 @@ PY
   export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:+$JAVA_TOOL_OPTIONS }$proxy_options"
 fi
 
-# The test app references build/NotiflyCore.xcframework in a clean checkout.
+# Build the local Core binary consumed by the root Swift package.
 exec ./scripts/build_kmp_core_xcframework.sh

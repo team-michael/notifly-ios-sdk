@@ -1,6 +1,16 @@
 included:
   - Sources
-  - NotiflyTestApp
+  - NotiflyExample
+  - Tests/NotiflySDKTests
+
+opt_in_rules:
+  - indentation_width
+  - multiline_arguments
+  - multiline_arguments_brackets
+  - multiline_parameters
+  - multiline_parameters_brackets
+  - missing_docs
+  - redundant_self
 
 disabled_rules:
   - trailing_whitespace
@@ -12,17 +22,37 @@ disabled_rules:
   - function_parameter_count
   - identifier_name
 
-line_length:
-  warning: 120
-  error: 150
+# Use four-space indentation for code. Preserve formatting inside comments and
+# multiline strings, where whitespace may have a different meaning.
+indentation_width:
+  indentation_width: 4
+  include_comments: false
+  include_multiline_strings: false
 
-type_name:
-  min_length:
-    warning: 3
-    error: 2
-  max_length:
-    warning: 40
-    error: 50
+# Keep short declarations and calls on one line. When wrapping, place each
+# parameter or argument on its own line and the closing parenthesis below it.
+multiline_parameters:
+  allows_single_line: true
+
+multiline_arguments:
+  first_argument_location: next_line
+
+# Put else and catch on the next line, aligned with the preceding closing brace.
+statement_position:
+  statement_mode: uncuddled_else
+
+# Public API documentation must be written in English and describe behavior,
+# parameters, return values, and errors where applicable. This rule checks only
+# documentation presence; completeness and accuracy require code review.
+missing_docs:
+  error: [open, public]
+  excludes_inherited_types: false
+  evaluate_effective_access_control_level: true
+
+# Omit self unless it is required to preserve the meaning of the code.
+redundant_self:
+  severity: error
+  only_in_closures: false
 
 cyclomatic_complexity:
   warning: 10
