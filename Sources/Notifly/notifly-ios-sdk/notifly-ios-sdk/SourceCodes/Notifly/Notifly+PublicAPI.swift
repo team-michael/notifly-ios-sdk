@@ -79,6 +79,10 @@ import UIKit
 
         // NotificationsManager now handles all token acquisition logic
         Notifly.asyncWorker.addTask { finishTask in
+            guard (try? NotiflyCustomUserDefaults.loadIdentity()) != nil else {
+                finishTask()
+                return
+            }
             main.trackingManager.trackSessionStartInternalEvent()
             Logger.info("📡 Notifly SDK is successfully initialized.")
             finishTask()
@@ -217,6 +221,10 @@ import UIKit
         }
     }
 
+    /// Returns the current Notifly user ID synchronously.
+    ///
+    /// 캐시가 없으면 호출한 스레드에서 Keychain 조회와 마이그레이션을 수행합니다.
+    /// 메인 스레드에서 호출하면 저장소 접근 또는 진행 중인 저장 작업만큼 지연될 수 있습니다.
     static func getNotiflyUserId() -> String? {
         guard let main = try? main else {
             Logger.error(

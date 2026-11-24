@@ -116,6 +116,7 @@ class UserStateManager {
             receiveCompletion: { syncStateCompletion in
                 if case let .failure(error) = syncStateCompletion {
                     Logger.error("Fail to sync user state: " + error.localizedDescription)
+                    completion()
                 }
             },
             receiveValue: { [weak self] jsonString in
@@ -158,7 +159,11 @@ class UserStateManager {
                         deviceExternalUserID: deviceExternalUserID
                     ) == true {
                         // SDK의 external_user_id를 DB 값으로 변경
-                        notifly.userManager.changeExternalUserId(newValue: deviceExternalUserID)
+                        // Persist directly on the URLSession response callback thread.
+                        guard notifly.userManager.changeExternalUserId(newValue: deviceExternalUserID) else {
+                            completion()
+                            return
+                        }
 
                         notifly.inAppMessageManager.userStateManager.syncState(
                             postProcessConfig: PostProcessConfigForSyncState(

@@ -28,7 +28,8 @@ Pod::Spec.new do |s|
   s.subspec 'Extension' do |e|
     e.source_files = [
         'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyExtension/**/*.swift',
-        'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/**/*.swift'
+        'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/**/*.swift',
+        'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Shared/**/*.swift'
     ]
   end
 end

@@ -11,6 +11,7 @@ class UserManager {
     )
 
     private var _notiflyUserIDCache: String?
+    private var cachedIdentity: StoredIdentity?
     var notiflyUserIDCache: String? {
         get {
             userIdAccessQueue.sync {
@@ -24,30 +25,22 @@ class UserManager {
         }
     }
 
-    private var _externalUserID: String?
     var externalUserID: String? {
-        get {
-            userIdAccessQueue.sync {
-                _externalUserID
-            }
-        }
-        set {
-            userIdAccessQueue.sync {
-                _externalUserID = newValue
-            }
-        }
+        NotiflyCustomUserDefaults.externalUserIdInUserDefaults
     }
 
-    init() {
-        externalUserID = NotiflyCustomUserDefaults.externalUserIdInUserDefaults
-    }
-
-    func changeExternalUserId(newValue: String?) {
-        lastUserPropertiesSentAt = nil
-        notiflyUserIDCache = nil
-        externalUserID = newValue
-        userIdAccessQueue.async {
-            NotiflyCustomUserDefaults.externalUserIdInUserDefaults = newValue
+    /// Persists on the caller, including network callbacks; no worker is scheduled.
+    @discardableResult
+    func changeExternalUserId(newValue: String?) -> Bool {
+        guard let store = NotiflyCustomUserDefaults.identityStore else { return false }
+        do {
+            try store.setExternalUserID(newValue)
+            self.lastUserPropertiesSentAt = nil
+            self.notiflyUserIDCache = nil
+            return true
+        } catch {
+            Logger.error("Cannot persist user identity; user switch skipped: \(error)")
+            return false
         }
     }
 
@@ -69,49 +62,45 @@ class UserManager {
             return
         }
 
-        if let data = [
-            TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID,
-            TrackingConstant.Internal.previousExternalUserID: externalUserID,
-            TrackingConstant.Internal.previousNotiflyUserID: try? getNotiflyUserID(),
-        ] as? [String: Any] {
-            Notifly.asyncWorker.addTask { [weak self] finishTask in
-                guard let self = self else {
-                    finishTask()
-                    return
-                }
-
-                let transition = UserIdTransitionPolicy.shared.evaluate(
-                    previousUserId: externalUserID,
-                    newUserId: newExternalUserID
-                )
-                guard transition.changed else {
-                    Logger.info(
-                        "External User Id is not changed because the new user id is same as the current user id."
-                    )
-                    finishTask()
-                    return
-                }
-
-                self.changeExternalUserId(newValue: newExternalUserID)
-                let postProcessConfigForSyncState = PostProcessConfigForSyncState(
-                    merge: transition.shouldMerge,
-                    clear: transition.shouldClear
-                )
-                if transition.shouldSync {
-                    notifly.inAppMessageManager.userStateManager.syncState(
-                        postProcessConfig: postProcessConfigForSyncState
-                    ) {
-                        self.setUserProperties(userProperties: data, lockAcquired: true)
-                        finishTask()
-                    }
-                } else {
+        Notifly.asyncWorker.addTask { [weak self] finishTask in
+            guard let self = self else {
+                finishTask()
+                return
+            }
+            // Capture the previous identity only after migration has completed.
+            let previousExternalUserID = self.externalUserID
+            let transition = UserIdTransitionPolicy.shared.evaluate(
+                previousUserId: previousExternalUserID,
+                newUserId: newExternalUserID
+            )
+            guard transition.changed else {
+                finishTask()
+                return
+            }
+            let data: [String: Any] = [
+                TrackingConstant.Internal.notiflyExternalUserID: newExternalUserID,
+                TrackingConstant.Internal.previousExternalUserID: previousExternalUserID,
+                TrackingConstant.Internal.previousNotiflyUserID: try? self.getNotiflyUserID(),
+            ].compactMapValues { $0 }
+            guard self.changeExternalUserId(newValue: newExternalUserID) else {
+                finishTask()
+                return
+            }
+            let postProcessConfigForSyncState = PostProcessConfigForSyncState(
+                merge: transition.shouldMerge,
+                clear: transition.shouldClear
+            )
+            if transition.shouldSync {
+                notifly.inAppMessageManager.userStateManager.syncState(
+                    postProcessConfig: postProcessConfigForSyncState
+                ) {
                     self.setUserProperties(userProperties: data, lockAcquired: true)
                     finishTask()
                 }
+            } else {
+                self.setUserProperties(userProperties: data, lockAcquired: true)
+                finishTask()
             }
-
-        } else {
-            Logger.error("Fail to Set User Id.")
         }
     }
 
@@ -131,8 +120,10 @@ class UserManager {
                 previousUserId: previousExternalUserID,
                 newUserId: nil
             )
-            self.changeExternalUserId(newValue: nil)
-
+            guard self.changeExternalUserId(newValue: nil) else {
+                finishTask()
+                return
+            }
             let postProcessConfigForSyncState = PostProcessConfigForSyncState(
                 merge: transition.shouldMerge,
                 clear: transition.shouldClear
@@ -199,26 +190,32 @@ class UserManager {
         }
     }
 
+    /// Reads the identity on the calling thread. A cache miss or an in-flight storage
+    /// operation may block, including when this method is called from the main thread.
     func getNotiflyUserID() throws -> String {
-        let userID = try (_notiflyUserIDCache ?? generateUserID(externalUserID: externalUserID))
-        _notiflyUserIDCache = userID
-        return userID.lowercased()
+        let identity = try NotiflyCustomUserDefaults.loadIdentity()
+        return userIdAccessQueue.sync {
+            if cachedIdentity != identity { _notiflyUserIDCache = nil }
+            let userID = _notiflyUserIDCache ?? generateUserID(identity: identity)
+            _notiflyUserIDCache = userID
+            cachedIdentity = identity
+            return userID.lowercased()
+        }
     }
 
-    private func generateUserID(externalUserID: String?) throws -> String {
-        guard let notifly = try? Notifly.main else {
-            throw NotiflyError.notInitialized
-        }
-        let projectId = notifly.projectId
+    private func generateUserID(identity: StoredIdentity) -> String {
+        let projectId = identity.projectID
         let uuidV5Namespace: UUID
         let uuidV5Name: String
 
-        if let externalUserID = externalUserID {
+        if let externalUserID = identity.externalUserID {
             uuidV5Name = "\(projectId)\(externalUserID)"
             uuidV5Namespace = TrackingConstant.HashNamespace.registeredUserID
         } else {
-            let deviceID = try AppHelper.getDeviceID()
-            uuidV5Name = "\(projectId)\(deviceID)"
+            // Older releases interpolated a String? here. Preserve its Optional("...")
+            // representation: unwrapping it would change every anonymous Notifly user ID.
+            let legacyDeviceDescription = String(describing: Optional(identity.deviceID))
+            uuidV5Name = "\(projectId)\(legacyDeviceDescription)"
             uuidV5Namespace = TrackingConstant.HashNamespace.unregisteredUserID
         }
 

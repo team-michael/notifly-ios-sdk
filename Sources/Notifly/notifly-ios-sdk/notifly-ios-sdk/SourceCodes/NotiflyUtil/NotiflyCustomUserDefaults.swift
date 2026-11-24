@@ -11,10 +11,79 @@ class NotiflyCustomUserDefaults {
     private static var projectId: String?
     private static var notiflyUserDefaultsShared: UserDefaults?
 
-    static func register(projectId: String, org: String) {
-        NotiflyCustomUserDefaults.projectId = projectId
-        NotiflyCustomUserDefaults.notiflyUserDefaultsShared =
-            UserDefaults(suiteName: "group.notifly.\(org)") ?? UserDefaults.standard
+    private static let identityLock = NSLock()
+    private static var configuredIdentityStore: SharedIdentityStore?
+    private static var identityConfiguration: String?
+    private static var identityError: Error = IdentityMigrationError.identityUnavailable
+
+    static var identityStore: SharedIdentityStore? {
+        identityLock.lock()
+        defer { identityLock.unlock() }
+        return configuredIdentityStore
+    }
+
+    static func register(
+        projectId: String,
+        org: String,
+        isExtension: Bool = false,
+        defaults: UserDefaults? = nil,
+        keychain: KeychainProcessing = SystemKeychain()
+    ) {
+        // Capture UIKit's fallback before taking any storage lock. Reading Keychain
+        // while another thread waits for this value must not require a main-queue hop.
+        let fallbackDeviceID = isExtension ? nil : AppHelper.makeNewDeviceID()
+        identityLock.lock()
+        defer { identityLock.unlock() }
+        let configuration = "\(projectId):\(org):\(isExtension)"
+        if defaults == nil, identityConfiguration == configuration,
+            configuredIdentityStore != nil
+        {
+            return
+        }
+        let shared = defaults ?? UserDefaults(suiteName: "group.notifly.\(org)") ?? .standard
+        self.projectId = projectId
+        notiflyUserDefaultsShared = shared
+        identityConfiguration = configuration
+        do {
+            guard !org.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                throw KeychainError.invalidConfiguration
+            }
+            configuredIdentityStore = try SharedIdentityStore(
+                projectID: projectId,
+                accessGroup: "group.notifly.\(org)",
+                keychain: keychain,
+                legacy: LegacyIdentityStore(
+                    defaults: shared, projectID: projectId, username: org
+                ),
+                isReadOnly: isExtension,
+                newDeviceID: { fallbackDeviceID }
+            )
+        } catch {
+            configuredIdentityStore = nil
+            identityError = error
+        }
+    }
+
+    /// Reads synchronously on the caller. A cache miss may block for Keychain I/O.
+    static func loadIdentity(forceRefresh: Bool = false) throws -> StoredIdentity {
+        identityLock.lock()
+        let store = configuredIdentityStore
+        let error = identityError
+        identityLock.unlock()
+        guard let store = store else { throw error }
+        guard let identity = try store.load(forceRefresh: forceRefresh), identityStore === store else {
+            throw IdentityMigrationError.identityUnavailable
+        }
+        return identity
+    }
+
+    private static func readIdentity() -> StoredIdentity? {
+        do {
+            return try loadIdentity()
+        } catch {
+            Logger.error("Cannot read SDK identity: \(error)")
+            return nil
+        }
     }
 
     private static func get(key: String) -> String? {
@@ -42,23 +111,8 @@ class NotiflyCustomUserDefaults {
         return
     }
 
-    static var projectIdInUserDefaults: String? {
-        get {
-            return NotiflyCustomUserDefaults.get(key: NotiflyCustomDefaultKey.projectId)
-        }
-        set {
-            NotiflyCustomUserDefaults.set(key: NotiflyCustomDefaultKey.projectId, value: newValue)
-        }
-    }
-
-    static var usernameInUserDefaults: String? {
-        get {
-            return NotiflyCustomUserDefaults.get(key: NotiflyCustomDefaultKey.username)
-        }
-        set {
-            NotiflyCustomUserDefaults.set(key: NotiflyCustomDefaultKey.username, value: newValue)
-        }
-    }
+    static var projectIdInUserDefaults: String? { readIdentity()?.projectID }
+    static var usernameInUserDefaults: String? { readIdentity()?.username }
 
     static var passwordInUserDefaults: String? {
         get {
@@ -78,24 +132,8 @@ class NotiflyCustomUserDefaults {
         }
     }
 
-    static var externalUserIdInUserDefaults: String? {
-        get {
-            return NotiflyCustomUserDefaults.get(key: NotiflyCustomDefaultKey.externalUserId)
-        }
-        set {
-            NotiflyCustomUserDefaults.set(
-                key: NotiflyCustomDefaultKey.externalUserId, value: newValue)
-        }
-    }
-
-    static var deviceIdInUserDefaults: String? {
-        get {
-            return NotiflyCustomUserDefaults.get(key: NotiflyCustomDefaultKey.deviceId)
-        }
-        set {
-            NotiflyCustomUserDefaults.set(key: NotiflyCustomDefaultKey.deviceId, value: newValue)
-        }
-    }
+    static var externalUserIdInUserDefaults: String? { readIdentity()?.externalUserID }
+    static var deviceIdInUserDefaults: String? { readIdentity()?.deviceID }
 
     static var isRegisteredAPNsInUserDefaults: Bool? {
         get {
@@ -109,14 +147,4 @@ class NotiflyCustomUserDefaults {
             }
         }
     }
-}
-
-enum NotiflyCustomDefaultKey {
-    static let projectId = "notifly_project_id"
-    static let username = "notifly_username"
-    static let password = "notifly_password"
-    static let externalUserId = "notifly_external_user_id"
-    static let authToken = "notifly_authToken"
-    static let deviceId = "notifly_deviceId"
-    static let alreadyRegistered = "notifly_isRegisteredAPNs"
 }

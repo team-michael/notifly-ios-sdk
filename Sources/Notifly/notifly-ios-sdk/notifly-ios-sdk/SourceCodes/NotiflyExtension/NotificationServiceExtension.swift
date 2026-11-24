@@ -13,7 +13,7 @@ import UserNotifications
     var bestAttemptContent: UNMutableNotificationContent?
 
     open func register(projectId: String, username: String) {
-        NotiflyCustomUserDefaults.register(projectId: projectId, org: username)
+        NotiflyCustomUserDefaults.register(projectId: projectId, org: username, isExtension: true)
     }
 
     override open func didReceive(
@@ -36,10 +36,17 @@ import UserNotifications
             return
         }
 
-        if let projectId = NotiflyCustomUserDefaults.projectIdInUserDefaults,
-            NotiflyCustomUserDefaults.usernameInUserDefaults != nil,
-            NotiflyCustomUserDefaults.passwordInUserDefaults != nil
-        {
+        // Read on the extension callback thread; Keychain I/O may delay this callback.
+        defer {
+            ExtensionManager.show(
+                bestAttemptContent: bestAttemptContent, contentHandler: contentHandler)
+        }
+        do {
+            let identity = try NotiflyCustomUserDefaults.loadIdentity(forceRefresh: true)
+            guard NotiflyCustomUserDefaults.passwordInUserDefaults != nil else {
+                Logger.error("Cannot read credentials for push delivery tracking.")
+                return
+            }
             let gcmMessageId = bestAttemptContent.userInfo["gcm.message_id"] as? String
             let notiflyUserId = bestAttemptContent.userInfo["notifly_user_id"] as? String
             let data =
@@ -50,18 +57,13 @@ import UserNotifications
                     "notifly_message_id": bestAttemptContent.userInfo["notifly_message_id"] ?? "",
                     "gcm_message_id": gcmMessageId ?? ""
                 ] as [String: Any]
-            ExtensionManager(projectId: projectId)
+            ExtensionManager(projectId: identity.projectID)
                 .track(
                     eventName: TrackingConstant.Internal.pushNotificationMessageShown, params: data,
                     notiflyUserId: notiflyUserId)
-        } else {
-            Logger.error(
-                "Cannot Access to NotiflyCustomUserDefaults. Please confirm that the app group identifier is 'group.notifly.{username}.'"
-            )
+        } catch {
+            Logger.error("Cannot read the shared identity for push delivery tracking: \(error)")
         }
-
-        ExtensionManager.show(
-            bestAttemptContent: bestAttemptContent, contentHandler: contentHandler)
     }
 
     override open func serviceExtensionTimeWillExpire() {

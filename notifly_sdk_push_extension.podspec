@@ -17,6 +17,7 @@ Pod::Spec.new do |s|
   s.swift_versions = '5.0'
   s.source_files = [
       'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyExtension/**/*.swift',
-      'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/**/*.swift'
+      'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/NotiflyUtil/**/*.swift',
+      'Sources/Notifly/notifly-ios-sdk/notifly-ios-sdk/SourceCodes/Shared/**/*.swift'
   ]
 end

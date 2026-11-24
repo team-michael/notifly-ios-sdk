@@ -50,8 +50,6 @@ import UIKit
     ) {
         self.projectId = projectId
         NotiflyCustomUserDefaults.register(projectId: projectId, org: username)
-        NotiflyCustomUserDefaults.projectIdInUserDefaults = projectId
-        NotiflyCustomUserDefaults.usernameInUserDefaults = username
         NotiflyCustomUserDefaults.passwordInUserDefaults = password
 
         auth = Auth(
@@ -61,7 +59,7 @@ import UIKit
         userManager = UserManager()
 
         notificationsManager = NotificationsManager()
-        inAppMessageManager = InAppMessageManager(owner: (try? userManager.getNotiflyUserID()), projectId: projectId)
+        inAppMessageManager = InAppMessageManager(owner: nil, projectId: projectId)
         super.init()
     }
 

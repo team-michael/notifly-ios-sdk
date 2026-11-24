@@ -13,6 +13,23 @@ class notifly_ios_sdkTests: XCTestCase {
     private let trackingTestProjectID = "0123456789abcdef0123456789abcdef"
     private let trackingTestTimestamp = 1_788_498_000_000_000
 
+    override func setUpWithError() throws {
+        let suite = "tech.notifly.tracking-tests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        addTeardownBlock { UserDefaults.standard.removePersistentDomain(forName: suite) }
+        defaults.set(
+            "tracking-device",
+            forKey: "\(trackingTestProjectID)_\(NotiflyCustomDefaultKey.deviceId)"
+        )
+        NotiflyCustomUserDefaults.register(
+            projectId: trackingTestProjectID,
+            org: "sdk-user",
+            defaults: defaults,
+            keychain: MigrationMemoryKeychain()
+        )
+        _ = try NotiflyCustomUserDefaults.loadIdentity()
+    }
+
     override func tearDown() {
         WebViewModalViewController.openedInAppMessageCount = 0
         super.tearDown()
