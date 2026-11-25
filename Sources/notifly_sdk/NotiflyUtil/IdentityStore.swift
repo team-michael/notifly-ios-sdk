@@ -87,7 +87,7 @@ final class IdentityStore {
             deviceID: current.deviceID,
             externalUserID: value
         )
-        if identity != current { try writeAndVerify(identity) }
+        if identity != current { try keychain.save(identity) }
         cachedIdentity = identity
     }
 

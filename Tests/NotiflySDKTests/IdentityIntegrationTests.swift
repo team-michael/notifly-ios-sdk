@@ -107,17 +107,22 @@ final class IdentityIntegrationTests: XCTestCase {
         XCTAssertEqual(try storedIdentity(fixture.backend).externalUserID, "original-user")
     }
 
-    func testFailedVerificationDoesNotReturnStaleHashAndRecoveryReadsPersistedUser() throws {
-        let fixture = try register()
-        let users = UserManager()
-        let originalID = try users.getNotiflyUserID()
-        fixture.backend.afterWrite = { fixture.backend.readStatus = errSecInteractionNotAllowed }
-        XCTAssertFalse(users.changeExternalUserId(newValue: "server-user"))
-        XCTAssertThrowsError(try users.getNotiflyUserID())
+    func testSuccessfulUserChangeUpdatesCacheWhenKeychainReadsBecomeUnavailable() throws {
+        for newUserID: String? in ["server-user", nil] {
+            let fixture = try register()
+            let users = UserManager()
+            let originalID = try users.getNotiflyUserID()
+            fixture.backend.afterWrite = { fixture.backend.readStatus = errSecInteractionNotAllowed }
 
-        fixture.backend.readStatus = nil
-        XCTAssertEqual(users.externalUserID, "server-user")
-        XCTAssertNotEqual(try users.getNotiflyUserID(), originalID)
+            XCTAssertTrue(users.changeExternalUserId(newValue: newUserID))
+            XCTAssertEqual(users.externalUserID, newUserID)
+            XCTAssertNotEqual(try users.getNotiflyUserID(), originalID)
+            XCTAssertEqual(AppHelper.getDeviceID(), deviceID)
+            XCTAssertEqual(try storedIdentity(fixture.backend).externalUserID, newUserID)
+
+            fixture.backend.readStatus = nil
+            XCTAssertEqual(users.externalUserID, newUserID)
+        }
     }
 
     func testDirectReadsStayOnCallerAndNetworkCallbackPersistsSynchronously() throws {
