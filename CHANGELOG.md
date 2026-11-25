@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.5] - 2026-11-25
+
+### Changed
+
+- Move SDK identifiers from UserDefaults to the shared App Group Keychain while preserving existing user and device identifiers and their hashes. Remove legacy identifier values only after verifying the Keychain write.
+- Read shared identifiers from the notification extension without generating or migrating them, and preserve notification content when storage is unavailable.
+
 ## [2.8.4] - 2026-11-12
 
 ### Added
