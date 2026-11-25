@@ -63,7 +63,7 @@ class Auth {
     private func setup() {
         let setupTask = NotiflyAPI().authorizeSession(credentials: loginCred)
             .tryMap {
-                NotiflyCustomUserDefaults.authTokenInUserDefaults = $0
+                NotiflyStore.authToken = $0
                 return $0
             }
             .sink(
@@ -84,13 +84,13 @@ class Auth {
     }
 
     func refreshAuth() -> AnyPublisher<String, Error> {
-        NotiflyCustomUserDefaults.authTokenInUserDefaults = nil
+        NotiflyStore.authToken = nil
         return NotiflyAPI().authorizeSession(credentials: loginCred).handleEvents(receiveOutput: { [weak self] authToken in
             self?.authorizationPromise?(.success(authToken))
             self?.authorizationPub = Just(authToken)
                 .setFailureType(to: Error.self)
                 .eraseToAnyPublisher()
-            NotiflyCustomUserDefaults.authTokenInUserDefaults = authToken
+            NotiflyStore.authToken = authToken
         })
         .eraseToAnyPublisher()
     }

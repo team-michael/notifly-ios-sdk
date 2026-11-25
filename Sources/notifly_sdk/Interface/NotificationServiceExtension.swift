@@ -22,7 +22,7 @@ import UserNotifications
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
 
-    /// Selects the shared preferences suite and project used by this extension.
+    /// Selects the shared Keychain and preferences namespace used by this extension.
     ///
     /// Call before forwarding a notification to `didReceive(_:withContentHandler:)`.
     /// This selects the storage namespace; it does not authenticate or initialize the
@@ -32,7 +32,7 @@ import UserNotifications
     ///   - projectId: The same Notifly project identifier used by the host application.
     ///   - username: The host app's SDK username, selecting `group.notifly.<username>`.
     open func register(projectId: String, username: String) {
-        NotiflyCustomUserDefaults.register(projectId: projectId, org: username)
+        NotiflyStore.register(projectId: projectId, org: username, isExtension: true)
     }
 
     /// Processes an incoming notification and supplies the best available content.
@@ -69,9 +69,9 @@ import UserNotifications
             return
         }
 
-        if let projectId = NotiflyCustomUserDefaults.projectIdInUserDefaults,
-            NotiflyCustomUserDefaults.usernameInUserDefaults != nil,
-            NotiflyCustomUserDefaults.passwordInUserDefaults != nil
+        if let identity = try? NotiflyStore.loadIdentity(),
+            identity.username != nil,
+            NotiflyStore.password != nil
         {
             let gcmMessageId = bestAttemptContent.userInfo["gcm.message_id"] as? String
             let notiflyUserId = bestAttemptContent.userInfo["notifly_user_id"] as? String
@@ -83,7 +83,7 @@ import UserNotifications
                     "notifly_message_id": bestAttemptContent.userInfo["notifly_message_id"] ?? "",
                     "gcm_message_id": gcmMessageId ?? ""
                 ] as [String: Any]
-            ExtensionManager(projectId: projectId)
+            ExtensionManager(projectId: identity.projectID)
                 .track(
                     eventName: TrackingConstant.Internal.pushNotificationMessageShown,
                     params: data,
@@ -92,7 +92,7 @@ import UserNotifications
         }
         else {
             Logger.error(
-                "Cannot Access to NotiflyCustomUserDefaults. Please confirm that the app group identifier is 'group.notifly.{username}.'"
+                "Cannot Access to NotiflyStore. Please confirm that the app group identifier is 'group.notifly.{username}.'"
             )
         }
 
@@ -196,20 +196,26 @@ import UserNotifications
     private func preparePayload(eventName: String, params: [String: Any]?, notiflyUserId: String?)
         -> TrackingRecord?
     {
-        let userID = notiflyUserId ?? getUserId()
-        guard let notiflyDeviceID = AppHelper.getNotiflyDeviceID(),
-            let deviceID = AppHelper.getDeviceID(),
+        guard let identity = try? NotiflyStore.loadIdentity(),
+            identity.projectID == projectId,
+            let deviceID = identity.deviceID,
             let appVersion = AppHelper.getAppVersion()
         else {
             Logger.error("Failed to track event: " + eventName)
             return nil
         }
 
+        let userID = notiflyUserId ?? getUserId(identity: identity)
+        let notiflyDeviceID = UUID(
+            name: deviceID,
+            namespace: TrackingConstant.HashNamespace.deviceID
+        ).notiflyStyleString
+
         let data = TrackingData(
             id: UUID().uuidString,
             name: TrackingConstant.Internal.pushNotificationMessageShown,
             notifly_user_id: userID,
-            external_user_id: NotiflyCustomUserDefaults.externalUserIdInUserDefaults,
+            external_user_id: identity.externalUserID,
             time: AppHelper.getCurrentTimestamp(),
             notifly_device_id: notiflyDeviceID,
             external_device_id: deviceID,
@@ -233,8 +239,8 @@ import UserNotifications
         return TrackingRecord(partitionKey: notiflyDeviceID, data: stringfiedData)
     }
 
-    private func getUserId() -> String {
-        let externalUserId = NotiflyCustomUserDefaults.externalUserIdInUserDefaults
+    private func getUserId(identity: StoredIdentity) -> String {
+        let externalUserId = identity.externalUserID
 
         let uuidV5Namespace: UUID
         let uuidV5Name: String
@@ -245,7 +251,7 @@ import UserNotifications
             uuidV5Namespace = TrackingConstant.HashNamespace.registeredUserID
         }
         else {
-            let deviceID = AppHelper.getDeviceID()
+            let deviceID = identity.deviceID
             uuidV5Name = "\(projectId)\(String(describing: deviceID))"
             uuidV5Namespace = TrackingConstant.HashNamespace.unregisteredUserID
         }

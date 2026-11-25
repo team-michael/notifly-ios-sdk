@@ -56,10 +56,8 @@ import UIKit
         password: String
     ) {
         self.projectId = projectId
-        NotiflyCustomUserDefaults.register(projectId: projectId, org: username)
-        NotiflyCustomUserDefaults.projectIdInUserDefaults = projectId
-        NotiflyCustomUserDefaults.usernameInUserDefaults = username
-        NotiflyCustomUserDefaults.passwordInUserDefaults = password
+        NotiflyStore.register(projectId: projectId, org: username)
+        NotiflyStore.password = password
 
         auth = Auth(
             username: username,

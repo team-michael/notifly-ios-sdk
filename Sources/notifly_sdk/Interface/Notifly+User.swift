@@ -51,6 +51,8 @@ import UIKit
     /// The identifier is generated or retrieved locally and is distinct from the
     /// application's external user ID. This call does not wait for queued identity
     /// changes or make a server request to confirm the user.
+    /// A cache miss reads Keychain synchronously. Storage access or an in-progress
+    /// identity write can delay the calling thread, including the main thread.
     ///
     /// - Returns: The current lowercase Notifly identifier, or `nil` if the SDK has not
     ///   been initialized or the identifier cannot be generated.

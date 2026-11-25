@@ -12,6 +12,7 @@ class UserManager {
     )
 
     private var _notiflyUserIDCache: String?
+    private var cachedIdentity: StoredIdentity?
     var notiflyUserIDCache: String? {
         get {
             userIdAccessQueue.sync {
@@ -25,30 +26,22 @@ class UserManager {
         }
     }
 
-    private var _externalUserID: String?
     var externalUserID: String? {
-        get {
-            userIdAccessQueue.sync {
-                _externalUserID
-            }
-        }
-        set {
-            userIdAccessQueue.sync {
-                _externalUserID = newValue
-            }
-        }
+        NotiflyStore.externalUserID
     }
 
-    init() {
-        externalUserID = NotiflyCustomUserDefaults.externalUserIdInUserDefaults
-    }
-
-    func changeExternalUserId(newValue: String?) {
-        lastUserPropertiesSentAt = nil
-        notiflyUserIDCache = nil
-        externalUserID = newValue
-        userIdAccessQueue.async {
-            NotiflyCustomUserDefaults.externalUserIdInUserDefaults = newValue
+    /// Persists synchronously on the caller, including URLSession response callbacks.
+    @discardableResult
+    func changeExternalUserId(newValue: String?) -> Bool {
+        do {
+            try NotiflyStore.setExternalUserID(newValue)
+            lastUserPropertiesSentAt = nil
+            notiflyUserIDCache = nil
+            return true
+        }
+        catch {
+            Logger.error("Cannot persist user identity; user change skipped: \(error)")
+            return false
         }
     }
 
@@ -93,7 +86,10 @@ class UserManager {
                     return
                 }
 
-                changeExternalUserId(newValue: newExternalUserID)
+                guard changeExternalUserId(newValue: newExternalUserID) else {
+                    finishTask()
+                    return
+                }
                 let postProcessConfigForSyncState = PostProcessConfigForSyncState(
                     merge: transition.shouldMerge,
                     clear: transition.shouldClear
@@ -134,7 +130,10 @@ class UserManager {
                 previousUserId: previousExternalUserID,
                 newUserId: nil
             )
-            changeExternalUserId(newValue: nil)
+            guard changeExternalUserId(newValue: nil) else {
+                finishTask()
+                return
+            }
 
             let postProcessConfigForSyncState = PostProcessConfigForSyncState(
                 merge: transition.shouldMerge,
@@ -204,26 +203,29 @@ class UserManager {
         }
     }
 
+    /// Cold reads and pending identity writes may block the calling thread, including main.
     func getNotiflyUserID() throws -> String {
-        let userID = try (_notiflyUserIDCache ?? generateUserID(externalUserID: externalUserID))
-        _notiflyUserIDCache = userID
-        return userID.lowercased()
+        let identity = try NotiflyStore.loadIdentity()
+        return userIdAccessQueue.sync {
+            if cachedIdentity != identity { _notiflyUserIDCache = nil }
+            let userID = _notiflyUserIDCache ?? generateUserID(identity: identity)
+            _notiflyUserIDCache = userID
+            cachedIdentity = identity
+            return userID.lowercased()
+        }
     }
 
-    private func generateUserID(externalUserID: String?) throws -> String {
-        guard let notifly = try? Notifly.main else {
-            throw NotiflyError.notInitialized
-        }
-        let projectId = notifly.projectId
+    private func generateUserID(identity: StoredIdentity) -> String {
+        let projectId = identity.projectID
         let uuidV5Namespace: UUID
         let uuidV5Name: String
 
-        if let externalUserID = externalUserID {
+        if let externalUserID = identity.externalUserID {
             uuidV5Name = "\(projectId)\(externalUserID)"
             uuidV5Namespace = TrackingConstant.HashNamespace.registeredUserID
         }
         else {
-            let deviceID = AppHelper.getDeviceID()
+            let deviceID = identity.deviceID
             // Keep the legacy optional representation to preserve existing anonymous user IDs.
             uuidV5Name = "\(projectId)\(String(describing: deviceID))"
             uuidV5Namespace = TrackingConstant.HashNamespace.unregisteredUserID

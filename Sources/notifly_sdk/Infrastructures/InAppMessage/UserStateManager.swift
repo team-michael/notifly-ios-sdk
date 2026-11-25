@@ -150,17 +150,11 @@ class UserStateManager {
                         sdkExternalUserID: sdkExternalUserID,
                         deviceExternalUserID: deviceExternalUserID
                     ) == true {
-                        // Update the local external user ID to the server value.
-                        notifly.userManager.changeExternalUserId(newValue: deviceExternalUserID)
-
-                        notifly.inAppMessageManager.userStateManager.syncState(
-                            postProcessConfig: PostProcessConfigForSyncState(
-                                merge: false,
-                                clear: false
-                            )
-                        ) {
-                            completion()
-                        }
+                        notifly.inAppMessageManager.userStateManager.updateExternalUserID(
+                            deviceExternalUserID,
+                            userManager: notifly.userManager,
+                            completion: completion
+                        )
                         return
                     }
                 }
@@ -177,6 +171,21 @@ class UserStateManager {
             return
         }
         main.storeCancellable(cancellable: syncStateTask)
+    }
+
+    private func updateExternalUserID(
+        _ value: String?,
+        userManager: UserManager,
+        completion: @escaping () -> Void
+    ) {
+        guard userManager.changeExternalUserId(newValue: value) else {
+            completion()
+            return
+        }
+        syncState(
+            postProcessConfig: PostProcessConfigForSyncState(merge: false, clear: false),
+            completion: completion
+        )
     }
 
     /* post-process of sync state */

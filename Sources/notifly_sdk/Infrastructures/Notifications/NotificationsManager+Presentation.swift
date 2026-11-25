@@ -51,11 +51,11 @@ extension NotificationsManager {
     func registerForRemoteNotifications() {
         DispatchQueue.main.async {
             if !(UIApplication.shared.isRegisteredForRemoteNotifications
-                && NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults == true)
+                && NotiflyStore.isRegisteredAPNs == true)
             {
                 Logger.info("📝 Registering for remote notifications")
                 UIApplication.shared.registerForRemoteNotifications()
-                NotiflyCustomUserDefaults.isRegisteredAPNsInUserDefaults = true
+                NotiflyStore.isRegisteredAPNs = true
             }
             else {
                 Logger.info("📝 Already registered for remote notifications, re-requesting...")
